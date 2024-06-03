@@ -8,10 +8,10 @@
 <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
-@component('components.breadcrumb')
+{{-- @component('components.breadcrumb')
 @slot('li_1') Pages @endslot
 @slot('title') Permissions  @endslot
-@endcomponent
+@endcomponent --}}
 {{-- <h1>hello world</h1> --}}
 <div class="row justify-content-center">
     <div class="col-lg-8">
