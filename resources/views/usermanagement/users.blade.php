@@ -90,8 +90,8 @@
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
-                                            <option value="name"
-                                                {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
+                                            <option value="first_name"
+                                                {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Name</option>
                                             <option value="email"
                                                 {{ request('sort_by') == 'email' ? 'selected' : '' }}>Email
                                             </option>
@@ -104,7 +104,7 @@
                         <table id="" class="table table-striped display table-responsive rounded">
                             <thead>
                                 <tr>
-                                    <th class="rounded-start-3 ">Name</th>
+                                    <th class="rounded-start-3 ">Full Name</th>
                                     <th>Email</th>
                                     <th>Roles</th>
                                     <th class="rounded-end-3 ">Action</th>
@@ -113,7 +113,7 @@
                             <tbody>
                                 @foreach ($users as $user)
                                     <tr>
-                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->first_name }} {{ $user->surname }}</td>
                                         <td>{{ $user->email }}</td>
                                     <td>
                                         @foreach ($user->roles as $role)
@@ -257,7 +257,7 @@
                     <div class="modal-body">
                         <input type="hidden" id="id-field"/>
                         <div class="row g-3">
-                            <div class="col-lg-12">
+                            {{-- <div class="col-lg-12">
                                 <div class="text-center">
                                     <div class="position-relative d-inline-block">
                                         <div class="position-absolute bottom-0 end-0">
@@ -281,14 +281,21 @@
                                     <h5 class="fs-13 mt-3">Profile</h5>
                                 </div>
 
-                            </div>
+                            </div> --}}
 
                             <!--end col-->
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="user_password" class="form-label">
-                                        Name</label>
-                                    <input type="text" id="user_name" name="name"
+                                    <label for="" class="form-label">
+                                        First Name</label>
+                                    <input type="text" id="first_name" name="first_name"
+                                        class="form-control"  required />
+                                </div>
+                                <br>
+                                <div>
+                                    <label for="" class="form-label">
+                                    Surname</label>
+                                    <input type="text" id="surname" name="surname"
                                         class="form-control"  required />
                                 </div>
                                 <br>

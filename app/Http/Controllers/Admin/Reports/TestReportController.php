@@ -9,15 +9,9 @@ use App\Http\Controllers\Controller;
 
 class TestReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $testReports = Sample::orderBy('received_date', 'asc')->get();
-        return view('reports/test-reports.index', compact('testReports'));
-    }
-
-    public function search(Request $request)
-    {
-        $query = Sample::query();
+        $query = Sample::query()->orderBy('received_date', 'asc');
 
         if ($request->filled('test_number')) {
             $query->where('test_number', $request->test_number);
@@ -28,18 +22,41 @@ class TestReportController extends Controller
         }
 
         if ($request->filled('patient_name')) {
-            $nameParts = explode(' ', $request->patient_name);
-            $query->whereHas('patient', function ($q) use ($nameParts) {
-                $q->where('surname', $nameParts[0])
-                  ->where('first_name', $nameParts[1] ?? '');
+            $searchTerm = $request->input('patient_name');
+            $query->whereHas('patient', function ($query) use ($searchTerm) {
+                $query->where('surname', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('first_name', 'like', '%' . $searchTerm . '%');
             });
         }
 
-        $testReports = $query->get();
-        // dd($samples);
-
+        $testReports = $query->paginate(10);
         return view('reports/test-reports.index', compact('testReports'));
     }
+
+    // public function search(Request $request)
+    // {
+    //     $query = Sample::query();
+
+    //     if ($request->filled('test_number')) {
+    //         $query->where('test_number', $request->test_number);
+    //     }
+
+    //     if ($request->filled('access_number')) {
+    //         $query->where('access_number', $request->access_number);
+    //     }
+
+    //     if ($request->filled('patient_name')) {
+    //         $nameParts = explode(' ', $request->patient_name);
+    //         $query->whereHas('patient', function ($q) use ($nameParts) {
+    //             $q->where('surname', $nameParts[0])
+    //               ->where('first_name', $nameParts[1] ?? '');
+    //         });
+    //     }
+
+    //     $testReports = $query->get();
+
+    //     return view('reports/test-reports.index', compact('testReports'));
+    // }
 
     public function getreportforedit(Request $request, $id){
         $sample = Sample::findOrFail($id);
