@@ -457,24 +457,19 @@
                 @endcanany
 
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarAuth" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sideReport" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sideReport">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
                         </span>
                         {{-- <i class="ri-account-circle-line"></i> --}}
                          <span class="pt-1">Reports</span>
                     </a>
-                    <div class="collapse menu-dropdown" id="sidebarAuth">
+                    <div class="collapse menu-dropdown" id="sideReport">
                         <ul class="nav nav-sm flex-column">
-                            {{-- <li class="nav-item">
-                                <a href="{{ url('/permissions') }}" class="nav-link">Permissions</a>
+                            <li class="nav-item ">
+                                <a href="{{ url('/reports/test-reports') }}" class="nav-link px-0 py-2">Test Report</a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ url('/roles') }}" class="nav-link">Roles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url('/users') }}" class="nav-link">Users</a>
-                            </li> --}}
+
                         </ul>
                     </div>
                 </li>
