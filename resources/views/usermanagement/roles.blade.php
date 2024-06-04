@@ -12,14 +12,14 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
-    @component('components.breadcrumb')
+    {{-- @component('components.breadcrumb')
         @slot('li_1')
             Pages
         @endslot
         @slot('title')
             Roles
         @endslot
-    @endcomponent
+    @endcomponent --}}
     <div class="row">
         @if (Session::has('message'))
             <div class="alert {{ Session::get('alert-class', 'alert-info') }}" id="alert-message">
@@ -47,15 +47,140 @@
         @enderror
         <div class="col-lg-12">
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
+            {{-- <div class="card"> --}}
+                {{-- <div class="card-header d-flex justify-content-between">
                     <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                     id="create-btn" data-bs-target="#showModal"><i
                         class="ri-add-line align-bottom me-1 "></i> Add
                     Roles</button>
-                    {{-- <h5 class="card-title mb-0">Buttons Datatables</h5> --}}
+                    <h5 class="card-title mb-0">Buttons Datatables</h5>
+                </div> --}}
+
+                <div class="col">
+                    <div class="card p-3 bg-white">
+                        <div class="card-header d-flex justify-content-between">
+                            <h3 class="text-dark">List of roles</h3>
+                            <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
+                                id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
+                                role</button>
+                        </div>
+
+                        <div class="col my-2">
+                            <nav class="navbar">
+                                <div class="container-fluid p-0">
+                                    <form class="d-flex" method="GET" action="{{ route('roles.index') }}">
+                                        <input class="form-control me-2 main-search" type="search" placeholder="Search"
+                                            aria-label="Search" name="search" value="{{ request('search') }}">
+                                        <button class="btn search-btn" type="submit">Search</button>
+                                    </form>
+                                    <form class="d-flex" method="GET" action="{{ route('roles.index') }}">
+                                        <input type="hidden" name="search" value="{{ request('search') }}">
+                                        <select class="form-select sort-dropdown" aria-label="Default select example"
+                                            name="sort_by" onchange="this.form.submit()">
+                                            <option selected disabled>Sort By</option>
+                                            <option value="name"
+                                                {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
+                                        </select>
+                                    </form>
+                                </div>
+                            </nav>
+
+                        </div>
+                        <table id="" class="table table-striped display table-responsive rounded">
+                            <thead>
+                                <tr>
+                                    <th class="rounded-start-3 ">Name</th>
+                                    <th>Permissions</th>
+                                    <th class="rounded-end-3 ">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($roles as $role)
+                                    <tr>
+                                        <td>{{ $role->name }}</td>
+                                        <td>
+                                            @foreach ($role->permissions as $permission)
+                                                <span class="badge bg-primary-subtle text-white ">{{ $permission->name }}</span>
+                                            @endforeach
+                                        </td>
+
+                                        <td>
+                                            <a href="#showModal" data-bs-toggle="modal">
+                                                <span class="logo-sm">
+                                                    <img src="{{ URL::asset('build/images/report.png') }}" alt=""
+                                                        height="20">
+                                                </span>
+                                            </a>
+                                            <a href="">
+                                                <span class="logo-sm">
+                                                    <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
+                                                        height="20">
+                                                </span>
+                                            </a>
+                                            <a href="">
+                                                <span class="logo-sm">
+                                                    <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
+                                                        height="20">
+                                                </span>
+                                            </a>
+                                        </td>
+                                        {{-- <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="edit-item-btn" data-id="{{ $role->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="{{ $role->id }}"  data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td> --}}
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <ul class="pagination justify-content-center">
+                            @if ($roles->previousPageUrl())
+                                <li class="page-item previousPageUrl">
+                                    <a class="page-link" href="{{ $roles->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="page-item previousPageUrl disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                                </li>
+                            @endif
+
+                            @for ($page = 1; $page <= $roles->lastPage(); $page++)
+                                <li class="page-item {{ $roles->currentPage() == $page ? 'active' : '' }}">
+                                    <a class="page-link"
+                                        href="{{ $roles->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                                </li>
+                            @endfor
+
+                            @if ($roles->nextPageUrl())
+                                <li class="page-item nextPageUrl">
+                                    <a class="page-link" href="{{ $roles->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="page-item nextPageUrl disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
                 </div>
-                <div class="card-body">
+                {{-- <div class="card-body">
                     <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
                         <thead>
                             <tr>
@@ -70,7 +195,7 @@
                                     <td>{{ $role->name }}</td>
                                     <td>
                                         @foreach ($role->permissions as $permission)
-                                            <span class="badge bg-primary-subtle text-primary">{{ $permission->name }}</span>
+                                            <span class="badge bg-primary-subtle text-white">{{ $permission->name }}</span>
                                         @endforeach
                                     </td>
                                     <td>
@@ -98,8 +223,8 @@
                                 </tr>
                             @endforeach
                     </table>
-                </div>
-            </div>
+                </div> --}}
+            {{-- </div> --}}
         </div>
     </div>
 
@@ -107,8 +232,8 @@
     <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-light p-3">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
                     <h5 class="modal-title" id="exampleModalLabel">Add Roles</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
@@ -132,7 +257,9 @@
                             </div>
                             <!--end col-->
                             <div class="col-lg-12">
-                                <h6 class="fw-semibold">Permissions</h6>
+                                <label for="role_name" class="form-label">
+                                    Permissions
+                                    </label>
                                 <select class="js-example-basic-multiple" name="permission_ids[]" id="permission_ids" multiple="multiple">
                                     @foreach ($permissions as $permissionvalue)
                                         <option value="{{ $permissionvalue->id }}">

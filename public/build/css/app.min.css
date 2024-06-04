@@ -1073,7 +1073,8 @@
     position: relative;
     width: calc(200px + var(--vz-vertical-menu-width-sm));
     transition: none;
-    background: var(--vz-vertical-menu-bg)
+    /* background: var(--vz-vertical-menu-bg) */
+    background: var(--vz-primary-bg-subtle)
 }
 
 :is([data-layout=vertical], [data-layout=semibox])[data-sidebar-size=sm] .navbar-menu .navbar-nav .nav-item:hover>a.menu-link .icon-dual {
@@ -11665,7 +11666,7 @@ div.dtr-modal div.dtr-modal-close:hover {
     border: var(--vz-border-width) solid var(--vz-input-border-custom);
     height: calc(1.5em + 1rem + calc(var(--vz-border-width) * 2));
     /* background-color: var(--vz-input-bg-custom); */
-    background-color: #edf0f3 !important;
+    /* background-color: #edf0f3 !important; */
     outline: none
 }
 
@@ -11747,7 +11748,7 @@ div.dtr-modal div.dtr-modal-close:hover {
     min-height: calc(1.5em + 1rem + calc(var(--vz-border-width) * 2));
     border: var(--vz-border-width) solid var(--vz-input-border-custom) !important;
     /* background-color: var(--vz-input-bg-custom) */
-    background-color: #edf0f3 !important;
+    /* background-color: #edf0f3 !important; */
 }
 
 .select2-container .select2-selection--multiple .select2-selection__rendered {
@@ -17423,7 +17424,7 @@ h1 {
 .form-control {
     min-height: calc(1.5em + 1rem + calc(var(--vz-border-width)* 2));
 	/* height: 50px; */
-	background: #edf0f3;
+	/* background: #edf0f3; */
     border: var(--vz-border-width) solid var(--vz-input-border-custom) !important;	padding: 0 15px;
 	font-size: 16px;
 	-webkit-transition: all 0.3s ease-in-out;

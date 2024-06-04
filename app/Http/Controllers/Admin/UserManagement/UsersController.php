@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 use App\Models\RoleOrPermission;
+use Illuminate\Support\Facades\Password;
+
 // use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
@@ -16,17 +19,32 @@ class UsersController extends Controller
     {
         $this->middleware('role_or_permission:UserManagement access', ['only' => ['index','store','edit','update','destroy']]);
     }
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::whereDoesntHave('roles', function ($query) {
+        $query = User::whereDoesntHave('roles', function ($query) {
             $query->where('name', 'admin');
-        })->get();
+        });
 
-        // $users= User::all();
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($query) use ($searchTerm) {
+                $query->where('name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->has('sort_by')) {
+            $sortBy = $request->input('sort_by');
+            $sortOrder = $request->input('sort_order') ?? 'asc';
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        $users = $query->paginate(10);
+
         $roles = Role::where('name', '!=', 'admin')->get();
-        // $roles= Role::all();
-        // dd($users);
-        return view('usermanagement.users',compact('users','roles'));
+
+        // Return the view with the users and roles data
+        return view('usermanagement.users', compact('users', 'roles'));
     }
 
 
@@ -36,10 +54,9 @@ class UsersController extends Controller
         $request->validate([
             'name'=>'required',
             'email' => 'required|email|unique:users',
-            'password'=>'required',
-            'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-
+        $user_password = Hash::make('12345678');
         $imageName = null;
         if ($request->userimage) {
             $image = $request->userimage;
@@ -47,13 +64,14 @@ class UsersController extends Controller
             $image->move(public_path('uploads'), $imageName);
         }
 
+
         $user = User::create([
             'name'=>$request->name,
             'email'=>$request->email,
             'avatar' => $imageName ? $imageName : null,
             // 'roleid'=>2,
             'email_verified_at' => now(),
-            'password'=> bcrypt($request->user_password),
+            'password'=> bcrypt($user_password),
         ]);
         if (is_array($request->role_ids)) {
             // If permission_ids is an array, map its elements to integers
@@ -63,6 +81,11 @@ class UsersController extends Controller
             // If permission_ids is not an array, assume it's a single ID
             $user->syncRoles([$request->role_ids]);
         }
+
+        $user_email = $user->email;
+        $response = Password::sendResetLink(['email' => $user_email]);
+
+
         // $permissionIds = array_map('intval', $request->role_ids);
         // $user->syncRoles($permissionIds);
         Session::flash('message', 'Created successfully!');

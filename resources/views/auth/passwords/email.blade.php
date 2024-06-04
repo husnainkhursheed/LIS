@@ -61,7 +61,7 @@
 
                                         <div class="text-end">
                                             <button class="btn btn-primary w-md waves-effect waves-light"
-                                                type="button">Reset</button>
+                                                type="submit">Reset</button>
                                         </div>
 
                                     </form>

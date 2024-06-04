@@ -16,7 +16,26 @@ class RolesController extends Controller
     }
     public function index(Request $request)
     {
-       $roles = Role::latest()->get();
+        $query = Role::query();
+
+        // Handle search
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($query) use ($searchTerm) {
+                $query->where('name', 'like', '%' . $searchTerm . '%');
+
+            });
+        }
+
+        // Handle sorting
+        if ($request->has('sort_by')) {
+            $sortOrder = $request->input('sort_order') ?? 'asc'; // Default to ascending if not specified
+            $query->orderBy($request->input('sort_by'), $sortOrder);
+        }
+
+
+       $roles = $query->latest()->paginate(10);
+
        $permissions = Permission::latest()->get();
        return view('usermanagement.roles' ,['permissions'=>$permissions, 'roles'=>$roles]);
     }

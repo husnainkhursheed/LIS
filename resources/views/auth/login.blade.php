@@ -58,9 +58,9 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        {{-- <div class="float-end">
+                                        <div class="float-end">
                                             <a href="{{ route('password.update') }}" class="text-muted">Forgot password?</a>
-                                        </div> --}}
+                                        </div>
                                         <label class="form-label" for="password-input">Password <span class="text-danger">*</span></label>
                                         <div class="position-relative auth-pass-inputgroup mb-3">
                                             <input type="password" class="form-control pe-5 password-input @error('password') is-invalid @enderror" name="password" placeholder="Enter password" id="password-input" value="12345678">
