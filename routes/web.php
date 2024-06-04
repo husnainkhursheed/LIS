@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\Setup\InstitutionController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
 use App\Http\Controllers\Admin\UserManagement\UsersController;
 use App\Http\Controllers\Admin\UserManagement\PermissionController;
+use App\Http\Controllers\Admin\Reports\TestReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -89,6 +90,16 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
     Route::resource('/sample', SampleController::class);
+
+    Route::prefix('reports')->group(function () {
+        Route::get('/test-reports', [TestReportController::class, 'index'])->name('test-reports.index');
+        Route::get('/test-reports/search', [TestReportController::class, 'search'])->name('test-reports.search');
+        Route::post('/test-reports/{id}', [TestReportController::class, 'getreportforedit'])->name('test-reports.getreportforedit');
+        Route::get('/test-reports/{id}', [TestReportController::class, 'show'])->name('test-reports.show');
+        Route::get('/test-reports/{id}/edit', [TestReportController::class, 'edit'])->name('test-reports.edit');
+        Route::put('/test-reports/{id}', [TestReportController::class, 'update'])->name('test-reports.update');
+        Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
+    });
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
