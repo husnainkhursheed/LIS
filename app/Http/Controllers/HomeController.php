@@ -57,7 +57,7 @@ class HomeController extends Controller
             $query->orderBy($request->input('sort_by'), $sortOrder);
         }
 
-        $samples = $query->paginate(10);
+        $samples = $query->paginate(15);
         return view('index' , compact('samples'));
     }
 

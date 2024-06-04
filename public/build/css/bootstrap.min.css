@@ -100,7 +100,7 @@
     --vz-link-color: #101f33;
     --vz-link-color-rgb: 140, 104, 205;
     --vz-link-decoration: none;
-    --vz-link-hover-color: #8c68cd;
+    --vz-link-hover-color: #22416B;
     --vz-link-hover-color-rgb: 140, 104, 205;
     --vz-code-color: #f672a7;
     --vz-highlight-bg: #fcf8e3;
@@ -3644,7 +3644,7 @@ fieldset:disabled .btn {
 .nav-pills {
     --vz-nav-pills-border-radius: var(--vz-border-radius);
     --vz-nav-pills-link-active-color: #fff;
-    --vz-nav-pills-link-active-bg: #8c68cd;
+    --vz-nav-pills-link-active-bg: #22416B;
 }
 .nav-pills .nav-link {
     border-radius: var(--vz-nav-pills-border-radius);
