@@ -76,6 +76,11 @@ use \Carbon\Carbon;
                                                 height="20">
                                         </span>
                                     </a>
+                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                        data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                        <a  id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                class="ri-pencil-fill align-bottom"></i></a>
+                                    </li>
                                     <a href="">
                                         <span class="logo-sm">
                                             <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
@@ -155,4 +160,18 @@ use \Carbon\Carbon;
     <!-- dashboard init -->
     <script src="{{ URL::asset('build/js/pages/dashboard-ecommerce.init.js') }}"></script>
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
+    <script>
+        $(document).ready(function(){
+        $('.edit-item-btn').click(function(){
+            // Redirect to another page
+            var itemId = $(this).data('id');
+            // var itemId = $('#edit-btn').attr('data-id');
+            console.log(itemId);
+            var urlValue = '/sample/' + itemId + '/edit';
+            // alert(urlValue);
+            window.location.href = urlValue;
+        });
+    });
+    </script>
 @endsection

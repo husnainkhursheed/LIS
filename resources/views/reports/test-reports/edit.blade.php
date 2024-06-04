@@ -1,1 +1,1 @@
-{{dd($reporttypeid)}}
+{{-- {{dd($reporttype)}} --}}

@@ -78,7 +78,7 @@
                                         <td>{{ $patient->contact_number }}</td>
                                         <td>{{ $patient->sex }}</td>
 
-                                        <td>
+                                        {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
                                                 <span class="logo-sm">
                                                     <img src="{{ URL::asset('build/images/report.png') }}" alt=""
@@ -97,8 +97,8 @@
                                                         height="20">
                                                 </span>
                                             </a>
-                                        </td>
-                                        {{-- <td>
+                                        </td> --}}
+                                        <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -113,7 +113,7 @@
                                                     </a>
                                                 </li>
                                             </ul>
-                                        </td> --}}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

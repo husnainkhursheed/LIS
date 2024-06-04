@@ -65,6 +65,11 @@ use \Carbon\Carbon;
                                                 height="20">
                                         </span>
                                     </a>
+                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                        data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                        <a  id="edit-btn" class="edit-item-btn fs-5" data-id="<?php echo e($sample->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
+                                                class="ri-pencil-fill align-bottom"></i></a>
+                                    </li>
                                     <a href="">
                                         <span class="logo-sm">
                                             <img src="<?php echo e(URL::asset('build/images/Vector.png')); ?>" alt=""
@@ -129,6 +134,20 @@ use \Carbon\Carbon;
     <!-- dashboard init -->
     <script src="<?php echo e(URL::asset('build/js/pages/dashboard-ecommerce.init.js')); ?>"></script>
     <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
+
+    <script>
+        $(document).ready(function(){
+        $('.edit-item-btn').click(function(){
+            // Redirect to another page
+            var itemId = $(this).data('id');
+            // var itemId = $('#edit-btn').attr('data-id');
+            console.log(itemId);
+            var urlValue = '/sample/' + itemId + '/edit';
+            // alert(urlValue);
+            window.location.href = urlValue;
+        });
+    });
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/index.blade.php ENDPATH**/ ?>

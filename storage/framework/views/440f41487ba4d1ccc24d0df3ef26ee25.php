@@ -46,13 +46,13 @@
                     <div class="collapse menu-dropdown" id="sidebarAuth">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="<?php echo e(url('/permissions')); ?>" class="nav-link">Permissions</a>
+                                <a href="<?php echo e(url('/permissions')); ?>" class="nav-link px-0 py-2">Permissions</a>
                             </li>
                             <li class="nav-item">
-                                <a href="<?php echo e(url('/roles')); ?>" class="nav-link">Roles</a>
+                                <a href="<?php echo e(url('/roles')); ?>" class="nav-link px-0 py-2">Roles</a>
                             </li>
                             <li class="nav-item">
-                                <a href="<?php echo e(url('/users')); ?>" class="nav-link">Users</a>
+                                <a href="<?php echo e(url('/users')); ?>" class="nav-link px-0 py-2">Users</a>
                             </li>
                         </ul>
                     </div>
@@ -158,11 +158,16 @@
 
             // Check if the current path includes the linkPath or vice versa
             else if (currentPath.includes(linkPath) || linkPath.includes(currentPath)) {
-                $(this).addClass('active');
+                $('.nav-item .nav-link').removeClass('active');
+            // Remove active class from all nav-items
+            $('.nav-item').removeClass('active');
 
-                // Handle the parent elements based on the structure
-                $(this).parents('.collapse').addClass('show');
-                $(this).parents('.nav-item').addClass('active');
+            // Add active class to the current nav-link
+            $(this).addClass('active');
+
+            // Handle the parent elements based on the structure
+            $(this).parents('.collapse').addClass('show');
+            $(this).parents('.nav-item').addClass('active');
             }
         });
     });

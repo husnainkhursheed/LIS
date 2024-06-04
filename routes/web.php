@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/test-reports/{id}', [TestReportController::class, 'update'])->name('test-reports.update');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
     });
+
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
