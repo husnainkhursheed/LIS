@@ -11,7 +11,8 @@ class TestReportController extends Controller
 {
     public function index()
     {
-        return view('reports/test-reports.index');
+        $testReports = Sample::orderBy('received_date', 'asc')->get();
+        return view('reports/test-reports.index', compact('testReports'));
     }
 
     public function search(Request $request)
@@ -41,10 +42,17 @@ class TestReportController extends Controller
     }
 
     public function getreportforedit(Request $request, $id){
+        $sample = Sample::findOrFail($id);
 
-        $sample = Sample::find($id);
-        $reporttypeid = $request->report_type;
+        // Find or create a test report for the selected test and sample
+        $testReport = TestReport::firstOrCreate(
+            ['sample_id' => $sample->id]
+            // ['is_completed' => false, 'is_signed' => false]
+        );
+
+        // $sample = Sample::find($id);
+        $reporttype = $request->report_type;
         // dd($reporttypeid);
-        return view('reports/test-reports.edit', compact('sample','reporttypeid'));
+        return view('reports/test-reports.edit', compact('sample','reporttype'));
     }
 }

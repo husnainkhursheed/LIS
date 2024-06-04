@@ -101,13 +101,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
     });
 
-    Route::get('/reportedit', function () {
-        // $employee = \App\Models\MainEmployee::find(1);
-        // dd($employee);
-        // $practices = SetupPractice::where('is_active', 1)->get();
-        // $genders = SetupGender::all();
-        return view('reports/test-reports.edit');
-    });
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
