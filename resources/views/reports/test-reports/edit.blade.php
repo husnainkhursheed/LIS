@@ -21,10 +21,11 @@
             font-weight: 600;
             font-family: 'Montserrat', sans-serif;
             border: 2px solid #3AAFE2;
+            background-color: #3AAFE2;
         }
 
         .border-nav:hover {
-            background-color: #3AAFE2;
+            background-color: #22416b;
             transition: 0.3s;
         }
     </style>

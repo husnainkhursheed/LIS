@@ -76,18 +76,19 @@ use \Carbon\Carbon;
                                                 height="20">
                                         </span>
                                     </a>
-                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                    {{-- <li class="list-inline-item" data-bs-toggle="tooltip"
                                         data-bs-trigger="hover" data-bs-placement="top" title="Edit">
                                         <a  id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><i
                                                 class="ri-pencil-fill align-bottom"></i></a>
-                                    </li>
-                                    <a href="">
+                                    </li> --}}
+                                    <a id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal">
                                         <span class="logo-sm">
                                             <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
                                                 height="20">
                                         </span>
                                     </a>
-                                    <a href="">
+                                    <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
+                                        href="#deleteRecordModal">
                                         <span class="logo-sm">
                                             <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
                                                 height="20">
