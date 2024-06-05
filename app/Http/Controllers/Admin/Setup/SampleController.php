@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\Institution;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\CustomDropdown;
 use Illuminate\Support\Facades\Session;
 
 class SampleController extends Controller
@@ -31,8 +32,10 @@ class SampleController extends Controller
         $institutions = Institution::all();
         $patients = Patient::all();
         $tests = Test::all();
+        // $custom = CustomDropdown::all();
+        $custom = CustomDropdown::where('dropdown_name', 'Bilirubin')->get();
 
-        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests'));
+        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests','custom'));
     }
 
     /**

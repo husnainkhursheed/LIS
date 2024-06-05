@@ -157,6 +157,20 @@
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="custom" class="form-label">bilirubin<a href=""
+                                data-bs-toggle="modal" data-bs-target="#showModalDropdown"
+                                > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                            <select class="js-example-basic-multiple" name="custom[]" id="custom" multiple="multiple">
+                                @foreach ($custom as $test)
+
+                                    <option value="{{ $test->dropdown_name }}">
+                                        {{ $test->value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -429,6 +443,62 @@
         </div>
     </div>
     {{-- end model  --}}
+
+
+
+
+
+        <!--dropdown-modal-->
+        <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+           <div class="modal-dialog modal-dialog-centered modal-lg">
+               <div class="modal-content border-0">
+                   <div class="modal-header bg-primary-subtle p-3">
+                       <h5 class="modal-title" id="exampleModalLabel">Bilirubin</h5>
+                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                           id="close-modal"></button>
+                   </div>
+                       <div class="modal-body">
+                        <table id="" class="table table-striped display table-responsive rounded">
+                            <thead>
+                                <tr>
+                                    <th class="rounded-start-3 ">Name</th>
+                                    <th>Values</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($custom as $doctor)
+                                    <tr>
+                                        <td>{{ $doctor->dropdown_name }}</td>
+                                        <td>{{ $doctor->value }}</td>
+
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                       </div>
+           </div>
+       </div>
+       <!-- end Modal -->
 @endsection
 
 @section('script')
