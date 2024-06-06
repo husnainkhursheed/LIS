@@ -1,8 +1,7 @@
-@extends('layouts.master')
-@section('title')
+<?php $__env->startSection('title'); ?>
         Roles
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <!--datatable css-->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <!--datatable responsive css-->
@@ -10,20 +9,18 @@
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
-@endsection
-@section('content')
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Pages
-        @endslot
-        @slot('title')
-            Users
-        @endslot
-    @endcomponent --}}
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    
     <div class="row">
-        @error('email')
+        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
             <div class="alert alert-danger" id="alert-message">
-                {{ $message }}
+                <?php echo e($message); ?>
+
             </div>
 
             <script>
@@ -32,10 +29,14 @@
                     document.getElementById('alert-message').style.display = 'none';
                 }, 5000); // 5000 milliseconds = 5 seconds
             </script>
-        @enderror
-        @if (Session::has('message'))
-            <div class="alert {{ Session::get('alert-class', 'alert-info') }}" id="alert-message">
-                {{ Session::get('message') }}
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        <?php if(Session::has('message')): ?>
+            <div class="alert <?php echo e(Session::get('alert-class', 'alert-info')); ?>" id="alert-message">
+                <?php echo e(Session::get('message')); ?>
+
             </div>
 
             <script>
@@ -44,10 +45,15 @@
                     document.getElementById('alert-message').style.display = 'none';
                 }, 5000); // 5000 milliseconds = 5 seconds
             </script>
-        @endif
-        @error('name')
+        <?php endif; ?>
+        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
             <div class="alert alert-danger" id="alert-message">
-                {{ $message }}
+                <?php echo e($message); ?>
+
             </div>
 
             <script>
@@ -56,17 +62,14 @@
                     document.getElementById('alert-message').style.display = 'none';
                 }, 5000); //
             </script>
-        @enderror
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
         <div class="col-lg-12">
 
-            {{-- <div class="card "> --}}
-                {{-- <div class="card-header d-flex justify-content-between">
-                    <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
-                    id="create-btn" data-bs-target="#showModal"><i
-                        class="ri-add-line align-bottom me-1 "></i> Add
-                    User</button>
-                    <h5 class="card-title mb-0">Buttons Datatables</h5>
-                </div> --}}
+            
+                
 
                 <div class="col">
                     <div class="card p-3 bg-white">
@@ -80,20 +83,20 @@
                         <div class="col my-2">
                             <nav class="navbar">
                                 <div class="container-fluid p-0">
-                                    <form class="d-flex" method="GET" action="{{ route('users.index') }}">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('users.index')); ?>">
                                         <input class="form-control me-2 main-search" type="search" placeholder="Search"
-                                            aria-label="Search" name="search" value="{{ request('search') }}">
+                                            aria-label="Search" name="search" value="<?php echo e(request('search')); ?>">
                                         <button class="btn search-btn" type="submit">Search</button>
                                     </form>
-                                    <form class="d-flex" method="GET" action="{{ route('users.index') }}">
-                                        <input type="hidden" name="search" value="{{ request('search') }}">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('users.index')); ?>">
+                                        <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
-                                            <option value="first_name"
-                                                {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Name</option>
+                                            <option value="name"
+                                                <?php echo e(request('sort_by') == 'name' ? 'selected' : ''); ?>>Name</option>
                                             <option value="email"
-                                                {{ request('sort_by') == 'email' ? 'selected' : '' }}>Email
+                                                <?php echo e(request('sort_by') == 'email' ? 'selected' : ''); ?>>Email
                                             </option>
                                         </select>
                                     </form>
@@ -104,53 +107,34 @@
                         <table id="" class="table table-striped display table-responsive rounded">
                             <thead>
                                 <tr>
-                                    <th class="rounded-start-3 ">Full Name</th>
+                                    <th class="rounded-start-3 ">Name</th>
                                     <th>Email</th>
                                     <th>Roles</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($users as $user)
+                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td>{{ $user->first_name }} {{ $user->surname }}</td>
-                                        <td>{{ $user->email }}</td>
+                                        <td><?php echo e($user->name); ?></td>
+                                        <td><?php echo e($user->email); ?></td>
                                     <td>
-                                        @foreach ($user->roles as $role)
-                                            <span class="badge bg-primary-subtle text-white">{{ $role->name }}</span>
-                                        @endforeach
+                                        <?php $__currentLoopData = $user->roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <span class="badge bg-primary-subtle text-white"><?php echo e($role->name); ?></span>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </td>
 
-                                        {{-- <td>
-                                            <a href="#showModal" data-bs-toggle="modal">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/report.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                        </td> --}}
+                                        
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $user->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                    <a class="edit-item-btn" data-id="<?php echo e($user->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $user->id }}"  data-bs-toggle="modal"
+                                                    <a class="remove-item-btn" data-id="<?php echo e($user->id); ?>"  data-bs-toggle="modal"
                                                         href="#deleteRecordModal">
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
@@ -158,84 +142,47 @@
                                             </ul>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            @if ($users->previousPageUrl())
+                            <?php if($users->previousPageUrl()): ?>
                                 <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="{{ $users->previousPageUrl() }}" aria-label="Previous">
+                                    <a class="page-link" href="<?php echo e($users->previousPageUrl()); ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                         <span class="sr-only">Previous</span>
                                     </a>
                                 </li>
-                            @else
+                            <?php else: ?>
                                 <li class="page-item previousPageUrl disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
                                 </li>
-                            @endif
+                            <?php endif; ?>
 
-                            @for ($page = 1; $page <= $users->lastPage(); $page++)
-                                <li class="page-item {{ $users->currentPage() == $page ? 'active' : '' }}">
+                            <?php for($page = 1; $page <= $users->lastPage(); $page++): ?>
+                                <li class="page-item <?php echo e($users->currentPage() == $page ? 'active' : ''); ?>">
                                     <a class="page-link"
-                                        href="{{ $users->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                                        href="<?php echo e($users->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
                                 </li>
-                            @endfor
+                            <?php endfor; ?>
 
-                            @if ($users->nextPageUrl())
+                            <?php if($users->nextPageUrl()): ?>
                                 <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="{{ $users->nextPageUrl() }}" aria-label="Next">
+                                    <a class="page-link" href="<?php echo e($users->nextPageUrl()); ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                         <span class="sr-only">Next</span>
                                     </a>
                                 </li>
-                            @else
+                            <?php else: ?>
                                 <li class="page-item nextPageUrl disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
                                 </li>
-                            @endif
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>
-                {{-- <div class="card-body">
-                    <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Roles</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($users as $user)
-                                <tr>
-                                    <td>{{ $user->name }}</td>
-                                    <td>
-                                        @foreach ($user->roles as $role)
-                                            <span class="badge bg-primary-subtle text-primary">{{ $role->name }}</span>
-                                        @endforeach
-                                    </td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $user->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $user->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            @endforeach
-                    </table>
-                </div> --}}
-            {{-- </div> --}}
+                
+            
         </div>
     </div>
 
@@ -250,14 +197,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url('/users') }}"
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url('/users')); ?>"
                     method="Post" autocomplete="off" enctype="multipart/form-data">
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <div class="modal-body">
                         <input type="hidden" id="id-field"/>
                         <div class="row g-3">
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="text-center">
                                     <div class="position-relative d-inline-block">
                                         <div class="position-absolute bottom-0 end-0">
@@ -273,7 +220,7 @@
                                         </div>
                                         <div class="avatar-lg p-1">
                                             <div class="avatar-title bg-light rounded-circle">
-                                                <img src="{{ URL::asset('build/images/users/user-dummy-img.jpg') }}"
+                                                <img src="<?php echo e(URL::asset('build/images/users/user-dummy-img.jpg')); ?>"
                                         alt="" id="lead-img" class="avatar-md rounded-circle object-fit-cover" >
                                             </div>
                                         </div>
@@ -281,21 +228,14 @@
                                     <h5 class="fs-13 mt-3">Profile</h5>
                                 </div>
 
-                            </div> --}}
+                            </div>
 
                             <!--end col-->
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="" class="form-label">
-                                        First Name</label>
-                                    <input type="text" id="first_name" name="first_name"
-                                        class="form-control"  required />
-                                </div>
-                                <br>
-                                <div>
-                                    <label for="" class="form-label">
-                                    Surname</label>
-                                    <input type="text" id="surname" name="surname"
+                                    <label for="user_password" class="form-label">
+                                        Name</label>
+                                    <input type="text" id="user_name" name="name"
                                         class="form-control"  required />
                                 </div>
                                 <br>
@@ -307,46 +247,21 @@
 
                                 </div>
                                 <br>
-                                {{-- <div>
-                                    <label for="user_password" class="form-label">
-                                        Password</label>
-                                    <input type="password" id="user_password" name="password"
-                                        class="form-control" />
-                                </div> --}}
+                                
                             </div>
                             <!--end col-->
                             <div class="col-lg-12">
                                 <label for="role_select" class="form-label">
                                     User Type</label>
                                 <select class="js-example-basic-multiple" name="role_ids[]" id="role_ids" multiple="multiple">
-                                    @foreach ($roles as $rolevalue)
-                                            <option value="{{ $rolevalue->id }}">
-                                                {{ $rolevalue->name }}</option>
-                                        @endforeach
+                                    <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rolevalue): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($rolevalue->id); ?>">
+                                                <?php echo e($rolevalue->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
-                            {{-- <div class="col-lg-12">
-                                <div>
-                                    <label for="leads_score-field" class="form-label">Roles</label>
-                                    <select class="form-select mb-3" name="role_ids[]"
-                                        id="role_ids" aria-label=".form-select-lg example" multiple
-                                        required>
-                                        @foreach ($roles as $rolevalue)
-                                            <option value="{{ $rolevalue->id }}">
-                                                {{ $rolevalue->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div> --}}
-                            {{-- <div class="col-lg-12">
-                                <div class="form-check form-check-dark mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active"
-                                        id="is_active" checked>
-                                    <label class="form-check-label" for="is_active">
-                                        Active
-                                    </label>
-                                </div>
-                            </div> --}}
+                            
+                            
                             <!--end col-->
                         </div>
                         <!--end row-->
@@ -356,7 +271,7 @@
                             <button type="button" class="btn btn-light"
                                 data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-success" id="add-btn">Add </button>
-                            {{-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> --}}
+                            
                         </div>
                     </div>
                 </form>
@@ -396,11 +311,11 @@
             </div>
         </div>
     </div>
-@endsection
-@section('script')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
 
 
-    {{-- <script src="{{ URL::asset('build/js/app.js') }}"></script> --}}
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
@@ -414,9 +329,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
     <script>
         jQuery(document).ready(function($) {
         // When the document is ready, attach a click event to the "Edit" button
@@ -424,7 +339,7 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '{{ url("/users") }}' + '/' + itemId + '/edit';
+            var url = '<?php echo e(url("/users")); ?>' + '/' + itemId + '/edit';
 
 
             $.ajax({
@@ -440,8 +355,8 @@
                         $('#user_email').val(leadType.email);
                         $('#user_password').val(leadType.password);
                         var imagePath = leadType.avatar
-                        ? '{{ URL::asset("uploads/") }}/' + leadType.avatar
-                        : '{{ URL::asset("build/images/users/user-dummy-img.jpg") }}';
+                        ? '<?php echo e(URL::asset("uploads/")); ?>/' + leadType.avatar
+                        : '<?php echo e(URL::asset("build/images/users/user-dummy-img.jpg")); ?>';
                         $('#lead-img').attr('src', imagePath);
 
                         // var roleIds = leadType.roles.map(function(role) {
@@ -467,7 +382,7 @@
                         var form = $('#leadtype_form');
 
                         // Update the form action (assuming the form has an ID of 'your-form-id')
-                        $('#leadtype_form').attr('action', '{{ url("/users") }}/' + itemId);
+                        $('#leadtype_form').attr('action', '<?php echo e(url("/users")); ?>/' + itemId);
 
                         // $('#leadtype_form').attr('method', 'POST');
                         // if (!form.find('input[name="_method"]').length) {
@@ -500,7 +415,7 @@
 
             // Change the button text
             $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '{{ url("/users") }}');
+            $('#leadtype_form').attr('action', '<?php echo e(url("/users")); ?>');
             // if ( $('#patch').length) {
             //     $('#patch').remove();
             // }
@@ -512,7 +427,7 @@
             $('#user_password').val('');
             $('#role_ids').val('');
             $('#is_active').prop('checked', true);
-            $('#lead-img').attr('src', '{{ URL::asset("build/images/users/user-dummy-img.jpg") }}');
+            $('#lead-img').attr('src', '<?php echo e(URL::asset("build/images/users/user-dummy-img.jpg")); ?>');
         }
 
         // Event listener for modal close event
@@ -572,5 +487,7 @@
     });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/usermanagement/users.blade.php ENDPATH**/ ?>

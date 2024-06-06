@@ -1,19 +1,18 @@
-@extends('layouts.master')
-@section('title')
+<?php $__env->startSection('title'); ?>
     Doctors
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css" rel="stylesheet"
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('build/libs/swiper/swiper-bundle.min.css') }}" rel="stylesheet" type="text/css" />
-@endsection
-@php
+    <link href="<?php echo e(URL::asset('build/libs/swiper/swiper-bundle.min.css')); ?>" rel="stylesheet" type="text/css" />
+<?php $__env->stopSection(); ?>
+<?php
 use \Carbon\Carbon;
-@endphp
-@section('content')
+?>
+<?php $__env->startSection('content'); ?>
     <style>
         #reportStickyNav {
             top: 86px;
@@ -25,19 +24,18 @@ use \Carbon\Carbon;
             font-weight: 600;
             font-family: 'Montserrat', sans-serif;
             border: 2px solid #3AAFE2;
-            background-color: #3AAFE2;
         }
 
         .border-nav:hover {
-            background-color: #22416b;
+            background-color: #3AAFE2;
             transition: 0.3s;
         }
     </style>
-    {{-- //start  --}}
+    
     <div class="container-fluid">
         <nav class="navbar navbar-expand-lg sticky-top navbar-light rounded" id="reportStickyNav">
             <div class="container-fluid">
-                {{-- <a class="navbar-brand text-white" href="#">Navbar</a> --}}
+                
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -46,7 +44,7 @@ use \Carbon\Carbon;
 
                     <ul class="navbar-nav gap-5">
                         <li class="nav-item border-nav px-5 rounded ">
-                            <a class="nav-link active" aria-current="page" href="{{url('/reports/test-reports')}}">Find</a>
+                            <a class="nav-link active" aria-current="page" href="#">Find</a>
                         </li>
                         <li class="nav-item border-nav px-5 rounded ">
                             <button class="nav-link" id="SaveReport">Save</button>
@@ -73,19 +71,19 @@ use \Carbon\Carbon;
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="access_number" class="form-label">Patient name</label>
-                        <input type="text" id="access_number" name="access_number" class="form-control" value="{{ $sample->patient->surname }} {{ $sample->patient->first_name }}" disabled />
+                        <input type="text" id="access_number" name="access_number" class="form-control" value="<?php echo e($sample->patient->surname); ?> <?php echo e($sample->patient->first_name); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="test_number" class="form-label">Test Number</label>
-                        <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="{{ $sample->test_number }}" disabled />
+                        <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="<?php echo e($sample->test_number); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="access_number" class="form-label">Access Number</label>
-                        <input type="text" id="access_number" name="access_number" class="form-control" value="{{ $sample->access_number }}" disabled />
+                        <input type="text" id="access_number" name="access_number" class="form-control" value="<?php echo e($sample->access_number); ?>" disabled />
                     </div>
                 </div>
             </div>
@@ -93,19 +91,19 @@ use \Carbon\Carbon;
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="collected_date" class="form-label">Collected date</label>
-                        <input type="text" id="collected_date" name="collected_date" class="form-control" value="{{ Carbon::parse($sample->collected_date)->format('d-m-Y') }}" disabled />
+                        <input type="text" id="collected_date" name="collected_date" class="form-control" value="<?php echo e(Carbon::parse($sample->collected_date)->format('d-m-Y')); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="received_date" class="form-label">Received date</label>
-                        <input type="text" id="received_date" name="received_date" class="form-control" value="{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}" disabled />
+                        <input type="text" id="received_date" name="received_date" class="form-control" value="<?php echo e(Carbon::parse($sample->received_date)->format('d-m-Y')); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="received_time" class="form-label">Time</label>
-                        <input type="text" id="received_time" name="received_time" class="form-control" value="{{ $sample->received_time }}" disabled />
+                        <input type="text" id="received_time" name="received_time" class="form-control" value="<?php echo e($sample->received_time); ?>" disabled />
                     </div>
                 </div>
             </div>
@@ -113,30 +111,30 @@ use \Carbon\Carbon;
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="test_number" class="form-label">Bill to (Doctor, Patient, Other)</label>
-                        <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->bill_to }}" disabled />
+                        <input type="text" id="test_number" name="test_number" class="form-control" value="<?php echo e($sample->bill_to); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="doctorname" class="form-label">Doctor Name</label>
-                        <input type="text" id="doctorname" name="doctorname" class="form-control" value="{{ $sample->doctor->name }}" disabled />
+                        <input type="text" id="doctorname" name="doctorname" class="form-control" value="<?php echo e($sample->doctor->name); ?>" disabled />
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="test_number" class="form-label">Tests Requested</label>
-                        @php
+                        <?php
                         // Assuming $sample->tests is a collection or array of test objects
                             $testNames = $sample->tests->pluck('name')->implode(', ');
-                        @endphp
-                        <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $testNames }}" disabled />
+                        ?>
+                        <input type="text" id="test_number" name="test_number" class="form-control" value="<?php echo e($testNames); ?>" disabled />
                     </div>
                 </div>
             </div>
-            <input type="hidden" id="reporttypeis" name="reporttypeis" value="{{$reporttype}}">
-            <input type="hidden" id="testReport" name="testReport" value="{{$testReport->id}}">
-            {{-- BioChemistry / Haematology Test Results --}}
-            @if ($reporttype == 1)
+            <input type="hidden" id="reporttypeis" name="reporttypeis" value="<?php echo e($reporttype); ?>">
+            <input type="hidden" id="testReport" name="testReport" value="<?php echo e($testReport->id); ?>">
+            
+            <?php if($reporttype == 1): ?>
                 <div class="card-header py-1">
                     <h4 class="text-dark">BioChemistry / Haematology Test Results </h4>
                 </div>
@@ -144,15 +142,15 @@ use \Carbon\Carbon;
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="reference" class="form-label">Reference</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
-                            <textarea name="reference" id="reference" cols="30" rows="5" class="form-control" >{{$testReport->BiochemHaemoResults[0]->reference  ?? ''}}</textarea>
+                            
+                            <textarea name="reference" id="reference" cols="30" rows="5" class="form-control" ><?php echo e($testReport->BiochemHaemoResults[0]->reference  ?? ''); ?></textarea>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="note" class="form-label">Note</label>
-                            <textarea name="note" id="note" cols="30" rows="5" class="form-control"  >{{$testReport->BiochemHaemoResults[0]->note  ?? ''}}</textarea>
-                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                            <textarea name="note" id="note" cols="30" rows="5" class="form-control"  ><?php echo e($testReport->BiochemHaemoResults[0]->note  ?? ''); ?></textarea>
+                            
                         </div>
                     </div>
                 </div>
@@ -169,43 +167,28 @@ use \Carbon\Carbon;
                     <tbody>
                             <tr>
                                 <td>
-                                    <input type="text" id="description" name="description" class="form-control" value="{{$test->name}}"  disabled/>
+                                    <input type="text" id="description" name="description" class="form-control" value="<?php echo e($test->name); ?>"  disabled/>
                                 </td>
                                 <td>
-                                <input type="text" id="test_results" name="test_results" class="form-control" value="{{$testReport->BiochemHaemoResults[0]->test_results ?? ''}}"  />
+                                <input type="text" id="test_results" name="test_results" class="form-control" value="<?php echo e($testReport->BiochemHaemoResults[0]->test_results ?? ''); ?>"  />
                                 </td>
                                 <td>
-                                <input type="text" id="flag" name="flag" class="form-control" value="{{$testReport->BiochemHaemoResults[0]->flag  ?? ''}}"  />
+                                <input type="text" id="flag" name="flag" class="form-control" value="<?php echo e($testReport->BiochemHaemoResults[0]->flag  ?? ''); ?>"  />
                                 </td>
                                 <td>
-                                <input type="text" id="reference_range" name="reference_range" class="form-control" value="{{$test->reference_range}}"  disabled/>
+                                <input type="text" id="reference_range" name="reference_range" class="form-control" value="<?php echo e($test->reference_range); ?>"  disabled/>
                                 </td>
                                 <td>
-                                <textarea  id="test_notes" name="test_notes" class="form-control"   >{{$testReport->BiochemHaemoResults[0]->test_notes  ?? ''}}</textarea>
+                                <textarea  id="test_notes" name="test_notes" class="form-control"   ><?php echo e($testReport->BiochemHaemoResults[0]->test_notes  ?? ''); ?></textarea>
                                 </td>
-                                {{-- <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td> --}}
+                                
                             </tr>
                     </tbody>
                 </table>
-            @endif
+            <?php endif; ?>
 
-              {{-- Cytology / Gynecology Test Results  --}}
-            @if ($reporttype == 2)
+              
+            <?php if($reporttype == 2): ?>
                 <div class="card-header py-1">
                     <h4 class="text-dark">Cytology / Gynecology Test Results </h4>
                 </div>
@@ -213,14 +196,14 @@ use \Carbon\Carbon;
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="history" class="form-label">History</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
-                            <textarea name="history" id="history" cols="30" rows="" class="form-control" value="" >{{$testReport->cytologyGynecologyResults[0]->history  ?? ''}}</textarea>
+                            
+                            <textarea name="history" id="history" cols="30" rows="" class="form-control" value="" ><?php echo e($testReport->cytologyGynecologyResults[0]->history  ?? ''); ?></textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="last_period" class="form-label">Last Period </label>
-                            <input type="date" id="last_period" name="last_period" class="form-control form-control-sm" value="{{$testReport->cytologyGynecologyResults[0]->last_period  ?? ''}}"  />
+                            <input type="date" id="last_period" name="last_period" class="form-control form-control-sm" value="<?php echo e($testReport->cytologyGynecologyResults[0]->last_period  ?? ''); ?>"  />
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -230,10 +213,7 @@ use \Carbon\Carbon;
                                 > <span class="badge bg-info text-white"> Add New</span> </a>
                             </label>
                             <select class="js-example-basic-multiple form-control" name="contraceptive" id="contraceptive">
-                                {{-- @foreach ($institutions as $institution)
-                                    <option value="{{ $institution->id }}" {{ $sample->institution_id == $institution->id ? 'selected' : ''}}>
-                                        {{ $institution->name }}</option>
-                                @endforeach --}}
+                                
                             </select>
 
                         </div>
@@ -243,19 +223,19 @@ use \Carbon\Carbon;
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="previous_pap" class="form-label">Previous Pap </label>
-                            <input type="date" id="previous_pap" name="previous_pap" class="form-control" value="{{$testReport->cytologyGynecologyResults[0]->previous_pap  ?? ''}}"/>
+                            <input type="date" id="previous_pap" name="previous_pap" class="form-control" value="<?php echo e($testReport->cytologyGynecologyResults[0]->previous_pap  ?? ''); ?>"/>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="result" class="form-label">Result </label>
-                            <input type="text" id="result1" name="result" class="form-control" value="{{$testReport->cytologyGynecologyResults[0]->result  ?? ''}}"/>
+                            <input type="text" id="result1" name="result" class="form-control" value="<?php echo e($testReport->cytologyGynecologyResults[0]->result  ?? ''); ?>"/>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="cervix_examination" class="form-label">Cervix Examination </label>
-                            <textarea type="text" id="cervix_examination" name="cervix_examination" class="form-control" value="" >{{$testReport->cytologyGynecologyResults[0]->cervix_examination  ?? ''}}</textarea>
+                            <textarea type="text" id="cervix_examination" name="cervix_examination" class="form-control" value="" ><?php echo e($testReport->cytologyGynecologyResults[0]->cervix_examination  ?? ''); ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -266,28 +246,28 @@ use \Carbon\Carbon;
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
-                            <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control" value="" >{{$testReport->cytologyGynecologyResults[0]->specimen_adequacy  ?? ''}}</textarea>
+                            
+                            <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control" value="" ><?php echo e($testReport->cytologyGynecologyResults[0]->specimen_adequacy  ?? ''); ?></textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation</label>
-                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control">{{$testReport->cytologyGynecologyResults[0]->diagnostic_interpretation  ?? ''}}</textarea>
-                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control"><?php echo e($testReport->cytologyGynecologyResults[0]->diagnostic_interpretation  ?? ''); ?></textarea>
+                            
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="recommend" class="form-label">Recommend</label>
-                            <textarea name="recommend" id="recommend" cols="30" rows="5" class="form-control">{{$testReport->cytologyGynecologyResults[0]->recommend  ?? ''}}</textarea>
-                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                            <textarea name="recommend" id="recommend" cols="30" rows="5" class="form-control"><?php echo e($testReport->cytologyGynecologyResults[0]->recommend  ?? ''); ?></textarea>
+                            
                         </div>
                     </div>
                 </div>
-            @endif
-             {{-- Urinalysis / Microbiology Test Results  --}}
-            @if ($reporttype == 3)
+            <?php endif; ?>
+             
+            <?php if($reporttype == 3): ?>
                 <div class="card-header py-1">
                     <h4 class="text-dark">Urinalysis / Microbiology Test Results </h4>
                 </div>
@@ -420,11 +400,11 @@ use \Carbon\Carbon;
                         </div>
                     </div>
                 </div><!-- end card-body -->
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-@endsection
-@section('script')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
@@ -438,9 +418,9 @@ use \Carbon\Carbon;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
     <script>
         jQuery(document).ready(function($) {
             // When the document is ready, attach a click event to the "Edit" button
@@ -448,7 +428,7 @@ use \Carbon\Carbon;
                 // Get the ID from the data attribute
 
                 var itemId = $(this).data('id');
-                var url = '{{ url('/reports/test-reports') }}' + '/' + itemId;
+                var url = '<?php echo e(url('/reports/test-reports')); ?>' + '/' + itemId;
                 $('#leadtype_form').attr('action', url);
                 // $.ajax({
                 //         url: url, // Adjust the route as needed
@@ -515,7 +495,7 @@ use \Carbon\Carbon;
 
                 // Change the button text
                 $('#add-btn').html("Add");
-                $('#leadtype_form').attr('action', '{{ url('/doctor') }}');
+                $('#leadtype_form').attr('action', '<?php echo e(url('/doctor')); ?>');
                 // if ( $('#patch').length) {
                 //     $('#patch').remove();
                 // }
@@ -653,5 +633,7 @@ use \Carbon\Carbon;
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/reports/test-reports/edit.blade.php ENDPATH**/ ?>

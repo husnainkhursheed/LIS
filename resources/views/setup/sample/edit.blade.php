@@ -12,6 +12,18 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+<style>
+    /* #liveTime {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 20px;
+        color: #333;
+        text-align: center;
+    } */
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #eff2f7;
+    }
+</style>
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Dashboard
@@ -40,6 +52,8 @@
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
+                                hidden required />
+                                <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
                                 disabled required />
                         </div>
                     </div>
@@ -121,7 +135,7 @@
                         <div class="form-group">
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
-                                <option selected>Choose Institution</option>
+                                {{-- <option selected>Choose Institution</option> --}}
                                 <option value="Patient" {{ $sample->bill_to == 'Patient' ? 'selected' : ''}}>Patient</option>
                                 <option value="Doctor"  {{ $sample->bill_to == 'Doctor' ? 'selected' : ''}}>Doctor</option>
                                 <option value="Other"  {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>

@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Session;
 
 class SampleController extends Controller
 {
+    public function __construct()
+    {
+        // $this->middleware('role_or_permission:Course access|Course create|Course edit|Course delete', ['only' => ['index', 'show']]);
+        $this->middleware('role_or_permission:Sample create', ['only' => ['create', 'store']]);
+        $this->middleware('role_or_permission:Sample edit', ['only' => ['edit', 'update']]);
+        $this->middleware('role_or_permission:Sample delete', ['only' => ['destroy']]);
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -31,8 +40,9 @@ class SampleController extends Controller
         $institutions = Institution::all();
         $patients = Patient::all();
         $tests = Test::all();
+        $test_number = strtoupper(substr(md5(time()), 0, 6));
 
-        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests'));
+        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests','test_number'));
     }
 
     /**
@@ -42,23 +52,22 @@ class SampleController extends Controller
     {
 
         $request->validate([
-            // 'test_number' => 'required|unique:samples,test_number|max:6',
-            'access_number' => 'required|unique:samples,access_number',
-            'collected_date' => 'required|date',
-            'received_date' => 'required|date',
-            'received_time' => 'required|time',
-            'patient_id' => 'required|exists:patients,id',
-            'institution_id' => 'nullable|exists:institutions,id',
-            'doctor_id' => 'nullable|exists:doctors,id',
-            'bill_to' => 'required|in:Patient,Doctor,Other',
+            'test_number' => 'required',
+            'access_number' => 'required',
+            'collected_date' => 'required',
+            'received_date' => 'required',
+            // 'received_time' => 'required',
+            'patient_id' => 'required',
+            'institution_id' => 'required',
+            'doctor_id' => 'required',
+            'bill_to' => 'required',
             'test_requested' => 'required',
-
        ]);
     //    dd($request->all());
 
 
        $sample = new Sample();
-       $sample->test_number = strtoupper(substr(md5(time()), 0, 6)); // Example of generating a unique 6-character string
+       $sample->test_number =$request->test_number;
        $sample->access_number = $request->access_number;
        $sample->collected_date = $request->collected_date;
        $sample->received_date = $request->received_date;
@@ -105,20 +114,19 @@ class SampleController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            // 'test_number' => 'required|unique:samples,test_number|max:6',
-            'access_number' => 'required|unique:samples,access_number',
-            'collected_date' => 'required|date',
-            'received_date' => 'required|date',
-            'received_time' => 'required|time',
-            'patient_id' => 'required|exists:patients,id',
-            'institution_id' => 'nullable|exists:institutions,id',
-            'doctor_id' => 'nullable|exists:doctors,id',
-            'bill_to' => 'required|in:Patient,Doctor,Other',
+            'test_number' => 'required',
+            'access_number' => 'required',
+            'collected_date' => 'required',
+            'received_date' => 'required',
+            'patient_id' => 'required',
+            'institution_id' => 'required',
+            'doctor_id' => 'required',
+            'bill_to' => 'required',
             'test_requested' => 'required',
-        ]);
+       ]);
 
         $sample = Sample::findOrFail($id);
-
+        $sample->test_number =$request->test_number;
         $sample->access_number = $request->access_number;
         $sample->collected_date = $request->collected_date;
         $sample->received_date = $request->received_date;
@@ -146,6 +154,9 @@ class SampleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $sample = Sample::find($id);
+        $sample->delete();
+        Session::flash('message', 'Deleted successfully!');
+        Session::flash('alert-class', 'alert-success');
     }
 }

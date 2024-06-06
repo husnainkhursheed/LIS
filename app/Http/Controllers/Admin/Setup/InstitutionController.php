@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Session;
 
 class InstitutionController extends Controller
 {
+    function __construct()
+    {
+        $this->middleware('role_or_permission:Institution access', ['only' => ['index','store','edit','update','destroy']]);
+    }
     //
     public function index(Request $request)
     {
