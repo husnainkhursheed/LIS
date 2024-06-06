@@ -489,14 +489,14 @@
                             {{-- <li class="nav-item">
                                 <a href="{{ url('/roles') }}" class="nav-link">Roles</a>
 
-                            </li>
+                            </li>--}}
 
                         </ul>
                     </div>
                 </li>
-                @endcanany
 
                 {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span>@lang('translation.pages')</span></li> --}}
+                @endcanany
             </ul>
         </div>
         <div class="fixed-bottom mb-4">
