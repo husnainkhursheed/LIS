@@ -39,6 +39,7 @@
                          <span class="pt-1">Dashboards</span>
                     </a>
                 </li>
+                @canany('Sample create')
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('/sample/create') }}">
                         <span class="">
@@ -48,6 +49,7 @@
                          <span class="pt-1">New Sample</span>
                     </a>
                 </li>
+                @endcanany
 
                 @canany('UserManagement access')
                 <li class="nav-item">
@@ -420,7 +422,7 @@
                         </ul>
                     </div>
                 </li> <!-- end Dashboard Menu --> --}}
-                @canany(['Practice Access'])
+                {{-- @canany(['Practice Access']) --}}
                     <li class="nav-item">
                         <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarSetup" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarSetup">
                             <span class="">
@@ -436,40 +438,52 @@
                                         <a href="{{ url('/practice') }}" class="nav-link">Practice</a>
                                     </li>
                                 @endcanany --}}
+                                @canany('Institution access')
                                 <li class="nav-item">
                                     <a href="{{ url('/institution') }}" class="nav-link px-0 py-2">Institutions</a>
                                 </li>
+                                @endcanany
+                                @canany('Doctor access')
                                 <li class="nav-item">
                                     <a href="{{ url('/doctor') }}" class="nav-link px-0 py-2">Doctors</a>
                                 </li>
+                                @endcanany
+                                @canany('Patient access')
                                 <li class="nav-item">
                                     <a href="{{ url('/patient') }}" class="nav-link px-0 py-2">Patients</a>
                                 </li>
+                                @endcanany
+                                @canany('TestCharges access')
                                 <li class="nav-item">
                                     <a href="{{ url('/test') }}" class="nav-link px-0 py-2">Charges and Reference Ranges</a>
                                 </li>
+                                @endcanany
+                                @canany('Notes access')
                                 <li class="nav-item">
                                     <a href="{{ url('/note') }}" class="nav-link px-0 py-2">Notes</a>
                                 </li>
+                                @endcanany
                             </ul>
                         </div>
                     </li>
-                @endcanany
-
+                {{-- @endcanany --}}
+                @canany('Manage TestReports')
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarAuth" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarreport" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarreport">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
                         </span>
                         {{-- <i class="ri-account-circle-line"></i> --}}
                          <span class="pt-1">Reports</span>
                     </a>
-                    <div class="collapse menu-dropdown" id="sidebarAuth">
+                    <div class="collapse menu-dropdown" id="sidebarreport">
                         <ul class="nav nav-sm flex-column">
-                            {{-- <li class="nav-item">
-                                <a href="{{ url('/permissions') }}" class="nav-link">Permissions</a>
-                            </li>
+                            @canany('Manage TestReports')
                             <li class="nav-item">
+                                <a href="{{ url('/reports/test-reports') }}" class="nav-link">Test Reports</a>
+                            </li>
+                            @endcanany
+                            {{-- <li class="nav-item">
                                 <a href="{{ url('/roles') }}" class="nav-link">Roles</a>
                             </li>
                             <li class="nav-item">
@@ -478,6 +492,7 @@
                         </ul>
                     </div>
                 </li>
+                @endcanany
 
                 {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span>@lang('translation.pages')</span></li> --}}
             </ul>

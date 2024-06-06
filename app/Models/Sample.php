@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use App\Models\Test;
+use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\TestReport;
+use App\Models\Institution;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -31,6 +34,21 @@ class Sample extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    public function testReports()
+    {
+        return $this->hasMany(TestReport::class);
     }
 
 

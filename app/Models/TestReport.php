@@ -5,7 +5,10 @@ namespace App\Models;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\Sample;
+use App\Models\BiochemHaemoResults;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CytologyGynecologyResults;
+use App\Models\UrinalysisMicrobiologyResults;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TestReport extends Model
@@ -41,4 +44,19 @@ class TestReport extends Model
     // {
     //     return $this->hasMany(AuditTrail::class);
     // }
+
+    public function biochemHaemoResults()
+    {
+        return $this->hasMany(BiochemHaemoResults::class);
+    }
+
+    public function cytologyGynecologyResults()
+    {
+        return $this->hasMany(CytologyGynecologyResults::class);
+    }
+
+    public function urinalysisMicrobiologyResults()
+    {
+        return $this->hasMany(UrinalysisMicrobiologyResults::class);
+    }
 }
