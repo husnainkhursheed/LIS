@@ -13,11 +13,11 @@
 @endsection
 @section('content')
     <style>
-        #liveTime {
-            font-size: 24px;
+        .time {
+            font-size: 18px;
             font-weight: bold;
             margin: 20px;
-            color: #333;
+            color: #22416b;
             text-align: center;
         }
         .select2-container--default .select2-results__option[aria-selected=true] {
@@ -64,8 +64,11 @@
 
     <div class="container m-auto">
         <div class="form-wrap">
+            <div class="position-absolute top-0 pt-4 end-0 translate-middle-y me-3 float-end time" >
+                Time : <span id="liveTime"></span>
+            </div>
             <header class="header">
-                <h1 id="title" class="text-center">New Sample  <span class="align-right" id="liveTime"></span>
+                <h1 id="title" class="text-center">New Sample
                 </h1>
             </header>
             {{-- <div id="liveTime"></div> --}}
