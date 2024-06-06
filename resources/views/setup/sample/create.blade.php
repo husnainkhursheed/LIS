@@ -12,6 +12,16 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+<style>
+    #addRowBtn{
+        background-color: #22416b;
+        border-color: #22416b;
+    }
+    #addRowBtn:hover{
+        background-color: #3aafe2;
+        border-color: #3aafe2;
+    }
+</style>
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Dashboard
@@ -162,13 +172,12 @@
                             <label for="custom" class="form-label">bilirubin<a href=""
                                 data-bs-toggle="modal" data-bs-target="#showModalDropdown"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
-                            <select class="js-example-basic-multiple" name="custom[]" id="custom" multiple="multiple">
-                                @foreach ($custom as $test)
+                                <select class="js-example-basic-multiple" name="custom[]" id="customDropdown">
+                                    @foreach ($custom as $test)
+                                        <option value="{{ $test->dropdown_name }}">{{ $test->dropdown_name }}</option>
+                                    @endforeach
+                                </select>
 
-                                    <option value="{{ $test->dropdown_name }}">
-                                        {{ $test->value }}</option>
-                                @endforeach
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -449,55 +458,58 @@
 
 
         <!--dropdown-modal-->
-        <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-           <div class="modal-dialog modal-dialog-centered modal-lg">
-               <div class="modal-content border-0">
-                   <div class="modal-header bg-primary-subtle p-3">
-                       <h5 class="modal-title" id="exampleModalLabel">Bilirubin</h5>
-                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                           id="close-modal"></button>
-                   </div>
-                       <div class="modal-body">
-                        <table id="" class="table table-striped display table-responsive rounded">
-                            <thead>
-                                <tr>
-                                    <th class="rounded-start-3 ">Name</th>
-                                    <th>Values</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($custom as $doctor)
+        <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0">
+                    <div class="modal-header bg-primary-subtle p-3">
+                        <h5 class="modal-title" id="exampleModalLabel">Bilirubin</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class=" d-flex justify-content-end py-1">
+                            <button type="button" id="addRowBtn" class="btn btn-secondary px-5">Add</button>
+                         </div>
+                        <form id="bilirubinForm">
+                            @csrf
+                            <input type="hidden" name="deleted_ids" id="deleted_ids" value="">
+                            <table id="" class="table table-responsive rounded">
+                                <thead>
                                     <tr>
-                                        <td>{{ $doctor->dropdown_name }}</td>
-                                        <td>{{ $doctor->value }}</td>
-
-                                        <td>
-                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                                </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
-                                                        href="#deleteRecordModal">
-                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </td>
-
+                                        <th class="rounded-start-3">Name</th>
+                                        <th>Values</th>
+                                        <th>Action</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody id="valuesTable">
+                                    @foreach ($custom as $doctor)
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" name="id[]" value="{{ $doctor->id }}">
+                                                <input type="text" name="dropdown_name[]" class="form-control" value="{{ $doctor->dropdown_name }}" readonly>
+                                            </td>
+                                            <td><input type="text" name="value[]" class="form-control" value="{{ $doctor->value }}"></td>
+                                            <td>
+                                                <ul class="list-inline hstack gap-2 mb-0">
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                        <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, {{ $doctor->id }});">
+                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-primary float-end px-4">Submit</button>
+                        </form>
 
-                       </div>
-           </div>
-       </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
        <!-- end Modal -->
 @endsection
 
@@ -535,6 +547,104 @@
             }
         });
     </script>
+<script>
+    $(document).ready(function() {
+        // Add new row
+        $('#addRowBtn').click(function() {
+            var newRow = `
+                <tr>
+                    <td>
+                        <input type="hidden" name="id[]" value="">
+                        <input type="text" name="dropdown_name[]" class="form-control" value="Bilirubin" readonly>
+                    </td>
+                    <td><input type="text" name="value[]" class="form-control" value=""></td>
+                    <td>
+                        <ul class="list-inline hstack gap-2 mb-0">
+                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, null);">
+                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>`;
+            $('#valuesTable').append(newRow);
+        });
+
+        // Remove row and track deleted IDs
+        window.removeRow = function(el, id) {
+            if (id) {
+                var deletedIds = $('#deleted_ids').val();
+                if (deletedIds) {
+                    deletedIds += ',' + id;
+                } else {
+                    deletedIds = id;
+                }
+                $('#deleted_ids').val(deletedIds);
+            }
+            $(el).closest('tr').remove();
+        };
+
+        // Handle form submission
+        $('#bilirubinForm').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '{{ route("custom-dropdown.store") }}',
+                method: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                success: function(response) {
+                    alert('Values added/updated/deleted successfully!');
+
+                    // Update dropdown
+                    updateDropdown();
+
+                    // Optionally, you can clear the form or close the modal
+                    $('#showModalDropdown').modal('hide');
+                },
+                error: function(xhr) {
+                    alert('An error occurred. Please try again.');
+                    console.log(xhr.responseText); // Log the error response
+                }
+            });
+        });
+
+        // Function to update the dropdown menu
+        function updateDropdown() {
+            $.ajax({
+                url: '{{ route("custom-dropdown.getDropdownNames") }}',
+                method: 'GET',
+                success: function(data) {
+                    var dropdown = $('#customDropdown');
+                    dropdown.empty(); // Clear the existing options
+                    data.forEach(function(item) {
+                        dropdown.append($('<option>', {
+                            value: item.dropdown_name,
+                            text: item.value
+                        }));
+                    });
+
+                    // Re-initialize the select2 plugin if used
+                    $('.js-example-basic-multiple').select2();
+                },
+                error: function(xhr) {
+                    console.log('An error occurred while updating the dropdown.');
+                }
+            });
+        }
+
+        // Initial call to populate the dropdown when the page loads
+        updateDropdown();
+    });
+</script>
+
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
 @endsection

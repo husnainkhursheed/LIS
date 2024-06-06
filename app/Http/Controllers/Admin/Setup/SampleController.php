@@ -46,15 +46,15 @@ class SampleController extends Controller
 
         $request->validate([
             // 'test_number' => 'required|unique:samples,test_number|max:6',
-            'access_number' => 'required|unique:samples,access_number',
-            'collected_date' => 'required|date',
-            'received_date' => 'required|date',
-            'received_time' => 'required|time',
-            'patient_id' => 'required|exists:patients,id',
-            'institution_id' => 'nullable|exists:institutions,id',
-            'doctor_id' => 'nullable|exists:doctors,id',
-            'bill_to' => 'required|in:Patient,Doctor,Other',
-            'test_requested' => 'required',
+            // 'access_number' => 'required|unique:samples,access_number',
+            // 'collected_date' => 'required|date',
+            // 'received_date' => 'required|date',
+            // 'received_time' => 'required|time',
+            // 'patient_id' => 'required|exists:patients,id',
+            // 'institution_id' => 'nullable|exists:institutions,id',
+            // 'doctor_id' => 'nullable|exists:doctors,id',
+            // 'bill_to' => 'required|in:Patient,Doctor,Other',
+            // 'test_requested' => 'required',
 
        ]);
     //    dd($request->all());

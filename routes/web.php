@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CustomDropdownController;
 use App\Http\Controllers\Admin\Setup\NoteController;
 use App\Http\Controllers\Admin\Setup\TestController;
 use App\Http\Controllers\Admin\Setup\DoctorController;
@@ -9,10 +10,10 @@ use App\Http\Controllers\Admin\Setup\SampleController;
 use App\Http\Controllers\Admin\Setup\PatientController;
 use App\Http\Controllers\Admin\Setup\PracticeController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
+use App\Http\Controllers\Admin\Reports\TestReportController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
 use App\Http\Controllers\Admin\UserManagement\UsersController;
 use App\Http\Controllers\Admin\UserManagement\PermissionController;
-use App\Http\Controllers\Admin\Reports\TestReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -100,6 +101,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/test-reports/{id}', [TestReportController::class, 'update'])->name('test-reports.update');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
     });
+    Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
+    Route::get('custom-dropdown/names', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
+
 
     ////////////       end routes       /////////////////////
 
