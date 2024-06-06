@@ -3,6 +3,34 @@
     @lang('translation.password-reset')
 @endsection
 @section('content')
+<style>
+    .input-group-text {
+        cursor: pointer;
+        z-index: 10;
+    }
+    .input-group .form-control {
+        position: relative;
+        z-index: 10;
+    }
+    .input-group .input-group-append {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+    }
+    .input-group .input-group-append .input-group-text {
+        border: none;
+        background: none;
+    }
+    .invalid-feedback {
+        position: absolute;
+        width: 100%;
+        top: 100%;
+        left: 0;
+    }
+    </style>
+
     <div class="auth-page-wrapper pt-5">
 
         <!-- auth page content -->
@@ -46,15 +74,51 @@
                                         <input type="hidden" name="token" value="{{ $token }}">
                                         <div class="mb-3">
                                             <label for="useremail" class="form-label">Email</label>
-                                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="useremail" name="email" placeholder="Enter email" value="{{ $email ?? old('email') }}" id="email" disabled>
+                                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="useremail" name="email" placeholder="Enter email" value="{{ $email ?? old('email') }}" id="email" readonly>
                                             @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
                                             @enderror
                                         </div>
+                                        <div class="mb-3 position-relative">
+                                            <label for="userpassword">Password</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="userpassword" placeholder="Enter password" required>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-transparent border-0 cursor-pointer" id="toggle-password">
+                                                        <i class="fas fa-eye"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            @error('password')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                            @enderror
+                                            <div id="passwordHelpBlock" class="form-text">
+                                                Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
+                                            </div>
+                                        </div>
 
-                                        <div class="mb-3">
+                                        <div class="mb-3 position-relative">
+                                            <label for="password-confirm">Confirm Password</label>
+                                            <div class="input-group">
+                                                <input id="password-confirm" type="password" name="password_confirmation" class="form-control" placeholder="Enter confirm password" required>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-transparent border-0 cursor-pointer" id="toggle-confirm-password">
+                                                        <i class="fas fa-eye"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="invalid-feedback" id="confirm-password-error">
+                                                Passwords do not match.
+                                            </div>
+                                        </div>
+
+
+
+                                        {{-- <div class="mb-3">
                                             <label for="userpassword">Password</label>
                                             <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="userpassword" placeholder="Enter password">
                                             @error('password')
@@ -67,7 +131,7 @@
                                         <div class="mb-3">
                                             <label for="userpassword">Confirm Password</label>
                                             <input id="password-confirm" type="password" name="password_confirmation" class="form-control" placeholder="Enter confirm password">
-                                        </div>
+                                        </div> --}}
 
                                         <div class="text-end">
                                             <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Create </button>
@@ -117,4 +181,81 @@
 @section('script')
     <script src="{{ URL::asset('build/libs/particles.js/particles.js') }}"></script>
     <script src="{{ URL::asset('build/js/pages/particles.app.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const password = document.getElementById('userpassword');
+            const confirmPassword = document.getElementById('password-confirm');
+            const passwordHelpBlock = document.getElementById('passwordHelpBlock');
+            const confirmPasswordError = document.getElementById('confirm-password-error');
+            const form = password.closest('form');
+
+            const togglePassword = document.getElementById('toggle-password').querySelector('i');
+            const toggleConfirmPassword = document.getElementById('toggle-confirm-password').querySelector('i');
+
+            // Password validation regex
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+
+            // Function to check password strength
+            function validatePassword() {
+                if (passwordRegex.test(password.value)) {
+                    password.classList.remove('is-invalid');
+                    passwordHelpBlock.style.display = 'none';
+                } else {
+                    password.classList.add('is-invalid');
+                    passwordHelpBlock.style.display = 'block';
+                }
+            }
+
+            // Function to check if passwords match
+            function validateConfirmPassword() {
+                if (password.value === confirmPassword.value) {
+                    confirmPassword.classList.remove('is-invalid');
+                    confirmPasswordError.style.display = 'none';
+                } else {
+                    confirmPassword.classList.add('is-invalid');
+                    confirmPasswordError.style.display = 'block';
+                }
+            }
+
+            // Toggle password visibility
+            function togglePasswordVisibility(input, icon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
+
+            // Event listeners for validation
+            password.addEventListener('input', validatePassword);
+            confirmPassword.addEventListener('input', validateConfirmPassword);
+
+            // Event listener for toggling password visibility
+            togglePassword.addEventListener('click', function() {
+                togglePasswordVisibility(password, togglePassword);
+            });
+
+            toggleConfirmPassword.addEventListener('click', function() {
+                togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
+            });
+
+            // Prevent form submission if validations fail
+            form.addEventListener('submit', function(event) {
+                validatePassword();
+                validateConfirmPassword();
+
+                if (password.classList.contains('is-invalid') || confirmPassword.classList.contains('is-invalid')) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+
+
+
+
 @endsection
