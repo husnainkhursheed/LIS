@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cytology_gynecology_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('test_report_id')->constrained('test_reports');
+            $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
             $table->text('history')->nullable();
             $table->date('last_period')->nullable();
             $table->string('contraceptive')->nullable();

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('biochem_haemo_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('test_report_id')->constrained('test_reports');
+            $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
             $table->text('reference')->nullable();
             $table->text('note')->nullable();
             $table->text('description')->nullable();

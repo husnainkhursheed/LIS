@@ -18,9 +18,9 @@ return new class extends Migration
             $table->date('collected_date');
             $table->date('received_date');
             $table->time('received_time');
-            $table->foreignId('patient_id')->constrained('patients');
-            $table->foreignId('institution_id')->nullable()->constrained('institutions');
-            $table->foreignId('doctor_id')->nullable()->constrained('doctors');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('institution_id')->nullable()->constrained('institutions')->onDelete('cascade');
+            $table->foreignId('doctor_id')->nullable()->constrained('doctors')->onDelete('cascade');
             $table->enum('bill_to', ['Patient', 'Doctor', 'Other']);
             $table->timestamps();
         });

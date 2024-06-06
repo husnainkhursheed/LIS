@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('test_reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sample_id')->constrained('samples');
-            $table->foreignId('test_id')->constrained('tests');
+            $table->foreignId('sample_id')->constrained('samples')->onDelete('cascade');
+            $table->foreignId('test_id')->constrained('tests')->onDelete('cascade');
             $table->text('results')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('is_completed')->default(false);
             $table->boolean('is_signed')->default(false);
-            $table->foreignId('signed_by')->nullable()->constrained('users');
+            $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

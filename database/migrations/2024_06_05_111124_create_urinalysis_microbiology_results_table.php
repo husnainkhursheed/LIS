@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('urinalysis_microbiology_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('test_report_id')->constrained('test_reports');
+            $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
             $table->float('s_gravity')->nullable();
             $table->float('ph')->nullable();
             $table->string('bilirubin')->nullable();
