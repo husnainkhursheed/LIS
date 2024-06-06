@@ -469,13 +469,16 @@
                 {{-- @endcanany --}}
                 @canany('Manage TestReports')
                 <li class="nav-item">
+
                     <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarreport" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarreport">
+
                         <span class="">
                             <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
                         </span>
                         {{-- <i class="ri-account-circle-line"></i> --}}
                          <span class="pt-1">Reports</span>
                     </a>
+
                     <div class="collapse menu-dropdown" id="sidebarreport">
                         <ul class="nav nav-sm flex-column">
                             @canany('Manage TestReports')
@@ -485,10 +488,9 @@
                             @endcanany
                             {{-- <li class="nav-item">
                                 <a href="{{ url('/roles') }}" class="nav-link">Roles</a>
+
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ url('/users') }}" class="nav-link">Users</a>
-                            </li> --}}
+
                         </ul>
                     </div>
                 </li>
