@@ -62,9 +62,9 @@
                     </a>
                     <div class="collapse menu-dropdown" id="sidebarAuth">
                         <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a href="{{ url('/permissions') }}" class="nav-link px-0 py-2">Permissions</a>
-                            </li>
+                            </li> --}}
                             <li class="nav-item">
                                 <a href="{{ url('/roles') }}" class="nav-link px-0 py-2">Roles</a>
                             </li>

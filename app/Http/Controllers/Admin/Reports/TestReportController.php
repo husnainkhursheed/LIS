@@ -18,6 +18,9 @@ class TestReportController extends Controller
     }
     public function index(Request $request)
     {
+        $testNumber = $request->input('test_number');
+        $accessNumber = $request->input('access_number');
+        $patientName = $request->input('patient_name');
        $query = Sample::query()->orderBy('received_date', 'asc');
 
 
@@ -38,7 +41,7 @@ class TestReportController extends Controller
         }
 
         $testReports = $query->paginate(10);
-        return view('reports/test-reports.index', compact('testReports'));
+        return view('reports/test-reports.index', compact('testReports','testNumber', 'accessNumber', 'patientName'));
     }
 
     public function edit($id)
