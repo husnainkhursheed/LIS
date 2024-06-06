@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('test_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sample_id')->constrained('samples');
-            // $table->foreignId('test_id')->constrained('tests');
+            $table->foreignId('test_id')->constrained('tests');
             $table->text('results')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('is_completed')->default(false);

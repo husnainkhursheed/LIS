@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Session;
 
 class TestController extends Controller
 {
+    function __construct()
+    {
+        $this->middleware('role_or_permission:TestCharges access', ['only' => ['index','store','edit','update','destroy']]);
+    }
     public function index(Request $request)
     {
         $query = Test::query();

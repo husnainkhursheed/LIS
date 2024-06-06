@@ -1,33 +1,25 @@
-@extends('layouts.master')
-@section('title')
+<?php $__env->startSection('title'); ?>
         Doctors
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css" rel="stylesheet"
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
-@endsection
-@section('content')
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Assets
-        @endslot
-        @slot('title')
-            Doctors
-        @endslot
-    @endcomponent --}}
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    
 
     <div class="row">
 
-        @include('layouts.notification')
+        <?php echo $__env->make('layouts.notification', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
         <div class="card px-5 py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
                 <h3 class="text-dark">Test Reports</h3>
             </div>
-            <form class="mb-4" action="{{ route('test-reports.search') }}" method="GET">
+            <form class="mb-4" action="<?php echo e(route('test-reports.search')); ?>" method="GET">
                 <div class="row">
                     <div class="col-3">
                         <label for="test_number">Test Number</label>
@@ -54,78 +46,18 @@
 
             <div class="col-lg-12">
 
-                {{-- <div class="card "> --}}
+                
                     <div class="col">
                         <div class="">
                             <div class="card-header d-flex justify-content-between">
                                 <h3 class="text-dark">List of Test Report</h3>
-                                {{-- <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
-                                    id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
-                                    doctor</button> --}}
-                                {{-- <h5 class="card-title mb-0">Buttons Datatables</h5> --}}
+                                
+                                
                             </div>
 
-                            {{-- <div class="col my-2">
-                                <nav class="navbar">
-                                    <div class="container-fluid p-0">
-                                        <form class="d-flex" method="GET" action="{{ route('doctor.index') }}">
-                                            <input class="form-control me-2 main-search" type="search" placeholder="Search"
-                                                aria-label="Search" name="search" value="{{ request('search') }}">
-                                            <button class="btn search-btn" type="submit">Search</button>
-                                        </form>
-                                        <form class="d-flex" method="GET" action="{{ route('doctor.index') }}">
-                                            <input type="hidden" name="search" value="{{ request('search') }}">
-                                            <select class="form-select sort-dropdown" aria-label="Default select example"
-                                            name="sort_by" onchange="this.form.submit()">
-                                            <option selected disabled>Sort By</option>
-                                            <option value="name"
-                                                {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
-                                            <option value="contact_number"
-                                                {{ request('sort_by') == 'contact_number' ? 'selected' : '' }}>Contact Number
-                                            </option>
-                                            <option value="address_line_2"
-                                                {{ request('sort_by') == 'address_line_2' ? 'selected' : '' }}>Address
-                                            </option>
-                                        </select>
-
-                                        </form>
-                                    </div>
-                                </nav>
-
-                            </div> --}}
-                            {{-- @if(isset($testReports))
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Test #</th>
-                                            <th>Access #</th>
-                                            <th>Patient Name</th>
-                                            <th>Date Received</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($testReports as $testReport)
-                                            <tr>
-                                                <td>{{ $testReport->test_number }}</td>
-                                                <td>{{ $testReport->access_number }}</td>
-                                                <td>{{ $testReport->patient->surname }}, {{ $testReport->patient->first_name }}</td>
-                                                <td>{{ $testReport->received_date }}</td>
-                                                <td>
-                                                    <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
-                                                    <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
-                                                    <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            @endif --}}
-                            @if(isset($testReports))
+                            
+                            
+                            <?php if(isset($testReports)): ?>
                             <table id="" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
@@ -137,117 +69,40 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($testReports as $testReport)
+                                    <?php $__currentLoopData = $testReports; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $testReport): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td>{{ $testReport->test_number }}</td>
-                                            <td>{{ $testReport->access_number }}</td>
-                                            <td>{{ $testReport->patient->surname }}, {{ $testReport->patient->first_name }}</td>
-                                            <td>{{ $testReport->received_date }}</td>
+                                            <td><?php echo e($testReport->test_number); ?></td>
+                                            <td><?php echo e($testReport->access_number); ?></td>
+                                            <td><?php echo e($testReport->patient->surname); ?>, <?php echo e($testReport->patient->first_name); ?></td>
+                                            <td><?php echo e($testReport->received_date); ?></td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
                                                         data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                        <a class="edit-item-btn" data-id="<?php echo e($testReport->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
                                                                 class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                     </li>
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
                                                         data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                        <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
+                                                        <a class="remove-item-btn" data-id="<?php echo e($testReport->id); ?>"  data-bs-toggle="modal"
                                                             href="#deleteRecordModal">
                                                             <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                         </a>
                                                     </li>
                                                 </ul>
-                                                {{-- <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
-                                                <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
-                                                <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                                </form> --}}
+                                                
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
-                            @endif
-                            {{-- <ul class="pagination justify-content-center">
-                                @if ($doctors->previousPageUrl())
-                                    <li class="page-item previousPageUrl">
-                                        <a class="page-link" href="{{ $doctors->previousPageUrl() }}" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                            <span class="sr-only">Previous</span>
-                                        </a>
-                                    </li>
-                                @else
-                                    <li class="page-item previousPageUrl disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
-                                    </li>
-                                @endif
-
-                                @for ($page = 1; $page <= $doctors->lastPage(); $page++)
-                                    <li class="page-item {{ $doctors->currentPage() == $page ? 'active' : '' }}">
-                                        <a class="page-link"
-                                            href="{{ $doctors->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
-                                    </li>
-                                @endfor
-
-                                @if ($doctors->nextPageUrl())
-                                    <li class="page-item nextPageUrl">
-                                        <a class="page-link" href="{{ $doctors->nextPageUrl() }}" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                            <span class="sr-only">Next</span>
-                                        </a>
-                                    </li>
-                                @else
-                                    <li class="page-item nextPageUrl disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
-                                    </li>
-                                @endif
-                            </ul> --}}
+                            <?php endif; ?>
+                            
                         </div>
 
                     </div>
-                    {{-- <div class="card-body">
-                        <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Telephone</th>
-                                    <th>Address</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($doctors as $doctor)
-                                    <tr>
-                                        <td>{{ $doctor->name }}</td>
-                                        <td>{{ $doctor->contact_number }}</td>
-                                        <td>{{ $doctor->address }}</td>
-                                        <td>{{ $doctor->is_active == 1 ? 'Active' : 'InActive' }}</td>
-
-                                        <td>
-                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                                </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
-                                                        href="#deleteRecordModal">
-                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                        </table>
-                    </div> --}}
-                {{-- </div> --}}
+                    
+                
             </div>
      </div>
     </div>
@@ -256,13 +111,9 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content border-0">
-                {{-- <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Doctor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div> --}}
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/reports/test-reports") }}" method="post" autocomplete="off">
-                    @csrf
+                
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/reports/test-reports")); ?>" method="post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row">
@@ -334,8 +185,8 @@
             </div>
         </div>
     </div>
-@endsection
-@section('script')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -351,9 +202,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
     <script>
         jQuery(document).ready(function($) {
         // When the document is ready, attach a click event to the "Edit" button
@@ -361,7 +212,7 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId + '/edit';
+            var url = '<?php echo e(url("/reports/test-reports")); ?>' + '/' + itemId + '/edit';
             // $('#leadtype_form').attr('action', url);
             $.ajax({
                     url: url, // Adjust the route as needed
@@ -391,7 +242,7 @@
                         // Change the button text
                         // $('#add-btn').html("Update");
                         var form = $('#leadtype_form');
-                        var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                        var url = '<?php echo e(url("/reports/test-reports")); ?>' + '/' + itemId ;
                         $('#leadtype_form').attr('action', url);
 
                     },
@@ -414,7 +265,7 @@
 
             // Change the button text
             $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '{{ url("/doctor") }}');
+            $('#leadtype_form').attr('action', '<?php echo e(url("/doctor")); ?>');
             // if ( $('#patch').length) {
             //     $('#patch').remove();
             // }
@@ -473,5 +324,7 @@
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/reports/test-reports/index.blade.php ENDPATH**/ ?>
