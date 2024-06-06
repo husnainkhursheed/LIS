@@ -524,37 +524,58 @@
 <div class="vertical-overlay"></div>
 
 <script>
-    $(document).ready(function () {
-        // Get the current path or URL
-        var currentPath = window.location.pathname;
+$(document).ready(function () {
+    // Get the current path or URL
+    var currentPath = window.location.pathname;
 
-        // Specify the default active link
-        var defaultActiveLink = '/';
+    // Specify the default active link
+    var defaultActiveLink = '/';
 
-        // Add the "active" class to the default menu item
+    // Function to add the active class to the correct menu item
+    function activateLink(linkPath) {
+        // Remove active class from all nav-links
+        $('.nav-item .nav-link').removeClass('active');
+        // Remove active class from all nav-items
+        $('.nav-item').removeClass('active');
+
+        // Add active class to the current nav-link
+        $('.nav-item .nav-link[href="' + linkPath + '"]').addClass('active');
+
+        // Handle the parent elements based on the structure
+        $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.collapse').addClass('show');
+        $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.nav-item').addClass('active');
+    }
+
+    // Check if the current path is the default active link
+    if (currentPath === defaultActiveLink) {
+        activateLink(defaultActiveLink);
+    } else {
+        // Iterate through all nav-links to find the best match
         $('.nav-item .nav-link').each(function () {
             var linkPath = $(this).attr('href');
 
-            // Check if the current path is the default active link
-            if (currentPath === defaultActiveLink) {
-                $('.nav-item .nav-link[href="/"]').addClass('active');
-                $('.nav-item .nav-link[href="/"]').parents('.nav-item').addClass('active');
-            }
+            // Ensure we check against the full URL without query strings or hashes
+            var fullPath = new URL(linkPath, window.location.origin).pathname;
 
-            // Check if the current path includes the linkPath or vice versa
-            else if (currentPath.includes(linkPath) || linkPath.includes(currentPath)) {
-                $('.nav-item .nav-link').removeClass('active');
-            // Remove active class from all nav-items
-            $('.nav-item').removeClass('active');
-
-            // Add active class to the current nav-link
-            $(this).addClass('active');
-
-            // Handle the parent elements based on the structure
-            $(this).parents('.collapse').addClass('show');
-            $(this).parents('.nav-item').addClass('active');
+            // Check if the current path exactly matches the linkPath
+            if (currentPath === fullPath) {
+                activateLink(linkPath);
+                return false; // Break the loop once a match is found
             }
         });
-    });
+
+        // If no exact match is found, find the closest parent path match
+        $('.nav-item .nav-link').each(function () {
+            var linkPath = $(this).attr('href');
+            var fullPath = new URL(linkPath, window.location.origin).pathname;
+
+            if (currentPath.startsWith(fullPath) && fullPath !== defaultActiveLink) {
+                activateLink(linkPath);
+                return false; // Break the loop once a match is found
+            }
+        });
+    }
+});
+
 </script>
 

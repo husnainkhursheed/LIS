@@ -28,7 +28,8 @@ class UsersController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function($query) use ($searchTerm) {
-                $query->where('name', 'like', '%' . $searchTerm . '%')
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('surname', 'like', '%' . $searchTerm . '%')
                       ->orWhere('email', 'like', '%' . $searchTerm . '%');
             });
         }
@@ -52,7 +53,8 @@ class UsersController extends Controller
     {
         // dd($request->file('userimage'));
         $request->validate([
-            'name'=>'required',
+            'first_name'=>'required',
+            'surname'=>'required',
             'email' => 'required|email|unique:users',
             // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
@@ -66,7 +68,8 @@ class UsersController extends Controller
 
 
         $user = User::create([
-            'name'=>$request->name,
+            'first_name'=>$request->first_name,
+            'surname'=>$request->surname,
             'email'=>$request->email,
             'avatar' => $imageName ? $imageName : null,
             // 'roleid'=>2,
@@ -106,9 +109,10 @@ class UsersController extends Controller
     {
         $user = User::find($id);
         $validated = $request->validate([
-            'name'=>'required',
+            'first_name'=>'required',
+            'surname'=>'required',
             'email' => 'required|email|unique:users,email,'.$user->id.',id',
-            'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if($request->password != null){

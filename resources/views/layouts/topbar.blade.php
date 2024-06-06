@@ -13,7 +13,7 @@
                 <button type="button" class="btn d-flex align-items-center" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="d-flex align-items-center">
                         <span class="text-end me-2">
-                            <span class="d-none d-xl-inline-block ms-1 fw-semibold user-name-text">{{ Auth::user()->name }}</span>
+                            <span class="d-none d-xl-inline-block ms-1 fw-semibold user-name-text">{{ Auth::user()->first_name }}</span>
                             <span class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">ID Number</span>
                         </span>
                         <i class="bx bx-chevron-down font-size-16 align-middle"></i>

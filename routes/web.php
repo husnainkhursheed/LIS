@@ -93,7 +93,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('reports')->group(function () {
         Route::get('/test-reports', [TestReportController::class, 'index'])->name('test-reports.index');
-        Route::get('/test-reports/search', [TestReportController::class, 'search'])->name('test-reports.search');
+        // Route::get('/test-reports/search', [TestReportController::class, 'search'])->name('test-reports.search');
         Route::post('/test-reports/{id}', [TestReportController::class, 'getreportforedit'])->name('test-reports.getreportforedit');
         // Route::get('/test-reports/{id}', [TestReportController::class, 'show'])->name('test-reports.show');
         Route::get('/test-reports/{id}/edit', [TestReportController::class, 'edit'])->name('test-reports.edit');
