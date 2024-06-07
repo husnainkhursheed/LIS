@@ -67,7 +67,8 @@ class TestReportController extends Controller
 
         // $sample = Sample::find($id);
         $reporttype = $request->report_type;
-        // dd($reporttypeid);
+        // $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
+
         return view('reports/test-reports.edit', compact('sample','reporttype','test','testReport'));
     }
 

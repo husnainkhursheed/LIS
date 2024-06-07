@@ -209,13 +209,12 @@ use \Carbon\Carbon;
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="contraceptive" class="form-label">Contraceptive <a href=""
-                                data-bs-toggle="modal" data-bs-target="#showModalInstitution"
-                                > <span class="badge bg-info text-white"> Add New</span> </a>
-                            </label>
-                            <select class="js-example-basic-multiple form-control" name="contraceptive" id="contraceptive">
-                                
-                            </select>
+                            <label for="custom" class="form-label">Contraceptive<a href="" class="customDropdownEdit"
+                                data-bs-toggle="modal" data-id="Contraceptive" data-bs-target="#showModalDropdown"
+                                > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                <select class="js-example-basic-multiple" name="contraceptive" id="Contraceptive">
+                                    
+                                </select>
 
                         </div>
                     </div>
@@ -308,6 +307,44 @@ use \Carbon\Carbon;
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Dropdown Modal -->
+<div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-primary-subtle p-3">
+                <h5 class="modal-title" id="exampleModalLabel">Dropdown</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end py-1">
+                    <input type="text" name="" id="dropdownName" hidden>
+                    <button type="button" id="addRowBtn" class="btn btn-secondary px-5">Add</button>
+                </div>
+                <form id="dropdownForm">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="dropdown_name" id="dropdown_name">
+                    <input type="hidden" name="deleted_ids" id="deleted_ids" value="">
+                    <table class="table table-responsive rounded">
+                        <thead>
+                            <tr>
+                                <th class="rounded-start-3">Name</th>
+                                <th>Values</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="valuesTable">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary float-end px-4">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('script'); ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -536,6 +573,159 @@ use \Carbon\Carbon;
                 });
             });
         });
+
+        // $('#customDropdownEdit').on('click', function() {
+        //     // Get the ID from the data attribute
+
+        //     var itemId = $(this).data('id');
+        //     var url = '<?php echo e(url("/custom-dropdown/getvalues")); ?>' + '/' + itemId + '/edit';
+
+        //     $.ajax({
+        //             url: url, // Adjust the route as needed
+        //             type: 'GET',
+        //             success: function(response) {
+
+
+
+        //             },
+        //             error: function(xhr, status, error) {
+        //                 console.error(xhr, status, error);
+        //                 // Handle errors if needed
+        //             }
+        //         });
+
+        // });
+            // Edit button click event
+    $(document).on('click', '.customDropdownEdit', function() {
+        var dropdownName = $(this).data('id');
+        $('#dropdown_name').val(dropdownName); // Set the dropdown name
+        var url = '<?php echo e(url("/custom-dropdown/getvalues")); ?>' + '/' + dropdownName + '/edit';
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#valuesTable').empty(); // Clear existing rows
+                response.customdropdownvalues.forEach(function(item) {
+                    var newRow = `
+                        <tr>
+                            <td>
+                                <input type="hidden" name="id[]" value="${item.id}">
+                                <input type="text" name="dropdown_name[]" class="form-control" value="${item.dropdown_name}" readonly>
+                            </td>
+                            <td><input type="text" name="value[]" class="form-control" value="${item.value}"></td>
+                            <td>
+                                <ul class="list-inline hstack gap-2 mb-0">
+                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                        <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, ${item.id});">
+                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>`;
+                    $('#valuesTable').append(newRow);
+                });
+                $('#dropdownName').val(dropdownName);
+                $('#exampleModalLabel').html(dropdownName);
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr, status, error);
+                // Handle errors if needed
+            }
+        });
+    });
+
+    $('#addRowBtn').click(function() {
+            var dropdownName =  $('#dropdownName').val();
+            var newRow = `
+                <tr>
+                    <td>
+                        <input type="hidden" name="id[]" value="">
+                        <input type="text" name="dropdown_name[]" class="form-control" value="${dropdownName}" readonly>
+                    </td>
+                    <td><input type="text" name="value[]" class="form-control" value=""></td>
+                    <td>
+                        <ul class="list-inline hstack gap-2 mb-0">
+                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, null);">
+                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>`;
+            $('#valuesTable').append(newRow);
+        });
+
+        // Remove row and track deleted IDs
+        window.removeRow = function(el, id) {
+            if (id) {
+                var deletedIds = $('#deleted_ids').val();
+                if (deletedIds) {
+                    deletedIds += ',' + id;
+                } else {
+                    deletedIds = id;
+                }
+                $('#deleted_ids').val(deletedIds);
+            }
+            $(el).closest('tr').remove();
+        };
+
+        $('#dropdownForm').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '<?php echo e(route("custom-dropdown.store")); ?>',
+                method: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                success: function(response) {
+                    alert('Values added/updated/deleted successfully!');
+
+                    // Update dropdown
+                    var dropdown_name = $('#dropdown_name').val();
+                    console.log(dropdown_name);
+                    updateDropdown(dropdown_name);
+
+                    // Optionally, you can clear the form or close the modal
+                    $('#showModalDropdown').modal('hide');
+                },
+                error: function(xhr) {
+                    alert('An error occurred. Please try again.');
+                    console.log(xhr.responseText); // Log the error response
+                }
+            });
+        });
+
+        function updateDropdown(dropdownName) {
+            var url = '<?php echo e(url("custom-dropdown/names")); ?>' + '/' + dropdownName  ;
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(data) {
+                    var dropdown = $(`#${dropdownName}`);
+                    dropdown.empty(); // Clear the existing options
+                    data.forEach(function(item) {
+                        dropdown.append($('<option>', {
+                            value: item.dropdown_name,
+                            text: item.value
+                        }));
+                    });
+
+                    // Re-initialize the select2 plugin if used
+                    $('.js-example-basic-multiple').select2();
+                },
+                error: function(xhr) {
+                    console.log('An error occurred while updating the dropdown.');
+                }
+            });
+        }
+
+        updateDropdown('Contraceptive');
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
