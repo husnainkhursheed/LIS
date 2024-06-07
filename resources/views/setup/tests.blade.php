@@ -74,7 +74,18 @@
                                 @foreach ($tests as $test)
                                     <tr>
                                         <td>{{ $test->name }}</td>
-                                        <td>{{ $test->department }}</td>
+
+                                        <td>
+                                            @if($test->department == 1)
+                                                Biochemistry / Haematology
+                                            @elseif($test->department == 2)
+                                                Cytology / Gynecology
+                                            @elseif($test->department == 3)
+                                                Urinalysis / Microbiology
+                                            @else
+                                                Unknown Department
+                                            @endif
+                                        </td>
                                         <td>{{ $test->cost  }}</td>
 
                                         {{-- <td>

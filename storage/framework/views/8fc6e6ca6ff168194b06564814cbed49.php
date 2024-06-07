@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title'); ?>
         Test Charges
 <?php $__env->stopSection(); ?>
@@ -67,7 +66,18 @@
                                 <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
                                         <td><?php echo e($test->name); ?></td>
-                                        <td><?php echo e($test->department); ?></td>
+
+                                        <td>
+                                            <?php if($test->department == 1): ?>
+                                                Biochemistry / Haematology
+                                            <?php elseif($test->department == 2): ?>
+                                                Cytology / Gynecology
+                                            <?php elseif($test->department == 3): ?>
+                                                Urinalysis / Microbiology
+                                            <?php else: ?>
+                                                Unknown Department
+                                            <?php endif; ?>
+                                        </td>
                                         <td><?php echo e($test->cost); ?></td>
 
                                         
