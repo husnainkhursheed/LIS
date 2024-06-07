@@ -22,7 +22,7 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         $query = User::whereDoesntHave('roles', function ($query) {
-            $query->where('name', 'admin');
+            $query->where('first_name', 'admin');
         });
 
         if ($request->has('search')) {
