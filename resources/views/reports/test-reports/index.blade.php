@@ -10,6 +10,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+@php
+use \Carbon\Carbon;
+@endphp
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Assets
@@ -18,80 +21,47 @@
             Doctors
         @endslot
     @endcomponent --}}
+
     <div class="row">
 
         @include('layouts.notification')
 
-        <h1>Test Reports</h1>
-
-        <form action="{{ route('test-reports.search') }}" method="GET">
-            <div class="row">
-                <div class="col-3">
-                    <label for="test_number">Test Number</label>
-                    <input type="text" name="test_number" id="test_number" class="form-control">
-                </div>
-                <div class="col-3">
-                    <label for="access_number">Access Number</label>
-                    <input type="text" name="access_number" id="access_number" class="form-control">
-                </div>
-                <div class="col-4">
-                    <label for="patient_name">Patient Name</label>
-                    <input type="text" name="patient_name" id="patient_name" class="form-control">
-                </div>
-                <div class="col-2">
-
-                    <button type="submit" class="btn btn-primary mt-4">Search</button>
-
-                </div>
+        <div class="card px-5 py-3 bg-white">
+            <div class="card-header d-flex justify-content-between mb-4 py-2">
+                <h3 class="text-dark">List of Test Report</h3>
             </div>
+            <form class="mb-4" action="{{ route('test-reports.index') }}" method="GET">
+                <div class="row d-flex align-items-end">
+                    <div class="col-3">
+                        <label for="test_number">Test Number</label>
+                        <input type="text" name="test_number" id="test_number"  value="{{ $testNumber ?? '' }}" class="form-control">
+                    </div>
+                    <div class="col-3">
+                        <label for="access_number">Access Number</label>
+                        <input type="text" name="access_number" id="access_number"  value="{{ $accessNumber ?? '' }}"  class="form-control">
+                    </div>
+                    <div class="col-4">
+                        <label for="patient_name">Patient Name</label>
+                        <input type="text" name="patient_name" id="patient_name" value="{{ $patientName ?? '' }}" class="form-control">
+                    </div>
+                    <div class="col-2">
+
+                        <button type="submit" class="btn search-btn">Search</button>
+
+                    </div>
+                </div>
 
 
-        </form>
+            </form>
 
 
-        <div class="col-lg-12">
+            <div class="col-lg-12">
 
-            {{-- <div class="card "> --}}
-                <div class="col">
-                    <div class="card p-3 bg-white">
-                        <div class="card-header d-flex justify-content-between">
-                            <h3 class="text-dark">List of Test Report</h3>
-                            {{-- <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
-                                id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
-                                doctor</button> --}}
-                            {{-- <h5 class="card-title mb-0">Buttons Datatables</h5> --}}
-                        </div>
-
-                        {{-- <div class="col my-2">
-                            <nav class="navbar">
-                                <div class="container-fluid p-0">
-                                    <form class="d-flex" method="GET" action="{{ route('doctor.index') }}">
-                                        <input class="form-control me-2 main-search" type="search" placeholder="Search"
-                                            aria-label="Search" name="search" value="{{ request('search') }}">
-                                        <button class="btn search-btn" type="submit">Search</button>
-                                    </form>
-                                    <form class="d-flex" method="GET" action="{{ route('doctor.index') }}">
-                                        <input type="hidden" name="search" value="{{ request('search') }}">
-                                        <select class="form-select sort-dropdown" aria-label="Default select example"
-                                        name="sort_by" onchange="this.form.submit()">
-                                        <option selected disabled>Sort By</option>
-                                        <option value="name"
-                                            {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
-                                        <option value="contact_number"
-                                            {{ request('sort_by') == 'contact_number' ? 'selected' : '' }}>Contact Number
-                                        </option>
-                                        <option value="address_line_2"
-                                            {{ request('sort_by') == 'address_line_2' ? 'selected' : '' }}>Address
-                                        </option>
-                                    </select>
-
-                                    </form>
-                                </div>
-                            </nav>
-
-                        </div> --}}
-                        {{-- @if(isset($testReports))
-                            <table class="table">
+                {{-- <div class="card "> --}}
+                    <div class="col">
+                        <div class="">
+                            @if(isset($testReports))
+                            <table id="" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
                                         <th>Test #</th>
@@ -106,146 +76,115 @@
                                         <tr>
                                             <td>{{ $testReport->test_number }}</td>
                                             <td>{{ $testReport->access_number }}</td>
-                                            <td>{{ $testReport->patient->surname }}, {{ $testReport->patient->first_name }}</td>
-                                            <td>{{ $testReport->received_date }}</td>
+                                            <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
+                                            <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
                                             <td>
-                                                <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
+                                                <ul class="list-inline hstack gap-2 mb-0">
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                                class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                    </li>
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                        <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
+                                                            href="#deleteRecordModal">
+                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                {{-- <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
                                                 <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
                                                 <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger">Delete</button>
-                                                </form>
+                                                </form> --}}
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        @endif --}}
-                        @if(isset($testReports))
-                        <table id="" class="table table-striped display table-responsive rounded">
+                            @endif
+                            <ul class="pagination justify-content-center">
+                                @if ($testReports->previousPageUrl())
+                                    <li class="page-item previousPageUrl">
+                                        <a class="page-link" href="{{ $testReports->previousPageUrl() }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item previousPageUrl disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                                    </li>
+                                @endif
+
+                                @for ($page = 1; $page <= $testReports->lastPage(); $page++)
+                                    <li class="page-item {{ $testReports->currentPage() == $page ? 'active' : '' }}">
+                                        <a class="page-link"
+                                            href="{{ $testReports->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                                    </li>
+                                @endfor
+
+                                @if ($testReports->nextPageUrl())
+                                    <li class="page-item nextPageUrl">
+                                        <a class="page-link" href="{{ $testReports->nextPageUrl() }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item nextPageUrl disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
+
+                    </div>
+                    {{-- <div class="card-body">
+                        <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Test #</th>
-                                    <th>Access #</th>
-                                    <th>Patient Name</th>
-                                    <th>Date Received</th>
-                                    <th>Actions</th>
+                                    <th>Name</th>
+                                    <th>Telephone</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($testReports as $testReport)
+                                @foreach ($testReports as $doctor)
                                     <tr>
-                                        <td>{{ $testReport->test_number }}</td>
-                                        <td>{{ $testReport->access_number }}</td>
-                                        <td>{{ $testReport->patient->surname }}, {{ $testReport->patient->first_name }}</td>
-                                        <td>{{ $testReport->received_date }}</td>
+                                        <td>{{ $doctor->name }}</td>
+                                        <td>{{ $doctor->contact_number }}</td>
+                                        <td>{{ $doctor->address }}</td>
+                                        <td>{{ $doctor->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                    <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
+                                                    <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
                                                         href="#deleteRecordModal">
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>
                                             </ul>
-                                            {{-- <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
-                                            <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
-                                            <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form> --}}
                                         </td>
                                     </tr>
                                 @endforeach
-                            </tbody>
                         </table>
-                        @endif
-                        {{-- <ul class="pagination justify-content-center">
-                            @if ($doctors->previousPageUrl())
-                                <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="{{ $doctors->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item previousPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
-                                </li>
-                            @endif
-
-                            @for ($page = 1; $page <= $doctors->lastPage(); $page++)
-                                <li class="page-item {{ $doctors->currentPage() == $page ? 'active' : '' }}">
-                                    <a class="page-link"
-                                        href="{{ $doctors->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
-                                </li>
-                            @endfor
-
-                            @if ($doctors->nextPageUrl())
-                                <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="{{ $doctors->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item nextPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
-                                </li>
-                            @endif
-                        </ul> --}}
-                    </div>
-
-                </div>
-                {{-- <div class="card-body">
-                    <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Telephone</th>
-                                <th>Address</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($doctors as $doctor)
-                                <tr>
-                                    <td>{{ $doctor->name }}</td>
-                                    <td>{{ $doctor->contact_number }}</td>
-                                    <td>{{ $doctor->address }}</td>
-                                    <td>{{ $doctor->is_active == 1 ? 'Active' : 'InActive' }}</td>
-
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            @endforeach
-                    </table>
-                </div> --}}
-            {{-- </div> --}}
-        </div>
+                    </div> --}}
+                {{-- </div> --}}
+            </div>
+     </div>
     </div>
 
     <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -264,9 +203,17 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <div>
+                                    <label for="test_charges" class="form-label">Select charge items </label>
+                                    <select class="form-control" name="test_charges" id="test_charges" required>
+                                        <option value="">Select charge items </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 mt-3">
+                                <div>
                                     <label for="report_type" class="form-label">Select Report Type</label>
-                                    <select class="form-control" name="report_type" id="report_type">
-                                        <option value="">Select Department</option>
+                                    <select class="form-control" name="report_type" id="report_type" required>
+                                        <option value="">Select Report Type</option>
                                         <option value="1">Biochemistry / Haematology</option>
                                         <option value="2">Cytology / Gynecology</option>
                                         <option value="3">Urinalysis / Microbiology</option>
@@ -349,59 +296,45 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-            $('#leadtype_form').attr('action', url);
-            // $.ajax({
-            //         url: url, // Adjust the route as needed
-            //         type: 'GET',
-            //         success: function(response) {
-            //             // Assuming the response has a 'leadType' key
-            //             var doctor = response.doctor;
-            //             console.log("my practices ",doctor);
+            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId + '/edit';
+            // $('#leadtype_form').attr('action', url);
+            $.ajax({
+                    url: url, // Adjust the route as needed
+                    type: 'GET',
+                    success: function(response) {
+                        // Assuming the response has a 'leadType' key
+                        var sample = response.sample;
+                        var tests = response.sample.tests;
+                        // console.log("my practices ",sample);
+                        var testChargesSelect = $('#test_charges');
+                        testChargesSelect.empty(); // Clear existing options
+                        testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
 
-            //             // Now you can use the leadType data to populate your modal fields
-            //             $('#id-field').val(doctor.id);
-            //             $('#name').val(doctor.name);
-            //             // $('#phone').val(doctor.phone);
-            //             $('#contact_number').val(doctor.contact_number);
-            //             $('#street_name').val(doctor.street_name);
-            //             $('#address_line_2').val(doctor.address_line_2);
-            //             $('#area').val(doctor.area);
-            //             $('#email').val(doctor.email);
+                        tests.forEach(function(test) {
+                            var option = $('<option></option>')
+                                .attr('value', test.id) // Adjust the value if needed
+                                .text(test.name); // Adjust the text if needed
+                            testChargesSelect.append(option);
+                        });
 
-            //             // var surgeries = SetupPractice.surgeries.map(function(surgery) {
-            //             //         return surgery.id;
-            //             //     });
+                        // Update modal title
+                        // $('#exampleModalLabel').html("Edit Doctor");
 
-            //             // $('#surgeries').val(surgeries).trigger('change');
+                        // Display the modal footer
+                        $('#showModal .modal-footer').css('display', 'block');
 
+                        // Change the button text
+                        // $('#add-btn').html("Update");
+                        var form = $('#leadtype_form');
+                        var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                        $('#leadtype_form').attr('action', url);
 
-            //             // Set the checkbox town for is_active
-            //             // $('#is_active').prop('checked', SetupPractice.is_active);
-
-            //             // Update modal title
-            //             $('#exampleModalLabel').html("Edit Doctor");
-
-            //             // Display the modal footer
-            //             $('#showModal .modal-footer').css('display', 'block');
-
-            //             // Change the button text
-            //             $('#add-btn').html("Update");
-            //             var form = $('#leadtype_form');
-
-            //             // Update the form action (assuming the form has an ID of 'your-form-id')
-
-
-
-
-            //             // $('#showModal').modal('show');
-
-            //         },
-            //         error: function(xhr, status, error) {
-            //             console.error(xhr, status, error);
-            //             // Handle errors if needed
-            //         }
-            //     });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr, status, error);
+                        // Handle errors if needed
+                    }
+                });
 
         });
 

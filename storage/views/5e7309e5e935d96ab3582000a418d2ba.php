@@ -1,53 +1,92 @@
 <?php $__env->startSection('title'); ?>
-        Patient
+        Roles
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('css'); ?>
+    <!--datatable css-->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <!--datatable responsive css-->
     <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css" rel="stylesheet"
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
+    <style>
+        /* .time {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            color: #22416b;
+            text-align: center;
+        } */
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #eff2f7;
+        }
+    </style>
     
     <div class="row">
+        <?php if(Session::has('message')): ?>
+            <div class="alert <?php echo e(Session::get('alert-class', 'alert-info')); ?>" id="alert-message">
+                <?php echo e(Session::get('message')); ?>
 
-        <?php echo $__env->make('layouts.notification', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            </div>
 
+            <script>
+                // Add a timer to automatically dismiss the alert after 5 seconds (adjust as needed)
+                setTimeout(function() {
+                    document.getElementById('alert-message').style.display = 'none';
+                }, 5000); // 5000 milliseconds = 5 seconds
+            </script>
+        <?php endif; ?>
+        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <div class="alert alert-danger" id="alert-message">
+                <?php echo e($message); ?>
+
+            </div>
+
+            <script>
+                // Add a timer to automatically dismiss the alert after 5 seconds (adjust as needed)
+                setTimeout(function() {
+                    document.getElementById('alert-message').style.display = 'none';
+                }, 5000); //
+            </script>
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
         <div class="col-lg-12">
 
             
+                
 
                 <div class="col">
                     <div class="card p-3 bg-white">
                         <div class="card-header d-flex justify-content-between">
-                            <h3 class="text-dark">List of patients</h3>
+                            <h3 class="text-dark">List of roles</h3>
                             <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                                 id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
-                                Patient</button>
+                                role</button>
                         </div>
 
                         <div class="col my-2">
                             <nav class="navbar">
                                 <div class="container-fluid p-0">
-                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('roles.index')); ?>">
                                         <input class="form-control me-2 main-search" type="search" placeholder="Search"
                                             aria-label="Search" name="search" value="<?php echo e(request('search')); ?>">
                                         <button class="btn search-btn" type="submit">Search</button>
                                     </form>
-                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('roles.index')); ?>">
                                         <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
-                                            <option value="first_name"
-                                                <?php echo e(request('sort_by') == 'first_name' ? 'selected' : ''); ?>>Name</option>
-                                            <option value="contact_number"
-                                                <?php echo e(request('sort_by') == 'contact_number' ? 'selected' : ''); ?>>Contact Number
-                                            </option>
-                                            <option value="sex"
-                                                <?php echo e(request('sort_by') == 'sex' ? 'selected' : ''); ?>>Sex
-                                            </option>
+                                            <option value="name"
+                                                <?php echo e(request('sort_by') == 'name' ? 'selected' : ''); ?>>Name</option>
                                         </select>
                                     </form>
                                 </div>
@@ -58,47 +97,45 @@
                             <thead>
                                 <tr>
                                     <th class="rounded-start-3 ">Name</th>
-                                    <th>Telephone</th>
-                                    <th>Sex</th>
+                                    <th>Permissions</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $__currentLoopData = $patients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $patient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td><?php echo e($patient->first_name); ?></td>
-                                        <td><?php echo e($patient->contact_number); ?></td>
-                                        <td><?php echo e($patient->sex); ?></td>
-
+                                        <td><?php echo e($role->name); ?></td>
                                         <td>
-                                            <a href="#showModal" data-bs-toggle="modal">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/report.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/Vector.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/delete.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
+                                            <?php $__currentLoopData = $role->permissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <span class="badge bg-primary-subtle text-white "><?php echo e($permission->name); ?></span>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </td>
+
                                         
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="edit-item-btn" data-id="<?php echo e($role->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
+                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="<?php echo e($role->id); ?>"  data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            <?php if($patients->previousPageUrl()): ?>
+                            <?php if($roles->previousPageUrl()): ?>
                                 <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="<?php echo e($patients->previousPageUrl()); ?>" aria-label="Previous">
+                                    <a class="page-link" href="<?php echo e($roles->previousPageUrl()); ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                         <span class="sr-only">Previous</span>
                                     </a>
@@ -109,16 +146,16 @@
                                 </li>
                             <?php endif; ?>
 
-                            <?php for($page = 1; $page <= $patients->lastPage(); $page++): ?>
-                                <li class="page-item <?php echo e($patients->currentPage() == $page ? 'active' : ''); ?>">
+                            <?php for($page = 1; $page <= $roles->lastPage(); $page++): ?>
+                                <li class="page-item <?php echo e($roles->currentPage() == $page ? 'active' : ''); ?>">
                                     <a class="page-link"
-                                        href="<?php echo e($patients->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
+                                        href="<?php echo e($roles->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
                                 </li>
                             <?php endfor; ?>
 
-                            <?php if($patients->nextPageUrl()): ?>
+                            <?php if($roles->nextPageUrl()): ?>
                                 <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="<?php echo e($patients->nextPageUrl()); ?>" aria-label="Next">
+                                    <a class="page-link" href="<?php echo e($roles->nextPageUrl()); ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                         <span class="sr-only">Next</span>
                                     </a>
@@ -131,85 +168,70 @@
                         </ul>
                     </div>
                 </div>
-
                 
             
         </div>
     </div>
 
+
     <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Patient</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Roles</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url('/roles')); ?>"
+                    method="Post" autocomplete="off">
                     <?php echo csrf_field(); ?>
+
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
+
+                            <!--end col-->
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="companyname-field"
-                                        class="form-label">First Name</label>
-                                    <input type="text" id="first_name" name="first_name"
-                                        class="form-control"
-                                        placeholder="Enter First Name" required />
-                                </div>
-                                
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="surname" class="form-label">Surname</label>
-                                    <input type="text" id="surname" name="surname" class="form-control"
-                                    placeholder="Enter surname" required />
+                                    <label for="role_name" class="form-label">
+                                        Name</label>
+                                    <input type="text" id="role_name" name="name"
+                                        class="form-control"  required />
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="contact_number" class="form-label">Contact Number</label>
-                                    <input type="text" id="contact_number" class="form-control" name="contact_number"
-                                        placeholder="Enter Contact Number" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="dob" class="form-label">DOB</label>
-                                    <input type="date" id="dob" name="dob" class="form-control"
-                                        placeholder="Enter Dob" required />
-                                </div>
+                            <!--end col-->
+                            <div class="col-lg-12">
+                                <label for="role_name" class="form-label">
+                                    Permissions
+                                    </label>
+                                <select class="js-example-basic-multiple" name="permission_ids[]" id="permission_ids" multiple="multiple">
+                                    <?php $__currentLoopData = $permissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permissionvalue): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($permissionvalue->id); ?>">
+                                            <?php echo e($permissionvalue->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
                             </div>
 
-                            <div class="col-lg-6">
-                                <label for="Sex" class="form-label">Sex</label>
-                                <div class="pt-2">
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
-                                </div>
-                            </div>
+
+
                             
+                            <!--end col-->
                         </div>
+                        <!--end row-->
                     </div>
                     <div class="modal-footer">
                         <div class="hstack gap-2 justify-content-end">
                             <button type="button" class="btn btn-light"
                                 data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Add Patient</button>
+                            <button type="submit" class="btn btn-success" id="add-btn">Add </button>
+                            
                         </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-
 <!--end modal-->
 
 <!-- Modal -->
@@ -226,8 +248,8 @@
                         colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
                     </lord-icon>
                     <div class="mt-4 text-center">
-                        <h4 class="fs-semibold">You are about to delete a Patient ?</h4>
-                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your Patient will
+                        <h4 class="fs-semibold">You are about to delete a lead ?</h4>
+                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your lead will
                             remove all of your information from our database.</p>
                         <div class="hstack gap-2 justify-content-center remove">
                             <button
@@ -247,6 +269,7 @@
 <?php $__env->startSection('script'); ?>
 
 
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
@@ -270,91 +293,57 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '<?php echo e(url("/patient")); ?>' + '/' + itemId + '/edit';
+            var url = '<?php echo e(url("/roles")); ?>' + '/' + itemId + '/edit';
+
 
             $.ajax({
                     url: url, // Adjust the route as needed
                     type: 'GET',
                     success: function(response) {
-                        // Assuming the response has a 'leadType' key
-                        var patient = response.patient;
-                        // console.log("my practices ",doctor);
+                        var leadType = response.role;
 
-                        // Now you can use the leadType data to populate your modal fields
-                        $('#id-field').val(patient.id);
-                        $('#first_name').val(patient.first_name);
-                        // $('#phone').val(patient.phone);
-                        $('#surname').val(patient.surname);
-                        $('#contact_number').val(patient.contact_number);
-                        $('#dob').val(patient.dob);
-                        // $('#area').val(patient.area);
-                        // $('#email').val(patient.email);
+                        $('#id-field').val(leadType.id);
+                        $('#role_name').val(leadType.name);
 
-                        // var surgeries = SetupPractice.surgeries.map(function(surgery) {
-                        //         return surgery.id;
-                        //     });
+                        var permissionIds = leadType.permissions.map(function(permission) {
+                            return permission.id;
+                        });
 
-                        // $('#surgeries').val(surgeries).trigger('change');
+                        $('#permission_ids').val(permissionIds).trigger('change');
+                        // $('#permission_ids').val(permissionIds);
+                        $('#is_active').prop('checked', leadType.is_active);
 
+                        $('#exampleModalLabel').html("Edit Role");
 
-                        // Set the checkbox town for is_active
-                        if (patient.sex === 'Male') {
-                            $('#male').prop('checked', true);
-                        } else if (patient.sex === 'Female') {
-                            $('#female').prop('checked', true);
-                        }
-
-                        // Update modal title
-                        $('#exampleModalLabel').html("Edit Patient");
-
-                        // Display the modal footer
                         $('#showModal .modal-footer').css('display', 'block');
 
-                        // Change the button text
                         $('#add-btn').html("Update");
                         var form = $('#leadtype_form');
 
-                        // Update the form action (assuming the form has an ID of 'your-form-id')
-                        $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>/' + itemId);
+                        $('#leadtype_form').attr('action', '<?php echo e(url("/roles")); ?>/' + itemId);
 
-
-
-                        // $('#showModal').modal('show');
 
                     },
                     error: function(xhr, status, error) {
                         console.error(xhr, status, error);
-                        // Handle errors if needed
                     }
                 });
-
         });
 
         function resetModal() {
-            // Reset modal titleq
-            $('#exampleModalLabel').html("Add Patient");
+            $('#exampleModalLabel').html("Add Roles");
 
-            // Display the modal footer
             $('#showModal .modal-footer').css('display', 'block');
 
-            // Change the button text
             $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>');
-            // if ( $('#patch').length) {
-            //     $('#patch').remove();
-            // }
-            $('#id-field').val('');
-            $('#first_name').val('');
-            // $('#phone').val(patient.phone);
-            $('#surname').val('');
-            $('#contact_number').val('');
-            $('#dob').val('');
-            // $('#surgeries').val("");
-            // $('#surgeries').val("").trigger('change');
+            $('#leadtype_form').attr('action', '<?php echo e(url("/roles")); ?>');
 
+            $('#id-field').val('');
+            $('#role_name').val('');
+            $('#permission_id').val('');
+            $('#is_active').prop('checked', true);
         }
 
-        // Event listener for modal close event
         $('#showModal').on('hidden.bs.modal', function () {
             resetModal();
         });
@@ -366,7 +355,7 @@
 
         $('#delete-record').on('click', function() {
             var itemId = $(this).data('id');
-            var url = '/patient/' + itemId;
+            var url = '/roles/' + itemId;
 
             $.ajax({
                 url: url,
@@ -375,28 +364,24 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    // Handle success, e.g., remove the deleted item from the UI
                     console.log(response);
                     $('#deleteRecordModal').modal('hide');
                     location.reload();
                 },
                 error: function(xhr, status, error) {
-                    // Handle error
                     console.error(xhr, status, error);
                 }
             });
         });
 
 
-        // Function to reset modal when clicking the "Close" button
         $('#close-modal').on('click', function() {
             resetModal();
         });
     });
-
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/setup/patient.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/usermanagement/roles.blade.php ENDPATH**/ ?>

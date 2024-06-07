@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Session;
 
 class PatientController extends Controller
 {
+    function __construct()
+    {
+        $this->middleware('role_or_permission:Patient access', ['only' => ['index','store','edit','update','destroy']]);
+    }
+
     public function index(Request $request)
     {
         $query = Patient::query();

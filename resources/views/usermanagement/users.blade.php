@@ -12,6 +12,18 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+    <style>
+        /* .time {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            color: #22416b;
+            text-align: center;
+        } */
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #eff2f7;
+        }
+    </style>
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Pages
@@ -90,8 +102,8 @@
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
-                                            <option value="name"
-                                                {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
+                                            <option value="first_name"
+                                                {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Name</option>
                                             <option value="email"
                                                 {{ request('sort_by') == 'email' ? 'selected' : '' }}>Email
                                             </option>
@@ -104,7 +116,7 @@
                         <table id="" class="table table-striped display table-responsive rounded">
                             <thead>
                                 <tr>
-                                    <th class="rounded-start-3 ">Name</th>
+                                    <th class="rounded-start-3 ">Full Name</th>
                                     <th>Email</th>
                                     <th>Roles</th>
                                     <th class="rounded-end-3 ">Action</th>
@@ -113,7 +125,7 @@
                             <tbody>
                                 @foreach ($users as $user)
                                     <tr>
-                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->first_name }} {{ $user->surname }}</td>
                                         <td>{{ $user->email }}</td>
                                     <td>
                                         @foreach ($user->roles as $role)
@@ -121,7 +133,7 @@
                                         @endforeach
                                     </td>
 
-                                        <td>
+                                        {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
                                                 <span class="logo-sm">
                                                     <img src="{{ URL::asset('build/images/report.png') }}" alt=""
@@ -140,8 +152,8 @@
                                                         height="20">
                                                 </span>
                                             </a>
-                                        </td>
-                                        {{-- <td>
+                                        </td> --}}
+                                        <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -156,7 +168,7 @@
                                                     </a>
                                                 </li>
                                             </ul>
-                                        </td> --}}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -257,7 +269,7 @@
                     <div class="modal-body">
                         <input type="hidden" id="id-field"/>
                         <div class="row g-3">
-                            <div class="col-lg-12">
+                            {{-- <div class="col-lg-12">
                                 <div class="text-center">
                                     <div class="position-relative d-inline-block">
                                         <div class="position-absolute bottom-0 end-0">
@@ -281,14 +293,21 @@
                                     <h5 class="fs-13 mt-3">Profile</h5>
                                 </div>
 
-                            </div>
+                            </div> --}}
 
                             <!--end col-->
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="user_password" class="form-label">
-                                        Name</label>
-                                    <input type="text" id="user_name" name="name"
+                                    <label for="" class="form-label">
+                                        First Name</label>
+                                    <input type="text" id="first_name" name="first_name"
+                                        class="form-control"  required />
+                                </div>
+                                <br>
+                                <div>
+                                    <label for="" class="form-label">
+                                    Surname</label>
+                                    <input type="text" id="surname" name="surname"
                                         class="form-control"  required />
                                 </div>
                                 <br>
@@ -429,7 +448,8 @@
 
                         // Now you can use the leadType data to populate your modal fields
                         $('#id-field').val(leadType.id);
-                        $('#user_name').val(leadType.name);
+                        $('#first_name').val(leadType.first_name);
+                        $('#surname').val(leadType.surname);
                         $('#user_email').val(leadType.email);
                         $('#user_password').val(leadType.password);
                         var imagePath = leadType.avatar
@@ -500,7 +520,7 @@
 
             // Reset form fields
             $('#id-field').val('');
-            $('#user_name').val('');
+            $('#first_name').val('');
             $('#user_email').val('');
             $('#user_password').val('');
             $('#role_ids').val('');
@@ -524,7 +544,7 @@
 
             $.ajax({
                 url: url,
-                type: 'POST',
+                type: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },

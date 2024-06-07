@@ -12,6 +12,18 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+    <style>
+        .time {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            color: #22416b;
+            text-align: center;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #eff2f7;
+        }
+    </style>
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Dashboard
@@ -20,7 +32,8 @@
             Add Sample
         @endslot
     @endcomponent --}}
-    <div class="row">
+    @include('layouts.notification')
+    {{-- <div class="row">
         @if (Session::has('message'))
             <div class="alert {{ Session::get('alert-class', 'alert-info') }}" id="alert-message">
                 {{ Session::get('message') }}
@@ -46,22 +59,30 @@
             </script>
         @enderror
 
-    </div>
+    </div> --}}
     {{-- start here  --}}
 
     <div class="container m-auto">
         <div class="form-wrap">
+            <div class="position-absolute top-0 pt-4 end-0 translate-middle-y me-3 float-end time" >
+                Time : <span id="liveTime"></span>
+            </div>
             <header class="header">
-                <h1 id="title" class="text-center">New Sample</h1>
+                <h1 id="title" class="text-center">New Sample
+                </h1>
             </header>
+            {{-- <div id="liveTime"></div> --}}
             <form class="tablelist-form" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
             @csrf
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
-                                <input type="text" id="test_number" name="test_number" class="form-control"
-                                disabled required />
+                                <input type="text" id="test_number" name="test_number" value="{{$test_number}}" class="form-control"
+                                hidden required />
+                                <input type="text" id="" name="" value="{{$test_number}}" class="form-control"
+                                disabled  />
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -136,7 +157,7 @@
                         <div class="form-group">
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
-                                <option selected>Choose Institution</option>
+                                {{-- <option selected>Choose Institution</option> --}}
                                 <option value="Patient">Patient</option>
                                 <option value="Doctor">Doctor</option>
                                 <option value="Other">Other</option>
@@ -463,6 +484,22 @@
             if (file) {
                 reader.readAsDataURL(file);
             }
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function updateTime() {
+                var now = new Date();
+                var hours = now.getHours().toString().padStart(2, '0');
+                var minutes = now.getMinutes().toString().padStart(2, '0');
+                var seconds = now.getSeconds().toString().padStart(2, '0');
+                var timeString = hours + ':' + minutes + ':' + seconds;
+                document.getElementById('liveTime').textContent = timeString;
+            }
+
+            // Update the time immediately and then every second
+            updateTime();
+            setInterval(updateTime, 1000);
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

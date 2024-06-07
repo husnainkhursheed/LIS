@@ -518,6 +518,8 @@
 }
 
 .page-content {
+    /* position: relative;
+    z-index: ; */
     background-color: #f5fdff;
     padding: calc(85px + 1.5rem) .75rem 60px .75rem
 }
@@ -17333,7 +17335,7 @@ table thead {
 }
 
 .search-btn {
-    padding: 0px 38px;
+    padding: 10px 38px;
     background: #3AAFE2;
     color: #fff;
 }

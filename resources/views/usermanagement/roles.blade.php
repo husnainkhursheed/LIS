@@ -12,6 +12,18 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
 @endsection
 @section('content')
+    <style>
+        /* .time {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            color: #22416b;
+            text-align: center;
+        } */
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #eff2f7;
+        }
+    </style>
     {{-- @component('components.breadcrumb')
         @slot('li_1')
             Pages
@@ -104,7 +116,7 @@
                                             @endforeach
                                         </td>
 
-                                        <td>
+                                        {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
                                                 <span class="logo-sm">
                                                     <img src="{{ URL::asset('build/images/report.png') }}" alt=""
@@ -123,23 +135,26 @@
                                                         height="20">
                                                 </span>
                                             </a>
-                                        </td>
-                                        {{-- <td>
+                                        </td> --}}
+                                        <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
                                                     <a class="edit-item-btn" data-id="{{ $role->id }}"  href="#showModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $role->id }}"  data-bs-toggle="modal"
-                                                        href="#deleteRecordModal">
-                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                    </a>
-                                                </li>
+                                                @if ($role->name !== 'Management')
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                        <a class="remove-item-btn" data-id="{{ $role->id }}"  data-bs-toggle="modal"
+                                                            href="#deleteRecordModal">
+                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                @endif
+
                                             </ul>
-                                        </td> --}}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

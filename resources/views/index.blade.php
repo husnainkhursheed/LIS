@@ -76,18 +76,38 @@ use \Carbon\Carbon;
                                                 height="20">
                                         </span>
                                     </a>
-                                    <a href="">
+
+                                    @can('Sample edit')
+                                        <li class="list-inline-item" data-bs-toggle="tooltip"
+                                            data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                            <a  id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
+                                                height="20"></a>
+                                        </li>
+                                    @endcan
+                                    @can('Sample delete')
+                                        <li class="list-inline-item" data-bs-toggle="tooltip"
+                                            data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                            <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
+                                                href="#deleteRecordModal">
+                                                <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
+                                                    height="20">
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    {{-- <a href="">
+
                                         <span class="logo-sm">
                                             <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
                                                 height="20">
                                         </span>
                                     </a>
-                                    <a href="">
+                                    <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
+                                        href="#deleteRecordModal">
                                         <span class="logo-sm">
                                             <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
                                                 height="20">
                                         </span>
-                                    </a>
+                                    </a> --}}
                                 </td>
                                 {{-- <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
@@ -145,6 +165,37 @@ use \Carbon\Carbon;
             </div>
         </div>
     </div>
+
+    <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1"
+        aria-labelledby="deleteRecordLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="btn-close"></button>
+                </div>
+                <div class="modal-body p-5 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
+                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
+                    </lord-icon>
+                    <div class="mt-4 text-center">
+                        <h4 class="fs-semibold">You are about to delete a Sample ?</h4>
+                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your Sample will
+                            remove all of your information from our database.</p>
+                        <div class="hstack gap-2 justify-content-center remove">
+                            <button
+                                class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
+                                data-bs-dismiss="modal" id="deleteRecord-close"><i
+                                    class="ri-close-line me-1 align-middle"></i>
+                                Close</button>
+                            <button class="btn btn-danger" id="delete-record">Yes,
+                                Delete It!!</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('script')
     <!-- apexcharts -->
@@ -155,4 +206,49 @@ use \Carbon\Carbon;
     <!-- dashboard init -->
     <script src="{{ URL::asset('build/js/pages/dashboard-ecommerce.init.js') }}"></script>
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
+    <script>
+        $(document).ready(function(){
+        $('.edit-item-btn').click(function(){
+            // Redirect to another page
+            var itemId = $(this).data('id');
+            // var itemId = $('#edit-btn').attr('data-id');
+            console.log(itemId);
+            var urlValue = '/sample/' + itemId + '/edit';
+            // alert(urlValue);
+            window.location.href = urlValue;
+        });
+    });
+
+    jQuery(document).ready(function($) {
+        $('.remove-item-btn').on('click', function() {
+            var itemId = $(this).data('id');
+            $('#delete-record').attr('data-id', itemId);
+        });
+
+        $('#delete-record').on('click', function() {
+            var itemId = $(this).data('id');
+            var url = '/sample/' + itemId;
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Handle success, e.g., remove the deleted item from the UI
+                    console.log(response);
+                    $('#deleteRecordModal').modal('hide');
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    // Handle error
+                    console.error(xhr, status, error);
+                }
+            });
+        });
+    });
+    </script>
+
 @endsection

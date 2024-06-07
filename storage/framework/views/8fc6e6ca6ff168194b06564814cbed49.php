@@ -66,30 +66,37 @@
                                 <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
                                         <td><?php echo e($test->name); ?></td>
-                                        <td><?php echo e($test->department); ?></td>
-                                        <td><?php echo e($test->cost); ?></td>
 
                                         <td>
-                                            <a href="#showModal" data-bs-toggle="modal">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/report.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/Vector.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="<?php echo e(URL::asset('build/images/delete.png')); ?>" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
+                                            <?php if($test->department == 1): ?>
+                                                Biochemistry / Haematology
+                                            <?php elseif($test->department == 2): ?>
+                                                Cytology / Gynecology
+                                            <?php elseif($test->department == 3): ?>
+                                                Urinalysis / Microbiology
+                                            <?php else: ?>
+                                                Unknown Department
+                                            <?php endif; ?>
                                         </td>
+                                        <td><?php echo e($test->cost); ?></td>
+
                                         
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="edit-item-btn" data-id="<?php echo e($test->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
+                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="<?php echo e($test->id); ?>"  data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>

@@ -19,7 +19,8 @@ class PermissionSeeder extends Seeder
     {
 
         $admin = User::create([
-            'name' => 'admin',
+            'first_name' => 'admin',
+            'surname' => 'admin',
             'email' => 'admin@admin.com',
             'email_verified_at' => now(),
             'password' => Hash::make('12345678'),
@@ -28,10 +29,18 @@ class PermissionSeeder extends Seeder
             'remember_token' => Str::random(10),
         ]);
 
-        $admin_role = Role::create(['name' => 'admin']);
+        $admin_role = Role::create(['name' => 'Management']);
 
         $permission = Permission::create(['name' => 'UserManagement access']);
-        $permission = Permission::create(['name' => 'Practice Access']);
+        $permission = Permission::create(['name' => 'Institution access']);
+        $permission = Permission::create(['name' => 'Doctor access']);
+        $permission = Permission::create(['name' => 'Patient access']);
+        $permission = Permission::create(['name' => 'TestCharges access']);
+        $permission = Permission::create(['name' => 'Notes access']);
+        $permission = Permission::create(['name' => 'Sample create']);
+        $permission = Permission::create(['name' => 'Sample edit']);
+        $permission = Permission::create(['name' => 'Sample delete']);
+        $permission = Permission::create(['name' => 'Manage TestReports']);
         $admin->assignRole($admin_role);
 
         $admin_role->givePermissionTo(Permission::all());
