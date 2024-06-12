@@ -13213,7 +13213,7 @@ span.flatpickr-weekday {
 .shape>svg {
     width: 100%;
     height: auto;
-    fill: #101f2f;
+    fill:   #22416b;
 }
 
 .auth-pass-inputgroup input[type=text]+.btn .ri-eye-fill:before {
@@ -16937,7 +16937,7 @@ body:before {
 }
 
 [data-bs-theme=dark] body:before {
-    background-color: #041324f2
+    background-color: #22416b;
 }
 
 [data-bs-theme=dark][data-layout=vertical][data-sidebar=dark][data-sidebar-size=sm-hover] .navbar-menu:hover {
