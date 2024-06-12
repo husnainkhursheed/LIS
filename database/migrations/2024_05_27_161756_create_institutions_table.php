@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('address_line_2')->nullable();
             $table->string('area');
             $table->string('email');
+            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });
     }

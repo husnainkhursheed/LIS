@@ -70,6 +70,7 @@
                                 <th class="rounded-start-3 ">Name</th>
                                 <th>Telephone</th>
                                 <th>Address</th>
+                                <th>Status</th>
                                 <th class="rounded-end-3 ">Action</th>
                             </tr>
                         </thead>
@@ -79,6 +80,8 @@
                                     <td>{{ $institution->name }}</td>
                                     <td>{{ $institution->contact_number }}</td>
                                     <td>{{ $institution->address_line_2 }}</td>
+                                    <td>{{ $institution->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
 
 
 
@@ -249,7 +252,7 @@
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address" required />
+                                        placeholder="Enter Address" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -260,7 +263,7 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -268,7 +271,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -369,7 +372,7 @@
 
 
                         // Set the checkbox town for is_active
-                        // $('#is_active').prop('checked', SetupPractice.is_active);
+                        $('#is_active').prop('checked', institution.is_active);
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit Institution");

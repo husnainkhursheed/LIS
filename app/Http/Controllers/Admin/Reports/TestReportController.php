@@ -6,8 +6,10 @@ use App\Models\Test;
 use App\Models\Sample;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
+use App\Models\CustomDropdown;
 use App\Models\BiochemHaemoResults;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\CytologyGynecologyResults;
 
 class TestReportController extends Controller
@@ -18,12 +20,18 @@ class TestReportController extends Controller
     }
     public function index(Request $request)
     {
-        $testNumber = $request->input('test_number');
-        $accessNumber = $request->input('access_number');
-        $patientName = $request->input('patient_name');
+       $testNumber = $request->input('test_number');
+       $accessNumber = $request->input('access_number');
+       $patientName = $request->input('patient_name');
        $query = Sample::query()->orderBy('received_date', 'asc');
-
-
+       $currentUser = Auth::user();
+        if ($currentUser->hasRole('Lab')) {
+            // Filter samples by the current user's departments through the related tests
+            $departmentIds = $currentUser->departments;
+            $query->whereHas('tests', function($testQuery) use ($departmentIds) {
+                $testQuery->whereIn('department', $departmentIds);
+            });
+        }
         if ($request->filled('test_number')) {
             $query->where('test_number', $request->test_number);
         }
@@ -48,6 +56,7 @@ class TestReportController extends Controller
     {
         $sample = Sample::with('tests')->findOrFail($id);
         // dd($sample);
+
         return response()->json([
             'sample' => $sample,
         ]);
@@ -67,9 +76,9 @@ class TestReportController extends Controller
 
         // $sample = Sample::find($id);
         $reporttype = $request->report_type;
-        // $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
+        $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','test','testReport'));
+        return view('reports/test-reports.edit', compact('sample','reporttype','test','testReport','contraceptivedropdown'));
     }
 
     public function saveReports(Request $request)

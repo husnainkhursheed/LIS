@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'avatar',
+        'departments',
     ];
 
     /**
@@ -43,5 +44,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'departments' => 'array',
     ];
+
+
+
 }

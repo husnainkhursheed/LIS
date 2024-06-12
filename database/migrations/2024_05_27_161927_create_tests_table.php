@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('specimen_type');
             $table->decimal('cost', 8, 2);
             $table->text('reference_range');
+            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });
     }

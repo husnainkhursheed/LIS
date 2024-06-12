@@ -229,9 +229,10 @@ use \Carbon\Carbon;
                                 data-bs-toggle="modal" data-id="Contraceptive" data-bs-target="#showModalDropdown"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                 <select class="js-example-basic-multiple" name="contraceptive" id="Contraceptive">
-                                    {{-- @foreach ($custom as $test)
-                                        <option value="{{ $test->dropdown_name }}">{{ $test->dropdown_name }}</option>
-                                    @endforeach --}}
+                                    {{-- {{ dd($testReport->contraceptive)}} --}}
+                                    @foreach ($contraceptivedropdown as $test)
+                                        <option value="{{ $test->value }}" {{ isset($testReport->cytologyGynecologyResults[0]) && $testReport->cytologyGynecologyResults[0]->contraceptive === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                    @endforeach
                                 </select>
 
                         </div>
@@ -311,31 +312,39 @@ use \Carbon\Carbon;
                     <!-- Tab panes -->
                     <div class="tab-content text-muted">
                         <div class="tab-pane active show" id="pill-justified-home-1" role="tabpanel">
-                            {{-- <div class="d-flex">
+                            <div class="d-flex">
 
                                 <div class="flex-grow-1 ms-2">
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="test_number" class="form-label">Bill to (Doctor, Patient, Other)</label>
-                                                <input type="text" id="test_number" name="test_number" class="form-control" value="ABC123" readonly />
+                                                <label for="s_gravity" class="form-label">S. Gravity</label>
+                                                <input type="number" id="s_gravity" name="s_gravity" class="form-control" value="" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="access_number" class="form-label">Doctor Name</label>
-                                                <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly />
+                                                <label for="ph" class="form-label">PH</label>
+                                                <input type="text" id="ph" name="ph" class="form-control" value=""  />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="test_number" class="form-label">Tests Requested</label>
-                                                <input type="text" id="test_number" name="test_number" class="form-control" value="ABC123" readonly />
+                                                <label for="bilirubin" class="form-label">Bilirubin<a href="" class="customDropdownEdit"
+                                                    data-bs-toggle="modal" data-id="Bilirubin" data-bs-target="#showModalDropdown"
+                                                    > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                                    <select class="js-example-basic-multiple" name="bilirubin" id="Bilirubin">
+                                                        {{-- {{ dd($testReport->contraceptive)}} --}}
+                                                        {{-- @foreach ($contraceptivedropdown as $test)
+                                                            <option value="{{ $test->value }}" {{ isset($testReport->cytologyGynecologyResults[0]) && $testReport->cytologyGynecologyResults[0]->contraceptive === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                        @endforeach --}}
+                                                    </select>
+
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div> --}}
+                            </div>
 
                         </div>
                         <div class="tab-pane" id="pill-justified-profile-1" role="tabpanel">
@@ -641,7 +650,7 @@ use \Carbon\Carbon;
                         reporttype: reporttypeis,
                         history: $('#history').val(),
                         last_period: $('#last_period').val(),
-                        contraceptive: $('#contraceptive').val(),
+                        contraceptive: $('#Contraceptive').val(),
                         result: $('#result1').val(),
                         previous_pap: $('#previous_pap').val(),
                         cervix_examination: $('#cervix_examination').val(),
@@ -838,7 +847,7 @@ use \Carbon\Carbon;
             });
         }
 
-        updateDropdown('Contraceptive');
+        // updateDropdown('Contraceptive');
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

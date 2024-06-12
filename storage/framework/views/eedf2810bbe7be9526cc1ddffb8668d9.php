@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title'); ?>
     Add Sample
 <?php $__env->stopSection(); ?>
@@ -170,7 +169,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
+                <form class="tablelist-form" id="patient_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
@@ -218,7 +217,15 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -244,7 +251,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/doctor")); ?>" method="Post" autocomplete="off">
+                <form class="tablelist-form" id="doctor_form" action="<?php echo e(url("/doctor")); ?>" method="Post" autocomplete="off">
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
@@ -295,7 +302,15 @@
                                         placeholder="Enter Area" required />
                                 </div>
                             </div>
-                            
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -321,7 +336,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/institution")); ?>" method="Post" autocomplete="off">
+                <form class="tablelist-form" id="institution_form" action="<?php echo e(url("/institution")); ?>" method="Post" autocomplete="off">
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
@@ -372,7 +387,15 @@
                                 </div>
                             </div>
 
-                            
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -410,6 +433,107 @@
 
 
     <script>
+       $(document).ready(function() {
+            // Initialize Select2
+            $('#doctor_id').select2();
+
+            // Select the last option
+            $('#doctor_id option:last').attr('selected', 'selected');
+            $('#doctor_id').trigger('change'); // Notify any JS listeners of the change
+            $('#institution_id option:last').attr('selected', 'selected');
+            $('#institution_id').trigger('change'); // Notify any JS listeners of the change
+            $('#patient_id option:last').attr('selected', 'selected');
+            $('#patient_id').trigger('change'); // Notify any JS listeners of the change
+
+
+            $(document).ready(function() {
+                // Initialize Select2
+                $('#patient_id').select2();
+
+                // Handle form submission via AJAX
+                $('#patient_form').on('submit', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '<?php echo e(url("/patient")); ?>',
+                        method: 'POST',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                // Append the new patient to the dropdown
+                                var newOption = new Option(response.patient.first_name, response.patient.id, true, true);
+                                $('#patient_id').append(newOption).trigger('change');
+
+                                // Close the modal
+                                $('#showModalPatient').modal('hide');
+
+                                // Optionally, clear the form inputs
+                                $('#patient_form')[0].reset();
+                            } else {
+                                alert('An error occurred while adding the patient.');
+                            }
+                        },
+                        error: function(response) {
+                            alert('An error occurred. Please check the input data.');
+                        }
+                    });
+                });
+                $('#doctor_form').on('submit', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '<?php echo e(url("/doctor")); ?>',
+                        method: 'POST',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                // Append the new patient to the dropdown
+                                var newOption = new Option(response.doctor.name, response.doctor.id, true, true);
+                                $('#doctor_id').append(newOption).trigger('change');
+
+                                // Close the modal
+                                $('#showModalDoctor').modal('hide');
+
+                                // Optionally, clear the form inputs
+                                $('#doctor_form')[0].reset();
+                            } else {
+                                alert('An error occurred while adding the patient.');
+                            }
+                        },
+                        error: function(response) {
+                            alert('An error occurred. Please check the input data.');
+                        }
+                    });
+                });
+                $('#institution_form').on('submit', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '<?php echo e(url("/doctor")); ?>',
+                        method: 'POST',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                // Append the new patient to the dropdown
+                                var newOption = new Option(response.doctor.name, response.doctor.id, true, true);
+                                $('#institution_id').append(newOption).trigger('change');
+
+                                // Close the modal
+                                $('#showModalInstitution').modal('hide');
+
+                                // Optionally, clear the form inputs
+                                $('#institution_form')[0].reset();
+                            } else {
+                                alert('An error occurred while adding the patient.');
+                            }
+                        },
+                        error: function(response) {
+                            alert('An error occurred. Please check the input data.');
+                        }
+                    });
+                });
+            });
+        });
         document.querySelector("#lead-image-input").addEventListener("change", function() {
             var preview = document.querySelector("#lead-img");
             var file = document.querySelector("#lead-image-input").files[0];

@@ -214,6 +214,9 @@ use \Carbon\Carbon;
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                 <select class="js-example-basic-multiple" name="contraceptive" id="Contraceptive">
                                     
+                                    <?php $__currentLoopData = $contraceptivedropdown; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($test->value); ?>" <?php echo e(isset($testReport->cytologyGynecologyResults[0]) && $testReport->cytologyGynecologyResults[0]->contraceptive === $test->value ? 'selected' : ''); ?>><?php echo e($test->value); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
 
                         </div>
@@ -293,7 +296,37 @@ use \Carbon\Carbon;
                     <!-- Tab panes -->
                     <div class="tab-content text-muted">
                         <div class="tab-pane active show" id="pill-justified-home-1" role="tabpanel">
-                            
+                            <div class="d-flex">
+
+                                <div class="flex-grow-1 ms-2">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="s_gravity" class="form-label">S. Gravity</label>
+                                                <input type="number" id="s_gravity" name="s_gravity" class="form-control" value="" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="ph" class="form-label">PH</label>
+                                                <input type="text" id="ph" name="ph" class="form-control" value=""  />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="bilirubin" class="form-label">Bilirubin<a href="" class="customDropdownEdit"
+                                                    data-bs-toggle="modal" data-id="Bilirubin" data-bs-target="#showModalDropdown"
+                                                    > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                                    <select class="js-example-basic-multiple" name="bilirubin" id="Bilirubin">
+                                                        
+                                                        
+                                                    </select>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                         <div class="tab-pane" id="pill-justified-profile-1" role="tabpanel">
@@ -527,7 +560,7 @@ use \Carbon\Carbon;
                         reporttype: reporttypeis,
                         history: $('#history').val(),
                         last_period: $('#last_period').val(),
-                        contraceptive: $('#contraceptive').val(),
+                        contraceptive: $('#Contraceptive').val(),
                         result: $('#result1').val(),
                         previous_pap: $('#previous_pap').val(),
                         cervix_examination: $('#cervix_examination').val(),
@@ -596,47 +629,47 @@ use \Carbon\Carbon;
 
         // });
             // Edit button click event
-    $(document).on('click', '.customDropdownEdit', function() {
-        var dropdownName = $(this).data('id');
-        $('#dropdown_name').val(dropdownName); // Set the dropdown name
-        var url = '<?php echo e(url("/custom-dropdown/getvalues")); ?>' + '/' + dropdownName + '/edit';
+        $(document).on('click', '.customDropdownEdit', function() {
+            var dropdownName = $(this).data('id');
+            $('#dropdown_name').val(dropdownName); // Set the dropdown name
+            var url = '<?php echo e(url("/custom-dropdown/getvalues")); ?>' + '/' + dropdownName + '/edit';
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(response) {
-                $('#valuesTable').empty(); // Clear existing rows
-                response.customdropdownvalues.forEach(function(item) {
-                    var newRow = `
-                        <tr>
-                            <td>
-                                <input type="hidden" name="id[]" value="${item.id}">
-                                <input type="text" name="dropdown_name[]" class="form-control" value="${item.dropdown_name}" readonly>
-                            </td>
-                            <td><input type="text" name="value[]" class="form-control" value="${item.value}"></td>
-                            <td>
-                                <ul class="list-inline hstack gap-2 mb-0">
-                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                        <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, ${item.id});">
-                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>`;
-                    $('#valuesTable').append(newRow);
-                });
-                $('#dropdownName').val(dropdownName);
-                $('#exampleModalLabel').html(dropdownName);
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr, status, error);
-                // Handle errors if needed
-            }
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#valuesTable').empty(); // Clear existing rows
+                    response.customdropdownvalues.forEach(function(item) {
+                        var newRow = `
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="id[]" value="${item.id}">
+                                    <input type="text" name="dropdown_name[]" class="form-control" value="${item.dropdown_name}" readonly>
+                                </td>
+                                <td><input type="text" name="value[]" class="form-control" value="${item.value}"></td>
+                                <td>
+                                    <ul class="list-inline hstack gap-2 mb-0">
+                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                            <a class="remove-item-btn" href="javascript:void(0);" onclick="removeRow(this, ${item.id});">
+                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>`;
+                        $('#valuesTable').append(newRow);
+                    });
+                    $('#dropdownName').val(dropdownName);
+                    $('#exampleModalLabel').html(dropdownName);
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr, status, error);
+                    // Handle errors if needed
+                }
+            });
         });
-    });
 
-    $('#addRowBtn').click(function() {
+        $('#addRowBtn').click(function() {
             var dropdownName =  $('#dropdownName').val();
             var newRow = `
                 <tr>
@@ -710,7 +743,7 @@ use \Carbon\Carbon;
                     dropdown.empty(); // Clear the existing options
                     data.forEach(function(item) {
                         dropdown.append($('<option>', {
-                            value: item.dropdown_name,
+                            value: item.value,
                             text: item.value
                         }));
                     });
@@ -724,7 +757,7 @@ use \Carbon\Carbon;
             });
         }
 
-        updateDropdown('Contraceptive');
+        // updateDropdown('Contraceptive');
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

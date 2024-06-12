@@ -68,6 +68,7 @@
                                     <th class="rounded-start-3 ">Note Code</th>
                                     <th>Department</th>
                                     <th>Comment</th>
+                                    <th>Status</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
@@ -75,8 +76,20 @@
                                 @foreach ($notes as $note)
                                     <tr>
                                         <td>{{ $note->note_code }}</td>
-                                        <td>{{ $note->department }}</td>
+                                        <td>
+                                            @if($note->department == 1)
+                                                Biochemistry / Haematology
+                                            @elseif($note->department == 2)
+                                                Cytology / Gynecology
+                                            @elseif($note->department == 3)
+                                                Urinalysis / Microbiology
+                                            @else
+                                                Unknown Department
+                                            @endif
+                                        </td>
                                         <td>{{ $note->comment  }}</td>
+                                        <td>{{ $note->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
 
                                         {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
@@ -242,6 +255,15 @@
                                         placeholder="Enter Comment" required ></textarea>
                                 </div>
                             </div>
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
@@ -344,7 +366,7 @@
 
 
                         // Set the checkbox town for is_active
-
+                        $('#is_active').prop('checked', note.is_active);
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit Note");

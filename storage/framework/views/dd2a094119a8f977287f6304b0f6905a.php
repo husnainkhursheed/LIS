@@ -1,6 +1,5 @@
-
 <?php $__env->startSection('title'); ?>
-        Doctors
+        Patient
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('css'); ?>
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
@@ -18,39 +17,38 @@
         <div class="col-lg-12">
 
             
+
                 <div class="col">
                     <div class="card p-3 bg-white">
                         <div class="card-header d-flex justify-content-between">
-                            <h3 class="text-dark">List of Doctors</h3>
+                            <h3 class="text-dark">List of patients</h3>
                             <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                                 id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
-                                doctor</button>
-                            
+                                Patient</button>
                         </div>
 
                         <div class="col my-2">
                             <nav class="navbar">
                                 <div class="container-fluid p-0">
-                                    <form class="d-flex" method="GET" action="<?php echo e(route('doctor.index')); ?>">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
                                         <input class="form-control me-2 main-search" type="search" placeholder="Search"
                                             aria-label="Search" name="search" value="<?php echo e(request('search')); ?>">
                                         <button class="btn search-btn" type="submit">Search</button>
                                     </form>
-                                    <form class="d-flex" method="GET" action="<?php echo e(route('doctor.index')); ?>">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
                                         <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
-                                        name="sort_by" onchange="this.form.submit()">
-                                        <option selected disabled>Sort By</option>
-                                        <option value="name"
-                                            <?php echo e(request('sort_by') == 'name' ? 'selected' : ''); ?>>Name</option>
-                                        <option value="contact_number"
-                                            <?php echo e(request('sort_by') == 'contact_number' ? 'selected' : ''); ?>>Contact Number
-                                        </option>
-                                        <option value="address_line_2"
-                                            <?php echo e(request('sort_by') == 'address_line_2' ? 'selected' : ''); ?>>Address
-                                        </option>
-                                    </select>
-
+                                            name="sort_by" onchange="this.form.submit()">
+                                            <option selected disabled>Sort By</option>
+                                            <option value="first_name"
+                                                <?php echo e(request('sort_by') == 'first_name' ? 'selected' : ''); ?>>Name</option>
+                                            <option value="contact_number"
+                                                <?php echo e(request('sort_by') == 'contact_number' ? 'selected' : ''); ?>>Contact Number
+                                            </option>
+                                            <option value="sex"
+                                                <?php echo e(request('sort_by') == 'sex' ? 'selected' : ''); ?>>Sex
+                                            </option>
+                                        </select>
                                     </form>
                                 </div>
                             </nav>
@@ -61,44 +59,45 @@
                                 <tr>
                                     <th class="rounded-start-3 ">Name</th>
                                     <th>Telephone</th>
-                                    <th>Address</th>
+                                    <th>Sex</th>
+                                    <th>Status</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $__currentLoopData = $doctors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doctor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php $__currentLoopData = $patients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $patient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td><?php echo e($doctor->name); ?></td>
-                                        <td><?php echo e($doctor->contact_number); ?></td>
-                                        <td><?php echo e($doctor->address_line_2); ?></td>
+                                        <td><?php echo e($patient->first_name); ?></td>
+                                        <td><?php echo e($patient->contact_number); ?></td>
+                                        <td><?php echo e($patient->sex); ?></td>
+                                        <td><?php echo e($patient->is_active == 1 ? 'Active' : 'InActive'); ?></td>
 
 
-
+                                        
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="<?php echo e($doctor->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
+                                                    <a class="edit-item-btn" data-id="<?php echo e($patient->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="<?php echo e($doctor->id); ?>"  data-bs-toggle="modal"
+                                                    <a class="remove-item-btn" data-id="<?php echo e($patient->id); ?>"  data-bs-toggle="modal"
                                                         href="#deleteRecordModal">
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>
                                             </ul>
                                         </td>
-
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            <?php if($doctors->previousPageUrl()): ?>
+                            <?php if($patients->previousPageUrl()): ?>
                                 <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="<?php echo e($doctors->previousPageUrl()); ?>" aria-label="Previous">
+                                    <a class="page-link" href="<?php echo e($patients->previousPageUrl()); ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                         <span class="sr-only">Previous</span>
                                     </a>
@@ -109,16 +108,16 @@
                                 </li>
                             <?php endif; ?>
 
-                            <?php for($page = 1; $page <= $doctors->lastPage(); $page++): ?>
-                                <li class="page-item <?php echo e($doctors->currentPage() == $page ? 'active' : ''); ?>">
+                            <?php for($page = 1; $page <= $patients->lastPage(); $page++): ?>
+                                <li class="page-item <?php echo e($patients->currentPage() == $page ? 'active' : ''); ?>">
                                     <a class="page-link"
-                                        href="<?php echo e($doctors->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
+                                        href="<?php echo e($patients->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
                                 </li>
                             <?php endfor; ?>
 
-                            <?php if($doctors->nextPageUrl()): ?>
+                            <?php if($patients->nextPageUrl()): ?>
                                 <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="<?php echo e($doctors->nextPageUrl()); ?>" aria-label="Next">
+                                    <a class="page-link" href="<?php echo e($patients->nextPageUrl()); ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                         <span class="sr-only">Next</span>
                                     </a>
@@ -130,8 +129,8 @@
                             <?php endif; ?>
                         </ul>
                     </div>
-
                 </div>
+
                 
             
         </div>
@@ -142,69 +141,74 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Doctor</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Patient</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/doctor")); ?>" method="Post" autocomplete="off">
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
                     <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
                                 <div>
                                     <label for="companyname-field"
-                                        class="form-label">Doctor’s Name</label>
-                                    <input type="text" id="name" name="name"
+                                        class="form-label">First Name</label>
+                                    <input type="text" id="first_name" name="first_name"
                                         class="form-control"
-                                        placeholder="Enter Doctor’s Name" required />
+                                        placeholder="Enter First Name" required />
                                 </div>
                                 
                             </div>
                             <div class="col-lg-6">
                                 <div>
-                                    <label for="email" class="form-label">Email address</label>
-                                    <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email" required />
+                                    <label for="surname" class="form-label">Surname</label>
+                                    <input type="text" id="surname" name="surname" class="form-control"
+                                    placeholder="Enter surname" required />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="contact_number" class="form-label">Contact Number</label>
+                                    <input type="text" id="contact_number" class="form-control" name="contact_number"
+                                        placeholder="Enter Contact Number" required />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="dob" class="form-label">DOB</label>
+                                    <input type="date" id="dob" name="dob" class="form-control"
+                                        placeholder="Enter Dob" required />
                                 </div>
                             </div>
 
                             <div class="col-lg-6">
-                                <div>
-                                    <label for="address" class="form-label">Contact Number</label>
-                                    <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number" required />
+                                <label for="Sex" class="form-label">Sex</label>
+                                <div class="pt-2">
+                                    <input type="radio" id="male" name="sex"
+                                        placeholder="Enter Email" required  value="male"/>
+                                        <label for="male" class="form-label">Male</label>
+                                    <input type="radio" id="female" name="sex"
+                                        placeholder="Enter Email" required value="female" />
+                                    <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="town" class="form-label">Street name</label>
-                                    <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town" required />
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="zip" class="form-label">Second line in address</label>
-                                    <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="country" class="form-label">Area</label>
-                                    <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area" required />
-                                </div>
-                            </div>
-                            
                         </div>
                     </div>
                     <div class="modal-footer">
                         <div class="hstack gap-2 justify-content-end">
                             <button type="button" class="btn btn-light"
                                 data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Add Doctor</button>
+                            <button type="submit" class="btn btn-success" id="add-btn">Add Patient</button>
                         </div>
                     </div>
                 </form>
@@ -229,8 +233,8 @@
                         colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
                     </lord-icon>
                     <div class="mt-4 text-center">
-                        <h4 class="fs-semibold">You are about to delete a Doctor ?</h4>
-                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your Doctor will
+                        <h4 class="fs-semibold">You are about to delete a Patient ?</h4>
+                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your Patient will
                             remove all of your information from our database.</p>
                         <div class="hstack gap-2 justify-content-center remove">
                             <button
@@ -273,25 +277,25 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '<?php echo e(url("/doctor")); ?>' + '/' + itemId + '/edit';
+            var url = '<?php echo e(url("/patient")); ?>' + '/' + itemId + '/edit';
 
             $.ajax({
                     url: url, // Adjust the route as needed
                     type: 'GET',
                     success: function(response) {
                         // Assuming the response has a 'leadType' key
-                        var doctor = response.doctor;
-                        console.log("my practices ",doctor);
+                        var patient = response.patient;
+                        // console.log("my practices ",doctor);
 
                         // Now you can use the leadType data to populate your modal fields
-                        $('#id-field').val(doctor.id);
-                        $('#name').val(doctor.name);
-                        // $('#phone').val(doctor.phone);
-                        $('#contact_number').val(doctor.contact_number);
-                        $('#street_name').val(doctor.street_name);
-                        $('#address_line_2').val(doctor.address_line_2);
-                        $('#area').val(doctor.area);
-                        $('#email').val(doctor.email);
+                        $('#id-field').val(patient.id);
+                        $('#first_name').val(patient.first_name);
+                        // $('#phone').val(patient.phone);
+                        $('#surname').val(patient.surname);
+                        $('#contact_number').val(patient.contact_number);
+                        $('#dob').val(patient.dob);
+                        // $('#area').val(patient.area);
+                        // $('#email').val(patient.email);
 
                         // var surgeries = SetupPractice.surgeries.map(function(surgery) {
                         //         return surgery.id;
@@ -299,12 +303,18 @@
 
                         // $('#surgeries').val(surgeries).trigger('change');
 
+                        $('#is_active').prop('checked', patient.is_active);
+
 
                         // Set the checkbox town for is_active
-                        // $('#is_active').prop('checked', SetupPractice.is_active);
+                        if (patient.sex === 'Male') {
+                            $('#male').prop('checked', true);
+                        } else if (patient.sex === 'Female') {
+                            $('#female').prop('checked', true);
+                        }
 
                         // Update modal title
-                        $('#exampleModalLabel').html("Edit Doctor");
+                        $('#exampleModalLabel').html("Edit Patient");
 
                         // Display the modal footer
                         $('#showModal .modal-footer').css('display', 'block');
@@ -314,7 +324,7 @@
                         var form = $('#leadtype_form');
 
                         // Update the form action (assuming the form has an ID of 'your-form-id')
-                        $('#leadtype_form').attr('action', '<?php echo e(url("/doctor")); ?>/' + itemId);
+                        $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>/' + itemId);
 
 
 
@@ -331,25 +341,23 @@
 
         function resetModal() {
             // Reset modal titleq
-            $('#exampleModalLabel').html("Add Doctor");
+            $('#exampleModalLabel').html("Add Patient");
 
             // Display the modal footer
             $('#showModal .modal-footer').css('display', 'block');
 
             // Change the button text
             $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '<?php echo e(url("/doctor")); ?>');
+            $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>');
             // if ( $('#patch').length) {
             //     $('#patch').remove();
             // }
             $('#id-field').val('');
-            $('#name').val('');
-            // $('#phone').val('');
+            $('#first_name').val('');
+            // $('#phone').val(patient.phone);
+            $('#surname').val('');
             $('#contact_number').val('');
-            $('#street_name').val('');
-            $('#address_line_2').val('');
-            $('#area').val('');
-            $('#email').val('');
+            $('#dob').val('');
             // $('#surgeries').val("");
             // $('#surgeries').val("").trigger('change');
 
@@ -367,7 +375,7 @@
 
         $('#delete-record').on('click', function() {
             var itemId = $(this).data('id');
-            var url = '/doctor/' + itemId;
+            var url = '/patient/' + itemId;
 
             $.ajax({
                 url: url,
@@ -400,4 +408,4 @@
     <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/setup/doctor.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\LIS\LIS\resources\views/setup/patient.blade.php ENDPATH**/ ?>

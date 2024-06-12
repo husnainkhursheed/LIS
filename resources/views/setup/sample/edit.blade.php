@@ -138,7 +138,7 @@
                                 {{-- <option selected>Choose Institution</option> --}}
                                 <option value="Patient" {{ $sample->bill_to == 'Patient' ? 'selected' : ''}}>Patient</option>
                                 <option value="Doctor"  {{ $sample->bill_to == 'Doctor' ? 'selected' : ''}}>Doctor</option>
-                                <option value="Other"  {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
+                                <option value="Other"   {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
                             </select>
                         </div>
                     </div>
@@ -231,7 +231,7 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -239,7 +239,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -318,7 +318,7 @@
                                         placeholder="Enter Area" required />
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -326,7 +326,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -405,7 +405,7 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -413,7 +413,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -451,6 +451,15 @@
 
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let doctorSelect = document.getElementById('doctor_id');
+            if (doctorSelect) {
+                let lastOption = doctorSelect.options[doctorSelect.options.length - 1];
+                if (!Array.from(doctorSelect.options).some(option => option.selected)) {
+                    lastOption.selected = true;
+                }
+            }
+        });
         document.querySelector("#lead-image-input").addEventListener("change", function() {
             var preview = document.querySelector("#lead-img");
             var file = document.querySelector("#lead-image-input").files[0];
