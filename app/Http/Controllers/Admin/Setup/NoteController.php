@@ -53,6 +53,7 @@ class NoteController extends Controller
         $note->note_code  = $request->input('note_code');
         $note->department  = $request->input('department');
         $note->comment  = $request->input('comment');
+        $note->is_active  = $request->has('is_active') ? 1 : 0;
         $note->save();
 
         Session::flash('message', 'Created successfully!');
@@ -81,6 +82,7 @@ class NoteController extends Controller
         $note->note_code  = $request->input('note_code');
         $note->department  = $request->input('department');
         $note->comment  = $request->input('comment');
+        $note->is_active  = $request->has('is_active') ? 1 : 0;
         $note->update();
 
 

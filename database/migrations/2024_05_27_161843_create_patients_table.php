@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('contact_number');
             $table->date('dob');
             $table->enum('sex', ['Male', 'Female']);
+            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });
     }

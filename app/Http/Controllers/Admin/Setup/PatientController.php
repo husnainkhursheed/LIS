@@ -58,7 +58,12 @@ class PatientController extends Controller
         $patient->contact_number  = $request->input('contact_number');
         $patient->dob  = $request->input('dob');
         $patient->sex  = $request->input('sex');
+        $patient->is_active  = $request->has('is_active') ? 1 : 0;
         $patient->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'patient' => $patient]);
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -89,6 +94,7 @@ class PatientController extends Controller
         $patient->contact_number  = $request->input('contact_number');
         $patient->dob  = $request->input('dob');
         $patient->sex  = $request->input('sex');
+        $patient->is_active  = $request->has('is_active') ? 1 : 0;
         $patient->update();
 
 

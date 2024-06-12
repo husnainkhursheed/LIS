@@ -67,6 +67,7 @@
                                     <th class="rounded-start-3 ">Name</th>
                                     <th>Department</th>
                                     <th>Cost</th>
+                                    <th>Status</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
@@ -87,6 +88,8 @@
                                             @endif
                                         </td>
                                         <td>{{ $test->cost  }}</td>
+                                        <td>{{ $test->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
 
                                         {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
@@ -287,6 +290,15 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -335,6 +347,7 @@
             </div>
         </div>
     </div>
+    {{-- {{dd(Auth::user()->departments)}} --}}
 @endsection
 @section('script')
 
@@ -356,6 +369,26 @@
 
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
+        $(document).ready(function() {
+            var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
+
+            // Check if the current user is in the "Lab" role
+            if (currentUser === 'Lab') {
+                console.log('clicked');
+                var labDepartments = {!! json_encode(Auth::user()->departments) !!}; // Get the department IDs associated with the user
+
+                // Loop through each option in the select element
+                $('#department option').each(function() {
+                    var departmentId = $(this).val(); // Get the value of the option
+
+                    // Check if the department ID is not in the user's associated departments
+                    if (!labDepartments.includes(departmentId)) {
+                        $(this).hide(); // Hide the option
+                    }
+                });
+            }
+        });
+
         jQuery(document).ready(function($) {
         // When the document is ready, attach a click event to the "Edit" button
         $('.edit-item-btn').on('click', function() {
@@ -390,7 +423,7 @@
 
 
                         // Set the checkbox town for is_active
-
+                        $('#is_active').prop('checked', test.is_active);
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit test");

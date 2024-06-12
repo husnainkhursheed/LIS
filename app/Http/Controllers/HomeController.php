@@ -40,6 +40,16 @@ class HomeController extends Controller
         // $samples = Sample::paginate(10);
         $query = Sample::query();
 
+        // Check if the current user has the "Lab" role
+        $currentUser = Auth::user();
+        if ($currentUser->hasRole('Lab')) {
+            // Filter samples by the current user's departments through the related tests
+            $departmentIds = $currentUser->departments;
+            $query->whereHas('tests', function($testQuery) use ($departmentIds) {
+                $testQuery->whereIn('department', $departmentIds);
+            });
+        }
+
         // Handle search
         if ($request->has('search')) {
             $searchTerm = $request->input('search');

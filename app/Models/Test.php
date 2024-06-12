@@ -16,6 +16,7 @@ class Test extends Model
         'specimen_type',
         'cost',
         'reference_range',
+        'is_active',
     ];
 
     public function samples()

@@ -59,20 +59,20 @@ class UsersController extends Controller
             // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
         $user_password = Hash::make('12345678');
-        $imageName = null;
-        if ($request->userimage) {
-            $image = $request->userimage;
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads'), $imageName);
-        }
+        // $imageName = null;
+        // if ($request->userimage) {
+        //     $image = $request->userimage;
+        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
+        //     $image->move(public_path('uploads'), $imageName);
+        // }
 
 
         $user = User::create([
             'first_name'=>$request->first_name,
             'surname'=>$request->surname,
             'email'=>$request->email,
-            'avatar' => $imageName ? $imageName : null,
-            // 'roleid'=>2,
+            // 'avatar' => $imageName ? $imageName : null,
+            'departments' => $request->departments ?? [],
             'email_verified_at' => now(),
             'password'=> bcrypt($user_password),
         ]);
@@ -115,40 +115,50 @@ class UsersController extends Controller
             // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if($request->password != null){
-            $request->validate([
-                'password' => 'required'
-            ]);
-            $validated['password'] = bcrypt($request->password);
-        }
+        // if($request->password != null){
+        //     $request->validate([
+        //         'password' => 'required'
+        //     ]);
+        //     $validated['password'] = bcrypt($request->password);
+        // }
         // if ($request->hasFile('user_image') && $request->file('user_image')->isValid()) {
         //     $image = $request->file('user_image');
         //     $imageName = time() . '.' . $image->getClientOriginalExtension();
         //     $image->move(public_path('uploads'), $imageName);
         //     $validated['avatar'] = $imageName;
         // }
-        $imageName = null;
-        if ($request->hasFile('userimage') && $request->file('userimage')->isValid()) {
-            if ($user->avatar != null && file_exists(public_path('uploads') . '/' . $user->avatar)) {
-                 $file_old = public_path('uploads') . '/' . $user->avatar;
-                 unlink($file_old);
-             }
-             $image = $request->file('userimage');
-             // var_dump( $image );
-             $imageName = time() . '.' . $image->getClientOriginalExtension();
-             $image->move(public_path('uploads'), $imageName);
+        // $imageName = null;
+        // if ($request->hasFile('userimage') && $request->file('userimage')->isValid()) {
+        //     if ($user->avatar != null && file_exists(public_path('uploads') . '/' . $user->avatar)) {
+        //          $file_old = public_path('uploads') . '/' . $user->avatar;
+        //          unlink($file_old);
+        //      }
+        //      $image = $request->file('userimage');
+        //      // var_dump( $image );
+        //      $imageName = time() . '.' . $image->getClientOriginalExtension();
+        //      $image->move(public_path('uploads'), $imageName);
 
-             // Save the image file name to the database
-             $validated['avatar'] = $imageName ? $imageName : null;
-         }
+        //      // Save the image file name to the database
+        //      $validated['avatar'] = $imageName ? $imageName : null;
+        // }
 
-        $user->update($validated);
+        // Find the user by ID
+        $user = User::findOrFail($id);
+
+        // Update user details
+        $user->update([
+            'first_name' => $request->first_name,
+            'surname' => $request->surname,
+            'email' => $request->email,
+            // 'avatar' => $imageName ? $imageName : null,
+            'departments' => $request->departments ?? [],
+        ]);
+
+        // Update user's roles
         if (is_array($request->role_ids)) {
-            // If permission_ids is an array, map its elements to integers
-            $permissionIds = array_map('intval', $request->role_ids);
-            $user->syncRoles($permissionIds);
+            $roleIds = array_map('intval', $request->role_ids);
+            $user->syncRoles($roleIds);
         } else {
-            // If permission_ids is not an array, assume it's a single ID
             $user->syncRoles([$request->role_ids]);
         }
         // $permissionIds = array_map('intval', $request->role_ids);

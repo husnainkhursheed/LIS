@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Setup;
 use App\Models\Test;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class TestController extends Controller
@@ -16,6 +17,13 @@ class TestController extends Controller
     public function index(Request $request)
     {
         $query = Test::query();
+
+        $currentUser = Auth::user();
+        if ($currentUser->hasRole('Lab')) {
+            // Filter tests by the current user's departments
+            $departmentIds = $currentUser->departments;
+            $query->whereIn('department', $departmentIds);
+        }
 
         // Handle search
         if ($request->has('search')) {
@@ -57,6 +65,7 @@ class TestController extends Controller
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
         $test->reference_range  = $request->input('reference_range');
+        $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
 
         Session::flash('message', 'Created successfully!');
@@ -88,6 +97,7 @@ class TestController extends Controller
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
         $test->reference_range  = $request->input('reference_range');
+        $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
 
 

@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notes', function (Blueprint $table) {
+        Schema::create('custom_dropdowns', function (Blueprint $table) {
             $table->id();
-            $table->string('note_code');
-            $table->enum('department', ['1', '2', '3']);
-            $table->text('comment');
-            $table->tinyInteger('is_active')->default(1);
+            $table->string('dropdown_name');
+            $table->string('value');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notes');
+        Schema::dropIfExists('custom_dropdown');
     }
 };
