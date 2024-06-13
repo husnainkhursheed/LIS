@@ -108,6 +108,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
 
+    // generate pdf route
+    Route::get('generate-pdf', [App\Http\Controllers\PDFController::class, 'generatePDF']);
+
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
