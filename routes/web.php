@@ -108,6 +108,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
 
+
+
+    Route::get('verify/{token}', [UsersController::class, 'verify']);
+    // Route::view('verify-view', 'emails.verify');
+    Route::post('set-password', [UsersController::class, 'setPassword']);
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
