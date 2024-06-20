@@ -10,48 +10,228 @@
             margin: 0;
         }
         .sub-header {
-            /* background-color: #22416b; */
-            color: #22416b;
-            padding: 20px;
+            color: #3d90ca;
             text-align: center;
+            margin-bottom: 20px;
         }
-        .info-container {
-            width: 45%; /* Adjust width as needed */
+        .sub-header img {
+            width: 250px;
+        }
+        .info-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .info-table td {
+            padding: 10px;
+            border: 1px solid #3d90ca;
+        }
+        .info-table h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3d90ca;
+            padding-bottom: 5px;
+        }
+        .info-table p {
+            font-size: 13px;
+            font-weight: normal;
+            margin: 5px 0;
+            letter-spacing: 0.7px;
+        }
 
-            margin: 10px; /* Add some margin for spacing */
-            border: 1px solid #ccc; /* Add border for visualization */
-            padding: 10px; /* Add padding for spacing */
+
+        .main-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 0px;
+        }
+        .main-table td img{
+            width: 230px;
+        }
+        .main-table td {
+            /* padding: 10px; */
+            border: 0px;
+        }
+        .main-table h3 {
+            margin-top: 0;
+            /* margin-bottom: 10px; */
+            padding-bottom: 5px;
+        }
+        .main-table p {
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #3d90ca;
+        }
+        .table-bordered thead {
+            background-color: #3d90ca;
+            color: #fff;
+        }
+        thead th {
+            font-size: 14px
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+
+        }
+        .table-bordered td{
+            font-size: 14px;
+            /* font-weight: 100; */
+            line-height: 25px;
         }
     </style>
 </head>
 <body>
-    {{-- <div class="sub-header"> --}}
-        <div >
-            <!-- Left side content -->
-            <h1>Border Life - LIS</h1>
-            <p>Date: {{ date('m/d/Y') }}</p>
-        </div>
-        <div >
-            <!-- Right side content (logo) -->
-            <img src="<?php echo public_path('build/images/logo-lis.png'); ?>" alt="Logo" class="logo">
-        </div>
-    {{-- </div> --}}
-    <div class="info-container" style="float:left;">
-        <h2 style="margin-top:0;">Patient Information</h2>
-        <p><strong>Name:</strong> John Doe</p>
-        <p><strong>Age:</strong> 35</p>
-        <p><strong>Gender:</strong> Male</p>
-        <p><strong>Sample ID:</strong> 123456</p>
-    </div>
-    <div class="info-container" style="float:right;">
-        <h2 style="margin-top:0;">Report Information</h2>
-        <p><strong>Name:</strong> John Doe</p>
-        <p><strong>Age:</strong> 35</p>
-        <p><strong>Gender:</strong> Male</p>
-        <p><strong>Sample ID:</strong> 123456</p>
-    </div>
+    <table class="main-table">
+
+        <tr>
+            <td style="width: 65%; vertical-align: top;">
+                <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
+            <p><strong>71 Eastern Main Road   Barataria, San Juan  Trinidad and Tobago</strong></p>
+            </td>
+            <td style="width: 35%; vertical-align: middle;">
+                <p><strong>TEL: </strong>   (868) 229-8643  or 316-1383</p>
+                <p><strong>Mail: </strong> borderlifemedlab@gmail.com</p>
+
+
+            </td>
+
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <thead>
+        <tr>
+            <th style="width: 50%; vertical-align: top;">
+                <h2>Patient Information</h2>
+                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Age:</strong> 35</p>
+                <p><strong>Sex:</strong> Male</p>
+                <p><strong>DOB:</strong> 01-Jan-91</p>
+                <p><strong>Sample ID:</strong> 123456</p>
+            </th>
+            <th style="width: 50%; vertical-align: top;">
+                <h2>Sample Collected At</h2>
+                <p><strong>Tobago, 71 Eastern Main Road Barataria</strong></p><br><br>
+                <p><strong>Ref. By:</strong> DR Yousaf</p>
+
+            </th>
+            <th style="width: 50%; vertical-align: top;">
+                <h2>Report Information</h2>
+                <p><strong>Lab Ref:</strong> B23-005768</p>
+                <p><strong>Company:</strong> PRIVATE</p>
+                <p><strong>Collection Date:</strong> 05-Jul-2023</p>
+                <p><strong>Received Date:</strong> 05-Jul-2023</p>
+                <p><strong>Report Date:</strong> 05-Jul-2023</p>
+            </th>
+        </tr>
+    </thead>
+    </table>
+    <table class="info-table">
+        <tr>
+            <td style="width: 50%; vertical-align: top;">
+                <p><strong>Request: </strong><br> CBC, HbA1c, FBS, LIPID PROFILE, LFT, RFT1, TFT 3,
+                    PT/PTT, Urine Micro, STD Profile 3, HPV</p>
+            </td>
+            <td style="width: 50%; vertical-align: top;">
+                <p><strong>Comments: </strong><br> SPECIMEN:
+                    SATISFACTORY</p>
+            </td>
+            <td style="width: 50%; vertical-align: top;">
+                <p><strong>Specimen: </strong><br>  Serum (Urine for CT/NG)</p>
+            </td>
+        </tr>
+    </table>
+    {{-- <div style=" border-bottom: 1px solid #3d90ca;">
+        <p><b>Whole Blood </b></p>
+    </div> --}}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th> NAME OF TEST</th>
+                <th>RESULTS</th>
+                <th>FLAG</th>
+                <th>REFERENCE RANGE</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td> White Blood Cells (WBC)</td>
+                <td style="text-align:center;">3.0</td>
+                <td style="color: blue; text-align:center;">Low</td>
+                <td>4.0 - 11.0 10^3/ul</td>
+            </tr>
+            <tr>
+                <td> Lymphocytes #</td>
+                <td style="text-align:center;"> 2.1 </td>
+                <td></td>
+                <td>0.8 - 4.9 10^3/ul</td>
+            </tr>
+            <tr>
+                <td> MID #</td>
+                <td style="text-align:center;">1.5</td>
+                <td></td>
+                <td> 0.3 - 2.4 10^3/uL</td>
+            </tr>
+            <tr>
+                <td> Granulocytes #</td>
+                <td style="text-align:center;">5.5</td>
+                <td></td>
+                <td> 1.4 - 6.5 10^3/ul</td>
+            </tr>
+            <tr>
+                <td> Lymphocytes %</td>
+                <td style="text-align:center;">10%</td>
+                <td style="color: blue; text-align:center;">Low</td>
+                <td> 20 - 45 %</td>
+            </tr>
+            <tr>
+                <td> MID %</td>
+                <td style="text-align:center;">15.2%</td>
+                <td style="color: red; text-align:center;">High</td>
+                <td> 2.0 - 13.3 %</td>
+            </tr>
+            <tr>
+                <td> RBC (Red Blood Cell)</td>
+                <td style="text-align:center;">5.5</td>
+                <td></td>
+                <td>  Male: 4.5 - 6.5 10^6/ul <br>
+                    Female: 3.9 - 5.6 10^6/ul
+                </td>
+            </tr>
+            <tr>
+                <td>  HGB (Hemoglobin)</td>
+                <td style="text-align:center;">16</td>
+                <td></td>
+                <td>  Males 13 - 18 g/dL <br>
+                    Females 11.6 - 16.5 g/dL
+                </td>
+            </tr>
+            <tr>
+                <td>HCT (Hematocrit)</td>
+                <td style="text-align:center;">30%</td>
+                <td></td>
+                <td>  Males 40 - 54% <br>
+                    Females 36 - 47%
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
 </body>
 </html>
+
 
 
 {{-- <table>
