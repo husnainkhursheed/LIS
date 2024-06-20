@@ -58,13 +58,28 @@ class TestController extends Controller
             'cost' => 'required',
             'reference_range' => 'required',
        ]);
-
+       $reference_range = $request->input('reference_range');
         $test = new Test();
         $test->name  = $request->input('name');
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
         $test->reference_range  = $request->input('reference_range');
+        if($reference_range == 'basic_ref'){
+            $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
+            $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+        }else if($reference_range == 'optional_ref'){
+            $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
+            $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
+            $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+        }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
 
@@ -90,6 +105,7 @@ class TestController extends Controller
             'cost' => 'required',
             'reference_range' => 'required',
        ]);
+        $reference_range = $request->input('reference_range');
 
         $test = Test::find($id);
         $test->name  = $request->input('name');
@@ -97,6 +113,21 @@ class TestController extends Controller
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
         $test->reference_range  = $request->input('reference_range');
+        if($reference_range == 'basic_ref'){
+            $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
+            $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+        }else if($reference_range == 'optional_ref'){
+            $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
+            $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
+            $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+        }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
 

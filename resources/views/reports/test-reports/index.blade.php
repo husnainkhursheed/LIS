@@ -68,6 +68,7 @@ use \Carbon\Carbon;
                                         <th>Access #</th>
                                         <th>Patient Name</th>
                                         <th>Date Received</th>
+                                        <th>Select ReportType</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -76,8 +77,35 @@ use \Carbon\Carbon;
                                         <tr>
                                             <td>{{ $testReport->test_number }}</td>
                                             <td>{{ $testReport->access_number }}</td>
+
                                             <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
                                             <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
+                                            <td>
+                                                <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
+                                                    @csrf
+                                                    <select class="" name="report_type" id="report_type" required>
+                                                        <option value="">Select Report Type</option>
+                                                        @foreach($testReport->unique_departments as $department)
+                                                            <option value="{{ $department }}">@if($department == 1)
+                                                                Biochemistry / Haematology
+                                                            @elseif($department == 2)
+                                                                Cytology / Gynecology
+                                                            @elseif($department == 3)
+                                                                Urinalysis / Microbiology
+                                                            @endif</option>
+                                                        {{-- <span>{{ $department }}</span><br> --}}
+                                                        @endforeach
+                                                    </select>
+                                                    <!-- Add other form fields as necessary -->
+                                                </form>
+                                                {{-- <div class="col-lg-12 mt-3">
+                                                    <div> --}}
+                                                        {{-- <label for="report_type" class="form-label">Select Report Type</label> --}}
+
+                                                    {{-- </div>
+                                                </div> --}}
+
+                                            </td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
@@ -310,50 +338,147 @@ use \Carbon\Carbon;
             }
         });
         jQuery(document).ready(function($) {
-        // When the document is ready, attach a click event to the "Edit" button
-        $('.edit-item-btn').on('click', function() {
-            // Get the ID from the data attribute
+            $('#SaveReport').on('click', function(event) {
+                event.preventDefault();
+                var itemId = $(this).data('id');
+                var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                 // Prevent the default link behavior
+                var reporttypeis = $('#report_type').val();
+                data = {
+                    report_type: reporttypeis,
+                };
 
-            var itemId = $(this).data('id');
-            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId + '/edit';
-            // $('#leadtype_form').attr('action', url);
-            $.ajax({
-                    url: url, // Adjust the route as needed
-                    type: 'GET',
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
                     success: function(response) {
-                        // Assuming the response has a 'leadType' key
-                        var sample = response.sample;
-                        var tests = response.sample.tests;
-                        // console.log("my practices ",sample);
-                        var testChargesSelect = $('#test_charges');
-                        testChargesSelect.empty(); // Clear existing options
-                        testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
-
-                        tests.forEach(function(test) {
-                            var option = $('<option></option>')
-                                .attr('value', test.id) // Adjust the value if needed
-                                .text(test.name); // Adjust the text if needed
-                            testChargesSelect.append(option);
-                        });
-
-                        // Update modal title
-                        // $('#exampleModalLabel').html("Edit Doctor");
-
-                        // Display the modal footer
-                        $('#showModal .modal-footer').css('display', 'block');
-
-                        // Change the button text
-                        // $('#add-btn').html("Update");
-                        var form = $('#leadtype_form');
-                        var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-                        $('#leadtype_form').attr('action', url);
+                        // Handle the success response
+                        console.log('Success:', response);
+                        // if (response.success) {
+                        //     Toastify({
+                        //         text: response.message,
+                        //         gravity: 'top',
+                        //         position: 'center',
+                        //         duration: 5000,
+                        //         close: true,
+                        //         backgroundColor: '#40bb82',
+                        //     }).showToast();
+                        // } else {
+                        //     var errors = response.message;
+                        //     var errorMessage = errors.join('\n');
+                        //     Toastify({
+                        //         text: errors,
+                        //         duration: 5000,
+                        //         gravity: 'top',
+                        //         position: 'left',
+                        //         backgroundColor: '#ff4444',
+                        //     }).showToast();
+                        // }
 
                     },
                     error: function(xhr, status, error) {
-                        console.error(xhr, status, error);
-                        // Handle errors if needed
+                        console.error('Error:', xhr, status, error);
+
                     }
                 });
+            });
+        // When the document is ready, attach a click event to the "Edit" button
+        $('.edit-item-btn').on('click', function() {
+
+            // Get the ID from the data attribute
+            event.preventDefault();
+                var itemId = $(this).data('id');
+                // var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                 // Prevent the default link behavior
+                 $('#edittestreport' + itemId).submit();
+
+                // var reporttypeis = $('#report_type').val();
+                // data = {
+                //     report_type: reporttypeis,
+                // };
+                // $.ajaxSetup({
+                //     headers: {
+                //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                //     }
+                // });
+
+                // $.ajax({
+                //     url: url,
+                //     type: 'POST',
+                //     data: data,
+                //     success: function(response) {
+                //         // Handle the success response
+                //         console.log('Success:', response);
+                //         // if (response.success) {
+                //         //     Toastify({
+                //         //         text: response.message,
+                //         //         gravity: 'top',
+                //         //         position: 'center',
+                //         //         duration: 5000,
+                //         //         close: true,
+                //         //         backgroundColor: '#40bb82',
+                //         //     }).showToast();
+                //         // } else {
+                //         //     var errors = response.message;
+                //         //     var errorMessage = errors.join('\n');
+                //         //     Toastify({
+                //         //         text: errors,
+                //         //         duration: 5000,
+                //         //         gravity: 'top',
+                //         //         position: 'left',
+                //         //         backgroundColor: '#ff4444',
+                //         //     }).showToast();
+                //         // }
+
+                //     },
+                //     error: function(xhr, status, error) {
+                //         console.error('Error:', xhr, status, error);
+
+                //     }
+                // });
+
+            // var itemId = $(this).data('id');
+            // var url = '{{ url("/reports/test-reports") }}';
+            // // $('#leadtype_form').attr('action', url);
+            // $.ajax({
+            //         url: url, // Adjust the route as needed
+            //         type: 'Post',
+            //         success: function(response) {
+            //             // Assuming the response has a 'leadType' key
+            //             var sample = response.sample;
+            //             var tests = response.sample.tests;
+            //             // console.log("my practices ",sample);
+            //             var testChargesSelect = $('#test_charges');
+            //             testChargesSelect.empty(); // Clear existing options
+            //             testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
+
+            //             tests.forEach(function(test) {
+            //                 var option = $('<option></option>')
+            //                     .attr('value', test.id) // Adjust the value if needed
+            //                     .text(test.name); // Adjust the text if needed
+            //                 testChargesSelect.append(option);
+            //             });
+
+            //             // Update modal title
+            //             // $('#exampleModalLabel').html("Edit Doctor");
+
+            //             // Display the modal footer
+            //             $('#showModal .modal-footer').css('display', 'block');
+
+            //             // Change the button text
+            //             // $('#add-btn').html("Update");
+            //             var form = $('#leadtype_form');
+            //             var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+            //             $('#leadtype_form').attr('action', url);
+
+            //         },
+            //         error: function(xhr, status, error) {
+            //             console.error(xhr, status, error);
+            //             // Handle errors if needed
+            //         }
+            //     });
 
         });
 

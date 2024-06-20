@@ -77,7 +77,7 @@
                                     <tr>
                                         <td>{{ $note->note_code }}</td>
                                         <td>
-                                            @if($note->department == 1)
+                                            @if($note->department == 1)    
                                                 Biochemistry / Haematology
                                             @elseif($note->department == 2)
                                                 Cytology / Gynecology

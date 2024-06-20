@@ -261,33 +261,71 @@
                                         placeholder="Enter Cost" required />
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
+                                <label for="reference_range" class="form-label">Reference range</label>
                                 <div>
-                                    <label for="reference_range" class="form-label">Reference range</label>
-                                    <input type="text" id="reference_range" name="reference_range" class="form-control"
-                                        placeholder="Enter Reference Range" required />
+
+                                    <input type="radio" id="basic_ref" name="reference_range"
+                                         required  value="basic_ref" checked/>
+                                        <label for="basic_ref" class="form-label">Basic Reference range</label>
+                                    <input type="radio" id="optional_ref" class="ms-4" name="reference_range"
+                                         required value="optional_ref" />
+                                    <label for="optional_ref" class="form-label">Reference range with optional sex</label>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label for="" class="form-label">High value with optional sex</label>
-                                <div>
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
-                                </div>
+                            <div class="row" id="basicValues">
+                                {{-- <label for="" class="form-label">High value with optional sex</label> --}}
+                                {{-- <div> --}}
+                                    <div class="col-lg-6">
+                                        <div>
+                                            <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
+                                            <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
+                                                placeholder="Enter Low Value" required />
+                                        </div>
+                                    </div>
+                                        {{-- <label for="male" class="form-label">High Value</label> --}}
+                                    <div class="col-lg-6">
+                                        <div>
+                                            <label for="basic_high_value_ref_range" class="form-label">High Value</label>
+                                            <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
+                                                placeholder="Enter High Value" required />
+                                        </div>
+                                    </div>
+                                    {{-- <label for="female" class="form-label">Low value</label> --}}
+                                {{-- </div> --}}
                             </div>
-                            <div class="col-lg-6">
-                                <label for="" class="form-label">Low value with optional sex </label>
-                                <div>
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
+                            <div class="row" id="optionalValues">
+                                <h5 for="" class="form-label text-black fw-bolder">Male </h5>
+                                <div class="col-lg-6">
+                                    <div>
+                                        <label for="male_low_value_ref_range" class="form-label">Low Value</label>
+                                        <input type="text" id="male_low_value_ref_range" class="form-control" name="male_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
+                                    </div>
+                                </div>
+                                    {{-- <label for="male" class="form-label">High Value</label> --}}
+                                <div class="col-lg-6">
+                                    <div>
+                                        <label for="male_high_value_ref_range" class="form-label">High Value</label>
+                                        <input type="text" id="male_high_value_ref_range" class="form-control" name="male_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
+                                    </div>
+                                </div>
+                                <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
+                                <div class="col-lg-6">
+                                    <div>
+                                        <label for="female_low_value_ref_range" class="form-label">Low Value</label>
+                                        <input type="text" id="female_low_value_ref_range" class="form-control" name="female_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
+                                    </div>
+                                </div>
+                                    {{-- <label for="female" class="form-label">High Value</label> --}}
+                                <div class="col-lg-6">
+                                    <div>
+                                        <label for="female_high_value_ref_range" class="form-label">High Value</label>
+                                        <input type="text" id="female_high_value_ref_range" class="form-control" name="female_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -370,6 +408,36 @@
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
         $(document).ready(function() {
+            // Hide optionalValues by default
+            $('#optionalValues').hide();
+            $('#basicValues').show();
+
+            // Show/hide fields based on selected reference range
+            $('input[name="reference_range"]').on('change', function() {
+                if (this.value === 'basic_ref') {
+                    $('#basicValues').show();
+                    $('#optionalValues').hide();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', true);
+                    $('#basic_high_value_ref_range').prop('required', true);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
+                } else if (this.value === 'optional_ref') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').show();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', true);
+                    $('#male_high_value_ref_range').prop('required', true);
+                    $('#female_low_value_ref_range').prop('required', true);
+                    $('#female_high_value_ref_range').prop('required', true);
+                }
+            });
+        });
+        $(document).ready(function() {
             var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
 
             // Check if the current user is in the "Lab" role
@@ -412,6 +480,44 @@
                         $('#specimen_type').val(test.specimen_type);
                         $('#cost').val(test.cost);
                         $('#reference_range').val(test.reference_range);
+
+                        if (test.reference_range === 'basic_ref') {
+                            $('#basic_ref').prop('checked', true);
+                            $('#optional_ref').prop('checked', false);
+                            $('#basicValues').show();
+                            $('#optionalValues').hide();
+                            // Make fields required
+                            $('#basic_low_value_ref_range').prop('required', true);
+                            $('#basic_high_value_ref_range').prop('required', true);
+                            $('#male_low_value_ref_range').prop('required', false);
+                            $('#male_high_value_ref_range').prop('required', false);
+                            $('#female_low_value_ref_range').prop('required', false);
+                            $('#female_high_value_ref_range').prop('required', false);
+                            $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
+                            $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
+                            $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
+                            $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                        } else if (test.reference_range === 'optional_ref') {
+                            $('#basic_ref').prop('checked', false);
+                            $('#optional_ref').prop('checked', true);
+                            $('#basicValues').hide();
+                            $('#optionalValues').show();
+                            // Make fields required
+                            $('#basic_low_value_ref_range').prop('required', false);
+                            $('#basic_high_value_ref_range').prop('required', false);
+                            $('#male_low_value_ref_range').prop('required', true);
+                            $('#male_high_value_ref_range').prop('required', true);
+                            $('#female_low_value_ref_range').prop('required', true);
+                            $('#female_high_value_ref_range').prop('required', true);
+                            $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
+                            $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
+                            $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
+                            $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                        }
                         // $('#area').val(test.area);
                         // $('#email').val(test.email);
 
@@ -468,7 +574,21 @@
             $('#department').val('');
             $('#specimen_type ').val('');
             $('#cost').val('');
-            $('#reference_range').val('');
+            $('#basic_ref').prop('checked', true);
+            $('#basicValues').show();
+            $('#optionalValues').hide();
+            $('#basic_low_value_ref_range').prop('required', true);
+            $('#basic_high_value_ref_range').prop('required', true);
+            $('#male_low_value_ref_range').prop('required', false);
+            $('#male_high_value_ref_range').prop('required', false);
+            $('#female_low_value_ref_range').prop('required', false);
+            $('#female_high_value_ref_range').prop('required', false);
+            $('#basic_low_value_ref_range').val('');
+            $('#basic_high_value_ref_range').val('');
+            $('#male_low_value_ref_range').val('');
+            $('#male_high_value_ref_range').val('');
+            $('#female_low_value_ref_range').val('');
+            $('#female_high_value_ref_range').val('');
             // $('#surgeries').val("");
             // $('#surgeries').val("").trigger('change');
 
