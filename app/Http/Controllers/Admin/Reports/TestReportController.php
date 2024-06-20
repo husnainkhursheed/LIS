@@ -10,6 +10,7 @@ use App\Models\CustomDropdown;
 use App\Models\BiochemHaemoResults;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\CytologyGynecologyResults;
 
 class TestReportController extends Controller
@@ -214,4 +215,40 @@ class TestReportController extends Controller
             'alert-class' => 'alert-success',
         ]);
     }
+
+    public function signReport(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        // Check if the provided username matches the logged-in user's username
+        $user = Auth::user();
+        if ($user->email !== $request->email) {
+            return response()->json(['error' => 'Email does not match the logged-in user.'], 401);
+        }
+
+        // Check if the provided password matches the logged-in user's password
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json(['error' => 'Password is incorrect.'], 401);
+        }
+
+        // Find the test report
+        $testReport = TestReport::find($request->test_report_id);
+
+        // Check if the report is already signed
+        if ($testReport->signed_by) {
+            // Fetch the user who signed the report
+            $signedByUser = TestReport::find($testReport->signed_by);
+            return response()->json(['error' => 'Report already signed by ' . $signedByUser->name . ' on ' . $testReport->updated_at->format('d-m-Y')], 400);
+        }
+
+        // Update the test-reports table with the user ID in the signed_by column
+        $testReport->signed_by = $user->id;
+        $testReport->save();
+
+        return response()->json(['success' => 'Report signed successfully.']);
+    }
+
 }
