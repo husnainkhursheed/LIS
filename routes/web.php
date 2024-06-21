@@ -108,14 +108,8 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('/test-reports/{id}', [TestReportController::class, 'show'])->name('test-reports.show');
         Route::get('/test-reports/{id}/edit', [TestReportController::class, 'edit'])->name('test-reports.edit');
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
-        Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
-
-        Route::get('/fetch-notes-cytology', [TestReportController::class, 'fetchNotesCytology'])->name('fetch-notes-cytology');
-        Route::get('/fetch-notes-urinalysis', [TestReportController::class, 'fetchNotesUrinalysis'])->name('fetch-notes-urinalysis');
-
         Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
-
     });
 
     Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
