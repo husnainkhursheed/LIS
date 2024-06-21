@@ -214,4 +214,27 @@ class TestReportController extends Controller
             'alert-class' => 'alert-success',
         ]);
     }
+
+    public function delinktest(Request $request, $id){
+        $sample_id = $request->sample_id;
+        $sample = Sample::find($sample_id);
+        $sample->tests()->detach($id);
+
+        $testReport = TestReport::where([
+            'sample_id' => $sample_id,
+            'test_id' => $id
+        ])->first();
+        if($testReport) {
+            $testReport->delete();
+        }
+
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detached successfully!',
+            'alert-class' => 'alert-success',
+        ]);
+    }
 }

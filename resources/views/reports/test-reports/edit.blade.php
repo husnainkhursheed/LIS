@@ -164,17 +164,18 @@ use \Carbon\Carbon;
                         id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
                         Test</button>
                 </div>
-                <table id="" class="table table-striped display table-responsive rounded">
+                <table id="tests-table"  class="table table-striped display table-responsive rounded">
                     <thead>
                         <tr>
                             <th class="rounded-start-3 ">Description</th>
                             <th>Test Results </th>
                             <th>Flag </th>
                             <th>Reference Range </th>
-                            <th class="rounded-end-3 ">Test Notes </th>
+                            <th >Test Notes </th>
+                            <th class="rounded-end-3 "></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody >
                             {{-- @foreach ($tests as $test)
                                 <tr>
                                     <td>
@@ -195,7 +196,7 @@ use \Carbon\Carbon;
                                     </td>
                                 </tr>
                             @endforeach --}}
-                            @foreach ($tests as $test)
+                            @foreach ($tests as $index => $test)
                                 @php
                                     $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
                                     // dd($testReport);
@@ -213,6 +214,7 @@ use \Carbon\Carbon;
                                     <td>
                                         <input type="text" data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][flag]" class="form-control" value="{{ $biochemHaemoResults->flag ?? '' }}" />
                                     </td>
+
                                     <td>
                                         <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][reference_range]" class="form-control" disabled>
                                             @if($test->reference_range == 'basic_ref')
@@ -225,6 +227,17 @@ use \Carbon\Carbon;
                                         </td>
                                     <td>
                                         <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                    </td>
+                                    <td>
+                                        @if ($index > 0)
+                                            <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $test->id }}" data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                    href="#deleteRecordModal">
+                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                </a>
+                                            </li>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -653,6 +666,7 @@ use \Carbon\Carbon;
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
+                        <input type="hidden" id="sample_id" name="sample_id" value="{{$sample->id}}">
                         <div class="row g-3">
                             <div class="col-lg-12">
                                 <div>
@@ -781,6 +795,39 @@ use \Carbon\Carbon;
         </div>
     </div>
 
+    <!--delete Modal -->
+    <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1"
+        aria-labelledby="deleteRecordLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="btn-close"></button>
+                </div>
+                <div class="modal-body p-5 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
+                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
+                    </lord-icon>
+                    <div class="mt-4 text-center">
+                        <h4 class="fs-semibold">You are about to delete a test ?</h4>
+                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your test will
+                            remove all of your information from our database.</p>
+                        <div class="hstack gap-2 justify-content-center remove">
+                            <button
+                                class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
+                                data-bs-dismiss="modal" id="deleteRecord-close"><i
+                                    class="ri-close-line me-1 align-middle"></i>
+                                Close</button>
+                                <input type="text" id="delete-record-id"  hidden>
+                            <button class="btn btn-danger" id="delete-record">Yes,
+                                Delete It!!</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 @section('script')
@@ -802,13 +849,40 @@ use \Carbon\Carbon;
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
         jQuery(document).ready(function($) {
+            $('#optionalValues').hide();
+            $('#basicValues').show();
+
+            // Show/hide fields based on selected reference range
+            $('input[name="reference_range"]').on('change', function() {
+                if (this.value === 'basic_ref') {
+                    $('#basicValues').show();
+                    $('#optionalValues').hide();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', true);
+                    $('#basic_high_value_ref_range').prop('required', true);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
+                } else if (this.value === 'optional_ref') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').show();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', true);
+                    $('#male_high_value_ref_range').prop('required', true);
+                    $('#female_low_value_ref_range').prop('required', true);
+                    $('#female_high_value_ref_range').prop('required', true);
+                }
+            });
             // When the document is ready, attach a click event to the "Edit" button
             $('.edit-item-btn').on('click', function() {
                 // Get the ID from the data attribute
 
-                var itemId = $(this).data('id');
-                var url = '{{ url('/reports/test-reports') }}' + '/' + itemId;
-                $('#leadtype_form').attr('action', url);
+                // var itemId = $(this).data('id');
+                // var url = '{{ url('/reports/test-reports') }}' + '/' + itemId;
+                // $('#leadtype_form').attr('action', url);
                 // $.ajax({
                 //         url: url, // Adjust the route as needed
                 //         type: 'GET',
@@ -863,8 +937,6 @@ use \Carbon\Carbon;
 
             });
 
-
-
             function resetModal() {
                 // Reset modal titleq
                 $('#exampleModalLabel').html("Add Doctor");
@@ -874,7 +946,7 @@ use \Carbon\Carbon;
 
                 // Change the button text
                 $('#add-btn').html("Add");
-                $('#leadtype_form').attr('action', '{{ url('/doctor') }}');
+                // $('#leadtype_form').attr('action', '{{ url('/doctor') }}');
                 // if ( $('#patch').length) {
                 //     $('#patch').remove();
                 // }
@@ -896,32 +968,54 @@ use \Carbon\Carbon;
                 resetModal();
             });
 
-            $('.remove-item-btn').on('click', function() {
+            $(document).on('click', '.remove-item-btn', function() {
+                // event.preventDefault();
+            // $('.remove-item-btn').on('click', function() {
                 var itemId = $(this).data('id');
+                var sampleid = $(this).data('sampleid');
                 $('#delete-record').attr('data-id', itemId);
+                $('#delete-record-id').val(itemId);
+                $('#delete-record').attr('data-sampleid', sampleid);
             });
 
-            $('#delete-record').on('click', function() {
-                var itemId = $(this).data('id');
-                var url = '/doctor/' + itemId;
+            $(document).on('click', '#delete-record', function(event) {
+            // $('#delete-record').on('click', function() {
+                event.preventDefault();
+                // var itemId = $('#delete-record').data('id');
+                var sampleid = $('#sampleid').val();
+                var deleterecordid = $('#delete-record-id').val();
+                var url = '{{ url("/reports/delink-test") }}' + '/' + deleterecordid;
+                 // Prevent the default link behavior
+                // var reporttypeis = $('#report_type').val();
+                data = {
+                    sample_id: sampleid,
+                };
+
 
                 $.ajax({
                     url: url,
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
+                    type: 'POST',
+                    data: data,
                     success: function(response) {
-                        // Handle success, e.g., remove the deleted item from the UI
-                        console.log(response);
-                        $('#deleteRecordModal').modal('hide');
-                        location.reload();
+                        // Handle the success response
+                        console.log('Success:', response);
+
+                        if (response.success) {
+                            // Remove the corresponding row from the table
+                            $('tr').has('a[data-id="' + deleterecordid + '"]').remove();
+                            // alert(response.message); // Optionally, show a success message
+                            $('#deleteRecordModal').modal('hide');
+                        }
+
+
                     },
                     error: function(xhr, status, error) {
-                        // Handle error
-                        console.error(xhr, status, error);
+                        console.error('Error:', xhr, status, error);
                     }
                 });
+
+
+
             });
 
 
@@ -1019,6 +1113,51 @@ use \Carbon\Carbon;
                     error: function(xhr, status, error) {
                         console.error('Error:', xhr, status, error);
 
+                    }
+                });
+            });
+
+
+            $('#leadtype_form').on('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            var sampleid = $('#sampleid').val();
+                            // Append the new test to the table
+                            var newRow = '<tr>' +
+                            // '<td></td>' +
+                            '<td><input data-test-id="' + response.test.id + '" type="text" name="tests[' + response.test.id + '][description]" class="form-control" value="' + response.test.name + '" disabled /><input type="text" name="tests[' + response.test.id + '][id]" class="form-control" value="' + response.test.id + '" hidden disabled /></td>' +
+                            '<td><input data-test-id="' + response.test.id + '" type="text" name="tests[' + response.test.id + '][test_results]" class="form-control" value="" /></td>' +
+                            '<td><input data-test-id="' + response.test.id + '" type="text" name="tests[' + response.test.id + '][flag]" class="form-control" value="" /></td>' +
+                            '<td><textarea data-test-id="' + response.test.id + '" name="tests[' + response.test.id + '][reference_range]" class="form-control" disabled>' +
+                            (response.test.reference_range === 'basic_ref' ? response.test.basic_low_value_ref_range + '-' + response.test.basic_high_value_ref_range :
+                            'Male: ' + response.test.male_low_value_ref_range + '-' + response.test.male_high_value_ref_range + '<br>Female: ' + response.test.female_low_value_ref_range + '-' + response.test.female_high_value_ref_range) +
+                            '</textarea></td>' +
+                            '<td><textarea data-test-id="' + response.test.id + '" name="tests[' + response.test.id + '][test_notes]" class="form-control"></textarea></td>' +
+                            '<td><li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete"><a class="remove-item-btn" data-id="' + response.test.id + '" data-sampleid="'+sampleid+'" data-bs-toggle="modal" href="#deleteRecordModal"><i class="ri-delete-bin-fill align-bottom text-muted"></i></a></li></td>' +
+                            '</tr>';
+                            if (response.test.department === '1') {
+                                $('#tests-table tbody').append(newRow);
+                            }
+
+                            // Close the modal
+                            $('#showModal').modal('hide');
+
+                            // Show a success message (optional)
+                            $('#leadtype_form')[0].reset();
+                        } else {
+                            // Show an error message (optional)
+                            alert('An error occurred');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle the error
+                        alert('An error occurred: ' + error);
                     }
                 });
             });
