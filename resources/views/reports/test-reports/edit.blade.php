@@ -32,6 +32,8 @@ use \Carbon\Carbon;
             background-color: #22416b;
             transition: 0.3s;
         }
+
+
     </style>
     {{-- //start  --}}
     <div class="container-fluid">
@@ -332,6 +334,7 @@ use \Carbon\Carbon;
                     .modal.right .modal-body {
                         padding: 15px 15px 80px;
                     }
+
                     .note-item {
                         cursor: pointer;
                         background-color: #f2fafc;
@@ -351,8 +354,7 @@ use \Carbon\Carbon;
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy
-                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
-                                    Note</span>
+                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add Note</span>
                             </label>
                             {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
                             <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control" value="" >{{$cytologyGynecologyResults->specimen_adequacy  ?? ''}}</textarea>
@@ -361,11 +363,11 @@ use \Carbon\Carbon;
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
-                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
-                                    Add Note</span>
+                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation"> Add Note</span>
                             </label>
                             <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control">{{$cytologyGynecologyResults->diagnostic_interpretation  ?? ''}}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -655,6 +657,60 @@ use \Carbon\Carbon;
             @endif
         </div>
     </div>
+
+    <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="notesModalLabel">All Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notes-container">
+                        <!-- Notes will be loaded here via AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('.add-note').on('click', function() {
+                var targetTextarea = $($(this).data('target'));
+                $('#notesModal').modal('show');
+
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ route("fetch-notes-cytology") }}',
+                    success: function(notes) {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+
+                        if (notes.length > 0) {
+                            notes.forEach(function(note) {
+                                notesContainer.append('<div class="note-item">' + note + '</div>');
+                            });
+
+                            // Add click event to each note-item
+                            $('.note-item').on('click', function() {
+                                var selectedNote = $(this).text();
+                                var currentText = targetTextarea.val();
+                                targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedNote);
+                                $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a note
+                            });
+                        } else {
+                            notesContainer.append('<p>No notes available.</p>');
+                        }
+                    },
+                    error: function() {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+                        notesContainer.append('<p>Error fetching notes.</p>');
+                    }
+                });
+            });
+        });
+    </script>
 
     <!-- Dropdown Modal -->
     <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
