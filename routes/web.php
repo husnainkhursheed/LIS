@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 // use App\Http\Controllers\CustomDropdownController;
 use App\Http\Controllers\Admin\Setup\NoteController;
-use App\Http\Controllers\Admin\Setup\CustomDropdownController;
 use App\Http\Controllers\Admin\Setup\TestController;
 use App\Http\Controllers\Admin\Setup\DoctorController;
 use App\Http\Controllers\Admin\Setup\SampleController;
@@ -13,8 +12,10 @@ use App\Http\Controllers\Admin\Setup\PatientController;
 use App\Http\Controllers\Admin\Setup\PracticeController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
 use App\Http\Controllers\Admin\Reports\TestReportController;
+use App\Http\Controllers\Admin\Setup\CustomDropdownController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
 use App\Http\Controllers\Admin\UserManagement\UsersController;
+use App\Http\Controllers\Admin\Setup\SenstivityItemsController;
 use App\Http\Controllers\Admin\UserManagement\PermissionController;
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +93,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/note/{id}', [NoteController::class, 'update'])->name('note.update');
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
+    Route::get('/profile', [SenstivityItemsController::class, 'index'])->name('profile.index');
+    Route::post('/profile', [SenstivityItemsController::class, 'store'])->name('profile.store');
+    Route::get('/profile/{id}/edit', [SenstivityItemsController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/{id}', [SenstivityItemsController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/{id}', [SenstivityItemsController::class, 'destroy'])->name('profile.destroy');
+
     Route::resource('/sample', SampleController::class);
 
     Route::prefix('reports')->group(function () {
@@ -102,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/test-reports/{id}/edit', [TestReportController::class, 'edit'])->name('test-reports.edit');
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
+        Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
     });
 
     Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
@@ -114,13 +122,13 @@ Route::middleware(['auth'])->group(function () {
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
-    Route::get('/profile', function () {
-        $employee = \App\Models\MainEmployee::find(1);
-        // dd($employee);
-        // $practices = SetupPractice::where('is_active', 1)->get();
-        // $genders = SetupGender::all();
-        return view('employee.profile',compact('employee'));
-    });
+    // Route::get('/profile', function () {
+    //     $employee = \App\Models\MainEmployee::find(1);
+    //     // dd($employee);
+    //     // $practices = SetupPractice::where('is_active', 1)->get();
+    //     // $genders = SetupGender::all();
+    //     return view('employee.profile',compact('employee'));
+    // });
 
 
 
