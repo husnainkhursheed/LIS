@@ -502,7 +502,7 @@
         <div class="fixed-bottom mb-4">
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item ">
-                    <a class="nav-link menu-link d-flex gap-2 align-middle" href="javascript:void();"  onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <a style="width: fit-content;" class="nav-link menu-link d-flex gap-2 align-middle" href="javascript:void();"  onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/md-log-out.png') }}" alt="" height="18">
                         </span>
