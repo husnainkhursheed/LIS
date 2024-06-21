@@ -11,8 +11,8 @@ use App\Models\BiochemHaemoResults;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\CytologyGynecologyResults;
 use App\Models\Note;
+use App\Models\CytologyGynecologyResults;
 
 class TestReportController extends Controller
 {
@@ -217,6 +217,28 @@ class TestReportController extends Controller
         ]);
     }
 
+    public function delinktest(Request $request, $id){
+        $sample_id = $request->sample_id;
+        $sample = Sample::find($sample_id);
+        $sample->tests()->detach($id);
+
+        $testReport = TestReport::where([
+            'sample_id' => $sample_id,
+            'test_id' => $id
+        ])->first();
+        if($testReport) {
+            $testReport->delete();
+        }
+
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detached successfully!',
+            'alert-class' => 'alert-success',
+        ]);
+    }
 
     public function signReport(Request $request)
     {
@@ -252,6 +274,7 @@ class TestReportController extends Controller
 
         return response()->json(['success' => 'Report signed successfully.']);
     }
+
     public function fetchNotesCytology()
     {
         //Cytology / Gynecology
@@ -266,29 +289,4 @@ class TestReportController extends Controller
 
         return response()->json($notesUrinalysis);
     }
-
-
-    public function delinktest(Request $request, $id){
-        $sample_id = $request->sample_id;
-        $sample = Sample::find($sample_id);
-        $sample->tests()->detach($id);
-
-        $testReport = TestReport::where([
-            'sample_id' => $sample_id,
-            'test_id' => $id
-        ])->first();
-        if($testReport) {
-            $testReport->delete();
-        }
-
-
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Detached successfully!',
-            'alert-class' => 'alert-success',
-        ]);
-    }
-
 }
