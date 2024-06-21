@@ -103,6 +103,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
         Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
+
+        Route::get('/fetch-notes-cytology', [TestReportController::class, 'fetchNotesCytology'])->name('fetch-notes-cytology');
+        Route::get('/fetch-notes-urinalysis', [TestReportController::class, 'fetchNotesUrinalysis'])->name('fetch-notes-urinalysis');
+
     });
 
     Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');

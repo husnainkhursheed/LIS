@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\CytologyGynecologyResults;
+use App\Models\Note;
 
 class TestReportController extends Controller
 {
@@ -249,6 +250,20 @@ class TestReportController extends Controller
         $testReport->save();
 
         return response()->json(['success' => 'Report signed successfully.']);
+    }
+    public function fetchNotesCytology()
+    {
+        //Cytology / Gynecology
+        $notesCytology = Note::where('department',2)->pluck('note_code'); // Adjust this query to match your data structure
+
+        return response()->json($notesCytology);
+    }
+    public function fetchNotesUrinalysis()
+    {
+        //Urinalysis
+        $notesUrinalysis = Note::where('department',3)->pluck('note_code'); // Adjust this query to match your data structure
+
+        return response()->json($notesUrinalysis);
     }
 
 }

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Doctors
+    Report
 @endsection
 @section('css')
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
@@ -336,28 +336,45 @@ Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_rang
                 <div class="card-header py-1">
                     <h4 class="text-dark">Notes </h4>
                 </div>
+                <style>
+                    .modal.right .modal-dialog {
+                        position: fixed;
+                        right: 0;
+                        margin: auto;
+                        width: 30% !important;
+                        height: 100%;
+                    }
+                    .modal.right .modal-content {
+                        height: 100%;
+                        overflow-y: auto;
+                    }
+                    .modal.right .modal-body {
+                        padding: 15px 15px 80px;
+                    }
+                </style>
                 <div class="row pt-3">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="specimen_adequacy" class="form-label">Specimen Adequacy</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
-                            <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control"
-                                value="">{{ $cytologyGynecologyResults->specimen_adequacy ?? '' }}</textarea>
+                            <label for="specimen_adequacy" class="form-label">Specimen Adequacy
+                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add Note</span>
+                            </label>
+                            <textarea name="specimen_adequacy" id="specimen_adequacy" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->specimen_adequacy ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation</label>
-                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5"
-                                class="form-control">{{ $cytologyGynecologyResults->diagnostic_interpretation ?? '' }}</textarea>
-                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                            <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
+                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation"> Add Note</span>
+                            </label>
+                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->diagnostic_interpretation ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="recommend" class="form-label">Recommend</label>
+                            <label for="recommend" class="form-label">Recommend
+                                <span class="badge bg-info text-white add-note" data-target="#recommend"> Add Note</span>
+                            </label>
                             <textarea name="recommend" id="recommend" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->recommend ?? '' }}</textarea>
-                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
                     </div>
                 </div>
@@ -685,7 +702,59 @@ Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_rang
             @endif
         </div>
     </div>
+    <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="notesModalLabel">All Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notes-container">
+                        <!-- Notes will be loaded here via AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('.add-note').on('click', function() {
+                var targetTextarea = $($(this).data('target'));
+                $('#notesModal').modal('show');
 
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ route("fetch-notes-cytology") }}',
+                    success: function(notes) {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+
+                        if (notes.length > 0) {
+                            notes.forEach(function(note) {
+                                notesContainer.append('<div class="note-item">' + note + '</div>');
+                            });
+
+                            // Add click event to each note-item
+                            $('.note-item').on('click', function() {
+                                var selectedNote = $(this).text();
+                                var currentText = targetTextarea.val();
+                                targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedNote);
+                                $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a note
+                            });
+                        } else {
+                            notesContainer.append('<p>No notes available.</p>');
+                        }
+                    },
+                    error: function() {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+                        notesContainer.append('<p>Error fetching notes.</p>');
+                    }
+                });
+            });
+        });
+    </script>
     <!-- Dropdown Modal -->
     <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
