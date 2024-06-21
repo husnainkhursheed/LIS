@@ -32,6 +32,8 @@
             background-color: #22416b;
             transition: 0.3s;
         }
+
+
     </style>
     {{-- //start  --}}
     <div class="container-fluid">
@@ -393,37 +395,19 @@ Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_rang
                         width: 30% !important;
                         height: 100%;
                     }
-
                     .modal.right .modal-content {
                         height: 100%;
                         overflow-y: auto;
                     }
-
                     .modal.right .modal-body {
                         padding: 15px 15px 80px;
-                    }
-
-                    .note-item {
-                        cursor: pointer;
-                        background-color: #f2fafc;
-                        padding: 10px;
-                        margin-bottom: 10px;
-                        border-radius: 5px;
-                        transition: background-color 0.3s;
-                        font-weight:700;
-                    }
-
-                    .note-item:hover {
-                        background-color: #e9ecef;
-                        /* Hover background color */
                     }
                 </style>
                 <div class="row pt-3">
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy
-                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
-                                    Note</span>
+                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add Note</span>
                             </label>
                             <textarea name="specimen_adequacy" id="specimen_adequacy" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->specimen_adequacy ?? '' }}</textarea>
                         </div>
@@ -431,11 +415,9 @@ Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_rang
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
-                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
-                                    Add Note</span>
+                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation"> Add Note</span>
                             </label>
-                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5"
-                                class="form-control">{{ $cytologyGynecologyResults->diagnostic_interpretation ?? '' }}</textarea>
+                            <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->diagnostic_interpretation ?? '' }}</textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -794,26 +776,22 @@ Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_rang
 
                 $.ajax({
                     type: 'GET',
-                    url: '{{ route('fetch-notes-cytology') }}',
+                    url: '{{ route("fetch-notes-cytology") }}',
                     success: function(notes) {
                         var notesContainer = $('#notes-container');
                         notesContainer.empty();
 
                         if (notes.length > 0) {
                             notes.forEach(function(note) {
-                                // console.log(note.comment);
-                                notesContainer.append('<div class="note-item">' + note.comment +
-                                    '</div>');
+                                notesContainer.append('<div class="note-item">' + note + '</div>');
                             });
 
                             // Add click event to each note-item
                             $('.note-item').on('click', function() {
                                 var selectedNote = $(this).text();
                                 var currentText = targetTextarea.val();
-                                targetTextarea.val(currentText + (currentText ? '\n' :
-                                    '') + selectedNote);
-                                $('#notesModal').modal(
-                                'hide'); // Optional: Hide modal after selecting a note
+                                targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedNote);
+                                $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a note
                             });
                         } else {
                             notesContainer.append('<p>No notes available.</p>');
