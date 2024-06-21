@@ -380,7 +380,6 @@ use \Carbon\Carbon;
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', xhr, status, error);
-
                     }
                 });
             });

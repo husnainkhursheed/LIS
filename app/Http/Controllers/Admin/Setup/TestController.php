@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Setup;
 
 use App\Models\Test;
+use App\Models\Sample;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -82,6 +83,13 @@ class TestController extends Controller
         }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
+
+        if ($request->ajax()) {
+            $sample = Sample::find($request->sample_id);
+            $sample->tests()->attach($test);
+
+            return response()->json(['success' => true, 'test' => $test]);
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');

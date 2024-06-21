@@ -217,6 +217,7 @@ class TestReportController extends Controller
         ]);
     }
 
+
     public function signReport(Request $request)
     {
         $request->validate([
@@ -264,6 +265,30 @@ class TestReportController extends Controller
         $notesUrinalysis = Note::where('department',3)->pluck('note_code'); // Adjust this query to match your data structure
 
         return response()->json($notesUrinalysis);
+    }
+
+
+    public function delinktest(Request $request, $id){
+        $sample_id = $request->sample_id;
+        $sample = Sample::find($sample_id);
+        $sample->tests()->detach($id);
+
+        $testReport = TestReport::where([
+            'sample_id' => $sample_id,
+            'test_id' => $id
+        ])->first();
+        if($testReport) {
+            $testReport->delete();
+        }
+
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detached successfully!',
+            'alert-class' => 'alert-success',
+        ]);
     }
 
 }
