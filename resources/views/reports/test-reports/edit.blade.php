@@ -55,7 +55,8 @@ use \Carbon\Carbon;
                             <a class="nav-link" href="#">Delete</a>
                         </li>
                         <li class="nav-item border-nav px-5 rounded ">
-                            <a class="nav-link" href="#">Sign</a>
+                            {{-- <a class="nav-link" href="#">Sign</a> --}}
+                            <a class="nav-link" href="#" id="sign-link">Sign</a>
                         </li>
                         <li class="nav-item border-nav px-5 rounded ">
                             <a class="nav-link" href="#">Complete</a>
@@ -316,24 +317,62 @@ use \Carbon\Carbon;
                 <div class="card-header py-1">
                     <h4 class="text-dark">Notes </h4>
                 </div>
+                <style>
+                    .modal.right .modal-dialog {
+                        position: fixed;
+                        right: 0;
+                        margin: auto;
+                        width: 30% !important;
+                        height: 100%;
+                    }
+                    .modal.right .modal-content {
+                        height: 100%;
+                        overflow-y: auto;
+                    }
+                    .modal.right .modal-body {
+                        padding: 15px 15px 80px;
+                    }
+                    .note-item {
+                        cursor: pointer;
+                        background-color: #f2fafc;
+                        padding: 10px;
+                        margin-bottom: 10px;
+                        border-radius: 5px;
+                        transition: background-color 0.3s;
+                        font-weight:700;
+                    }
+
+                    .note-item:hover {
+                        background-color: #e9ecef;
+                        /* Hover background color */
+                    }
+                </style>
                 <div class="row pt-3">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="specimen_adequacy" class="form-label">Specimen Adequacy</label>
+                            <label for="specimen_adequacy" class="form-label">Specimen Adequacy
+                                <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
+                                    Note</span>
+                            </label>
                             {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
                             <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control" value="" >{{$cytologyGynecologyResults->specimen_adequacy  ?? ''}}</textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation</label>
+                            <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
+                                <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
+                                    Add Note</span>
+                            </label>
                             <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5" class="form-control">{{$cytologyGynecologyResults->diagnostic_interpretation  ?? ''}}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="recommend" class="form-label">Recommend</label>
+                            <label for="recommend" class="form-label">Recommend
+                                <span class="badge bg-info text-white add-note" data-target="#recommend"> Add Note</span>
+                            </label>
                             <textarea name="recommend" id="recommend" cols="30" rows="5" class="form-control">{{$cytologyGynecologyResults->recommend  ?? ''}}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
@@ -828,6 +867,104 @@ use \Carbon\Carbon;
         </div>
     </div>
 
+        {{-- sign modal  --}}
+        <!-- Modal -->
+            <div class="modal fade" id="signModal" tabindex="-1" aria-labelledby="signModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0">
+                        <div class="modal-header bg-primary-subtle p-3">
+                            <h5 class="modal-title" id="signModalLabel">Sign</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            @foreach ($tests as $test)
+                                <div id="sign-form">
+                                    <p class="text-dark fw-semibold fs-6">Please indicate that you agree with all that is in this
+                                        report by signing:</p>
+                                    <form class="tablelist-form" id="leadtype_form"
+                                        action="{{ route('test-reports.signReport') }}" method="POST" autocomplete="off">
+                                        @csrf
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="text" class="form-control" id="email" name="email">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="password" name="password">
+                                        </div>
+                                        <input type="hidden" id="test_report_id" name="test_report_id"
+                                            value="{{ $test->id ?? '' }}">
+                                        <div id="success-message" class="text-success" style="display: none;"></div>
+                                        <div id="error-message" class="text-danger" style="display: none;"></div>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success" id="sign-button">Sign</button>
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {{-- end sign modal  --}}
+
+    {{-- report notes modal  --}}
+    <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="notesModalLabel">All Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notes-container">
+                        <!-- Notes will be loaded here via AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('.add-note').on('click', function() {
+                var targetTextarea = $($(this).data('target'));
+                $('#notesModal').modal('show');
+
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ route("fetch-notes-cytology") }}',
+                    success: function(notes) {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+
+                        if (notes.length > 0) {
+                            notes.forEach(function(note) {
+                                notesContainer.append('<div class="note-item">' + note.comment + '</div>');
+                            });
+
+                            // Add click event to each note-item
+                            $('.note-item').on('click', function() {
+                                var selectedNote = $(this).text();
+                                var currentText = targetTextarea.val();
+                                targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedNote);
+                                $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a note
+                            });
+                        } else {
+                            notesContainer.append('<p>No notes available.</p>');
+                        }
+                    },
+                    error: function() {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+                        notesContainer.append('<p>Error fetching notes.</p>');
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection
 @section('script')
@@ -1314,7 +1451,54 @@ use \Carbon\Carbon;
         }
 
         // updateDropdown('Contraceptive');
+         // sign report working
+         $('#sign-link').click(function(event) {
+            event.preventDefault();
+            $('#signModal').modal('show');
+        });
 
+        $('#sign-button').click(function(event) {
+            event.preventDefault();
+
+            var formData = {
+                email: $('#email').val(),
+                password: $('#password').val(),
+                test_report_id: $('#test_report_id').val(),
+                _token: $('input[name="_token"]').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('test-reports.signReport') }}',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#success-message').text(response.success).show();
+                        $('#error-message').hide();
+                        // Hide the modal after a short delay to let the user read the success message
+                        setTimeout(function() {
+                            $('#signModal').modal('hide');
+                        }, 2000);
+                    }
+                },
+                error: function(response) {
+                    var errors = response.responseJSON;
+                    if (errors.error) {
+                        $('#error-message').text(errors.error).show();
+                        $('#success-message').hide();
+                    }
+                }
+            });
+
+            $('#signModal').on('hidden.bs.modal', function() {
+                // Reset form fields
+                $('#email').val('');
+                $('#password').val('');
+                $('#success-message').hide();
+                $('#error-message').hide();
+            });
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
