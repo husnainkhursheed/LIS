@@ -110,12 +110,23 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
         Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
+
         Route::post('/sensitivity/report', [TestReportController::class, 'getsensitivityitems'])->name('test-reports.getsensitivityitems');
+
+        // sign report
+        Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');
+        // report notes
+        Route::get('/fetch-notes-cytology', [TestReportController::class, 'fetchNotesCytology'])->name('fetch-notes-cytology');
+        Route::get('/fetch-notes-urinalysis', [TestReportController::class, 'fetchNotesUrinalysis'])->name('fetch-notes-urinalysis');
+
     });
 
     Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
+
+    // generate pdf route
+    Route::get('generate-pdf', [App\Http\Controllers\PDFController::class, 'generatePDF']);
 
     ////////////       end routes       /////////////////////
 
