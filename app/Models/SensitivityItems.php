@@ -13,11 +13,7 @@ class SensitivityItems extends Model
     protected $fillable = [
         'profile_id',
         'antibiotic',
-        // 'measure',
-        // 'designation',
-        // 'sensitivity',
-        // 'resistant',
-        // 'intermediate',
+        
     ];
 
     public function profile()
