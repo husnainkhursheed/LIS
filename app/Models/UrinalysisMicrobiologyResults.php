@@ -34,6 +34,8 @@ class UrinalysisMicrobiologyResults extends Model
         'crystals',
         'specimen',
         'procedure',
+        'specimen_note',
+        'sensitivity_profiles',
         'sensitivity',
         'review',
     ];

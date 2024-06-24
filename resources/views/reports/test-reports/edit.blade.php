@@ -33,6 +33,9 @@ use \Carbon\Carbon;
             transition: 0.3s;
         }
 
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #eff2f7;
+        }
 
     </style>
     {{-- //start  --}}
@@ -130,7 +133,7 @@ use \Carbon\Carbon;
                         <label for="test_number" class="form-label">Tests Requested</label>
                         @php
                         // Assuming $sample->tests is a collection or array of test objects
-                            $testNames = $sample->tests->pluck('name')->implode(', ');
+                            $testNames = $tests->pluck('name')->implode(', ');
                         @endphp
                         <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $testNames }}" disabled />
                     </div>
@@ -251,19 +254,19 @@ use \Carbon\Carbon;
 
               {{-- Cytology / Gynecology Test Results  --}}
             @if ($reporttype == 2)
-            @foreach ($tests as $test)
-                @php
-                    $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
-                    // dd($testReport);
-                    $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-                    // dd($biochemHaemoResults);
+                @foreach ($tests as $test)
+                    @php
+                        $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
+                        // dd($testReport);
+                        $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+                        // dd($biochemHaemoResults);
 
-                    $testIds = $tests->pluck('id')->implode(',');
+                        $testIds = $tests->pluck('id')->implode(',');
 
-                @endphp
+                    @endphp
 
-            @endforeach
-            <input type="hidden" id="test_id" name="test_id[]" value="{{$testIds}}" hidden>
+                @endforeach
+                <input type="hidden" id="test_id" name="test_id[]" value="{{$testIds}}" hidden>
                 <div class="card-header py-1">
                     <h4 class="text-dark">Cytology / Gynecology Test Results </h4>
                 </div>
@@ -383,6 +386,19 @@ use \Carbon\Carbon;
             @endif
              {{-- Urinalysis / Microbiology Test Results  --}}
             @if ($reporttype == 3)
+                @foreach ($tests as $test)
+                    @php
+                        $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
+                        // dd($testReport);
+                        $urinalysisMicrobiologyResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
+                        // dd(json_decode($urinalysisMicrobiologyResults->sensitivity_profiles));
+
+                        $testIds = $tests->pluck('id')->implode(',');
+
+                    @endphp
+
+                @endforeach
+                <input type="hidden" id="urinalysis_test_id" name="urinalysis_test_id[]" value="{{$testIds}}" hidden>
                 <div class="card-header py-1">
                     <h4 class="text-dark">Urinalysis / Microbiology Test Results </h4>
                 </div>
@@ -415,13 +431,13 @@ use \Carbon\Carbon;
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="s_gravity" class="form-label">S. Gravity</label>
-                                                <input type="number" id="s_gravity" name="s_gravity" class="form-control" value="" />
+                                                <input type="number" id="s_gravity" name="s_gravity" class="form-control" value="{{ $urinalysisMicrobiologyResults->s_gravity ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="ph" class="form-label">PH</label>
-                                                <input type="text" id="ph" name="ph" class="form-control" value=""  />
+                                                <input type="text" id="ph" name="ph" class="form-control" value="{{ $urinalysisMicrobiologyResults->ph ?? '' }}"  />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -431,7 +447,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="bilirubin" id="Bilirubin">
                                                         @foreach ($bilirubinropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -444,7 +460,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="blood" id="Blood">
                                                         @foreach ($blooddropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->blood === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -457,7 +473,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="leucocytes" id="Leucocytes">
                                                         @foreach ($leucocytesdropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->leucocytes === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -470,7 +486,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="glucose" id="Glucose">
                                                         @foreach ($glucosedropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->glucose === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -483,7 +499,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="nitrite" id="Nitrite">
                                                         @foreach ($nitritedropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->nitrite === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -496,7 +512,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="ketones" id="Ketones">
                                                         @foreach ($ketonesdropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->ketones === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -509,7 +525,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="urobilinogen" id="Urobilinogen">
                                                         @foreach ($urobilinogendropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->urobilinogen === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -522,7 +538,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="proteins" id="Proteins">
                                                         @foreach ($proteinsdropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->proteins === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -531,13 +547,13 @@ use \Carbon\Carbon;
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="colour" class="form-label">Colour</label>
-                                                <input type="text" id="colour" name="colour" class="form-control" value=""/>
+                                                <input type="text" id="colour" name="colour" class="form-control" value="{{ $urinalysisMicrobiologyResults->colour ?? '' }}"/>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="appearance" class="form-label">Appearance</label>
-                                                <input type="text" id="appearance" name="appearance" class="form-control" value=""/>
+                                                <input type="text" id="appearance" name="appearance" class="form-control" value="{{ $urinalysisMicrobiologyResults->appearance ?? '' }}"/>
                                             </div>
                                         </div>
                                     </div>
@@ -553,7 +569,7 @@ use \Carbon\Carbon;
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="epith" class="form-label">Epith</label>
-                                                <input type="text" id="epith" name="epith" class="form-control" value="" />
+                                                <input type="text" id="epith_cells" name="epith_cells" class="form-control" value="{{ $urinalysisMicrobiologyResults->epith_cells ?? '' }}" />
                                             </div>
                                         </div>
 
@@ -564,7 +580,7 @@ use \Carbon\Carbon;
                                                     > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                                     <select class="js-example-basic-multiple" name="bacteria " id="Bacteria">
                                                         @foreach ($bacteriadropdown as $test)
-                                                            <option value="{{ $test->value }}" {{ isset($cytologyGynecologyResults) && $cytologyGynecologyResults->bilirubin === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
+                                                            <option value="{{ $test->value }}" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->bacteria === $test->value ? 'selected' : '' }}>{{ $test->value }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -573,43 +589,43 @@ use \Carbon\Carbon;
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="white_cells" class="form-label">White cells </label>
-                                                <input type="text" id="white_cells" name="white_cells " class="form-control" value="" />
+                                                <input type="text" id="white_cells" name="white_cells " class="form-control" value="{{ $urinalysisMicrobiologyResults->white_cells ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="yeast" class="form-label">Yeast  </label>
-                                                <input type="text" id="yeast " name="yeast" class="form-control" value="" />
+                                                <input type="text" id="yeast" name="yeast" class="form-control" value="{{ $urinalysisMicrobiologyResults->yeast ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="red_cells" class="form-label">Red Cells</label>
-                                                <input type="text" id="red_cells" name="red_cells" class="form-control" value="" />
+                                                <input type="text" id="red_cells" name="red_cells" class="form-control" value="{{ $urinalysisMicrobiologyResults->red_cells ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="trichomonas" class="form-label">Trichomonas </label>
-                                                <input type="text" id="trichomonas " name="trichomonas" class="form-control" value="" />
+                                                <input type="text" id="trichomonas" name="trichomonas" class="form-control" value="{{ $urinalysisMicrobiologyResults->trichomonas ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="casts" class="form-label">Casts  </label>
-                                                <input type="text" id="casts" name="casts" class="form-control" value="" />
+                                                <input type="text" id="casts" name="casts" class="form-control" value="{{ $urinalysisMicrobiologyResults->casts ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="crystals" class="form-label">Crystals   </label>
-                                                <input type="text" id="crystals" name="crystals" class="form-control" value="" />
+                                                <input type="text" id="crystals" name="crystals" class="form-control" value="{{ $urinalysisMicrobiologyResults->crystals ?? '' }}" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="specimen" class="form-label">Specimen</label>
-                                                <textarea  id="specimen" name="specimen" class="form-control" value="" ></textarea>
+                                                <textarea  id="specimen" name="specimen" class="form-control" value="" >{{ $urinalysisMicrobiologyResults->specimen ?? '' }}</textarea>
                                             </div>
                                         </div>
 
@@ -624,25 +640,94 @@ use \Carbon\Carbon;
                                 </div> --}}
                                 <div class="flex-grow-1 ms-2">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                    <h3 class="text-black">Type of Specimen :</h3>
+                                    <div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="procedure" class="form-label">Procedure </label>
                                                     <select class="js-example-basic-multiple" name="procedure" id="procedure">
-                                                        <option value="wet_prep">Wet Prep</option>
-                                                        <option value="gram_stain">Gram Stain</option>
-                                                        <option value="culture">Culture</option>
-                                                        <option value="stool">Stool</option>
+                                                        <option value="wet_prep" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'wet_prep' ? 'selected' : '' }}>Wet Prep</option>
+                                                        <option value="gram_stain" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'gram_stain' ? 'selected' : '' }}>Gram Stain</option>
+                                                        <option value="culture" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'culture' ? 'selected' : '' }}>Culture</option>
+                                                        <option value="stool" {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'stool' ? 'selected' : '' }}>Stool</option>
                                                     </select>
 
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="specimen_note" class="form-label">Note</label>
-                                                <textarea type="text" id="specimen_note" name="specimen_note" rows="5" class="form-control" value=""></textarea>
+                                                <textarea type="text" id="specimen_note" name="specimen_note" rows="5" class="form-control" value="">{{ $urinalysisMicrobiologyResults->specimen_note ?? '' }}</textarea>
                                             </div>
                                         </div>
-                                        {{-- <div class="col-md-4">
+                                    </div>
+
+
+                                        <h3 class="text-black">Sensitivity :</h3>
+                                        <form id="profileForm" class="d-flex align-items-center">
+                                            @csrf
+                                            <div class="form-group mb-0 mr-2 col-6">
+                                                <label for="profiles" class="mr-2">Select Profiles: <a href="{{route('profile.index')}}" target="blank"
+                                                    > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                                <select name="profiles[]" id="profiles" class="js-example-basic-multiple form-control" multiple>
+                                                    @php
+                                                        $sensitivityProfilesArray = !empty($urinalysisMicrobiologyResults->sensitivity_profiles) ? json_decode($urinalysisMicrobiologyResults->sensitivity_profiles, true) : [];
+                                                    @endphp
+                                                    @foreach($senstivityprofiles as $profile)
+                                                    <option value="{{ $profile->id }}" {{ in_array($profile->id, $sensitivityProfilesArray) ? 'selected' : '' }}>{{ $profile->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <button type="button" id="createReportButton" class="btn btn-primary ms-3 mt-4">Get Sensitivity Items</button>
+                                        </form>
+
+                                        <div id="reportContainer" class="mt-3">
+                                            @php
+                                            $sensitivityData = !empty($urinalysisMicrobiologyResults->sensitivity) ? json_decode($urinalysisMicrobiologyResults->sensitivity) : [];
+                                        @endphp
+
+                                        @if(!empty($sensitivityData))
+                                            @foreach($sensitivityData as $profile)
+                                                <div class="form-group">
+                                                    <label for="microorganism">Microorganism:</label>
+                                                    <input type="text" name="microorganism" class="form-control" value="{{ $profile->microorganism }}">
+                                                </div>
+
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Antibiotics</th>
+                                                            <th>MIC (ug/mL)</th>
+                                                            <th>Sensitive</th>
+                                                            <th>Resistant</th>
+                                                            <th>Intermediate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($profile->items as $item)
+                                                            <tr>
+                                                                <td>{{ $item->antibiotic }}</td>
+                                                                <td><input type="text" name="mic" class="form-control" value="{{ $item->mic }}"></td>
+                                                                <td>
+                                                                    <input type="radio" name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}" value="sensitive" {{ $item->sensitivity === 'sensitive' ? 'checked' : '' }}>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="radio" name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}" value="resistant" {{ $item->sensitivity === 'resistant' ? 'checked' : '' }}>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="radio" name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}" value="intermediate" {{ $item->sensitivity === 'intermediate' ? 'checked' : '' }}>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            @endforeach
+                                        @endif
+                                        </div>
+                                        {{-- <button type="button" id="saveReportButton" class="btn btn-success">Save Report</button> --}}
+
+                                        {{-- <div class="col-md-4">pp
                                             <div class="form-group">
                                                 <label for="test_number" class="form-label">Tests Requested</label>
                                                 <input type="text" id="test_number" name="test_number" class="form-control" value=""/>
@@ -1272,6 +1357,66 @@ use \Carbon\Carbon;
                         diagnostic_interpretation: $('#diagnostic_interpretation').val(),
                         recommend: $('#recommend').val()
                     };
+                } else if (reporttypeis == 3) {
+                    var reportData = [];
+                    $('#reportContainer .form-group').each(function() {
+
+                        var microorganism = $(this).find('input[type="text"]').val();
+                        console.log(microorganism);
+                        // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
+                        var items = [];
+
+                        $(this).next('table').find('tbody tr').each(function() {
+                            // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];
+                            var antibiotic = $(this).find('td:first').text();
+                            var mic = $(this).find('input[type="text"]').val();
+                            var sensitivity = $(this).find('input[type="radio"]:checked').val();
+
+                            items.push({
+                                antibiotic: antibiotic,
+                                mic: mic,
+                                sensitivity: sensitivity
+                            });
+                        });
+
+                        reportData.push({
+                            // profile_id: profileId,
+                            microorganism: microorganism,
+                            items: items
+                        });
+                    });
+
+                    console.log(reportData);
+                    data = {
+                        sampleid: $('#sampleid').val(),
+                        testIds: $('#urinalysis_test_id').val(),
+                        reporttype: reporttypeis,
+                        s_gravity: $('#s_gravity').val(),
+                        ph: $('#ph').val(),
+                        bilirubin: $('#Bilirubin').val(),
+                        blood: $('#Blood').val(),
+                        leucocytes: $('#Leucocytes').val(),
+                        glucose: $('#Glucose').val(),
+                        nitrite: $('#Nitrite').val(),
+                        ketones: $('#Ketones').val(),
+                        urobilinogen: $('#Urobilinogen').val(),
+                        proteins: $('#Proteins').val(),
+                        colour: $('#colour').val(),
+                        appearance: $('#appearance').val(),
+                        epith_cells: $('#epith_cells').val(),
+                        bacteria: $('#Bacteria').val(),
+                        white_cells: $('#white_cells').val(),
+                        yeast: $('#yeast').val(),
+                        red_cells: $('#red_cells').val(),
+                        trichomonas: $('#trichomonas').val(),
+                        casts: $('#casts').val(),
+                        crystals: $('#crystals').val(),
+                        specimen: $('#specimen').val(),
+                        procedure: $('#procedure').val(),
+                        specimen_note: $('#specimen_note').val(),
+                        sensitivity_profiles: $('#profiles').val(),
+                        sensitivity: JSON.stringify(reportData)
+                    };
                 }
 
                 $.ajax({
@@ -1547,6 +1692,111 @@ use \Carbon\Carbon;
                 }
             });
 
+
+
+        $('#createReportButton').click(function() {
+            var selectedProfiles = $('#profiles').val();
+            if (selectedProfiles.length > 0) {
+                $.ajax({
+                    url: '{{ route("test-reports.getsensitivityitems") }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                    },
+                    data: {
+                        profile_ids: selectedProfiles
+                    },
+                    success: function(data) {
+                        var reportHtml = '';
+                        data.forEach(function(profile) {
+                            reportHtml += `
+                                <div class="form-group">
+                                    <label for="microorganism_${profile.id}">Microorganism:</label>
+                                    <input type="text" name="microorganism[${profile.id}]" class="form-control" value="${profile.name}">
+                                </div>
+                            `;
+                            reportHtml += `
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Antibiotics</th>
+                                            <th>MIC (ug/mL)</th>
+                                            <th>Sensitive</th>
+                                            <th>Resistant</th>
+                                            <th>Intermediate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+                            profile.sensitivity_values.forEach(function(item) {
+                                reportHtml += `
+                                    <tr>
+                                        <td>${item.antibiotic}</td>
+                                        <td><input type="text" name="mic[${item.id}]" class="form-control"></td>
+                                        <td><input type="radio" name="sensitivity[${item.id}]" value="sensitive"></td>
+                                        <td><input type="radio" name="sensitivity[${item.id}]" value="resistant"></td>
+                                        <td><input type="radio" name="sensitivity[${item.id}]" value="intermediate"></td>
+                                    </tr>
+                                `;
+                            });
+                            reportHtml += `
+                                    </tbody>
+                                </table>
+                            `;
+                        });
+                        $('#reportContainer').html(reportHtml);
+                    }
+                });
+            } else {
+                alert('Please select at least one profile.');
+            }
+        });
+
+        $('#saveReportButton').click(function() {
+            var reportData = [];
+            $('#reportContainer .form-group').each(function() {
+
+                var microorganism = $(this).find('input[type="text"]').val();
+                console.log(microorganism);
+                // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
+                var items = [];
+
+                $(this).next('table').find('tbody tr').each(function() {
+                    // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];
+                    var antibiotic = $(this).find('td:first').text();
+                    var mic = $(this).find('input[type="text"]').val();
+                    var sensitivity = $(this).find('input[type="radio"]:checked').val();
+
+                    items.push({
+                        antibiotic: antibiotic,
+                        mic: mic,
+                        sensitivity: sensitivity
+                    });
+                });
+
+                reportData.push({
+                    // profile_id: profileId,
+                    microorganism: microorganism,
+                    items: items
+                });
+            });
+
+            console.log(reportData);
+
+            // $.ajax({
+            //     url: $('#saveReportForm').attr('action'),
+            //     method: 'POST',
+            //     data: {
+            //         _token: $('input[name="_token"]').val(),
+            //         reportData: JSON.stringify(reportData)
+            //     },
+            //     success: function(response) {
+            //         alert('Report saved successfully');
+            //     }
+            // });
+        });
+
+
             $('#signModal').on('hidden.bs.modal', function() {
                 // Reset form fields
                 $('#email').val('');
@@ -1555,6 +1805,7 @@ use \Carbon\Carbon;
                 $('#error-message').hide();
             });
         });
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>

@@ -8,11 +8,13 @@ use App\Models\TestReport;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
 use App\Models\BiochemHaemoResults;
+use App\Models\SensitivityProfiles;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Note;
 use App\Models\CytologyGynecologyResults;
+use App\Models\UrinalysisMicrobiologyResults;
 
 class TestReportController extends Controller
 {
@@ -83,7 +85,7 @@ class TestReportController extends Controller
         // Collect test reports with their related results
         $testReports = collect(); // Initialize as a collection
         foreach ($tests as $test) {
-            $testReport = TestReport::with('cytologyGynecologyResults')
+            $testReport = TestReport::with('urinalysisMicrobiologyResults')
                 ->where('sample_id', $sample->id)
                 ->where('test_id', $test->id)
                 ->first();
@@ -107,8 +109,21 @@ class TestReportController extends Controller
         $proteinsdropdown = CustomDropdown::where('dropdown_name', 'Proteins')->get();
         $bacteriadropdown = CustomDropdown::where('dropdown_name', 'Bacteria')->get();
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown'));
+        $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
+
+        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles'));
     }
+
+    public function getsensitivityitems(Request $request)
+    {
+        $profileIds = $request->input('profile_ids');
+        $profiles = SensitivityProfiles::with('sensitivityValues')
+            ->whereIn('id', $profileIds)
+            ->get();
+
+        return response()->json($profiles);
+    }
+
 
     public function saveReports(Request $request)
     {
@@ -176,6 +191,87 @@ class TestReportController extends Controller
                         'specimen_adequacy' => $data['specimen_adequacy'] ?? null,
                         'diagnostic_interpretation' => $data['diagnostic_interpretation'] ?? null,
                         'recommend' => $data['recommend'] ?? null
+                    ]
+                );
+                // CytologyGynecologyResults::updateOrCreate(
+                //     ['test_report_id' => $data['testReport']], // Condition to check
+                //     [ // Data to update or create
+                //         'history' => $data['history'],
+                //         'last_period' => $data['last_period'],
+                //         'contraceptive' => $data['contraceptive'],
+                //         'result' => $data['result'],
+                //         'previous_pap' => $data['previous_pap'],
+                //         'cervix_examination' => $data['cervix_examination'],
+                //         'specimen_adequacy' => $data['specimen_adequacy'],
+                //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
+                //         'recommend' => $data['recommend']
+                //     ]
+                // );
+            }
+            // Save the data into BiochemHaemoResults table
+            // CytologyGynecologyResults::updateOrCreate(
+            //     ['test_report_id' => $data['testReport']], // Condition to check
+            //     [ // Data to update or create
+            //         'history' => $data['history'],
+            //         'last_period' => $data['last_period'],
+            //         'contraceptive' => $data['contraceptive'],
+            //         'result' => $data['result'],
+            //         'previous_pap' => $data['previous_pap'],
+            //         'cervix_examination' => $data['cervix_examination'],
+            //         'specimen_adequacy' => $data['specimen_adequacy'],
+            //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
+            //         'recommend' => $data['recommend']
+            //     ]
+            // );
+        }
+        if ($data['reporttype'] == 3) {
+            $test_ids = explode(',', $data['testIds']);
+            // dd($test_ids);
+            foreach ($test_ids as $testId ) {
+                // Find or create the test report
+                $testReport = TestReport::firstOrCreate(
+                    [
+                        'sample_id' => $data['sampleid'],
+                        'test_id' => $testId
+                    ]
+                    // [
+                    //     'is_completed' => false,
+                    //     'is_signed' => false
+                    // ]
+                );
+                // dd($testReport);
+
+                // Save the data into BiochemHaemoResults table
+                UrinalysisMicrobiologyResults::updateOrCreate(
+                    ['test_report_id' => $testReport->id], // Condition to check
+                    [
+                        'history' => $data['history'] ?? null,
+                        's_gravity'=> $data['s_gravity'] ?? null,
+                        'ph'=> $data['ph'] ?? null,
+                        'bilirubin'=> $data['bilirubin'] ?? null,
+                        'blood'=> $data['blood'] ?? null,
+                        'leucocytes'=> $data['leucocytes'] ?? null,
+                        'glucose'=> $data['glucose'] ?? null,
+                        'nitrite'=> $data['nitrite'] ?? null,
+                        'ketones'=> $data['ketones'] ?? null,
+                        'urobilinogen'=> $data['urobilinogen'] ?? null,
+                        'proteins'=> $data['proteins'] ?? null,
+                        'colour'=> $data['colour'] ?? null,
+                        'appearance'=> $data['appearance'] ?? null,
+                        'epith_cells'=> $data['epith_cells'] ?? null,
+                        'bacteria'=> $data['bacteria'] ?? null,
+                        'white_cells'=> $data['white_cells'] ?? null,
+                        'yeast'=> $data['yeast'] ?? null,
+                        'red_cells'=> $data['red_cells'] ?? null,
+                        'trichomonas'=> $data['trichomonas'] ?? null,
+                        'casts'=> $data['casts'] ?? null,
+                        'crystals'=> $data['crystals'] ?? null,
+                        'specimen'=> $data['specimen'] ?? null,
+                        'procedure'=> $data['procedure'] ?? null,
+                        'sensitivity'=> $data['sensitivity'] ?? null,
+                        'specimen_note'=> $data['specimen_note'] ?? null,
+                        'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
+                        'sensitivity'=> $data['sensitivity'] ?? null,
                     ]
                 );
                 // CytologyGynecologyResults::updateOrCreate(
