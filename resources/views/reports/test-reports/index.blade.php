@@ -110,7 +110,7 @@ use \Carbon\Carbon;
                                                 <ul class="list-inline hstack gap-2 mb-0">
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
                                                         data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
                                                                 class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                     </li>
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
@@ -215,53 +215,7 @@ use \Carbon\Carbon;
      </div>
     </div>
 
-    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0">
-                {{-- <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Doctor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div> --}}
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/reports/test-reports") }}" method="post" autocomplete="off">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="id-field" />
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div>
-                                    <label for="test_charges" class="form-label">Select charge items </label>
-                                    <select class="form-control" name="test_charges" id="test_charges" required>
-                                        <option value="">Select charge items </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 mt-3">
-                                <div>
-                                    <label for="report_type" class="form-label">Select Report Type</label>
-                                    <select class="form-control" name="report_type" id="report_type" required>
-                                        <option value="">Select Report Type</option>
-                                        <option value="1">Biochemistry / Haematology</option>
-                                        <option value="2">Cytology / Gynecology</option>
-                                        <option value="3">Urinalysis / Microbiology</option>
-                                    </select>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light"
-                                data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Edit Report</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
 
 <!--end modal-->
