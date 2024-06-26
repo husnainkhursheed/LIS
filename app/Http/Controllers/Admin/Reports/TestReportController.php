@@ -381,14 +381,13 @@ class TestReportController extends Controller
     public function fetchNotesCytology()
     {
         //Cytology / Gynecology
-        $notesCytology = Note::where('department',2)->pluck('note_code'); // Adjust this query to match your data structure
-
+        $notesCytology = Note::where('department',2)->get();
         return response()->json($notesCytology);
     }
     public function fetchNotesUrinalysis()
     {
         //Urinalysis
-        $notesUrinalysis = Note::where('department',3)->pluck('note_code'); // Adjust this query to match your data structure
+        $notesUrinalysis = Note::where('department',3)->get();
 
         return response()->json($notesUrinalysis);
     }

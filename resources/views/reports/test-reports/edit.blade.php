@@ -490,21 +490,19 @@
                 <div class="">
                     <!-- Nav tabs -->
                     <ul class="nav nav-pills nav-justified mb-3" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link waves-effect waves-light active" data-bs-toggle="tab"
-                                href="#pill-justified-home-1" role="tab" aria-selected="false" tabindex="-1">
+
+                        <li class="nav-item1" role="presentation">
+                            <a class="nav-link waves-effect waves-light active" data-bs-toggle="tab" href="#pill-justified-home-1" role="tab" aria-selected="false" tabindex="-1">
                                 Chemical Analysis
                             </a>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab"
-                                href="#pill-justified-profile-1" role="tab" aria-selected="true">
+                        <li class="nav-item1" role="presentation">
+                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-profile-1" role="tab" aria-selected="true">
                                 Microscopy
                             </a>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab"
-                                href="#pill-justified-messages-1" role="tab" aria-selected="false" tabindex="-1">
+                        <li class="nav-item1" role="presentation">
+                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-messages-1" role="tab" aria-selected="false" tabindex="-1">
                                 Specimen
                             </a>
                         </li>
