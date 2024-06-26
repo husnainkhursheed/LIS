@@ -108,17 +108,88 @@
 
         </tr>
     </table>
+    <div class="content">
+        <h1>{{ $title }}</h1>
+        <p><strong>Date:</strong> {{ $date }}</p>
 
+        <div class="section">
+            <h2>Patient Information</h2>
+            <p class="field"><strong>Name:</strong> {{ $sample->patient->first_name ?? 'null' }} {{ $sample->patient->surname ?? 'null' }}</p>
+            <p class="field"><strong>Contact Number:</strong> {{ $sample->patient->contact_number ?? 'null' }}</p>
+            <p class="field"><strong>DOB:</strong> {{ $sample->patient->dob ?? 'null' }}</p>
+            <p class="field"><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</p>
+        </div>
+
+        <div class="section">
+            <h2>Sample Information</h2>
+            <p class="field"><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
+            <p class="field"><strong>Access Number:</strong> {{ $sample->access_number ?? 'null' }}</p>
+            <p class="field"><strong>Collected Date:</strong> {{ $sample->collected_date ?? 'null' }}</p>
+            <p class="field"><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</p>
+            <p class="field"><strong>Received Time:</strong> {{ $sample->received_time ?? 'null' }}</p>
+        </div>
+
+        <div class="section">
+            <h2>Institution Information</h2>
+            <p class="field"><strong>Institution Name:</strong> {{ $sample->institution->name ?? 'null' }}</p>
+            <p class="field"><strong>Contact Number:</strong> {{ $sample->institution->contact_number ?? 'null' }}</p>
+            <p class="field"><strong>Address:</strong> {{ $sample->institution->street_name ?? 'null' }}, {{ $sample->institution->address_line_2 ?? 'null' }}, {{ $sample->institution->area ?? 'null' }}</p>
+            <p class="field"><strong>Email:</strong> {{ $sample->institution->email ?? 'null' }}</p>
+        </div>
+
+        <div class="section">
+            <h2>Doctor Information</h2>
+            <p class="field"><strong>Doctor Name:</strong> {{ $sample->doctor->name ?? 'null' }}</p>
+            <p class="field"><strong>Contact Number:</strong> {{ $sample->doctor->contact_number ?? 'null' }}</p>
+            <p class="field"><strong>Address:</strong> {{ $sample->doctor->street_name ?? 'null' }}, {{ $sample->doctor->address_line_2 ?? 'null' }}, {{ $sample->doctor->area ?? 'null' }}</p>
+            <p class="field"><strong>Email:</strong> {{ $sample->doctor->email ?? 'null' }}</p>
+        </div>
+
+        <div class="section">
+            <h2>Tests Information</h2>
+            @foreach($sample->tests as $test)
+                <p class="field"><strong>Test Name:</strong> {{ $test->name }}</p>
+                <p class="field"><strong>Department:</strong> {{ $test->department }}</p>
+                <p class="field"><strong>Specimen Type:</strong> {{ $test->specimen_type }}</p>
+                <p class="field"><strong>Cost:</strong> {{ $test->cost }}</p>
+                <p class="field"><strong>Reference Range:</strong> {{ $test->reference_range }}</p>
+                <p class="field"><strong>Basic Low Value Ref Range:</strong> {{ $test->basic_low_value_ref_range }}</p>
+                <p class="field"><strong>Basic High Value Ref Range:</strong> {{ $test->basic_high_value_ref_range }}</p>
+                <p class="field"><strong>Male Low Value Ref Range:</strong> {{ $test->male_low_value_ref_range ?? 'null' }}</p>
+                <p class="field"><strong>Male High Value Ref Range:</strong> {{ $test->male_high_value_ref_range ?? 'null' }}</p>
+                <p class="field"><strong>Female Low Value Ref Range:</strong> {{ $test->female_low_value_ref_range ?? 'null' }}</p>
+                <p class="field"><strong>Female High Value Ref Range:</strong> {{ $test->female_high_value_ref_range ?? 'null' }}</p>
+                <hr>
+            @endforeach
+        </div>
+
+        <div class="section">
+            <h2>Test Reports Information</h2>
+            @foreach($sample->testReports as $report)
+                <p class="field"><strong>Results:</strong> {{ $report->results ?? 'null' }}</p>
+                <p class="field"><strong>Notes:</strong> {{ $report->notes ?? 'null' }}</p>
+                <p class="field"><strong>Is Completed:</strong> {{ $report->is_completed ? 'Yes' : 'No' }}</p>
+                <p class="field"><strong>Is Signed:</strong> {{ $report->is_signed ? 'Yes' : 'No' }}</p>
+                <hr>
+            @endforeach
+        </div>
+
+        <div class="section">
+            <h2>Signed By</h2>
+            <p class="field"><strong>Signed By:</strong> {{ $sample->signedBy->first_name ?? 'null' }} {{ $sample->signedBy->surname ?? 'null' }}</p>
+            <p class="field"><strong>Signed At:</strong> {{ $sample->signed_at ?? 'null' }}</p>
+        </div>
+    </div>
     <table class="info-table">
         <thead>
         <tr>
             <th style="width: 50%; vertical-align: top;">
                 <h2>Patient Information</h2>
-                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Name:</strong> {{ $sample->patient->first_name ?? 'null' }}</p>
                 <p><strong>Age:</strong> 35</p>
-                <p><strong>Sex:</strong> Male</p>
-                <p><strong>DOB:</strong> 01-Jan-91</p>
-                <p><strong>Sample ID:</strong> 123456</p>
+                <p><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</p>
+                <p><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</p>
+                <p><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
             </th>
             <th style="width: 50%; vertical-align: top;">
                 <h2>Sample Collected At</h2>

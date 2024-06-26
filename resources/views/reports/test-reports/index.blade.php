@@ -26,7 +26,7 @@ use \Carbon\Carbon;
 
         @include('layouts.notification')
 
-        <div class="card px-5 py-3 bg-white">
+        <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
                 <h3 class="text-dark">List of Test Report</h3>
             </div>
@@ -84,7 +84,7 @@ use \Carbon\Carbon;
                                                 <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
                                                     @csrf
                                                     <select class="" name="report_type" id="report_type" required>
-                                                        <option value="">Select Report Type</option>
+                                                        {{-- <option value="">Select Report Type</option> --}}
                                                         @foreach($testReport->unique_departments as $department)
                                                             <option value="{{ $department }}">@if($department == 1)
                                                                 Biochemistry / Haematology
@@ -108,6 +108,13 @@ use \Carbon\Carbon;
                                             </td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
+                                                        <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
+                                                            <span class="logo-sm">
+                                                                <img src="{{ URL::asset('build/images/pdf.png') }}" alt="" height="30">
+                                                            </span>
+                                                        </a>
+                                                    </li>
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
                                                         data-bs-trigger="hover" data-bs-placement="top" title="Edit">
                                                         <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
@@ -273,6 +280,26 @@ use \Carbon\Carbon;
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
         $(document).ready(function() {
+
+
+            $('.generate-pdf-link').click(function(e) {
+                e.preventDefault();
+                var testReportId = $(this).data('test-report-id');
+                var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+
+                // Construct the URL dynamically
+                var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;
+
+                // Set the href attribute of the anchor tag to the constructed URL
+                $(this).attr('href', url);
+
+                // Optional: Open the link in a new tab/window
+                window.open(url, '_blank'); // This will open the URL in a new tab
+            });
+
+
+
+
             var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
 
             // Check if the current user is in the "Lab" role

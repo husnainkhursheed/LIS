@@ -271,7 +271,6 @@ class TestReportController extends Controller
                         'sensitivity'=> $data['sensitivity'] ?? null,
                         'specimen_note'=> $data['specimen_note'] ?? null,
                         'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
-                        'sensitivity'=> $data['sensitivity'] ?? null,
                     ]
                 );
                 // CytologyGynecologyResults::updateOrCreate(
