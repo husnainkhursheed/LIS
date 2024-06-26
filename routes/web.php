@@ -110,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
         Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
+        Route::post('/complete-test', [TestReportController::class, 'completetest'])->name('test-reports.completetest');
 
         Route::post('/sensitivity/report', [TestReportController::class, 'getsensitivityitems'])->name('test-reports.getsensitivityitems');
 

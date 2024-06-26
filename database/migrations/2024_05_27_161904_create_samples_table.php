@@ -22,6 +22,12 @@ return new class extends Migration
             $table->foreignId('institution_id')->nullable()->constrained('institutions')->onDelete('cascade');
             $table->foreignId('doctor_id')->nullable()->constrained('doctors')->onDelete('cascade');
             $table->enum('bill_to', ['Patient', 'Doctor', 'Other']);
+            $table->boolean('is_completed')->default(false);
+            $table->boolean('is_signed')->default(false);
+            $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->date('signed_at')->nullable();
+            $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->date('completed_at')->nullable();
             $table->timestamps();
         });
     }

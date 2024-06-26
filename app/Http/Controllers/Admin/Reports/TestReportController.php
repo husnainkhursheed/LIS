@@ -226,7 +226,7 @@ class TestReportController extends Controller
         }
         if ($data['reporttype'] == 3) {
             $test_ids = explode(',', $data['testIds']);
-            // dd($test_ids);
+            // dd($data['sensitivity_profiles']);
             foreach ($test_ids as $testId ) {
                 // Find or create the test report
                 $testReport = TestReport::firstOrCreate(
@@ -353,22 +353,29 @@ class TestReportController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Password is incorrect.'], 401);
         }
+        // dd($request->report_sample_id);
 
         // Find the test report
-        $testReport = TestReport::find($request->test_report_id);
+        $testReport = Sample::find($request->report_sample_id);
 
         // Check if the report is already signed
         if ($testReport->signed_by) {
             // Fetch the user who signed the report
-            $signedByUser = TestReport::find($testReport->signed_by);
-            return response()->json(['error' => 'Report already signed by ' . $signedByUser->name . ' on ' . $testReport->updated_at->format('d-m-Y')], 400);
+            $signedByUser = Sample::find($testReport->signed_by);
+            return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
         }
 
         // Update the test-reports table with the user ID in the signed_by column
+        $testReport->is_signed = true;
         $testReport->signed_by = $user->id;
+        $testReport->signed_at = now();
         $testReport->save();
 
-        return response()->json(['success' => 'Report signed successfully.']);
+        return response()->json([
+            'success' => 'Report signed successfully.',
+            'user' => $user,
+            'sample' => $testReport,
+        ]);
     }
 
     public function fetchNotesCytology()
@@ -384,5 +391,28 @@ class TestReportController extends Controller
         $notesUrinalysis = Note::where('department',3)->pluck('note_code'); // Adjust this query to match your data structure
 
         return response()->json($notesUrinalysis);
+    }
+
+    public function completetest(Request $request){
+        $user = Auth::user();
+        $testReport = Sample::find($request->sample_id);
+
+        // Check if the report is already signed
+        // if ($testReport->signed_by) {
+        //     // Fetch the user who signed the report
+        //     $signedByUser = Sample::find($testReport->signed_by);
+        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
+        // }
+
+        // Update the test-reports table with the user ID in the signed_by column
+        $testReport->is_completed = true;
+        $testReport->completed_by = $user->id;
+        $testReport->completed_at = now();
+        $testReport->save();
+
+        return response()->json([
+            'success' => 'Report Completed successfully.',
+            'sample' => $testReport,
+        ]);
     }
 }
