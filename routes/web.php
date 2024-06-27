@@ -126,9 +126,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
 
+
     // generate pdf route
     Route::get('generate-pdf/{id}/{type}', [App\Http\Controllers\PDFController::class, 'generatePDF']);
     Route::get('generate-pdf/{id}', [App\Http\Controllers\PDFController::class, 'generatePDF1']);
+
+
+
+    Route::get('verify/{token}', [UsersController::class, 'verify']);
+    // Route::view('verify-view', 'emails.verify');
+    Route::post('set-password', [UsersController::class, 'setPassword']);
 
     ////////////       end routes       /////////////////////
 
