@@ -102,8 +102,6 @@
             <td style="width: 35%; vertical-align: middle;">
                 <p><strong>TEL: </strong>   (868) 229-8643  or 316-1383</p>
                 <p><strong>Mail: </strong> borderlifemedlab@gmail.com</p>
-
-
             </td>
 
         </tr>
@@ -191,12 +189,12 @@
                 <p><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</p>
                 <p><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
             </th>
-            <th style="width: 50%; vertical-align: top;">
+            {{-- <th style="width: 50%; vertical-align: top;">
                 <h2>Sample Collected At</h2>
                 <p><strong>Tobago, 71 Eastern Main Road Barataria</strong></p><br><br>
                 <p><strong>Ref. By:</strong> DR Yousaf</p>
 
-            </th>
+            </th> --}}
             <th style="width: 50%; vertical-align: top;">
                 <h2>Report Information</h2>
                 <p><strong>Lab Ref:</strong> {{ $sample->access_number ?? 'null' }}</p>
@@ -219,16 +217,33 @@
                 {{ $testNames }}
                 </p>
             </td>
+            @foreach ($tests as $index => $test)
+            @php
+            $testReport = $testReports
+                ->where('test_id', $test->id)
+                ->where('sample_id', $sample->id)
+                ->first();
+            // dd($testReport);
+            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+            // dd($biochemHaemoResults);
+        @endphp
+            @endforeach
             <td style="width: 50%; vertical-align: top;">
-                <p><strong>Comments: </strong><br> SPECIMEN:
-                    SATISFACTORY</p>
+                <p><strong>Reference: </strong><br> {{$biochemHaemoResults->reference}}</p>
             </td>
             <td style="width: 50%; vertical-align: top;">
-                <p><strong>Specimen: </strong><br>  Serum (Urine for CT/NG)</p>
+                <p><strong>Note: </strong><br>   {{$biochemHaemoResults->note}}</p>
             </td>
         </tr>
     </table>
-    {{-- <div style=" border-bottom: 1px solid #3d90ca;">
+    {{-- <table class="info-table">
+        <tr>
+            <td style="width: 50%; vertical-align: top;">
+                <p><strong>Note: </strong><br>   {{$biochemHaemoResults->note}}</p>
+            </td>
+        </tr>
+    </table> --}}
+    {{-- <div style=" border-bottom: 1px solid #3d8fcadc;">
         <p><b>Whole Blood </b></p>
     </div> --}}
     <table class="table table-bordered">

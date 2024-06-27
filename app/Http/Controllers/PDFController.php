@@ -29,24 +29,33 @@ class PDFController extends Controller
             $sample = Sample::findOrFail($sample_id);
             $sample->tests;
 
-            // $test = Test::findOrFail($request->test_charges);
             $tests = $sample->tests()->where('department', $type)->get();
-            // dd($tests);
-            // Find or create a test report for the selected test and sample
-            // Collect test reports with their related results
-            $testReports = collect(); // Initialize as a collection
+
+            $testReports = collect();
+            // Define the relationship mappings
+            $relationMapping = [
+                '1' => 'biochemHaemoResults', // Biochemistry / Haematology
+                '2' => 'cytologyGynecologyResults', // Cytology / Gynecology
+                '3' => 'urinalysisMicrobiologyResults', // Urinalysis / Microbiology
+            ];
+
+            if (!array_key_exists($type, $relationMapping)) {
+                return response()->json(['error' => 'Invalid report type'], 400);
+            }
+
+            $relationship = $relationMapping[$type];
+
             foreach ($tests as $test) {
-                $testReport = TestReport::with('biochemHaemoResults')
+                $testReport = TestReport::with($relationship)
                     ->where('sample_id', $sample->id)
                     ->where('test_id', $test->id)
                     ->first();
 
-                $testReports->push($testReport); // Add to the collection
+                if ($testReport) {
+                    $testReports->push($testReport);
+                }
             }
 
-            // $sample = Sample::where('id', $sample_id)
-            //     ->with('patient', 'tests', 'institution', 'doctor', 'testReports.biochemHaemoResults', 'signedBy')
-            //     ->firstOrFail();
             $data = [
                 'title' => 'Border Life - LIS',
                 'date' => date('m/d/Y'),
@@ -54,28 +63,25 @@ class PDFController extends Controller
                 'testReports' => $testReports,
                 'tests' => $tests,
             ];
-// dd($data);
-            switch ($type) {
-                case "3": // Urinalysis / Microbiology
-                    $pdf = PDF::loadView('pdf.urinalysisMicrobiologyPdf', $data);
+            $viewMapping = [
+                '1' => 'pdf.biochemHaemoPdf', // Biochemistry / Haematology
+                '2' => 'pdf.cytologyGynecologyPdf', // Cytology / Gynecology
+                '3' => 'pdf.urinalysisMicrobiologyPdf', // Urinalysis / Microbiology
+            ];
 
-                    break;
-                case "2": // Cytology / Gynecology
-                    $pdf = PDF::loadView('pdf.cytologyGynecologyPdf', $data);
-                    break;
-                case "1": // Biochemistry / Haematology
-                    $pdf = PDF::loadView('pdf.biochemHaemoPdf', $data);
-                    break;
-                default:
-                    return response()->json(['error' => 'Invalid report type'], 400);
+            if (!array_key_exists($type, $viewMapping)) {
+                return response()->json(['error' => 'Invalid report type'], 400);
             }
 
-            // Generate the PDF and return base64-encoded content
+            $view = $viewMapping[$type];
+            $pdf = PDF::loadView($view, $data);
+
             return $pdf->stream('Report.pdf');
 
         } catch (\Exception $e) {
             return response()->json(['error' => 'PDF generation failed: ' . $e->getMessage()], 500);
         }
     }
+
 
 }

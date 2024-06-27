@@ -108,7 +108,7 @@
 
         </tr>
     </table>
-    <div class="content">
+    {{-- <div class="content">
         <h1>{{ $title }}</h1>
         <p><strong>Date:</strong> {{ $date }}</p>
 
@@ -179,14 +179,14 @@
             <p class="field"><strong>Signed By:</strong> {{ $sample->signedBy->first_name ?? 'null' }} {{ $sample->signedBy->surname ?? 'null' }}</p>
             <p class="field"><strong>Signed At:</strong> {{ $sample->signed_at ?? 'null' }}</p>
         </div>
-    </div>
+    </div> --}}
     <table class="info-table">
         <thead>
         <tr>
             <th style="width: 50%; vertical-align: top;">
                 <h2>Patient Information</h2>
                 <p><strong>Name:</strong> {{ $sample->patient->first_name ?? 'null' }}</p>
-                <p><strong>Age:</strong> 35</p>
+                {{-- <p><strong>Age:</strong> 35</p> --}}
                 <p><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</p>
                 <p><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</p>
                 <p><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
@@ -199,11 +199,11 @@
             </th>
             <th style="width: 50%; vertical-align: top;">
                 <h2>Report Information</h2>
-                <p><strong>Lab Ref:</strong> B23-005768</p>
+                <p><strong>Lab Ref:</strong> {{ $sample->access_number ?? 'null' }}</p>
                 <p><strong>Company:</strong> PRIVATE</p>
-                <p><strong>Collection Date:</strong> 05-Jul-2023</p>
-                <p><strong>Received Date:</strong> 05-Jul-2023</p>
-                <p><strong>Report Date:</strong> 05-Jul-2023</p>
+                <p><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</p>
+                <p><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</p>
+                <p><strong>Report Date:</strong> {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</p>
             </th>
         </tr>
     </thead>
@@ -211,8 +211,13 @@
     <table class="info-table">
         <tr>
             <td style="width: 50%; vertical-align: top;">
-                <p><strong>Request: </strong><br> CBC, HbA1c, FBS, LIPID PROFILE, LFT, RFT1, TFT 3,
-                    PT/PTT, Urine Micro, STD Profile 3, HPV</p>
+                <p><strong>Request: </strong><br>
+                    @php
+                    // Assuming $sample->tests is a collection or array of test objects
+                    $testNames = $tests->pluck('name')->implode(', ');
+                     @endphp
+                {{ $testNames }}
+                </p>
             </td>
             <td style="width: 50%; vertical-align: top;">
                 <p><strong>Comments: </strong><br> SPECIMEN:
@@ -236,14 +241,49 @@
             </tr>
         </thead>
         <tbody>
-
+            @foreach ($tests as $index => $test)
+            @php
+                $testReport = $testReports
+                    ->where('test_id', $test->id)
+                    ->where('sample_id', $sample->id)
+                    ->first();
+                // dd($testReport);
+                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+                // dd($cytologyGynecologyResults);
+            @endphp
             <tr>
-                <td> White Blood Cells (WBC)</td>
-                <td style="text-align:center;">3.0</td>
-                <td style="color: blue; text-align:center;">Low</td>
-                <td>4.0 - 11.0 10^3/ul</td>
+                <td> {{$cytologyGynecologyResults->description}}</td>
+                <td style="text-align:center;">{{$cytologyGynecologyResults->test_results}}</td>
+                {{-- <td style="color: blue; text-align:center;">{{$cytologyGynecologyResults->flag}}</td> --}}
+                @php
+                $background = '';
+                if (!empty($cytologyGynecologyResults) && $cytologyGynecologyResults->flag == 'Normal') {
+                    $background = 'color:#40bb82';
+                } elseif (
+                    !empty($cytologyGynecologyResults) &&
+                    $cytologyGynecologyResults->flag == 'High'
+                ) {
+                    $background = 'color:red';
+                } elseif (!empty($cytologyGynecologyResults) && $cytologyGynecologyResults->flag == 'Low') {
+                    $background = 'color:##ffca5b';
+                }
+            @endphp
+            <td>
+            <span class="badge badge-pill flag-badge" style="{{ $background }}"
+                data-key="t-hot">{{ $cytologyGynecologyResults->flag ?? 'Normal' }}</span>
+            </td>
+                <td>  @if ($test->reference_range == 'basic_ref')
+                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                @else
+                    Male:
+                    {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                    <br>
+                    Female:
+                    {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                @endif</td>
             </tr>
-            <tr>
+            @endforeach
+            {{-- <tr>
                 <td> Lymphocytes #</td>
                 <td style="text-align:center;"> 2.1 </td>
                 <td></td>
@@ -296,7 +336,7 @@
                 <td>  Males 40 - 54% <br>
                     Females 36 - 47%
                 </td>
-            </tr>
+            </tr> --}}
 
         </tbody>
     </table>
