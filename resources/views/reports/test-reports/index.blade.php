@@ -26,7 +26,7 @@ use \Carbon\Carbon;
 
         @include('layouts.notification')
 
-        <div class="card px-5 py-3 bg-white">
+        <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
                 <h3 class="text-dark">List of Test Report</h3>
             </div>
@@ -68,6 +68,7 @@ use \Carbon\Carbon;
                                         <th>Access #</th>
                                         <th>Patient Name</th>
                                         <th>Date Received</th>
+                                        <th>Select ReportType</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -76,13 +77,47 @@ use \Carbon\Carbon;
                                         <tr>
                                             <td>{{ $testReport->test_number }}</td>
                                             <td>{{ $testReport->access_number }}</td>
+
                                             <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
                                             <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
                                             <td>
+                                                <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
+                                                    @csrf
+                                                    <select class="" name="report_type" id="report_type" required>
+                                                        {{-- <option value="">Select Report Type</option> --}}
+                                                        @foreach($testReport->unique_departments as $department)
+                                                            <option value="{{ $department }}">@if($department == 1)
+                                                                Biochemistry / Haematology
+                                                            @elseif($department == 2)
+                                                                Cytology / Gynecology
+                                                            @elseif($department == 3)
+                                                                Urinalysis / Microbiology
+                                                            @endif</option>
+                                                        {{-- <span>{{ $department }}</span><br> --}}
+                                                        @endforeach
+                                                    </select>
+                                                    <!-- Add other form fields as necessary -->
+                                                </form>
+                                                {{-- <div class="col-lg-12 mt-3">
+                                                    <div> --}}
+                                                        {{-- <label for="report_type" class="form-label">Select Report Type</label> --}}
+
+                                                    {{-- </div>
+                                                </div> --}}
+
+                                            </td>
+                                            <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
+                                                        <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
+                                                            <span class="logo-sm">
+                                                                <img src="{{ URL::asset('build/images/pdf.png') }}" alt="" height="30">
+                                                            </span>
+                                                        </a>
+                                                    </li>
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
                                                         data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
                                                                 class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                     </li>
                                                     <li class="list-inline-item" data-bs-toggle="tooltip"
@@ -187,53 +222,7 @@ use \Carbon\Carbon;
      </div>
     </div>
 
-    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0">
-                {{-- <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Doctor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div> --}}
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/reports/test-reports") }}" method="post" autocomplete="off">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="id-field" />
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div>
-                                    <label for="test_charges" class="form-label">Select charge items </label>
-                                    <select class="form-control" name="test_charges" id="test_charges" required>
-                                        <option value="">Select charge items </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 mt-3">
-                                <div>
-                                    <label for="report_type" class="form-label">Select Report Type</label>
-                                    <select class="form-control" name="report_type" id="report_type" required>
-                                        <option value="">Select Report Type</option>
-                                        <option value="1">Biochemistry / Haematology</option>
-                                        <option value="2">Cytology / Gynecology</option>
-                                        <option value="3">Urinalysis / Microbiology</option>
-                                    </select>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light"
-                                data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Edit Report</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
 
 <!--end modal-->
@@ -291,6 +280,26 @@ use \Carbon\Carbon;
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
         $(document).ready(function() {
+
+
+            $('.generate-pdf-link').click(function(e) {
+                e.preventDefault();
+                var testReportId = $(this).data('test-report-id');
+                var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+
+                // Construct the URL dynamically
+                var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;
+
+                // Set the href attribute of the anchor tag to the constructed URL
+                $(this).attr('href', url);
+
+                // Optional: Open the link in a new tab/window
+                window.open(url, '_blank'); // This will open the URL in a new tab
+            });
+
+
+
+
             var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
 
             // Check if the current user is in the "Lab" role
@@ -310,50 +319,146 @@ use \Carbon\Carbon;
             }
         });
         jQuery(document).ready(function($) {
-        // When the document is ready, attach a click event to the "Edit" button
-        $('.edit-item-btn').on('click', function() {
-            // Get the ID from the data attribute
+            $('#SaveReport').on('click', function(event) {
+                event.preventDefault();
+                var itemId = $(this).data('id');
+                var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                 // Prevent the default link behavior
+                var reporttypeis = $('#report_type').val();
+                data = {
+                    report_type: reporttypeis,
+                };
 
-            var itemId = $(this).data('id');
-            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId + '/edit';
-            // $('#leadtype_form').attr('action', url);
-            $.ajax({
-                    url: url, // Adjust the route as needed
-                    type: 'GET',
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
                     success: function(response) {
-                        // Assuming the response has a 'leadType' key
-                        var sample = response.sample;
-                        var tests = response.sample.tests;
-                        // console.log("my practices ",sample);
-                        var testChargesSelect = $('#test_charges');
-                        testChargesSelect.empty(); // Clear existing options
-                        testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
-
-                        tests.forEach(function(test) {
-                            var option = $('<option></option>')
-                                .attr('value', test.id) // Adjust the value if needed
-                                .text(test.name); // Adjust the text if needed
-                            testChargesSelect.append(option);
-                        });
-
-                        // Update modal title
-                        // $('#exampleModalLabel').html("Edit Doctor");
-
-                        // Display the modal footer
-                        $('#showModal .modal-footer').css('display', 'block');
-
-                        // Change the button text
-                        // $('#add-btn').html("Update");
-                        var form = $('#leadtype_form');
-                        var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-                        $('#leadtype_form').attr('action', url);
+                        // Handle the success response
+                        console.log('Success:', response);
+                        // if (response.success) {
+                        //     Toastify({
+                        //         text: response.message,
+                        //         gravity: 'top',
+                        //         position: 'center',
+                        //         duration: 5000,
+                        //         close: true,
+                        //         backgroundColor: '#40bb82',
+                        //     }).showToast();
+                        // } else {
+                        //     var errors = response.message;
+                        //     var errorMessage = errors.join('\n');
+                        //     Toastify({
+                        //         text: errors,
+                        //         duration: 5000,
+                        //         gravity: 'top',
+                        //         position: 'left',
+                        //         backgroundColor: '#ff4444',
+                        //     }).showToast();
+                        // }
 
                     },
                     error: function(xhr, status, error) {
-                        console.error(xhr, status, error);
-                        // Handle errors if needed
+                        console.error('Error:', xhr, status, error);
                     }
                 });
+            });
+        // When the document is ready, attach a click event to the "Edit" button
+        $('.edit-item-btn').on('click', function() {
+
+            // Get the ID from the data attribute
+            event.preventDefault();
+                var itemId = $(this).data('id');
+                // var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                 // Prevent the default link behavior
+                 $('#edittestreport' + itemId).submit();
+
+                // var reporttypeis = $('#report_type').val();
+                // data = {
+                //     report_type: reporttypeis,
+                // };
+                // $.ajaxSetup({
+                //     headers: {
+                //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                //     }
+                // });
+
+                // $.ajax({
+                //     url: url,
+                //     type: 'POST',
+                //     data: data,
+                //     success: function(response) {
+                //         // Handle the success response
+                //         console.log('Success:', response);
+                //         // if (response.success) {
+                //         //     Toastify({
+                //         //         text: response.message,
+                //         //         gravity: 'top',
+                //         //         position: 'center',
+                //         //         duration: 5000,
+                //         //         close: true,
+                //         //         backgroundColor: '#40bb82',
+                //         //     }).showToast();
+                //         // } else {
+                //         //     var errors = response.message;
+                //         //     var errorMessage = errors.join('\n');
+                //         //     Toastify({
+                //         //         text: errors,
+                //         //         duration: 5000,
+                //         //         gravity: 'top',
+                //         //         position: 'left',
+                //         //         backgroundColor: '#ff4444',
+                //         //     }).showToast();
+                //         // }
+
+                //     },
+                //     error: function(xhr, status, error) {
+                //         console.error('Error:', xhr, status, error);
+
+                //     }
+                // });
+
+            // var itemId = $(this).data('id');
+            // var url = '{{ url("/reports/test-reports") }}';
+            // // $('#leadtype_form').attr('action', url);
+            // $.ajax({
+            //         url: url, // Adjust the route as needed
+            //         type: 'Post',
+            //         success: function(response) {
+            //             // Assuming the response has a 'leadType' key
+            //             var sample = response.sample;
+            //             var tests = response.sample.tests;
+            //             // console.log("my practices ",sample);
+            //             var testChargesSelect = $('#test_charges');
+            //             testChargesSelect.empty(); // Clear existing options
+            //             testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
+
+            //             tests.forEach(function(test) {
+            //                 var option = $('<option></option>')
+            //                     .attr('value', test.id) // Adjust the value if needed
+            //                     .text(test.name); // Adjust the text if needed
+            //                 testChargesSelect.append(option);
+            //             });
+
+            //             // Update modal title
+            //             // $('#exampleModalLabel').html("Edit Doctor");
+
+            //             // Display the modal footer
+            //             $('#showModal .modal-footer').css('display', 'block');
+
+            //             // Change the button text
+            //             // $('#add-btn').html("Update");
+            //             var form = $('#leadtype_form');
+            //             var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+            //             $('#leadtype_form').attr('action', url);
+
+            //         },
+            //         error: function(xhr, status, error) {
+            //             console.error(xhr, status, error);
+            //             // Handle errors if needed
+            //         }
+            //     });
 
         });
 

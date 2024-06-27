@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Test;
+use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\TestReport;
@@ -23,7 +24,13 @@ class Sample extends Model
         'patient_id',
         'institution_id',
         'doctor_id',
-        'bill_to'
+        'bill_to',
+        'is_completed',
+        'is_signed',
+        'signed_by',
+        'signed_at',
+        'completed_by',
+        'completed_at',
     ];
 
     public function tests()
@@ -49,6 +56,11 @@ class Sample extends Model
     public function testReports()
     {
         return $this->hasMany(TestReport::class);
+    }
+
+    public function signedBy()
+    {
+        return $this->belongsTo(User::class, 'signed_by');
     }
 
 
