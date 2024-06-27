@@ -111,7 +111,7 @@ use \Carbon\Carbon;
                                                     <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
                                                         <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
                                                             <span class="logo-sm">
-                                                                <img src="{{ URL::asset('build/images/pdf.png') }}" alt="" height="30">
+                                                                <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
                                                             </span>
                                                         </a>
                                                     </li>

@@ -191,12 +191,12 @@
                 <p><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</p>
                 <p><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
             </th>
-            <th style="width: 50%; vertical-align: top;">
+            {{-- <th style="width: 50%; vertical-align: top;">
                 <h2>Sample Collected At</h2>
                 <p><strong>Tobago, 71 Eastern Main Road Barataria</strong></p><br><br>
                 <p><strong>Ref. By:</strong> DR Yousaf</p>
 
-            </th>
+            </th> --}}
             <th style="width: 50%; vertical-align: top;">
                 <h2>Report Information</h2>
                 <p><strong>Lab Ref:</strong> {{ $sample->access_number ?? 'null' }}</p>
@@ -208,12 +208,11 @@
         </tr>
     </thead>
     </table>
-    <table class="info-table">
+    {{-- <table class="info-table">
         <tr>
             <td style="width: 50%; vertical-align: top;">
                 <p><strong>Request: </strong><br>
                     @php
-                    // Assuming $sample->tests is a collection or array of test objects
                     $testNames = $tests->pluck('name')->implode(', ');
                      @endphp
                 {{ $testNames }}
@@ -227,17 +226,15 @@
                 <p><strong>Specimen: </strong><br>  Serum (Urine for CT/NG)</p>
             </td>
         </tr>
-    </table>
-    {{-- <div style=" border-bottom: 1px solid #3d90ca;">
-        <p><b>Whole Blood </b></p>
-    </div> --}}
+    </table> --}}
+
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th> NAME OF TEST</th>
-                <th>RESULTS</th>
+                <th colspan="2" >CLINICAL HISTORY</th>
+                {{-- <th>RESULTS</th>
                 <th>FLAG</th>
-                <th>REFERENCE RANGE</th>
+                <th>REFERENCE RANGE</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -252,9 +249,10 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td> {{$cytologyGynecologyResults->description}}</td>
+                <td><strong>LAST PERIOD: </strong> {{$cytologyGynecologyResults->last_period}}</td>
+                <td><strong>CONTRACEPTIVE: </strong> {{$cytologyGynecologyResults->contraceptive}}</td>
+                {{-- <td> {{$cytologyGynecologyResults->description}}</td>
                 <td style="text-align:center;">{{$cytologyGynecologyResults->test_results}}</td>
-                {{-- <td style="color: blue; text-align:center;">{{$cytologyGynecologyResults->flag}}</td> --}}
                 @php
                 $background = '';
                 if (!empty($cytologyGynecologyResults) && $cytologyGynecologyResults->flag == 'Normal') {
@@ -280,7 +278,15 @@
                     <br>
                     Female:
                     {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                @endif</td>
+                @endif</td> --}}
+            </tr>
+            <tr>
+                <td><strong>PREVIOUS PAP: </strong> {{$cytologyGynecologyResults->previous_pap}}</td>
+                <td><strong>RESULT: </strong> {{$cytologyGynecologyResults->result}}</td>
+            </tr>
+            <tr>
+                <td><strong>CERVIX EXAMINATION: </strong> {{$cytologyGynecologyResults->cervix_examination}}</td>
+                <td><strong>HISTORY: </strong> {{$cytologyGynecologyResults->history}}</td>
             </tr>
             @endforeach
             {{-- <tr>
@@ -340,97 +346,80 @@
 
         </tbody>
     </table>
-</body>
-</html>
-
-
-
-{{-- <table>
-    <thead>
-        <tr>
-            <th>Test</th>
-            <th>Result</th>
-            <th>Reference Range</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Hemoglobin</td>
-            <td>13.5 g/dL</td>
-            <td>13.0 - 17.0 g/dL</td>
-        </tr>
-        <tr>
-            <td>White Blood Cells</td>
-            <td>6,000 /µL</td>
-            <td>4,000 - 11,000 /µL</td>
-        </tr>
-        <tr>
-            <td>Platelets</td>
-            <td>250,000 /µL</td>
-            <td>150,000 - 450,000 /µL</td>
-        </tr>
-        <tr>
-            <td>Red Blood Cells</td>
-            <td>4.5 million/µL</td>
-            <td>4.0 - 5.5 million/µL</td>
-        </tr>
-    </tbody>
-</table>
-
-<div class="footer">
-    <p>Border Life - LIS</p>
-</div> --}}
-    {{-- <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        h1 {
-            text-align: center;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        thead {
-            background-color: #f2f2f2;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>{{ $title }}</h1>
-    <p>{{ $date }}</p>
-    <br/>
-    <br/>
-
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Created At</th>
+                <th colspan="2" >SPECIMEN ADEQUACY:</th>
+                {{-- <th>RESULTS</th>
+                <th>FLAG</th>
+                <th>REFERENCE RANGE</th> --}}
             </tr>
         </thead>
         <tbody>
-            @foreach($users as $user)
+            @foreach ($tests as $index => $test)
+            @php
+                $testReport = $testReports
+                    ->where('test_id', $test->id)
+                    ->where('sample_id', $sample->id)
+                    ->first();
+                // dd($testReport);
+                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+                // dd($cytologyGynecologyResults);
+            @endphp
             <tr>
-                <td>{{ $user->first_name }}</td>
-                <td>{{ $user->surname }}</td>
-                <td>{{ $user->email }}</td>
-                <td>{{ $user->created_at->format('d-m-Y') }}</td>
+                <td colspan="2">{{$cytologyGynecologyResults->specimen_adequacy}}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th colspan="2" >DIAGNOSTIC INTERPRETATION</th>
 
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($tests as $index => $test)
+            @php
+                $testReport = $testReports
+                    ->where('test_id', $test->id)
+                    ->where('sample_id', $sample->id)
+                    ->first();
+
+                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+
+            @endphp
+            <tr>
+                <td colspan="2">{{$cytologyGynecologyResults->diagnostic_interpretation}}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th colspan="2" >RECOMMENDATION </th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($tests as $index => $test)
+            @php
+                $testReport = $testReports
+                    ->where('test_id', $test->id)
+                    ->where('sample_id', $sample->id)
+                    ->first();
+
+                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+
+            @endphp
+            <tr>
+                <td colspan="2">{{$cytologyGynecologyResults->recommend}}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </body>
-</html> --}}
+</html>
+
