@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Note;
 use App\Models\CytologyGynecologyResults;
 use App\Models\UrinalysisMicrobiologyResults;
+use App\Models\AuditTrail;
 
 class TestReportController extends Controller
 {
@@ -85,14 +86,14 @@ class TestReportController extends Controller
         // Collect test reports with their related results
         $testReports = collect(); // Initialize as a collection
         foreach ($tests as $test) {
-            $testReport = TestReport::with('urinalysisMicrobiologyResults')
+            $testReport = TestReport::with('biochemHaemoResults')
                 ->where('sample_id', $sample->id)
                 ->where('test_id', $test->id)
                 ->first();
 
             $testReports->push($testReport); // Add to the collection
         }
-        // dd($testReports);
+        dd($testReports);
         // dd($testReport->BiochemHaemoResults);
 
         // $sample = Sample::find($id);
@@ -129,6 +130,8 @@ class TestReportController extends Controller
     {
         // Gather data from the request
         $data = $request->all();
+        $user = Auth::user();
+
         // dd($data);
         // Check if the report type is 1
         if ($data['reporttype'] == 1) {
@@ -146,7 +149,7 @@ class TestReportController extends Controller
                 );
 
                 // Save the data into BiochemHaemoResults table
-                BiochemHaemoResults::updateOrCreate(
+                $result =  BiochemHaemoResults::updateOrCreate(
                     ['test_report_id' => $testReport->id], // Condition to check
                     [
                         'reference' => $data['reference'] ?? null,
@@ -158,6 +161,8 @@ class TestReportController extends Controller
                         'test_notes' => $testData['test_notes'] ?? null
                     ]
                 );
+                $this->addAuditTrail($testReport, $user, $result->getChanges());
+                // dd($result->getChanges());
             }
         }
 
@@ -271,7 +276,7 @@ class TestReportController extends Controller
                         'sensitivity'=> $data['sensitivity'] ?? null,
                         'specimen_note'=> $data['specimen_note'] ?? null,
                         'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
-                        'sensitivity'=> $data['sensitivity'] ?? null,
+                        // 'sensitivity'=> $data['sensitivity'] ?? null,
                     ]
                 );
                 // CytologyGynecologyResults::updateOrCreate(
@@ -311,6 +316,26 @@ class TestReportController extends Controller
             'message' => 'Saved successfully!',
             'alert-class' => 'alert-success',
         ]);
+    }
+
+    /**
+     * Add an entry to the audit trail.
+     *
+     * @param TestReport $testReport
+     * @param User $user
+     * @param array $changes
+     * @return void
+     */
+    protected function addAuditTrail(TestReport $testReport, $user, array $changes)
+    {
+        if (!empty($changes)) {
+            AuditTrail::create([
+                'test_report_id' => $testReport->id,
+                'user_id' => $user->id,
+                'changed_at' => now(),
+                'changes' => json_encode($changes),
+            ]);
+        }
     }
 
     public function delinktest(Request $request, $id){

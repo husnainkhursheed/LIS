@@ -271,6 +271,9 @@
                                     <input type="radio" id="optional_ref" class="ms-4" name="reference_range"
                                          required value="optional_ref" />
                                     <label for="optional_ref" class="form-label">Reference range with optional sex</label>
+                                    <input type="radio" id="no_manual_tag" class="ms-4" name="reference_range"
+                                         required value="no_manual_tag" />
+                                    <label for="no_manual_tag" class="form-label">No / Manual Tag</label>
                                 </div>
                             </div>
                             <div class="row" id="basicValues">
@@ -327,6 +330,9 @@
                                             placeholder="Enter High Value"  />
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row" id="noManualValues">
+                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
@@ -410,6 +416,7 @@
         $(document).ready(function() {
             // Hide optionalValues by default
             $('#optionalValues').hide();
+            $('#noManualValues').hide();
             $('#basicValues').show();
 
             // Show/hide fields based on selected reference range
@@ -417,6 +424,7 @@
                 if (this.value === 'basic_ref') {
                     $('#basicValues').show();
                     $('#optionalValues').hide();
+                    $('#noManualValues').hide();
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', true);
                     $('#basic_high_value_ref_range').prop('required', true);
@@ -427,6 +435,7 @@
                 } else if (this.value === 'optional_ref') {
                     $('#basicValues').hide();
                     $('#optionalValues').show();
+                    $('#noManualValues').hide();
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', false);
                     $('#basic_high_value_ref_range').prop('required', false);
@@ -434,6 +443,17 @@
                     $('#male_high_value_ref_range').prop('required', true);
                     $('#female_low_value_ref_range').prop('required', true);
                     $('#female_high_value_ref_range').prop('required', true);
+                }else if (this.value === 'no_manual_tag') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').hide();
+                    $('#noManualValues').show();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
                 }
             });
         });
@@ -484,8 +504,10 @@
                         if (test.reference_range === 'basic_ref') {
                             $('#basic_ref').prop('checked', true);
                             $('#optional_ref').prop('checked', false);
+                            $('#no_manual_tag').prop('checked', false);
                             $('#basicValues').show();
                             $('#optionalValues').hide();
+                            $('#noManualValues').hide();
                             // Make fields required
                             $('#basic_low_value_ref_range').prop('required', true);
                             $('#basic_high_value_ref_range').prop('required', true);
@@ -502,8 +524,10 @@
                         } else if (test.reference_range === 'optional_ref') {
                             $('#basic_ref').prop('checked', false);
                             $('#optional_ref').prop('checked', true);
+                            $('#no_manual_tag').prop('checked', false);
                             $('#basicValues').hide();
                             $('#optionalValues').show();
+                            $('#noManualValues').hide();
                             // Make fields required
                             $('#basic_low_value_ref_range').prop('required', false);
                             $('#basic_high_value_ref_range').prop('required', false);
@@ -517,6 +541,20 @@
                             $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
                             $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
                             $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                        }else if (test.reference_range === 'no_manual_tag') {
+                            $('#basic_ref').prop('checked', false);
+                            $('#optional_ref').prop('checked', false);
+                            $('#no_manual_tag').prop('checked', true);
+                            $('#basicValues').hide();
+                            $('#optionalValues').hide();
+                            $('#noManualValues').show();
+                            $('#basic_low_value_ref_range').prop('required', false);
+                            $('#basic_high_value_ref_range').prop('required', false);
+                            $('#male_low_value_ref_range').prop('required', false);
+                            $('#male_high_value_ref_range').prop('required', false);
+                            $('#female_low_value_ref_range').prop('required', false);
+                            $('#female_high_value_ref_range').prop('required', false);
+                            $('#nomanualvalues_ref_range').val(test.nomanualvalues_ref_range);
                         }
                         // $('#area').val(test.area);
                         // $('#email').val(test.email);
@@ -558,18 +596,10 @@
         });
 
         function resetModal() {
-            // Reset modal titleq
             $('#exampleModalLabel').html("Add Test");
-
-            // Display the modal footer
             $('#showModal .modal-footer').css('display', 'block');
-
-            // Change the button text
             $('#add-btn').html("Add");
             $('#leadtype_form').attr('action', '{{ url("/test") }}');
-            // if ( $('#patch').length) {
-            //     $('#patch').remove();
-            // }
             $('#name').val('');
             $('#department').val('');
             $('#specimen_type ').val('');
@@ -577,6 +607,7 @@
             $('#basic_ref').prop('checked', true);
             $('#basicValues').show();
             $('#optionalValues').hide();
+            $('#noManualValues').hide();
             $('#basic_low_value_ref_range').prop('required', true);
             $('#basic_high_value_ref_range').prop('required', true);
             $('#male_low_value_ref_range').prop('required', false);
@@ -589,9 +620,7 @@
             $('#male_high_value_ref_range').val('');
             $('#female_low_value_ref_range').val('');
             $('#female_high_value_ref_range').val('');
-            // $('#surgeries').val("");
-            // $('#surgeries').val("").trigger('change');
-
+            $('#nomanualvalues_ref_range').val('');
         }
 
         // Event listener for modal close event

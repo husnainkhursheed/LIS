@@ -73,6 +73,7 @@ class TestController extends Controller
             $test->male_high_value_ref_range  = null;
             $test->female_low_value_ref_range  = null;
             $test->female_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
         }else if($reference_range == 'optional_ref'){
             $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
             $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
@@ -80,6 +81,15 @@ class TestController extends Controller
             $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
             $test->basic_low_value_ref_range  = null;
             $test->basic_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }elseif ($reference_range == 'no_manual_tag') {
+            $test->nomanualvalues_ref_range = $request->input('nomanualvalues_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
         }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
@@ -128,6 +138,7 @@ class TestController extends Controller
             $test->male_high_value_ref_range  = null;
             $test->female_low_value_ref_range  = null;
             $test->female_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
         }else if($reference_range == 'optional_ref'){
             $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
             $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
@@ -135,7 +146,17 @@ class TestController extends Controller
             $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
             $test->basic_low_value_ref_range  = null;
             $test->basic_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }elseif ($reference_range == 'no_manual_tag') {
+            $test->nomanualvalues_ref_range = $request->input('nomanualvalues_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
         }
+
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
 

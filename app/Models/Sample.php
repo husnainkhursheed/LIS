@@ -31,6 +31,7 @@ class Sample extends Model
         'signed_at',
         'completed_by',
         'completed_at',
+        'notes',
     ];
 
     public function tests()
