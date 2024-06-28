@@ -53,9 +53,11 @@
                             <a class="nav-link active" aria-current="page"
                                 href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
-                        <li class="nav-item border-nav px-5 rounded ">
-                            <button class="nav-link" id="SaveReport">Save</button>
-                        </li>
+                        @if (!$sample->is_completed)
+                            <li class="nav-item border-nav px-5 rounded ">
+                                <button class="nav-link" id="SaveReport">Save</button>
+                            </li>
+                        @endif
                         <li class="nav-item border-nav px-5 rounded ">
                             <a class="nav-link" href="#">Delete</a>
                         </li>
@@ -213,9 +215,11 @@
                 </div>
                 <div class="card-header d-flex justify-content-between">
                     <h3 class="text-dark">List of tests</h3>
+                    @if (!$sample->is_completed)
                     <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                         id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
                         Test</button>
+                    @endif
                 </div>
                 <table id="tests-table" class="table table-striped display table-responsive rounded">
                     <thead>
@@ -250,7 +254,7 @@
                                         value="{{ $test->name }}" disabled />
                                 </td>
                                 <td>
-                                    <input type="number" step="any" data-test-id="{{ $test->id }}"
+                                    <input type="text" step="any" data-test-id="{{ $test->id }}"
                                         name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
                                         value="{{ $biochemHaemoResults->test_results ?? '' }}"
                                         data-basic-low="{{ $test->basic_low_value_ref_range }}"
@@ -286,12 +290,12 @@
                                     <p class="reference-range">
                                         @if ($test->reference_range == 'basic_ref')
                                             {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                        @else
-                                            Male:
-                                            {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                        @elseif ($test->reference_range == 'optional_ref')
+                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
                                             <br>
-                                            Female:
-                                            {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                        @elseif ($test->reference_range == 'no_manual_tag')
+                                            {{ $test->nomanualvalues_ref_range }}
                                         @endif
                                     </p>
                                 </td>
@@ -299,7 +303,7 @@
                                     <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
                                 </td>
                                 <td>
-                                    @if ($index > 0)
+                                    @if ($index > 0 && !$sample->is_completed)
                                         <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                             data-bs-placement="top" title="Delete">
                                             <a class="remove-item-btn" data-id="{{ $test->id }}"
@@ -355,10 +359,14 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="custom" class="form-label">Contraceptive<a href=""
+                            <label for="custom" class="form-label">Contraceptive
+                                @if (!$sample->is_completed)
+                                <a href=""
                                     class="customDropdownEdit" data-bs-toggle="modal" data-id="Contraceptive"
                                     data-bs-target="#showModalDropdown"> <span class="badge bg-info text-white"> Add
-                                        New</span> </a></label>
+                                        New</span> </a>
+                                @endif
+                                    </label>
                             <select class="js-example-basic-multiple" name="contraceptive" id="Contraceptive">
                                 {{-- {{ dd($testReports->contraceptive)}} --}}
                                 @foreach ($contraceptivedropdown as $test)
@@ -433,8 +441,10 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy
+                                @if (!$sample->is_completed)
                                 <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
                                     Note</span>
+                                @endif
                             </label>
                             {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
                             <textarea name="specimen_adequacy" id="specimen_adequacy" cols="" rows="5" class="form-control"
@@ -444,8 +454,10 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
+                                @if (!$sample->is_completed)
                                 <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
                                     Add Note</span>
+                                @endif
                             </label>
                             <textarea name="diagnostic_interpretation" id="diagnostic_interpretation" cols="30" rows="5"
                                 class="form-control">{{ $cytologyGynecologyResults->diagnostic_interpretation ?? '' }}</textarea>
@@ -456,7 +468,9 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="recommend" class="form-label">Recommend
+                                @if (!$sample->is_completed)
                                 <span class="badge bg-info text-white add-note" data-target="#recommend"> Add Note</span>
+                                @endif
                             </label>
                             <textarea name="recommend" id="recommend" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->recommend ?? '' }}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
@@ -493,16 +507,21 @@
 
                         <li class="nav-item1" role="presentation">
                             <a class="nav-link waves-effect waves-light active" data-bs-toggle="tab" href="#pill-justified-home-1" role="tab" aria-selected="false" tabindex="-1">
+
                                 Chemical Analysis
                             </a>
                         </li>
                         <li class="nav-item1" role="presentation">
+
                             <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-profile-1" role="tab" aria-selected="true">
+
                                 Microscopy
                             </a>
                         </li>
                         <li class="nav-item1" role="presentation">
+
                             <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-messages-1" role="tab" aria-selected="false" tabindex="-1">
+
                                 Specimen
                             </a>
                         </li>
@@ -531,10 +550,13 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="bilirubin" class="form-label">Bilirubin<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
+                                                <label for="bilirubin" class="form-label">Bilirubin
+                                                    @if (!$sample->is_completed)
+                                                    <a href="" class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Bilirubin" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a>
+                                                    @endif
+                                                        </label>
                                                 <select class="js-example-basic-multiple" name="bilirubin"
                                                     id="Bilirubin">
                                                     @foreach ($bilirubinropdown as $test)
@@ -548,10 +570,11 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="blood" class="form-label">Blood <a href=""
+                                                <label for="blood" class="form-label">Blood
+                                                    @if (!$sample->is_completed) <a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal" data-id="Blood"
                                                         data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a>@endif</label>
                                                 <select class="js-example-basic-multiple" name="blood" id="Blood">
                                                     @foreach ($blooddropdown as $test)
                                                         <option value="{{ $test->value }}"
@@ -564,10 +587,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="leucocytes" class="form-label">Leucocytes<a href=""
+                                                <label for="leucocytes" class="form-label">Leucocytes @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Leucocytes" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a>@endif</label>
                                                 <select class="js-example-basic-multiple" name="leucocytes"
                                                     id="Leucocytes">
                                                     @foreach ($leucocytesdropdown as $test)
@@ -581,10 +604,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="glucose" class="form-label">Glucose<a href=""
+                                                <label for="glucose" class="form-label">Glucose @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Glucose" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="glucose" id="Glucose">
                                                     @foreach ($glucosedropdown as $test)
                                                         <option value="{{ $test->value }}"
@@ -597,10 +620,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="nitrite" class="form-label">Nitrite<a href=""
+                                                <label for="nitrite" class="form-label">Nitrite @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Nitrite" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="nitrite" id="Nitrite">
                                                     @foreach ($nitritedropdown as $test)
                                                         <option value="{{ $test->value }}"
@@ -613,10 +636,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="ketones" class="form-label">Ketones<a href=""
+                                                <label for="ketones" class="form-label">Ketones @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Ketones" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="ketones" id="Ketones">
                                                     @foreach ($ketonesdropdown as $test)
                                                         <option value="{{ $test->value }}"
@@ -629,10 +652,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="urobilinogen" class="form-label">Urobilinogen<a
+                                                <label for="urobilinogen" class="form-label">Urobilinogen @if (!$sample->is_completed)<a
                                                         href="" class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Urobilinogen" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="urobilinogen"
                                                     id="Urobilinogen">
                                                     @foreach ($urobilinogendropdown as $test)
@@ -646,10 +669,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="proteins" class="form-label">Proteins<a href=""
+                                                <label for="proteins" class="form-label">Proteins @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Proteins" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="proteins" id="Proteins">
                                                     @foreach ($proteinsdropdown as $test)
                                                         <option value="{{ $test->value }}"
@@ -696,10 +719,10 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="bacteria " class="form-label">Bacteria<a href=""
+                                                <label for="bacteria" class="form-label">Bacteria @if (!$sample->is_completed)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Bacteria" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
+                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
                                                 <select class="js-example-basic-multiple" name="bacteria "
                                                     id="Bacteria">
                                                     @foreach ($bacteriadropdown as $test)
@@ -809,35 +832,37 @@
 
 
                                         <h3 class="text-black">Sensitivity :</h3>
-                                        <form id="profileForm" class="d-flex align-items-center">
-                                            @csrf
-                                            <div class="form-group mb-0 mr-2 col-6">
-                                                <label for="profiles" class="mr-2">Select Profiles: <a
-                                                        href="{{ route('profile.index') }}" target="blank"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a></label>
-                                                <select name="profiles[]" id="profiles"
-                                                    class="js-example-basic-multiple form-control" multiple>
-                                                    @php
-                                                        $sensitivityProfilesArray = !empty(
-                                                            $urinalysisMicrobiologyResults->sensitivity_profiles
-                                                        )
-                                                            ? json_decode(
-                                                                $urinalysisMicrobiologyResults->sensitivity_profiles,
-                                                                true,
+                                        @if (!$sample->is_completed)
+                                            <form id="profileForm" class="d-flex align-items-center">
+                                                @csrf
+                                                <div class="form-group mb-0 mr-2 col-6">
+                                                    <label for="profiles" class="mr-2">Select Profiles: <a
+                                                            href="{{ route('profile.index') }}" target="blank"> <span
+                                                                class="badge bg-info text-white"> Add New</span> </a></label>
+                                                    <select name="profiles[]" id="profiles"
+                                                        class="js-example-basic-multiple form-control" multiple>
+                                                        @php
+                                                            $sensitivityProfilesArray = !empty(
+                                                                $urinalysisMicrobiologyResults->sensitivity_profiles
                                                             )
-                                                            : [];
-                                                    @endphp
-                                                    @foreach ($senstivityprofiles as $profile)
-                                                        <option value="{{ $profile->id }}"
-                                                            {{ in_array($profile->id, $sensitivityProfilesArray) ? 'selected' : '' }}>
-                                                            {{ $profile->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                                                ? json_decode(
+                                                                    $urinalysisMicrobiologyResults->sensitivity_profiles,
+                                                                    true,
+                                                                )
+                                                                : [];
+                                                        @endphp
+                                                        @foreach ($senstivityprofiles as $profile)
+                                                            <option value="{{ $profile->id }}"
+                                                                {{ in_array($profile->id, $sensitivityProfilesArray) ? 'selected' : '' }}>
+                                                                {{ $profile->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
 
-                                            <button type="button" id="createReportButton"
-                                                class="btn btn-primary ms-3 mt-4">Get Sensitivity Items</button>
-                                        </form>
+                                                <button type="button" id="createReportButton"
+                                                    class="btn btn-primary ms-3 mt-4">Get Sensitivity Items</button>
+                                            </form>
+                                        @endif
 
                                         <div id="reportContainer" class="mt-3">
                                             @php
@@ -1063,33 +1088,36 @@
                                 <label for="reference_range" class="form-label">Reference range</label>
                                 <div>
 
-                                    <input type="radio" id="basic_ref" name="reference_range" required
-                                        value="basic_ref" checked />
-                                    <label for="basic_ref" class="form-label">Basic Reference range</label>
+                                    <input type="radio" id="basic_ref" name="reference_range"
+                                         required  value="basic_ref" checked/>
+                                        <label for="basic_ref" class="form-label">Basic Reference range</label>
                                     <input type="radio" id="optional_ref" class="ms-4" name="reference_range"
-                                        required value="optional_ref" />
+                                         required value="optional_ref" />
                                     <label for="optional_ref" class="form-label">Reference range with optional sex</label>
+                                    <input type="radio" id="no_manual_tag" class="ms-4" name="reference_range"
+                                         required value="no_manual_tag" />
+                                    <label for="no_manual_tag" class="form-label">No / Manual Tag</label>
                                 </div>
                             </div>
                             <div class="row" id="basicValues">
                                 {{-- <label for="" class="form-label">High value with optional sex</label> --}}
                                 {{-- <div> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
-                                        <input type="text" id="basic_low_value_ref_range" class="form-control"
-                                            name="basic_low_value_ref_range" placeholder="Enter Low Value" required />
+                                    <div class="col-lg-6">
+                                        <div>
+                                            <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
+                                            <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
+                                                placeholder="Enter Low Value" required />
+                                        </div>
                                     </div>
-                                </div>
-                                {{-- <label for="male" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="basic_high_value_ref_range" class="form-label">High Value</label>
-                                        <input type="text" id="basic_high_value_ref_range" class="form-control"
-                                            name="basic_high_value_ref_range" placeholder="Enter High Value" required />
+                                        {{-- <label for="male" class="form-label">High Value</label> --}}
+                                    <div class="col-lg-6">
+                                        <div>
+                                            <label for="basic_high_value_ref_range" class="form-label">High Value</label>
+                                            <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
+                                                placeholder="Enter High Value" required />
+                                        </div>
                                     </div>
-                                </div>
-                                {{-- <label for="female" class="form-label">Low value</label> --}}
+                                    {{-- <label for="female" class="form-label">Low value</label> --}}
                                 {{-- </div> --}}
                             </div>
                             <div class="row" id="optionalValues">
@@ -1097,34 +1125,37 @@
                                 <div class="col-lg-6">
                                     <div>
                                         <label for="male_low_value_ref_range" class="form-label">Low Value</label>
-                                        <input type="text" id="male_low_value_ref_range" class="form-control"
-                                            name="male_low_value_ref_range" placeholder="Enter Low Value" />
+                                        <input type="text" id="male_low_value_ref_range" class="form-control" name="male_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
                                     </div>
                                 </div>
-                                {{-- <label for="male" class="form-label">High Value</label> --}}
+                                    {{-- <label for="male" class="form-label">High Value</label> --}}
                                 <div class="col-lg-6">
                                     <div>
                                         <label for="male_high_value_ref_range" class="form-label">High Value</label>
-                                        <input type="text" id="male_high_value_ref_range" class="form-control"
-                                            name="male_high_value_ref_range" placeholder="Enter High Value" />
+                                        <input type="text" id="male_high_value_ref_range" class="form-control" name="male_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
                                     </div>
                                 </div>
                                 <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
                                 <div class="col-lg-6">
                                     <div>
                                         <label for="female_low_value_ref_range" class="form-label">Low Value</label>
-                                        <input type="text" id="female_low_value_ref_range" class="form-control"
-                                            name="female_low_value_ref_range" placeholder="Enter Low Value" />
+                                        <input type="text" id="female_low_value_ref_range" class="form-control" name="female_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
                                     </div>
                                 </div>
-                                {{-- <label for="female" class="form-label">High Value</label> --}}
+                                    {{-- <label for="female" class="form-label">High Value</label> --}}
                                 <div class="col-lg-6">
                                     <div>
                                         <label for="female_high_value_ref_range" class="form-label">High Value</label>
-                                        <input type="text" id="female_high_value_ref_range" class="form-control"
-                                            name="female_high_value_ref_range" placeholder="Enter High Value" />
+                                        <input type="text" id="female_high_value_ref_range" class="form-control" name="female_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row" id="noManualValues">
+                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" class="form-control" cols="30" rows="4"></textarea>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
@@ -1388,7 +1419,7 @@
                         high = parseFloat(this.dataset.basicHigh);
                     }
 
-                    let flag = 'Normal';
+                    let flag = '';
                     if (testValue < low) {
                         flag = 'Low';
                     } else if (testValue > high) {
@@ -1413,6 +1444,7 @@
         jQuery(document).ready(function($) {
             // $('#allreadyassign').hide();
             $('#optionalValues').hide();
+            $('#noManualValues').hide();
             $('#basicValues').show();
 
             // Show/hide fields based on selected reference range
@@ -1420,6 +1452,7 @@
                 if (this.value === 'basic_ref') {
                     $('#basicValues').show();
                     $('#optionalValues').hide();
+                    $('#noManualValues').hide();
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', true);
                     $('#basic_high_value_ref_range').prop('required', true);
@@ -1430,6 +1463,7 @@
                 } else if (this.value === 'optional_ref') {
                     $('#basicValues').hide();
                     $('#optionalValues').show();
+                    $('#noManualValues').hide();
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', false);
                     $('#basic_high_value_ref_range').prop('required', false);
@@ -1437,6 +1471,17 @@
                     $('#male_high_value_ref_range').prop('required', true);
                     $('#female_low_value_ref_range').prop('required', true);
                     $('#female_high_value_ref_range').prop('required', true);
+                }else if (this.value === 'no_manual_tag') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').hide();
+                    $('#noManualValues').show();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
                 }
             });
             // When the document is ready, attach a click event to the "Edit" button
@@ -1625,8 +1670,6 @@
                     }
                 });
 
-
-
             });
 
 
@@ -1803,7 +1846,6 @@
                             var sampleid = $('#sampleid').val();
                             // Append the new test to the table
                             var newRow = '<tr>' +
-                                // '<td></td>' +
                                 '<td><input data-test-id="' + response.test.id +
                                 '" type="text" name="tests[' + response.test.id +
                                 '][description]" class="form-control" value="' + response.test
@@ -1811,7 +1853,7 @@
                                 response.test.id + '][id]" class="form-control" value="' +
                                 response.test.id + '" hidden disabled /></td>' +
                                 '<td><input data-test-id="' + response.test.id +
-                                '" type="number" step="any" name="tests[' + response.test.id +
+                                '" type="text" step="any" name="tests[' + response.test.id +
                                 '][test_results]" class="form-control test-result" value="" data-basic-low="' +
                                 response.test.basic_low_value_ref_range +
                                 '" data-basic-high="' + response.test
@@ -1828,10 +1870,10 @@
                                 (response.test.reference_range === 'basic_ref' ? response.test
                                     .basic_low_value_ref_range + '-' + response.test
                                     .basic_high_value_ref_range :
-                                    'Male: ' + response.test.male_low_value_ref_range + '-' +
+                                    response.test.reference_range === 'optional_ref' ? 'Male: ' + response.test.male_low_value_ref_range + '-' +
                                     response.test.male_high_value_ref_range + '<br>Female: ' +
                                     response.test.female_low_value_ref_range + '-' + response
-                                    .test.female_high_value_ref_range) +
+                                    .test.female_high_value_ref_range : response.test.nomanualvalues_ref_range) +
                                 '</p></td>' +
                                 '<td><textarea data-test-id="' + response.test.id +
                                 '" name="tests[' + response.test.id +
@@ -1888,7 +1930,7 @@
                         high = parseFloat($(this).data('basic-high'));
                     }
 
-                    let flag = 'Normal';
+                    let flag = '';
                     if (testValue < low) {
                         flag = 'Low';
                     } else if (testValue > high) {

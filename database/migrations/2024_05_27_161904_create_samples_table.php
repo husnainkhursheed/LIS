@@ -28,6 +28,7 @@ return new class extends Migration
             $table->date('signed_at')->nullable();
             $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->date('completed_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

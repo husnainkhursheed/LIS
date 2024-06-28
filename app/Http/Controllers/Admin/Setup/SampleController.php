@@ -76,6 +76,7 @@ class SampleController extends Controller
        $sample->doctor_id = $request->doctor_id;
        $sample->institution_id = $request->institution_id;
        $sample->bill_to = $request->bill_to;
+       $sample->notes = $request->notes;
        $sample->save();
        // Attach the tests to the sample
        $sample->tests()->attach($request->test_requested);
@@ -135,6 +136,7 @@ class SampleController extends Controller
         $sample->doctor_id = $request->doctor_id;
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
+        $sample->notes = $request->notes;
 
         // Detach the existing tests from the sample
         $sample->tests()->detach();

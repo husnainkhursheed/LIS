@@ -167,6 +167,14 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Test Requested</label>
