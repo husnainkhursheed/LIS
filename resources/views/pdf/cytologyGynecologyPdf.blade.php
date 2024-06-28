@@ -1,240 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Border Life - LIS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
+        html,
         body {
-            font-family: Arial, sans-serif;
-            color: #333;
-            margin: 0;
-        }
-        .sub-header {
-            color: #3d90ca;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .sub-header img {
-            width: 250px;
-        }
-        .info-table {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .info-table td {
+            margin: 10px;
             padding: 10px;
-            border: 1px solid #3d90ca;
+            font-family: sans-serif;
         }
-        .info-table h2 {
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        span,
+        label {
+            font-family: sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0px !important;
+        }
+
+        table thead th {
+            height: 2px;
+            text-align: left;
+            font-size: 14px;
+            font-family: sans-serif;
+        }
+
+        table,
+        th,
+        td {
+            /* border: 1px solid #ddd; */
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .heading {
+            font-size: 18px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            font-family: sans-serif;
+        }
+
+        .small-heading {
+            font-size: 18px;
+            font-family: sans-serif;
+        }
+
+        .total-heading {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: sans-serif;
+        }
+
+        .order-details tbody tr td:nth-child(1) {
+            width: 20%;
+        }
+
+        .order-details tbody tr td:nth-child(3) {
+            width: 20%;
+        }
+
+        .order-details h2 {
             margin-top: 0;
             margin-bottom: 10px;
             border-bottom: 1px solid #3d90ca;
             padding-bottom: 5px;
         }
-        .info-table p {
-            font-size: 13px;
-            font-weight: normal;
-            margin: 5px 0;
-            letter-spacing: 0.7px;
-        }
 
-
-        .main-table {
-            width: 100%;
-            margin-bottom: 20px;
-            border: 0px;
-        }
-        .main-table td img{
-            width: 230px;
-        }
-        .main-table td {
-            /* padding: 10px; */
-            border: 0px;
-        }
-        .main-table h3 {
-            margin-top: 0;
-            /* margin-bottom: 10px; */
-            padding-bottom: 5px;
-        }
-        .main-table p {
-            font-size: 13px;
-            margin: 5px 0;
-        }
-
-
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid #3d90ca;
-        }
-        .table-bordered thead {
-            background-color: #3d90ca;
-            color: #fff;
-        }
-        thead th {
-            font-size: 14px
-        }
-        th, td {
-            padding: 8px;
+        .text-start {
             text-align: left;
-            font-size: 12px;
-
         }
-        .table-bordered td{
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .company-data span {
+            margin-bottom: 4px;
+            display: inline-block;
+            font-family: sans-serif;
             font-size: 14px;
-            /* font-weight: 100; */
-            line-height: 25px;
+            font-weight: 400;
+        }
+
+        .no-border {
+            border: 1px solid #3d90ca !important;
+        }
+
+        .bg-blue {
+            border: 1px solid #3d90ca;
+            /* background-color: #3d90ca; */
+            color: #3d90ca;
         }
     </style>
 </head>
 <body>
-    <table class="main-table">
 
-        <tr>
-            <td style="width: 65%; vertical-align: top;">
-                <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
-            <p><strong>71 Eastern Main Road   Barataria, San Juan  Trinidad and Tobago</strong></p>
-            </td>
-            <td style="width: 35%; vertical-align: middle;">
-                <p><strong>TEL: </strong>   (868) 229-8643  or 316-1383</p>
-                <p><strong>Mail: </strong> borderlifemedlab@gmail.com</p>
-
-
-            </td>
-
-        </tr>
-    </table>
-    {{-- <div class="content">
-        <h1>{{ $title }}</h1>
-        <p><strong>Date:</strong> {{ $date }}</p>
-
-        <div class="section">
-            <h2>Patient Information</h2>
-            <p class="field"><strong>Name:</strong> {{ $sample->patient->first_name ?? 'null' }} {{ $sample->patient->surname ?? 'null' }}</p>
-            <p class="field"><strong>Contact Number:</strong> {{ $sample->patient->contact_number ?? 'null' }}</p>
-            <p class="field"><strong>DOB:</strong> {{ $sample->patient->dob ?? 'null' }}</p>
-            <p class="field"><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</p>
-        </div>
-
-        <div class="section">
-            <h2>Sample Information</h2>
-            <p class="field"><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
-            <p class="field"><strong>Access Number:</strong> {{ $sample->access_number ?? 'null' }}</p>
-            <p class="field"><strong>Collected Date:</strong> {{ $sample->collected_date ?? 'null' }}</p>
-            <p class="field"><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</p>
-            <p class="field"><strong>Received Time:</strong> {{ $sample->received_time ?? 'null' }}</p>
-        </div>
-
-        <div class="section">
-            <h2>Institution Information</h2>
-            <p class="field"><strong>Institution Name:</strong> {{ $sample->institution->name ?? 'null' }}</p>
-            <p class="field"><strong>Contact Number:</strong> {{ $sample->institution->contact_number ?? 'null' }}</p>
-            <p class="field"><strong>Address:</strong> {{ $sample->institution->street_name ?? 'null' }}, {{ $sample->institution->address_line_2 ?? 'null' }}, {{ $sample->institution->area ?? 'null' }}</p>
-            <p class="field"><strong>Email:</strong> {{ $sample->institution->email ?? 'null' }}</p>
-        </div>
-
-        <div class="section">
-            <h2>Doctor Information</h2>
-            <p class="field"><strong>Doctor Name:</strong> {{ $sample->doctor->name ?? 'null' }}</p>
-            <p class="field"><strong>Contact Number:</strong> {{ $sample->doctor->contact_number ?? 'null' }}</p>
-            <p class="field"><strong>Address:</strong> {{ $sample->doctor->street_name ?? 'null' }}, {{ $sample->doctor->address_line_2 ?? 'null' }}, {{ $sample->doctor->area ?? 'null' }}</p>
-            <p class="field"><strong>Email:</strong> {{ $sample->doctor->email ?? 'null' }}</p>
-        </div>
-
-        <div class="section">
-            <h2>Tests Information</h2>
-            @foreach($sample->tests as $test)
-                <p class="field"><strong>Test Name:</strong> {{ $test->name }}</p>
-                <p class="field"><strong>Department:</strong> {{ $test->department }}</p>
-                <p class="field"><strong>Specimen Type:</strong> {{ $test->specimen_type }}</p>
-                <p class="field"><strong>Cost:</strong> {{ $test->cost }}</p>
-                <p class="field"><strong>Reference Range:</strong> {{ $test->reference_range }}</p>
-                <p class="field"><strong>Basic Low Value Ref Range:</strong> {{ $test->basic_low_value_ref_range }}</p>
-                <p class="field"><strong>Basic High Value Ref Range:</strong> {{ $test->basic_high_value_ref_range }}</p>
-                <p class="field"><strong>Male Low Value Ref Range:</strong> {{ $test->male_low_value_ref_range ?? 'null' }}</p>
-                <p class="field"><strong>Male High Value Ref Range:</strong> {{ $test->male_high_value_ref_range ?? 'null' }}</p>
-                <p class="field"><strong>Female Low Value Ref Range:</strong> {{ $test->female_low_value_ref_range ?? 'null' }}</p>
-                <p class="field"><strong>Female High Value Ref Range:</strong> {{ $test->female_high_value_ref_range ?? 'null' }}</p>
-                <hr>
-            @endforeach
-        </div>
-
-        <div class="section">
-            <h2>Test Reports Information</h2>
-            @foreach($sample->testReports as $report)
-                <p class="field"><strong>Results:</strong> {{ $report->results ?? 'null' }}</p>
-                <p class="field"><strong>Notes:</strong> {{ $report->notes ?? 'null' }}</p>
-                <p class="field"><strong>Is Completed:</strong> {{ $report->is_completed ? 'Yes' : 'No' }}</p>
-                <p class="field"><strong>Is Signed:</strong> {{ $report->is_signed ? 'Yes' : 'No' }}</p>
-                <hr>
-            @endforeach
-        </div>
-
-        <div class="section">
-            <h2>Signed By</h2>
-            <p class="field"><strong>Signed By:</strong> {{ $sample->signedBy->first_name ?? 'null' }} {{ $sample->signedBy->surname ?? 'null' }}</p>
-            <p class="field"><strong>Signed At:</strong> {{ $sample->signed_at ?? 'null' }}</p>
-        </div>
-    </div> --}}
-    <table class="info-table">
+    <table class="order-details">
         <thead>
-        <tr>
-            <th style="width: 50%; vertical-align: top;">
-                <h2>Patient Information</h2>
-                <p><strong>Name:</strong> {{ $sample->patient->first_name ?? 'null' }}</p>
-                {{-- <p><strong>Age:</strong> 35</p> --}}
-                <p><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</p>
-                <p><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</p>
-                <p><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</p>
-            </th>
-            {{-- <th style="width: 50%; vertical-align: top;">
-                <h2>Sample Collected At</h2>
-                <p><strong>Tobago, 71 Eastern Main Road Barataria</strong></p><br><br>
-                <p><strong>Ref. By:</strong> DR Yousaf</p>
-
-            </th> --}}
-            <th style="width: 50%; vertical-align: top;">
-                <h2>Report Information</h2>
-                <p><strong>Lab Ref:</strong> {{ $sample->access_number ?? 'null' }}</p>
-                <p><strong>Company:</strong> PRIVATE</p>
-                <p><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</p>
-                <p><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</p>
-                <p><strong>Report Date:</strong> {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</p>
-            </th>
-        </tr>
-    </thead>
-    </table>
-    {{-- <table class="info-table">
-        <tr>
-            <td style="width: 50%; vertical-align: top;">
-                <p><strong>Request: </strong><br>
+            <tr>
+                <th width="50%" colspan="2">
+                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
+                    <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
+                    {{-- <h2 class="text-start">Funda Ecommerce</h2> --}}
+                </th>
+                <th width="50%" colspan="2" class="text-end company-data">
+                    <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
+                    <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
+                </th>
+            </tr>
+            <tr>
+                <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
+                    <h2>Patient Information</h2>
+                    <span style="margin-right:15px; "><strong>Name:</strong>
+                        {{ $sample->patient->first_name ?? 'null' }}</span>
+                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</span>
+                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</span> <br><br>
+                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</span>
+                </th>
+                <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
+                    <h2>Report Information</h2>
+                    <span style="margin-right:50px; "><strong>Lab Ref:</strong>
+                        {{ $sample->access_number ?? 'null' }}</span>
+                    <span><strong>Company:</strong> PRIVATE</span>
+                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</span><br>
+                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</span><br>
+                    <span><strong>Report Date:</strong>
+                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="4">
                     @php
-                    $testNames = $tests->pluck('name')->implode(', ');
-                     @endphp
-                {{ $testNames }}
-                </p>
-            </td>
-            <td style="width: 50%; vertical-align: top;">
-                <p><strong>Comments: </strong><br> SPECIMEN:
-                    SATISFACTORY</p>
-            </td>
-            <td style="width: 50%; vertical-align: top;">
-                <p><strong>Specimen: </strong><br>  Serum (Urine for CT/NG)</p>
-            </td>
-        </tr>
-    </table> --}}
-
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th colspan="2" >CLINICAL HISTORY</th>
-                {{-- <th>RESULTS</th>
-                <th>FLAG</th>
-                <th>REFERENCE RANGE</th> --}}
+                        $testNames = $tests->pluck('name')->implode(', ');
+                    @endphp
+                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames }}</strong></span>
+                </th>
+            </tr>
+            <tr class="bg-blue">
+                <th width="50%" colspan="4">CLINICAL HISTORY</th>
             </tr>
         </thead>
         <tbody>
@@ -249,110 +168,25 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td><strong>LAST PERIOD: </strong> {{$cytologyGynecologyResults->last_period}}</td>
-                <td><strong>CONTRACEPTIVE: </strong> {{$cytologyGynecologyResults->contraceptive}}</td>
-                {{-- <td> {{$cytologyGynecologyResults->description}}</td>
-                <td style="text-align:center;">{{$cytologyGynecologyResults->test_results}}</td>
-                @php
-                $background = '';
-                if (!empty($cytologyGynecologyResults) && $cytologyGynecologyResults->flag == 'Normal') {
-                    $background = 'color:#40bb82';
-                } elseif (
-                    !empty($cytologyGynecologyResults) &&
-                    $cytologyGynecologyResults->flag == 'High'
-                ) {
-                    $background = 'color:red';
-                } elseif (!empty($cytologyGynecologyResults) && $cytologyGynecologyResults->flag == 'Low') {
-                    $background = 'color:##ffca5b';
-                }
-            @endphp
-            <td>
-            <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                data-key="t-hot">{{ $cytologyGynecologyResults->flag ?? 'Normal' }}</span>
-            </td>
-                <td>  @if ($test->reference_range == 'basic_ref')
-                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                @else
-                    Male:
-                    {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                    <br>
-                    Female:
-                    {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                @endif</td> --}}
+                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period}}</td>
+                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive}}</td>
             </tr>
             <tr>
-                <td><strong>PREVIOUS PAP: </strong> {{$cytologyGynecologyResults->previous_pap}}</td>
-                <td><strong>RESULT: </strong> {{$cytologyGynecologyResults->result}}</td>
+                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap}}</td>
+                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result}}</td>
             </tr>
             <tr>
-                <td><strong>CERVIX EXAMINATION: </strong> {{$cytologyGynecologyResults->cervix_examination}}</td>
-                <td><strong>HISTORY: </strong> {{$cytologyGynecologyResults->history}}</td>
+                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination}}</td>
+                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history}}</td>
             </tr>
             @endforeach
-            {{-- <tr>
-                <td> Lymphocytes #</td>
-                <td style="text-align:center;"> 2.1 </td>
-                <td></td>
-                <td>0.8 - 4.9 10^3/ul</td>
-            </tr>
-            <tr>
-                <td> MID #</td>
-                <td style="text-align:center;">1.5</td>
-                <td></td>
-                <td> 0.3 - 2.4 10^3/uL</td>
-            </tr>
-            <tr>
-                <td> Granulocytes #</td>
-                <td style="text-align:center;">5.5</td>
-                <td></td>
-                <td> 1.4 - 6.5 10^3/ul</td>
-            </tr>
-            <tr>
-                <td> Lymphocytes %</td>
-                <td style="text-align:center;">10%</td>
-                <td style="color: blue; text-align:center;">Low</td>
-                <td> 20 - 45 %</td>
-            </tr>
-            <tr>
-                <td> MID %</td>
-                <td style="text-align:center;">15.2%</td>
-                <td style="color: red; text-align:center;">High</td>
-                <td> 2.0 - 13.3 %</td>
-            </tr>
-            <tr>
-                <td> RBC (Red Blood Cell)</td>
-                <td style="text-align:center;">5.5</td>
-                <td></td>
-                <td>  Male: 4.5 - 6.5 10^6/ul <br>
-                    Female: 3.9 - 5.6 10^6/ul
-                </td>
-            </tr>
-            <tr>
-                <td>  HGB (Hemoglobin)</td>
-                <td style="text-align:center;">16</td>
-                <td></td>
-                <td>  Males 13 - 18 g/dL <br>
-                    Females 11.6 - 16.5 g/dL
-                </td>
-            </tr>
-            <tr>
-                <td>HCT (Hematocrit)</td>
-                <td style="text-align:center;">30%</td>
-                <td></td>
-                <td>  Males 40 - 54% <br>
-                    Females 36 - 47%
-                </td>
-            </tr> --}}
-
         </tbody>
     </table>
-    <table class="table table-bordered">
+
+    <table>
         <thead>
-            <tr>
-                <th colspan="2" >SPECIMEN ADEQUACY:</th>
-                {{-- <th>RESULTS</th>
-                <th>FLAG</th>
-                <th>REFERENCE RANGE</th> --}}
+            <tr class="bg-blue" colspan="4">
+                <th width="50%" colspan="4">SPECIMEN ADEQUACY:</th>
             </tr>
         </thead>
         <tbody>
@@ -367,16 +201,18 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td colspan="2">{{$cytologyGynecologyResults->specimen_adequacy}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->specimen_adequacy}}</td>
             </tr>
             @endforeach
+
+
         </tbody>
     </table>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th colspan="2" >DIAGNOSTIC INTERPRETATION</th>
 
+    <table>
+        <thead>
+            <tr class="bg-blue" colspan="4">
+                <th width="50%" colspan="4">DIAGNOSTIC INTERPRETATION:</th>
             </tr>
         </thead>
         <tbody>
@@ -391,16 +227,18 @@
 
             @endphp
             <tr>
-                <td colspan="2">{{$cytologyGynecologyResults->diagnostic_interpretation}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->diagnostic_interpretation}}</td>
             </tr>
             @endforeach
+
+
         </tbody>
     </table>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th colspan="2" >RECOMMENDATION </th>
 
+    <table>
+        <thead>
+            <tr class="bg-blue" colspan="4">
+                <th width="50%" colspan="4">RECOMMENDATION:</th>
             </tr>
         </thead>
         <tbody>
@@ -415,11 +253,14 @@
 
             @endphp
             <tr>
-                <td colspan="2">{{$cytologyGynecologyResults->recommend}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->recommend}}</td>
             </tr>
             @endforeach
+
+
         </tbody>
     </table>
+
+
 </body>
 </html>
-
