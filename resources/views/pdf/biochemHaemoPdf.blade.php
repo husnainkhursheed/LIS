@@ -150,7 +150,7 @@
                     @php
                         $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
-                    Request: {{ $testNames }}
+                    Request: {{ $testNames ?? 'null' }}
                 </th>
             </tr>
             <tr class="bg-blue">
@@ -162,49 +162,43 @@
         </thead>
         <tbody>
             @foreach ($tests as $index => $test)
-            @php
-                $testReport = $testReports
-                    ->where('test_id', $test->id)
-                    ->where('sample_id', $sample->id)
-                    ->first();
-                // dd($testReport);
-                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                // dd($biochemHaemoResults);
-            @endphp
-            <tr>
-                <td> {{$biochemHaemoResults->description}}</td>
-                <td>{{$biochemHaemoResults->test_results}}</td>
-                {{-- <td style="color: blue; text-align:center;">{{$biochemHaemoResults->flag}}</td> --}}
                 @php
-                $background = '';
-                if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                    $background = 'color:#40bb82';
-                } elseif (
-                    !empty($biochemHaemoResults) &&
-                    $biochemHaemoResults->flag == 'High'
-                ) {
-                    $background = 'color:red';
-                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                    $background = 'color:##ffca5b';
-                }
-            @endphp
-            <td>
-            <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                data-key="t-hot">{{ $biochemHaemoResults->flag ?? 'Normal' }}</span>
-            </td>
-                <td>  @if ($test->reference_range == 'basic_ref')
-                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                @else
-                    Male:
-                    {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                    <br>
-                    Female:
-                    {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                @endif</td>
-            </tr>
-            @endforeach
+                    $testReport = $testReports
+                        ->where('test_id', $test->id)
+                        ->where('sample_id', $sample->id)
+                        ->first();
+                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : null;
+                    $description = $biochemHaemoResults->description ?? 'N/A';
+                    $testResults = $biochemHaemoResults->test_results ?? 'N/A';
+                    $flag = $biochemHaemoResults->flag ?? 'Normal';
+                    $background = '';
 
+                    if ($flag == 'Normal') {
+                        $background = 'color:#40bb82';
+                    } elseif ($flag == 'High') {
+                        $background = 'color:red';
+                    } elseif ($flag == 'Low') {
+                        $background = 'color:#ffca5b';
+                    }
+
+                    $referenceRange = 'N/A';
+                    if ($test->reference_range == 'basic_ref') {
+                        $referenceRange = ($test->basic_low_value_ref_range ?? 'N/A') . '-' . ($test->basic_high_value_ref_range ?? 'N/A');
+                    } else {
+                        $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? 'N/A') . '-' . ($test->male_high_value_ref_range ?? 'N/A') . '<br>Female: ' . ($test->female_low_value_ref_range ?? 'N/A') . '-' . ($test->female_high_value_ref_range ?? 'N/A');
+                    }
+                @endphp
+                <tr>
+                    <td>{{ $description }}</td>
+                    <td>{{ $testResults }}</td>
+                    <td>
+                        <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
+                    </td>
+                    <td>{!! $referenceRange !!}</td>
+                </tr>
+            @endforeach
         </tbody>
+
     </table>
 
 </body>

@@ -149,7 +149,7 @@
                     @php
                         $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
-                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames }}</strong></span>
+                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? 'null' }}</strong></span>
                 </th>
             </tr>
             <tr class="bg-blue">
@@ -168,16 +168,16 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period}}</td>
-                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive}}</td>
+                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive ?? 'null'}}</td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap}}</td>
-                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result}}</td>
+                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result ?? 'null'}}</td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination}}</td>
-                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history}}</td>
+                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? 'null'}}</td>
             </tr>
             @endforeach
         </tbody>

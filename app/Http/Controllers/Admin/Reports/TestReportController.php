@@ -93,7 +93,7 @@ class TestReportController extends Controller
 
             $testReports->push($testReport); // Add to the collection
         }
-        dd($testReports);
+        // dd($testReports);
         // dd($testReport->BiochemHaemoResults);
 
         // $sample = Sample::find($id);
@@ -438,5 +438,14 @@ class TestReportController extends Controller
             'success' => 'Report Completed successfully.',
             'sample' => $testReport,
         ]);
+    }
+
+
+
+    // audit traits
+    public function auditTraits(Request $request)
+    {
+
+        return view('reports/test-reports.auditTraits');
     }
 }

@@ -13,14 +13,7 @@
 @php
 use \Carbon\Carbon;
 @endphp
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Assets
-        @endslot
-        @slot('title')
-            Doctors
-        @endslot
-    @endcomponent --}}
+
 <style>
     .test-reports-dropdown{
         width: 50%;
@@ -35,53 +28,27 @@ use \Carbon\Carbon;
 
         <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
-                <h3 class="text-dark">List of Test Report</h3>
-                <a href="{{route('audit-traits.index')}}" class="btn btn-primary"> Audit Trail </a>
+                <h3 class="text-dark">List of Audit Traits</h3>
+                <a href=""  data-bs-toggle="modal" data-bs-target="#auditModal" class="btn btn-primary"> Audit Trail modal </a>
             </div>
-            <form class="mb-4" action="{{ route('test-reports.index') }}" method="GET">
-                <div class="row d-flex align-items-end">
-                    <div class="col-3">
-                        <label for="test_number">Test Number</label>
-                        <input type="text" name="test_number" id="test_number"  value="{{ $testNumber ?? '' }}" class="form-control">
-                    </div>
-                    <div class="col-3">
-                        <label for="access_number">Access Number</label>
-                        <input type="text" name="access_number" id="access_number"  value="{{ $accessNumber ?? '' }}"  class="form-control">
-                    </div>
-                    <div class="col-4">
-                        <label for="patient_name">Patient Name</label>
-                        <input type="text" name="patient_name" id="patient_name" value="{{ $patientName ?? '' }}" class="form-control">
-                    </div>
-                    <div class="col-2">
-
-                        <button type="submit" class="btn search-btn">Search</button>
-
-                    </div>
-                </div>
-
-
-            </form>
-
 
             <div class="col-lg-12">
 
                 {{-- <div class="card "> --}}
                     <div class="col">
                         <div class="">
-                            @if(isset($testReports))
+                            {{-- @if(isset($testReports)) --}}
                             <table id="" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
                                         <th>Test #</th>
-                                        <th>Access #</th>
-                                        <th>Patient Name</th>
-                                        <th>Date Received</th>
-                                        <th>Select ReportType</th>
+                                        <th>User Name</th>
+                                        <th>Date &Time</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($testReports as $testReport)
+                                    {{-- @foreach($testReports as $testReport)
                                         <tr>
                                             <td>{{ $testReport->test_number }}</td>
                                             <td>{{ $testReport->access_number }}</td>
@@ -92,7 +59,7 @@ use \Carbon\Carbon;
                                                 <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
                                                     @csrf
                                                     <select class="test-reports-dropdown" name="report_type" id="report_type" required>
-                                                        {{-- <option value="">Select Report Type</option> --}}
+                                                        <option value="">Select Report Type</option>
                                                         @foreach($testReport->unique_departments as $department)
                                                             <option value="{{ $department }}">@if($department == 1)
                                                                 Biochemistry / Haematology
@@ -101,17 +68,16 @@ use \Carbon\Carbon;
                                                             @elseif($department == 3)
                                                                 Urinalysis / Microbiology
                                                             @endif</option>
-                                                        {{-- <span>{{ $department }}</span><br> --}}
+                                                        <span>{{ $department }}</span><br>
                                                         @endforeach
                                                     </select>
-                                                    <!-- Add other form fields as necessary -->
                                                 </form>
-                                                {{-- <div class="col-lg-12 mt-3">
-                                                    <div> --}}
-                                                        {{-- <label for="report_type" class="form-label">Select Report Type</label> --}}
+                                                <div class="col-lg-12 mt-3">
+                                                    <div>
+                                                        <label for="report_type" class="form-label">Select Report Type</label>
 
-                                                    {{-- </div>
-                                                </div> --}}
+                                                    </div>
+                                                </div>
 
                                             </td>
                                             <td>
@@ -136,20 +102,20 @@ use \Carbon\Carbon;
                                                         </a>
                                                     </li>
                                                 </ul>
-                                                {{-- <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
+                                               <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
                                                 <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
                                                 <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger">Delete</button>
-                                                </form> --}}
+                                                </form>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach --}}
                                 </tbody>
                             </table>
-                            @endif
-                            <ul class="pagination justify-content-center">
+                            {{-- @endif --}}
+                            {{-- <ul class="pagination justify-content-center">
                                 @if ($testReports->previousPageUrl())
                                     <li class="page-item previousPageUrl">
                                         <a class="page-link" href="{{ $testReports->previousPageUrl() }}" aria-label="Previous">
@@ -182,55 +148,106 @@ use \Carbon\Carbon;
                                         <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
                                     </li>
                                 @endif
-                            </ul>
+                            </ul> --}}
                         </div>
 
                     </div>
-                    {{-- <div class="card-body">
-                        <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Telephone</th>
-                                    <th>Address</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($testReports as $doctor)
-                                    <tr>
-                                        <td>{{ $doctor->name }}</td>
-                                        <td>{{ $doctor->contact_number }}</td>
-                                        <td>{{ $doctor->address }}</td>
-                                        <td>{{ $doctor->is_active == 1 ? 'Active' : 'InActive' }}</td>
 
-                                        <td>
-                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $doctor->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                                </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                    data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $doctor->id }}"  data-bs-toggle="modal"
-                                                        href="#deleteRecordModal">
-                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                        </table>
-                    </div> --}}
-                {{-- </div> --}}
+                 </div>
             </div>
      </div>
     </div>
 
+    {{-- Audit Traits modal  --}}
+    <div class="modal right fade" id="auditModal" tabindex="-1" aria-labelledby="auditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="auditModalLabel">All Changes List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="" class="table table-striped display table-responsive rounded">
+                        <thead>
+                            <tr>
+                                <th>Field name </th>
+                                <th>From value</th>
+                                <th>To value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- @foreach($testReports as $testReport)
+                                <tr>
+                                    <td>{{ $testReport->test_number }}</td>
+                                    <td>{{ $testReport->access_number }}</td>
 
+                                    <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
+                                    <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
+                                    <td>
+                                        <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
+                                            @csrf
+                                            <select class="test-reports-dropdown" name="report_type" id="report_type" required>
+                                                <option value="">Select Report Type</option>
+                                                @foreach($testReport->unique_departments as $department)
+                                                    <option value="{{ $department }}">@if($department == 1)
+                                                        Biochemistry / Haematology
+                                                    @elseif($department == 2)
+                                                        Cytology / Gynecology
+                                                    @elseif($department == 3)
+                                                        Urinalysis / Microbiology
+                                                    @endif</option>
+                                                <span>{{ $department }}</span><br>
+                                                @endforeach
+                                            </select>
+                                        </form>
+                                        <div class="col-lg-12 mt-3">
+                                            <div>
+                                                <label for="report_type" class="form-label">Select Report Type</label>
+
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <ul class="list-inline hstack gap-2 mb-0">
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
+                                                <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
+                                                    <span class="logo-sm">
+                                                        <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
+                                                    </span>
+                                                </a>
+                                            </li>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
+                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                            </li>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
+                                                    href="#deleteRecordModal">
+                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                       <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
+                                        <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
+                                        <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach --}}
+                        </tbody>
+                    </table>
+                    {{-- <div id="notes-container">
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 <!--end modal-->
