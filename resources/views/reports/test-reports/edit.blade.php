@@ -1761,11 +1761,6 @@
                 }
             });
 
-            $('#pdfbtn').on('click', function() {
-                console.log('clicked');
-                // alert('testing');
-
-            });
             // Example: Monitor changes in input fields
             $('input , textarea').on('input', function() {
                 // console.log('test');
