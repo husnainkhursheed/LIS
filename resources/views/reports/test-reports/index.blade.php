@@ -293,7 +293,8 @@ use \Carbon\Carbon;
             $('.generate-pdf-link').click(function(e) {
                 e.preventDefault();
                 var testReportId = $(this).data('test-report-id');
-                var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+                // var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+                var reportType = $(this).closest('tr').find('.test-reports-dropdown').val(); // Get the report type from the closest dropdown
 
                 // Construct the URL dynamically
                 var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;

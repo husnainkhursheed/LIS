@@ -128,20 +128,20 @@
                 <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
                     <h2>Patient Information</h2>
                     <span style="margin-right:15px; "><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? 'null' }}</span>
-                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</span>
-                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</span> <br><br>
-                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</span>
+                        {{ $sample->patient->first_name ?? '' }}</span>
+                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
+                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
+                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</span>
                 </th>
                 <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
                     <h2>Report Information</h2>
                     <span style="margin-right:50px; "><strong>Lab Ref:</strong>
-                        {{ $sample->access_number ?? 'null' }}</span>
+                        {{ $sample->access_number ?? '' }}</span>
                     <span><strong>Company:</strong> PRIVATE</span>
-                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</span><br>
-                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</span><br>
+                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</span><br>
+                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</span><br>
                     <span><strong>Report Date:</strong>
-                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</span>
+                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</span>
                 </th>
             </tr>
             <tr>
@@ -149,7 +149,7 @@
                     @php
                         $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
-                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? 'null' }}</strong></span>
+                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? '' }}</strong></span>
                 </th>
             </tr>
             <tr class="bg-blue">
@@ -168,16 +168,16 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period ?? 'null'}}</td>
-                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period ?? ''}}</td>
+                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive ?? ''}}</td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap ?? 'null'}}</td>
-                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap ?? ''}}</td>
+                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result ?? ''}}</td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination ?? 'null'}}</td>
-                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? 'null'}}</td>
+                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
+                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}</td>
             </tr>
             @endforeach
         </tbody>
@@ -201,7 +201,7 @@
                 // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->specimen_adequacy}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->specimen_adequacy ?? ''}}</td>
             </tr>
             @endforeach
 
@@ -227,7 +227,7 @@
 
             @endphp
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->diagnostic_interpretation}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->diagnostic_interpretation ?? ''}}</td>
             </tr>
             @endforeach
 
@@ -253,7 +253,7 @@
 
             @endphp
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->recommend}}</td>
+                <td colspan="4">{{$cytologyGynecologyResults->recommend ?? ''}}</td>
             </tr>
             @endforeach
 

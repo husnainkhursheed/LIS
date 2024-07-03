@@ -129,20 +129,20 @@
                 <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
                     <h2>Patient Information</h2>
                     <span style="margin-right:15px; "><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? 'null' }}</span>
-                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</span>
-                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</span> <br><br>
-                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</span>
+                        {{ $sample->patient->first_name ?? '' }}</span>
+                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
+                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
+                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</span>
                 </th>
                 <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
                     <h2>Report Information</h2>
                     <span style="margin-right:50px; "><strong>Lab Ref:</strong>
-                        {{ $sample->access_number ?? 'null' }}</span>
+                        {{ $sample->access_number ?? '' }}</span>
                     <span><strong>Company:</strong> PRIVATE</span>
-                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</span><br>
-                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</span><br>
+                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</span><br>
+                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</span><br>
                     <span><strong>Report Date:</strong>
-                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</span>
+                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</span>
                 </th>
             </tr>
             <tr>
@@ -150,7 +150,7 @@
                     @php
                         $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
-                    Request: {{ $testNames ?? 'null' }}
+                    Request: {{ $testNames ?? '' }}
                 </th>
             </tr>
             <tr class="bg-blue">
@@ -167,10 +167,10 @@
                         ->where('test_id', $test->id)
                         ->where('sample_id', $sample->id)
                         ->first();
-                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : null;
-                    $description = $biochemHaemoResults->description ?? 'N/A';
-                    $testResults = $biochemHaemoResults->test_results ?? 'N/A';
-                    $flag = $biochemHaemoResults->flag ?? 'Normal';
+                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                    $description = $biochemHaemoResults->description ?? '';
+                    $testResults = $biochemHaemoResults->test_results ?? '';
+                    $flag = $biochemHaemoResults->flag ?? '';
                     $background = '';
 
                     if ($flag == 'Normal') {
@@ -181,12 +181,16 @@
                         $background = 'color:#ffca5b';
                     }
 
-                    $referenceRange = 'N/A';
+                    $referenceRange = '';
+
                     if ($test->reference_range == 'basic_ref') {
-                        $referenceRange = ($test->basic_low_value_ref_range ?? 'N/A') . '-' . ($test->basic_high_value_ref_range ?? 'N/A');
-                    } else {
-                        $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? 'N/A') . '-' . ($test->male_high_value_ref_range ?? 'N/A') . '<br>Female: ' . ($test->female_low_value_ref_range ?? 'N/A') . '-' . ($test->female_high_value_ref_range ?? 'N/A');
+                        $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
+                    } elseif ($test->reference_range == 'optional_ref') {
+                        $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
+                    } elseif ($test->reference_range == 'no_manual_tag') {
+                        $referenceRange = ($test->nomanualvalues_ref_range ?? '');
                     }
+
                 @endphp
                 <tr>
                     <td>{{ $description }}</td>
