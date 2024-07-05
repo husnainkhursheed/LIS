@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Setup\DoctorController;
 use App\Http\Controllers\Admin\Setup\SampleController;
 use App\Http\Controllers\Admin\Setup\PatientController;
 use App\Http\Controllers\Admin\Setup\PracticeController;
+use App\Http\Controllers\ReportingandAnalyticsController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
 use App\Http\Controllers\Admin\Reports\TestReportController;
 use App\Http\Controllers\Admin\Setup\CustomDropdownController;
@@ -121,6 +122,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/fetch-notes-urinalysis', [TestReportController::class, 'fetchNotesUrinalysis'])->name('fetch-notes-urinalysis');
 
         Route::get('/audit-traits', [TestReportController::class, 'auditTraits'])->name('audit-traits.index');
+
+        Route::get('/processing-time', [ReportingandAnalyticsController::class, 'index'])->name('processingtime.index');
 
     });
 
