@@ -192,14 +192,14 @@
                     }
 
                 @endphp
-                <tr>
-                    <td>{{ $description }}</td>
-                    <td>{{ $testResults }}</td>
-                    <td>
-                        <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
-                    </td>
-                    <td>{!! $referenceRange !!}</td>
-                </tr>
+                    <tr>
+                        <td>{{ $description }}</td>
+                        <td>{{ $testResults }}</td>
+                        <td>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
+                        </td>
+                        <td>{!! $referenceRange !!}</td>
+                    </tr>
             @endforeach
         </tbody>
 

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-        Doctors
+        Reports
 @endsection
 @section('css')
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
