@@ -126,24 +126,32 @@
                 </th>
             </tr>
             <tr>
-                <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
-                    <h2>Patient Information</h2>
+                <th width="40%" colspan="" style="vertical-align: top; font-size:12px;">
+                    <h2>Patient Information</h2><br>
                     <span style="margin-right:15px; "><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? '' }}</span>
+                        {{ $sample->patient->first_name ?? '' }}</span><br> <br>
                     <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
                     <span><strong>DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
                     <span><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</span>
                 </th>
-                <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
+                <th width="60%" colspan="3" class="company-data" style="vertical-align: top; font-size:12px;">
                     <h2>Report Information</h2>
-                    <span style="margin-right:50px; "><strong>Lab Ref:</strong>
-                        {{ $sample->access_number ?? '' }}</span>
-                    <span><strong>Company:</strong> PRIVATE</span>
-                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</span><br>
-                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</span><br>
-                    <span><strong>Report Date:</strong>
-                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</span>
+                    <table style="font-size: 12px;">
+                        <tr>
+                            <td style="width: 60%;"><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</td>
+                            <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</td>
+                            <td><strong>Company:</strong> PRIVATE</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Report Date:</strong> {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</td>
+                            <td></td>
+                        </tr>
+                    </table>
                 </th>
+
             </tr>
             <tr>
                 <th colspan="4">
