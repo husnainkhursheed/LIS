@@ -51,39 +51,39 @@
 
                     <ul class="navbar-nav gap-5">
 
-                        <li class="nav-item border-nav px-5 rounded ">
-                            <a class="nav-link active" aria-current="page"
+                        <li class="nav-item border-nav  rounded ">
+                            <a class="nav-link active px-5" aria-current="page"
                                 href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
                         @if (!$sample->is_completed)
-                            <li class="nav-item border-nav px-5 rounded "  id="SaveReport">
-                                <button class="nav-link">Save</button>
+                            <li class="nav-item border-nav  rounded "  id="SaveReport">
+                                <button class="nav-link px-5">Save</button>
                             </li>
                         @endif
-                        <li class="nav-item border-nav px-5 rounded ">
-                            <a class="nav-link" href="#">Delete</a>
+                        <li class="nav-item border-nav  rounded ">
+                            <a class="nav-link px-5" href="#">Delete</a>
                         </li>
                         @if ($sample->signed_by)
-                            <li class="nav-item border-nav px-5 rounded " id="allreadyassign">
+                            <li class="nav-item border-nav  rounded " id="allreadyassign">
                                 {{-- <a class="nav-link" href="#">Sign</a> --}}
-                                <a class="nav-link" href="#">Signed</a>
+                                <a class="nav-link px-5" href="#">Signed</a>
                             </li>
                         @else
-                            <li class="nav-item border-nav px-5 rounded " id="assign">
+                            <li class="nav-item border-nav  rounded " id="assign">
                                 {{-- <a class="nav-link" href="#">Sign</a> --}}
-                                <a class="nav-link" href="#" id="sign-link">Sign</a>
+                                <a class="nav-link px-5" href="#" id="sign-link">Sign</a>
                             </li>
                         @endif
                         @if (!$sample->is_completed)
-                            <li class="nav-item border-nav px-5 rounded" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                            <li class="nav-item border-nav  rounded" data-bs-toggle="tooltip" data-bs-trigger="hover"
                             data-bs-placement="top" title="Complete">
-                                <a class="nav-link complete-report-btn" data-id="{{ $sample->id }}"
+                                <a class="nav-link complete-report-btn px-5" data-id="{{ $sample->id }}"
                                     data-bs-toggle="modal"
                                     href="#completeRecordModal">Complete</a>
                             </li>
                         @endif
 
-                        <li class="nav-item border-nav px-5 rounded " class="generate-pdf-link">
+                        <li class="nav-item border-nav  rounded " class="generate-pdf-link">
                             <a class="nav-link " aria-current="page" id="pdfbtn"
                                 href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
                         </li>
