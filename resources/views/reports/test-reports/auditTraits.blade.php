@@ -28,8 +28,8 @@ use \Carbon\Carbon;
 
         <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
-                <h3 class="text-dark">List of Audit Traits</h3>
-                <a href=""  data-bs-toggle="modal" data-bs-target="#auditModal" class="btn btn-primary"> Audit Trail modal </a>
+                <h3 class="text-dark">List of Audit Trails</h3>
+                {{-- <a href=""  data-bs-toggle="modal" data-bs-target="#auditModal" class="btn btn-primary"> Audit Trail modal </a> --}}
             </div>
 
             <div class="col-lg-12">
@@ -48,70 +48,23 @@ use \Carbon\Carbon;
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- @foreach($testReports as $testReport)
-                                        <tr>
-                                            <td>{{ $testReport->test_number }}</td>
-                                            <td>{{ $testReport->access_number }}</td>
-
-                                            <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
-                                            <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
-                                            <td>
-                                                <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
-                                                    @csrf
-                                                    <select class="test-reports-dropdown" name="report_type" id="report_type" required>
-                                                        <option value="">Select Report Type</option>
-                                                        @foreach($testReport->unique_departments as $department)
-                                                            <option value="{{ $department }}">@if($department == 1)
-                                                                Biochemistry / Haematology
-                                                            @elseif($department == 2)
-                                                                Cytology / Gynecology
-                                                            @elseif($department == 3)
-                                                                Urinalysis / Microbiology
-                                                            @endif</option>
-                                                        <span>{{ $department }}</span><br>
-                                                        @endforeach
-                                                    </select>
-                                                </form>
-                                                <div class="col-lg-12 mt-3">
-                                                    <div>
-                                                        <label for="report_type" class="form-label">Select Report Type</label>
-
-                                                    </div>
-                                                </div>
-
-                                            </td>
-                                            <td>
-                                                <ul class="list-inline hstack gap-2 mb-0">
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
-                                                        <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
-                                                            <span class="logo-sm">
-                                                                <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
-                                                            </span>
-                                                        </a>
-                                                    </li>
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                        data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                        <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
-                                                                class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                                    </li>
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                        data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                        <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
-                                                            href="#deleteRecordModal">
-                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                               <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
-                                                <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
-                                                <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach --}}
+                                    @foreach ($records as $record)
+                                    <tr>
+                                        {{-- {{dd($record->id)}} --}}
+                                        <td>{{$record->testReport->sample->test_number}}</td>
+                                        <td>{{$record->user->first_name}}</td>
+                                        <td>{{$record->changed_at}}</td>
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="edit-item-btn" data-id="{{$record->testReport->id}}" data-changedat="{{$record->changed_at}}"  href="#showModal" data-bs-target="#auditModal" data-bs-toggle="modal"><i
+                                                            class="ri-pencil-fill align-bottom text-muted"></i></a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                             {{-- @endif --}}
@@ -167,7 +120,7 @@ use \Carbon\Carbon;
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table id="" class="table table-striped display table-responsive rounded">
+                    <table id="changestable" class="table table-striped display table-responsive rounded">
                         <thead>
                             <tr>
                                 <th>Field name </th>
@@ -176,70 +129,7 @@ use \Carbon\Carbon;
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @foreach($testReports as $testReport)
-                                <tr>
-                                    <td>{{ $testReport->test_number }}</td>
-                                    <td>{{ $testReport->access_number }}</td>
 
-                                    <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
-                                    <td>{{ Carbon::parse($testReport->received_date)->format('d-m-Y') }}</td>
-                                    <td>
-                                        <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
-                                            @csrf
-                                            <select class="test-reports-dropdown" name="report_type" id="report_type" required>
-                                                <option value="">Select Report Type</option>
-                                                @foreach($testReport->unique_departments as $department)
-                                                    <option value="{{ $department }}">@if($department == 1)
-                                                        Biochemistry / Haematology
-                                                    @elseif($department == 2)
-                                                        Cytology / Gynecology
-                                                    @elseif($department == 3)
-                                                        Urinalysis / Microbiology
-                                                    @endif</option>
-                                                <span>{{ $department }}</span><br>
-                                                @endforeach
-                                            </select>
-                                        </form>
-                                        <div class="col-lg-12 mt-3">
-                                            <div>
-                                                <label for="report_type" class="form-label">Select Report Type</label>
-
-                                            </div>
-                                        </div>
-
-                                    </td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
-                                                <a href="#" class="generate-pdf-link" data-test-report-id="{{ $testReport->id }}">
-                                                    <span class="logo-sm">
-                                                        <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
-                                                    </span>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $testReport->id }}"  href="#" ><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $testReport->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                       <a href="{{ route('test-reports.edit', $testReport->id) }}" class="btn btn-warning">Edit</a>
-                                        <a href="{{ route('test-reports.show', $testReport->id) }}" class="btn btn-info">View</a>
-                                        <form action="{{ route('test-reports.destroy', $testReport->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach --}}
                         </tbody>
                     </table>
                     {{-- <div id="notes-container">
@@ -391,100 +281,46 @@ use \Carbon\Carbon;
             });
         // When the document is ready, attach a click event to the "Edit" button
         $('.edit-item-btn').on('click', function() {
-
             // Get the ID from the data attribute
-            event.preventDefault();
-                var itemId = $(this).data('id');
-                // var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-                 // Prevent the default link behavior
-                 $('#edittestreport' + itemId).submit();
 
-                // var reporttypeis = $('#report_type').val();
-                // data = {
-                //     report_type: reporttypeis,
-                // };
-                // $.ajaxSetup({
-                //     headers: {
-                //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                //     }
-                // });
+            var itemId = $(this).data('id');
+            var changedat = $(this).data('changedat');
+            // console.log(itemId);
+            var url = '{{ url('reports/changes') }}' + '/' + itemId ;
 
-                // $.ajax({
-                //     url: url,
-                //     type: 'POST',
-                //     data: data,
-                //     success: function(response) {
-                //         // Handle the success response
-                //         console.log('Success:', response);
-                //         // if (response.success) {
-                //         //     Toastify({
-                //         //         text: response.message,
-                //         //         gravity: 'top',
-                //         //         position: 'center',
-                //         //         duration: 5000,
-                //         //         close: true,
-                //         //         backgroundColor: '#40bb82',
-                //         //     }).showToast();
-                //         // } else {
-                //         //     var errors = response.message;
-                //         //     var errorMessage = errors.join('\n');
-                //         //     Toastify({
-                //         //         text: errors,
-                //         //         duration: 5000,
-                //         //         gravity: 'top',
-                //         //         position: 'left',
-                //         //         backgroundColor: '#ff4444',
-                //         //     }).showToast();
-                //         // }
 
-                //     },
-                //     error: function(xhr, status, error) {
-                //         console.error('Error:', xhr, status, error);
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data :  { changedat: changedat },
+                success: function(response) {
+                    // Clear existing table rows
+                    $('#changestable tbody').empty();
+                    // console.log(response.changes_made);
 
-                //     }
-                // });
+                    // Iterate over each change in the response and populate the table
+                    response.changes_made.forEach(function(change) {
 
-            // var itemId = $(this).data('id');
-            // var url = '{{ url("/reports/test-reports") }}';
-            // // $('#leadtype_form').attr('action', url);
-            // $.ajax({
-            //         url: url, // Adjust the route as needed
-            //         type: 'Post',
-            //         success: function(response) {
-            //             // Assuming the response has a 'leadType' key
-            //             var sample = response.sample;
-            //             var tests = response.sample.tests;
-            //             // console.log("my practices ",sample);
-            //             var testChargesSelect = $('#test_charges');
-            //             testChargesSelect.empty(); // Clear existing options
-            //             testChargesSelect.append('<option value="">Select Test Charges</option>'); // Add default option
+                        var field_name = change.field_name || '';
+                        var from_value = change.from_value || '';
+                        var to_value = change.to_value || '';
 
-            //             tests.forEach(function(test) {
-            //                 var option = $('<option></option>')
-            //                     .attr('value', test.id) // Adjust the value if needed
-            //                     .text(test.name); // Adjust the text if needed
-            //                 testChargesSelect.append(option);
-            //             });
+                        // Construct table row HTML
+                        var row = '<tr>' +
+                                '<td>' + field_name + '</td>' +
+                                '<td>' + from_value + '</td>' +
+                                '<td>' + to_value + '</td>' +
+                                '</tr>';
 
-            //             // Update modal title
-            //             // $('#exampleModalLabel').html("Edit Doctor");
+                        // Append row to the table body
+                        $('#changestable tbody').append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr, status, error);
 
-            //             // Display the modal footer
-            //             $('#showModal .modal-footer').css('display', 'block');
-
-            //             // Change the button text
-            //             // $('#add-btn').html("Update");
-            //             var form = $('#leadtype_form');
-            //             var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-            //             $('#leadtype_form').attr('action', url);
-
-            //         },
-            //         error: function(xhr, status, error) {
-            //             console.error(xhr, status, error);
-            //             // Handle errors if needed
-            //         }
-            //     });
-
+                }
+            });
         });
 
 

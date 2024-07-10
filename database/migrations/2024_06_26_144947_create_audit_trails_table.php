@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamp('changed_at');
-            $table->json('changes');
+            $table->string('field_name')->nullable();
+            $table->text('from_value')->nullable();
+            $table->text('to_value')->nullable();
             $table->timestamps();
         });
 

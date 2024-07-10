@@ -492,7 +492,7 @@
                                     </li>
                                 @endcanany
                                 <li class="nav-item">
-                                    <a href="{{ url('/roles') }}" class="nav-link">Processing Time</a>
+                                    <a href="{{ url('/reports/processing-time') }}" class="nav-link">Processing Time</a>
                                 </li>
 
                             </ul>

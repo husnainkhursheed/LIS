@@ -87,6 +87,24 @@
                             <a class="nav-link " aria-current="page" id="pdfbtn"
                                 href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
                         </li>
+                        @foreach ($tests as $test)
+                            @php
+                                $testReport = $testReports
+                                    ->where('test_id', $test->id)
+                                    ->where('sample_id', $sample->id)
+                                    ->first();
+                                // dd($testReport);
+                                // $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+                                // dd($biochemHaemoResults);
+
+                                // $testIds = $tests->pluck('id')->implode(',');
+
+                            @endphp
+                        @endforeach
+                        <li class="nav-item border-nav px-5 rounded " class="">
+                            <a class="nav-link " aria-current="page" id=""
+                                href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}" >Audit Trail</a>
+                        </li>
 
                     </ul>
                 </div>
@@ -1750,6 +1768,7 @@
         $(document).ready(function() {
 
             var isDirty = false;
+            // console.log(isDirty);
             $('#pdfbtn').click(function(e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
@@ -1762,13 +1781,18 @@
             });
 
             // Example: Monitor changes in input fields
-            $('input , textarea').on('input', function() {
-                // console.log('test');
+            $('textarea').on('input', function() {
+                // console.log('tested');
                 isDirty = true; // Set flag to true when changes are detected
                 // console.log(isDirty);
             });
+            // $('input[type="text"]').on('change', function() {
+            //     console.log('tested input');
+            //     isDirty = true; // Set flag to true when changes are detected
+            //     // console.log(isDirty);
+            // });
 
-            $('.test-result').on('keyup', function() {
+            $('.test-result, .flag-input, #s_gravity, #ph, #colour, #appearance, #epith_cells, #white_cells, #yeast, #red_cells, #trichomonas, #casts, #crystals, #result1').on('keyup', function() {
                 // console.log('test');
                 isDirty = true; // Set flag to true when changes are detected
                 // console.log(isDirty);
@@ -1781,17 +1805,20 @@
 
             // // Example: Monitor changes in checkboxes or radio buttons
             $('input[type="checkbox"], input[type="radio"]').on('change', function() {
+                // console.log('test');
                 isDirty = true; // Set flag to true when changes are detected
             });
             $('select').on('select2:select', function() {
+                // console.log('test');
                 isDirty = true; // Set flag to true when changes are detected via Select2
             });
             $(window).on('beforeunload', function() {
-                // alert('testing');
-                if (isDirty) {
+                // console.log(isDirty);
+                if (isDirty === true) {
                     return 'You have unsaved changes. Are you sure you want to leave?';
                 }
             });
+
             // Set CSRF token for all AJAX requests
             $.ajaxSetup({
                 headers: {
@@ -1917,7 +1944,7 @@
                         // Handle the success response
                         console.log('Success:', response);
                         if (response.success) {
-                            isDirty = false;
+                            // isDirty = false;
                             Toastify({
                                 text: response.message,
                                 gravity: 'top',

@@ -56,7 +56,7 @@
             </form>
 
             <div class="card-body">
-                <table id="processing-time-table" class="display table table-bordered" style="width:100%">
+                <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
                     <thead>
                         <tr>
                             <th>Test Number</th>
@@ -70,8 +70,8 @@
                             <tr>
                                 <td>{{ $sample['test_number'] }}</td>
                                 <td>{{ $sample['submitted_at'] }}</td>
-                                <td>{{ $sample['results_entered_at'] ?? 'N/A' }}</td>
-                                <td>{{ $sample['time_taken'] ?? 'N/A' }}</td>
+                                <td>{{ $sample['results_entered_at'] ?? '' }}</td>
+                                <td>{{'Days ('. $sample['time_taken_days'] .')' .' Hours ('. $sample['time_taken_hours'].')' ?? '' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -36,7 +36,7 @@ use \Carbon\Carbon;
         <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
                 <h3 class="text-dark">List of Test Report</h3>
-                <a href="{{route('audit-traits.index')}}" class="btn btn-primary"> Audit Trail </a>
+                {{-- <a href="{{route('audit-traits.index')}}" class="btn btn-primary"> Audit Trail </a> --}}
             </div>
             <form class="mb-4" action="{{ route('test-reports.index') }}" method="GET">
                 <div class="row d-flex align-items-end">
