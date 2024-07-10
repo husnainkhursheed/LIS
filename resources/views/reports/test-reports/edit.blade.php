@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    Doctors
+    Test Report
 @endsection
 @section('css')
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
@@ -37,6 +37,7 @@
             background-color: #eff2f7;
         }
     </style>
+
     {{-- //start  --}}
     <div class="container-fluid">
         <nav class="navbar navbar-expand-lg sticky-top navbar-light rounded" id="reportStickyNav">
@@ -49,13 +50,14 @@
                 <div class="collapse navbar-collapse justify-content-center " id="navbarNav">
 
                     <ul class="navbar-nav gap-5">
+
                         <li class="nav-item border-nav px-5 rounded ">
                             <a class="nav-link active" aria-current="page"
                                 href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
                         @if (!$sample->is_completed)
-                            <li class="nav-item border-nav px-5 rounded ">
-                                <button class="nav-link" id="SaveReport">Save</button>
+                            <li class="nav-item border-nav px-5 rounded "  id="SaveReport">
+                                <button class="nav-link">Save</button>
                             </li>
                         @endif
                         <li class="nav-item border-nav px-5 rounded ">
@@ -80,6 +82,30 @@
                                     href="#completeRecordModal">Complete</a>
                             </li>
                         @endif
+
+                        <li class="nav-item border-nav px-5 rounded " class="generate-pdf-link">
+                            <a class="nav-link " aria-current="page" id="pdfbtn"
+                                href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
+                        </li>
+                        @foreach ($tests as $test)
+                            @php
+                                $testReport = $testReports
+                                    ->where('test_id', $test->id)
+                                    ->where('sample_id', $sample->id)
+                                    ->first();
+                                // dd($testReport);
+                                // $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+                                // dd($biochemHaemoResults);
+
+                                // $testIds = $tests->pluck('id')->implode(',');
+
+                            @endphp
+                        @endforeach
+                        <li class="nav-item border-nav px-5 rounded " class="">
+                            <a class="nav-link " aria-current="page" id=""
+                                href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}" >Audit Trail</a>
+                        </li>
+
                     </ul>
                 </div>
             </div>
@@ -254,7 +280,7 @@
                                         value="{{ $test->name }}" disabled />
                                 </td>
                                 <td>
-                                    <input type="text" step="any" data-test-id="{{ $test->id }}"
+                                    <input type="text"  data-test-id="{{ $test->id }}"
                                         name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
                                         value="{{ $biochemHaemoResults->test_results ?? '' }}"
                                         data-basic-low="{{ $test->basic_low_value_ref_range }}"
@@ -262,12 +288,13 @@
                                         data-male-low="{{ $test->male_low_value_ref_range }}"
                                         data-male-high="{{ $test->male_high_value_ref_range }}"
                                         data-female-low="{{ $test->female_low_value_ref_range }}"
-                                        data-female-high="{{ $test->female_high_value_ref_range }}" />
+                                        data-female-high="{{ $test->female_high_value_ref_range }}"
+                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
                                 </td>
                                 <td>
-                                    <input type="text" hidden data-test-id="{{ $test->id }}"
+                                    <input type="text"  data-test-id="{{ $test->id }}"
                                         name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                        value="{{ $biochemHaemoResults->flag ?? '' }}" />
+                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
                                     @php
                                         $background = '';
                                         if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
@@ -281,8 +308,8 @@
                                             $background = 'bg-warning';
                                         }
                                     @endphp
-                                    <span class="badge badge-pill flag-badge {{ $background }}"
-                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? 'Normal' }}</span>
+                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
 
                                 </td>
 
@@ -947,6 +974,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="text" id="note-search" class="form-control mb-3" placeholder="Search notes...">
                     <div id="notes-container">
                         <!-- Notes will be loaded here via AJAX -->
                     </div>
@@ -955,7 +983,7 @@
         </div>
     </div>
     <script>
-        $(document).ready(function() {
+       $(document).ready(function() {
             $('.add-note').on('click', function() {
                 var targetTextarea = $($(this).data('target'));
                 $('#notesModal').modal('show');
@@ -969,19 +997,18 @@
 
                         if (notes.length > 0) {
                             notes.forEach(function(note) {
-                                notesContainer.append('<div class="note-item">' + note +
-                                    '</div>');
+                                notesContainer.append('<div class="note-item">' + note.note_code + '<br>' + note.comment + '</div>');
                             });
 
                             // Add click event to each note-item
                             $('.note-item').on('click', function() {
                                 var selectedNote = $(this).text();
                                 var currentText = targetTextarea.val();
-                                targetTextarea.val(currentText + (currentText ? '\n' :
-                                    '') + selectedNote);
-                                $('#notesModal').modal(
-                                'hide'); // Optional: Hide modal after selecting a note
+                                targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedNote);
+                                $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a note
                             });
+
+
                         } else {
                             notesContainer.append('<p>No notes available.</p>');
                         }
@@ -994,6 +1021,7 @@
                 });
             });
         });
+
     </script>
 
     <!-- Dropdown Modal -->
@@ -1341,18 +1369,38 @@
 
                         if (notes.length > 0) {
                             notes.forEach(function(note) {
-                                notesContainer.append('<div class="note-item">' + note
-                                    .comment + '</div>');
-                            });
+                                // Create the note item with comment initially hidden
+                                var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
+                                var noteComment = $('<div class="note-comment" style="display:none;">' + note.comment + '</div>');
 
-                            // Add click event to each note-item
-                            $('.note-item').on('click', function() {
-                                var selectedNote = $(this).text();
-                                var currentText = targetTextarea.val();
-                                targetTextarea.val(currentText + (currentText ? '\n' :
-                                    '') + selectedNote);
-                                $('#notesModal').modal(
-                                'hide'); // Optional: Hide modal after selecting a note
+                                // Append note item and comment to the container
+                                notesContainer.append(noteItem);
+                                notesContainer.append(noteComment);
+
+                                // Toggle the comment on note item click
+                                noteItem.on('click', function() {
+                                    noteComment.toggle();
+                                });
+
+                                // Append the comment to the textarea on comment click
+                                noteComment.on('click', function() {
+                                    var selectedComment = $(this).text();
+                                    var currentText = targetTextarea.val();
+                                    targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedComment);
+                                    $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a comment
+                                });
+                                 // Filter notes based on search input
+                                $('#note-search').on('input', function() {
+                                    var searchTerm = $(this).val().toLowerCase();
+                                    $('.note-item').each(function() {
+                                        var noteText = $(this).text().toLowerCase();
+                                        if (noteText.includes(searchTerm)) {
+                                            $(this).show();
+                                        } else {
+                                            $(this).hide();
+                                        }
+                                    });
+                                });
                             });
                         } else {
                             notesContainer.append('<p>No notes available.</p>');
@@ -1366,6 +1414,7 @@
                 });
             });
         });
+
     </script>
 
 @endsection
@@ -1395,6 +1444,7 @@
                     // console.log(input.value);
                     const testId = this.dataset.testId;
                     const testValue = parseFloat(this.value);
+
                     const flagInput = document.querySelector(
                     `input[name="tests[${testId}][flag]"]`);
                     const flagBadge = this.closest('tr').querySelector('.flag-badge');
@@ -1418,30 +1468,66 @@
                         low = parseFloat(this.dataset.basicLow);
                         high = parseFloat(this.dataset.basicHigh);
                     }
+                    // data-nomanual-set
+                    let noManualSet = this.dataset.nomanualSet;
+                    // console.log(noManualSet);
+
 
                     let flag = '';
-                    if (testValue < low) {
-                        flag = 'Low';
-                    } else if (testValue > high) {
-                        flag = 'High';
+                    if (!noManualSet) {
+                        // flag = '';
+                        if (testValue < low) {
+                            flag = 'Low';
+                        } else if (testValue > high) {
+                            flag = 'High';
+                        }else if(testValue >= low && testValue <= high){
+                            flag = 'Normal';
+                        }
                     }
+
 
                     flagInput.value = flag;
                     flagBadge.innerText = flag;
                     flagBadge.classList.remove('bg-danger', 'bg-warning', 'bg-success');
-                    if (flag === 'Low') {
-                        flagBadge.classList.add('bg-warning');
-                    } else if (flag === 'High') {
-                        flagBadge.classList.add('bg-danger');
-                    } else {
-                        flagBadge.classList.add('bg-success');
-                    }
+                    // if (flag === 'Low') {
+                    //     flagBadge.classList.add('bg-warning');
+                    // } else if (flag === 'High') {
+                    //     flagBadge.classList.add('bg-danger');
+                    // } else {
+                    //     flagBadge.classList.add('bg-success');
+                    // }
+                    // if (flag === 'Low') {
+                    //     flagInput.style.color = '#c2c22c';
+                    // } else if (flag === 'High') {
+                    //     flagInput.style.color = 'red';
+                    // } else {
+                    //     flagInput.style.color = 'green';
+                    // }
                 });
             });
         });
     </script>
     <script>
         jQuery(document).ready(function($) {
+
+            // generate pdf
+            $('.generate-pdf-link').click(function(e) {
+                e.preventDefault();
+                var testReportId = $(this).data('test-report-id');
+                // var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+                var reportType = $(this).closest('tr').find('.test-reports-dropdown').val(); // Get the report type from the closest dropdown
+
+                // Construct the URL dynamically
+                var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;
+
+                // Set the href attribute of the anchor tag to the constructed URL
+                $(this).attr('href', url);
+
+                // Optional: Open the link in a new tab/window
+                window.open(url, '_blank'); // This will open the URL in a new tab
+            });
+
+
             // $('#allreadyassign').hide();
             $('#optionalValues').hide();
             $('#noManualValues').hide();
@@ -1680,6 +1766,59 @@
         });
 
         $(document).ready(function() {
+
+            var isDirty = false;
+            // console.log(isDirty);
+            $('#pdfbtn').click(function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                if (isDirty) {
+                    alert('You have unsaved changes. Are you sure you want to leave?');
+                    window.open(url, '_blank');
+                }else{
+                    window.open(url, '_blank');
+                }
+            });
+
+            // Example: Monitor changes in input fields
+            $('textarea').on('input', function() {
+                // console.log('tested');
+                isDirty = true; // Set flag to true when changes are detected
+                // console.log(isDirty);
+            });
+            // $('input[type="text"]').on('change', function() {
+            //     console.log('tested input');
+            //     isDirty = true; // Set flag to true when changes are detected
+            //     // console.log(isDirty);
+            // });
+
+            $('.test-result, .flag-input, #s_gravity, #ph, #colour, #appearance, #epith_cells, #white_cells, #yeast, #red_cells, #trichomonas, #casts, #crystals, #result1').on('keyup', function() {
+                // console.log('test');
+                isDirty = true; // Set flag to true when changes are detected
+                // console.log(isDirty);
+            });
+
+            // Example: Monitor changes in contenteditable elements
+            // $('[contenteditable]').on('input', function() {
+            //     isDirty = true; // Set flag to true when changes are detected
+            // });
+
+            // // Example: Monitor changes in checkboxes or radio buttons
+            $('input[type="checkbox"], input[type="radio"]').on('change', function() {
+                // console.log('test');
+                isDirty = true; // Set flag to true when changes are detected
+            });
+            $('select').on('select2:select', function() {
+                // console.log('test');
+                isDirty = true; // Set flag to true when changes are detected via Select2
+            });
+            $(window).on('beforeunload', function() {
+                // console.log(isDirty);
+                if (isDirty === true) {
+                    return 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+
             // Set CSRF token for all AJAX requests
             $.ajaxSetup({
                 headers: {
@@ -1805,6 +1944,7 @@
                         // Handle the success response
                         console.log('Success:', response);
                         if (response.success) {
+                            // isDirty = false;
                             Toastify({
                                 text: response.message,
                                 gravity: 'top',
@@ -1824,6 +1964,7 @@
                                 backgroundColor: '#ff4444',
                             }).showToast();
                         }
+
 
                     },
                     error: function(xhr, status, error) {
@@ -1862,10 +2003,12 @@
                                 .test.male_high_value_ref_range + '" data-female-low="' +
                                 response.test.female_low_value_ref_range +
                                 '" data-female-high="' + response.test
-                                .female_high_value_ref_range + '" /></td>' +
+                                .female_high_value_ref_range + '" data-nomanual-set="' +
+                                response.test.nomanualvalues_ref_range +
+                                '" /></td>' +
                                 '<td><input data-test-id="' + response.test.id +
-                                '" type="text" hidden name="tests[' + response.test.id +
-                                '][flag]" class="form-control flag-input" value="" /><span class="badge badge-pill flag-badge" data-key="t-hot"></span></td>' +
+                                '" type="text"  name="tests[' + response.test.id +
+                                '][flag]" class="form-control flag-input" value="" style="width: 80px;" /><span class="badge badge-pill flag-badge d-none" data-key="t-hot"></span></td>' +
                                 '<td><p class="reference-range">' +
                                 (response.test.reference_range === 'basic_ref' ? response.test
                                     .basic_low_value_ref_range + '-' + response.test
@@ -1929,24 +2072,42 @@
                         low = parseFloat($(this).data('basic-low'));
                         high = parseFloat($(this).data('basic-high'));
                     }
+                    let noManualSet = $(this).data('nomanual-set');
+                    // console.log(noManualSet);
+
 
                     let flag = '';
-                    if (testValue < low) {
-                        flag = 'Low';
-                    } else if (testValue > high) {
-                        flag = 'High';
+                    if (!noManualSet) {
+                        // flag = 'Normal';
+                        if (testValue < low) {
+                            flag = 'Low';
+                        } else if (testValue > high) {
+                            flag = 'High';
+                        }else if(testValue >= low && testValue <= high){
+                            flag = 'Normal';
+                        }
                     }
+
+
+
 
                     flagInput.val(flag);
                     flagBadge.text(flag);
                     flagBadge.removeClass('bg-danger bg-warning bg-success');
-                    if (flag === 'Low') {
-                        flagBadge.addClass('bg-warning');
-                    } else if (flag === 'High') {
-                        flagBadge.addClass('bg-danger');
-                    } else {
-                        flagBadge.addClass('bg-success');
-                    }
+                    // if (flag === 'Low') {
+                    //     flagBadge.style('bg-warning');
+                    // } else if (flag === 'High') {
+                    //     flagBadge.addClass('bg-danger');
+                    // } else {
+                    //     flagBadge.addClass('bg-success');
+                    // }
+                    // if (flag === 'Low') {
+                        // $(flagInput).css('color', '#c2c22c');
+                    // } else if (flag === 'High') {
+                        // $(flagInput).css('color', 'red');
+                    // } else {
+                        // $(flagInput).css('color', 'green');
+                    // }
                 });
             }
 

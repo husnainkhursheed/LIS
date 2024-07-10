@@ -111,6 +111,9 @@
         tr.microorganism-row {
         page-break-inside: avoid;
     }
+    .page-break {
+            page-break-before: always;
+        }
     </style>
 </head>
 
@@ -133,20 +136,20 @@
                 <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
                     <h2>Patient Information</h2>
                     <span style="margin-right:15px; "><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? 'null' }}</span>
-                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? 'null' }}</span>
-                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? 'null' }}</span> <br><br>
-                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? 'null' }}</span>
+                        {{ $sample->patient->first_name ?? '' }}</span>
+                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
+                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
+                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</span>
                 </th>
                 <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
                     <h2>Report Information</h2>
                     <span style="margin-right:50px; "><strong>Lab Ref:</strong>
-                        {{ $sample->access_number ?? 'null' }}</span>
+                        {{ $sample->access_number ?? '' }}</span>
                     <span><strong>Company:</strong> PRIVATE</span>
-                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? 'null' }}</span><br>
-                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? 'null' }}</span><br>
+                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</span><br>
+                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</span><br>
                     <span><strong>Report Date:</strong>
-                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : 'null' }}</span>
+                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</span>
                 </th>
             </tr>
             <tr>
@@ -154,7 +157,7 @@
                     @php
                         $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
-                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames }}</strong></span>
+                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? '' }}</strong></span>
                 </th>
             </tr>
 
@@ -186,71 +189,71 @@
                 @endphp
                 <tr>
                     <td><strong>S. Gravity: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->s_gravity }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->s_gravity ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Epith. Cells: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->epith_cells }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->epith_cells ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Leucocytes: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->leucocytes }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->leucocytes ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>White Cells: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->white_cells }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->white_cells ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Nitrite: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->nitrite }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->nitrite ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Red Cells:</strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->red_cells }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->red_cells ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Glucose: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->glucose }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->glucose ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Casts:</strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->casts }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->casts ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Ketones: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->ketones }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->ketones ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Crystals: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->crystals }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->crystals ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Proteins: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->proteins }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->proteins ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Bacteria:</strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->bacteria }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->bacteria ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Urobilinogen: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->urobilinogen }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->urobilinogen ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Yeast:</strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->yeast }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->yeast ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Bilirubin: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->bilirubin }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->bilirubin ?? '' }}</td>
                     {{-- MICROSCOPY --}}
                     <td><strong>Trichomonas: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->trichomonas }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->trichomonas ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Blood: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->blood }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->blood ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Colour: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->colour }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->colour ?? '' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Appearance: </strong> </td>
-                    <td> {{ $urinalysisMicrobiologyResults->appearance }}</td>
+                    <td> {{ $urinalysisMicrobiologyResults->appearance ?? '' }}</td>
                 </tr>
 
         </tbody>
@@ -270,17 +273,17 @@
         </thead>
         <tbody>
             <tr>
-                <td width="10%"><strong>{{ $urinalysisMicrobiologyResults->procedure }}:</strong></td>
+                <td width="10%"><strong>{{ $urinalysisMicrobiologyResults->procedure ?? '' }}:</strong></td>
                 <td>
-                    {{ $urinalysisMicrobiologyResults->specimen_note }}
+                    {{ $urinalysisMicrobiologyResults->specimen_note ?? '' }}
                 </td>
 
             </tr>
         </tbody>
     </table>
 
-
-    <table>
+    <div class="page-break"></div>
+    <table >
         <thead>
             <tr>
                 <th class=" text-start heading" colspan="2">
@@ -299,8 +302,7 @@
 
         <tbody>
             @php
-
-            $data = json_decode($urinalysisMicrobiologyResults->sensitivity, true);
+              $data = json_decode($urinalysisMicrobiologyResults->sensitivity ?? '[]', true);
             @endphp
             @foreach ($data as $i )
                 @foreach ($i['items'] as $index => $item )

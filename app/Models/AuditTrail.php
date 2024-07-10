@@ -16,6 +16,9 @@ class AuditTrail extends Model
         'user_id',
         'changed_at',
         'changes',
+        'field_name',
+        'from_value',
+        'to_value'
     ];
 
     protected $casts = [

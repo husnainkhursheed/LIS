@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-        Doctors
+        Reports
 @endsection
 @section('css')
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
@@ -21,7 +21,14 @@ use \Carbon\Carbon;
             Doctors
         @endslot
     @endcomponent --}}
-
+<style>
+    .test-reports-dropdown{
+        width: 50%;
+        height: 33px;
+        border-color: #ced4da;
+        border-radius: 4px;
+    }
+</style>
     <div class="row">
 
         @include('layouts.notification')
@@ -29,6 +36,7 @@ use \Carbon\Carbon;
         <div class="card py-3 bg-white">
             <div class="card-header d-flex justify-content-between mb-4 py-2">
                 <h3 class="text-dark">List of Test Report</h3>
+                {{-- <a href="{{route('audit-traits.index')}}" class="btn btn-primary"> Audit Trail </a> --}}
             </div>
             <form class="mb-4" action="{{ route('test-reports.index') }}" method="GET">
                 <div class="row d-flex align-items-end">
@@ -83,7 +91,7 @@ use \Carbon\Carbon;
                                             <td>
                                                 <form action="{{ url('/reports/test-reports', $testReport->id) }}" id="edittestreport{{$testReport->id}}" method="POST">
                                                     @csrf
-                                                    <select class="" name="report_type" id="report_type" required>
+                                                    <select class="test-reports-dropdown" name="report_type" id="report_type" required>
                                                         {{-- <option value="">Select Report Type</option> --}}
                                                         @foreach($testReport->unique_departments as $department)
                                                             <option value="{{ $department }}">@if($department == 1)
@@ -285,7 +293,8 @@ use \Carbon\Carbon;
             $('.generate-pdf-link').click(function(e) {
                 e.preventDefault();
                 var testReportId = $(this).data('test-report-id');
-                var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+                // var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
+                var reportType = $(this).closest('tr').find('.test-reports-dropdown').val(); // Get the report type from the closest dropdown
 
                 // Construct the URL dynamically
                 var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;

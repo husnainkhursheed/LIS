@@ -60,7 +60,8 @@ class UsersController extends Controller
             'email' => 'required|email|unique:users',
             // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-        $user_password = Hash::make('12345678');
+
+        // $user_password = Hash::make($request->password);
         $token = Str::random(60);
         // $imageName = null;
         // if ($request->userimage) {
@@ -78,7 +79,7 @@ class UsersController extends Controller
             // 'avatar' => $imageName ? $imageName : null,
             'departments' => $request->departments ?? [],
             'email_verified_at' => now(),
-            'password'=> bcrypt($user_password),
+            'password'=> bcrypt($request->password),
         ]);
 
         if (is_array($request->role_ids)) {

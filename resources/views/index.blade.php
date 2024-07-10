@@ -37,6 +37,7 @@ use \Carbon\Carbon;
                                     <option selected disabled>Sort By</option>
                                     <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option>
                                     <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
+                                    <option value="first_name" {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Patient Name</option>
                                     <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
                                 </select>
 

@@ -93,7 +93,7 @@ class TestReportController extends Controller
 
             $testReports->push($testReport); // Add to the collection
         }
-        dd($testReports);
+        // dd($testReports);
         // dd($testReport->BiochemHaemoResults);
 
         // $sample = Sample::find($id);
@@ -150,20 +150,36 @@ class TestReportController extends Controller
 
                 // Save the data into BiochemHaemoResults table
                 $result =  BiochemHaemoResults::updateOrCreate(
-                    ['test_report_id' => $testReport->id], // Condition to check
-                    [
-                        'reference' => $data['reference'] ?? null,
-                        'note' => $data['note'] ?? null,
-                        'description' => $testData['description'] ?? null,
-                        'test_results' => $testData['test_results'] ?? null,
-                        'flag' => $testData['flag'] ?? null,
-                        'reference_range' => $testData['reference_range'] ?? null,
-                        'test_notes' => $testData['test_notes'] ?? null
-                    ]
+                    ['test_report_id' => $testReport->id]
                 );
-                $this->addAuditTrail($testReport, $user, $result->getChanges());
-                // dd($result->getChanges());
+                // Condition to check
+                    // Capture original values
+                    $originalValues = $result->getOriginal();
+
+                   // Update or create the result
+                    $result->reference = $data['reference'] ?? $result->reference;
+                    $result->note = $data['note'] ?? $result->note;
+                    $result->description = $testData['description'] ?? $result->description;
+                    $result->test_results = $testData['test_results'] ?? $result->test_results;
+                    $result->flag = $testData['flag'] ?? $result->flag;
+                    $result->reference_range = $testData['reference_range'] ?? $result->reference_range;
+                    $result->test_notes = $testData['test_notes'] ?? $result->test_notes;
+                    $result->save();
+                // );
+                $changes = [];
+                foreach ($result->getChanges() as $field => $newValue) {
+                    if (array_key_exists($field, $originalValues)) {
+                        $changes[$field] = [
+                            'from' => $originalValues[$field],
+                            'to' => $newValue,
+                        ];
+                    }
+                }
+                // dd($changes);
+                $this->addAuditTrail($testReport, $user, $changes);
+
             }
+            // dd($changes);
         }
 
         if ($data['reporttype'] == 2) {
@@ -176,59 +192,40 @@ class TestReportController extends Controller
                         'sample_id' => $data['sampleid'],
                         'test_id' => $testId
                     ]
-                    // [
-                    //     'is_completed' => false,
-                    //     'is_signed' => false
-                    // ]
+
                 );
                 // dd($testReport);
 
-                // Save the data into BiochemHaemoResults table
-                CytologyGynecologyResults::updateOrCreate(
-                    ['test_report_id' => $testReport->id], // Condition to check
-                    [ // Data to update or create
-                        'history' => $data['history'] ?? null,
-                        'last_period' => $data['last_period'] ?? null,
-                        'contraceptive' => $data['contraceptive'] ?? null,
-                        'result' => $data['result'] ?? null,
-                        'previous_pap' => $data['previous_pap'] ?? null,
-                        'cervix_examination' => $data['cervix_examination'] ?? null,
-                        'specimen_adequacy' => $data['specimen_adequacy'] ?? null,
-                        'diagnostic_interpretation' => $data['diagnostic_interpretation'] ?? null,
-                        'recommend' => $data['recommend'] ?? null
-                    ]
+                $result =  CytologyGynecologyResults::updateOrCreate(
+                    ['test_report_id' => $testReport->id],
                 );
-                // CytologyGynecologyResults::updateOrCreate(
-                //     ['test_report_id' => $data['testReport']], // Condition to check
-                //     [ // Data to update or create
-                //         'history' => $data['history'],
-                //         'last_period' => $data['last_period'],
-                //         'contraceptive' => $data['contraceptive'],
-                //         'result' => $data['result'],
-                //         'previous_pap' => $data['previous_pap'],
-                //         'cervix_examination' => $data['cervix_examination'],
-                //         'specimen_adequacy' => $data['specimen_adequacy'],
-                //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
-                //         'recommend' => $data['recommend']
-                //     ]
-                // );
+                $originalValues = $result->getOriginal();
+
+                $result->history = $data['history'] ?? null;
+                $result->last_period = $data['last_period'] ?? null;
+                $result->contraceptive = $data['contraceptive'] ?? null;
+                $result->result = $data['result'] ?? null;
+                $result->previous_pap = $data['previous_pap'] ?? null;
+                $result->cervix_examination = $data['cervix_examination'] ?? null;
+                $result->specimen_adequacy = $data['specimen_adequacy'] ?? null;
+                $result->diagnostic_interpretation = $data['diagnostic_interpretation'] ?? null;
+                $result->recommend = $data['recommend'] ?? null;
+                $result->save();
+
+                $changes = [];
+                foreach ($result->getChanges() as $field => $newValue) {
+                    if (array_key_exists($field, $originalValues)) {
+                        $changes[$field] = [
+                            'from' => $originalValues[$field],
+                            'to' => $newValue,
+                        ];
+                    }
+                }
+                // dd($changes);
+                $this->addAuditTrail($testReport, $user, $changes);
             }
-            // Save the data into BiochemHaemoResults table
-            // CytologyGynecologyResults::updateOrCreate(
-            //     ['test_report_id' => $data['testReport']], // Condition to check
-            //     [ // Data to update or create
-            //         'history' => $data['history'],
-            //         'last_period' => $data['last_period'],
-            //         'contraceptive' => $data['contraceptive'],
-            //         'result' => $data['result'],
-            //         'previous_pap' => $data['previous_pap'],
-            //         'cervix_examination' => $data['cervix_examination'],
-            //         'specimen_adequacy' => $data['specimen_adequacy'],
-            //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
-            //         'recommend' => $data['recommend']
-            //     ]
-            // );
         }
+
         if ($data['reporttype'] == 3) {
             $test_ids = explode(',', $data['testIds']);
             // dd($data['sensitivity_profiles']);
@@ -328,12 +325,14 @@ class TestReportController extends Controller
      */
     protected function addAuditTrail(TestReport $testReport, $user, array $changes)
     {
-        if (!empty($changes)) {
+        foreach ($changes as $field => $values) {
             AuditTrail::create([
                 'test_report_id' => $testReport->id,
                 'user_id' => $user->id,
                 'changed_at' => now(),
-                'changes' => json_encode($changes),
+                'field_name' => $field,
+                'from_value' => $values['from'],
+                'to_value' => $values['to'],
             ]);
         }
     }
@@ -347,12 +346,10 @@ class TestReportController extends Controller
             'sample_id' => $sample_id,
             'test_id' => $id
         ])->first();
+
         if($testReport) {
             $testReport->delete();
         }
-
-
-
 
         return response()->json([
             'success' => true,
@@ -396,6 +393,15 @@ class TestReportController extends Controller
         $testReport->signed_at = now();
         $testReport->save();
 
+        // AuditTrail::create([
+        //     'test_report_id' => $testReport->id,
+        //     'user_id' => $user->id,
+        //     'changed_at' => now(),
+        //     'field_name' => $field,
+        //     'from_value' => $values['from'],
+        //     'to_value' => $values['to'],
+        // ]);
+
         return response()->json([
             'success' => 'Report signed successfully.',
             'user' => $user,
@@ -438,5 +444,14 @@ class TestReportController extends Controller
             'success' => 'Report Completed successfully.',
             'sample' => $testReport,
         ]);
+    }
+
+
+
+    // audit traits
+    public function auditTraits(Request $request)
+    {
+
+        return view('reports/test-reports.auditTraits');
     }
 }

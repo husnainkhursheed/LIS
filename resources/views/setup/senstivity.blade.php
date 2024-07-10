@@ -179,7 +179,7 @@
     </div>
 
     <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
                     <h5 class="modal-title" id="exampleModalLabel">Add profile</h5>
@@ -202,7 +202,7 @@
 
                             <div class="col-lg-12">
                                 <div class="row">
-                                    <div class="col-lg-4">
+                                    <div class="col-lg-12">
                                         <div>
                                             <label for="name" class="form-label">Name</label>
                                             <input type="text" id="name" name="name"
@@ -226,7 +226,7 @@
 
                                             <div class="row input-group">
 
-                                                <div class="col-md-4"><label for="antibiotic"
+                                                <div class="col-md-12"><label for="antibiotic"
                                                         class="form-label">Antibiotic</label></div>
 
                                             </div>
@@ -235,7 +235,7 @@
 
                                                 <div class="row input-group">
 
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-12">
 
                                                         <input type="text" class="form-control antibiotic-value"
                                                             id="antibiotic" style=""
@@ -251,8 +251,8 @@
                                     </div>
 
                                     <div class="col-lg-12 mt-2">
-                                        <a id="add-item" class="btn btn-soft-primary fw-medium"><i
-                                                class="ri-add-fill me-1 align-bottom"></i> Add Item</a>
+                                        <a id="add-item" class="btn btn-soft-primary fw-medium text-white"><i
+                                                class="ri-add-fill me-1 align-bottom "></i> Add Item</a>
                                     </div>
 
                                 </div>
@@ -350,7 +350,7 @@
 
                     '<div class="row input-group">' +
 
-                        '<div class="col-md-4">' +
+                        '<div class="col-md-10">' +
 
                         '<input type="hidden" class="form-control mt-1 " style="" id="senstivityItems_ids"  name="senstivityItems_ids[]" required />' +
 
@@ -425,7 +425,7 @@
 
                             '<div class="row input-group">' +
 
-                            '<div class="col-md-4">' +
+                            '<div class="col-md-10">' +
 
                             '<input type="hidden" class="form-control mt-1" id="senstivityItems_ids" name="senstivityItems_ids[]" value="' +
                             element.id + '" />' +
@@ -489,7 +489,7 @@
 
                     '<div class="row input-group">' +
 
-                    '<div class="col-md-4">' +
+                    '<div class="col-md-12">' +
 
                     '<input type="hidden" class="form-control mt-1 " style="" id="senstivityItems_ids"  name="senstivityItems_ids[]" required />' +
 
