@@ -7,46 +7,30 @@ use App\Models\Sample;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class PDFController extends Controller
 {
-    public function generatePDF1(Request $request, $sample_id)
-    {
-        $sample = Sample::where('id',$sample_id)->with('patient','tests','institution','doctor','testReports','signedBy')->firstOrFail();
-        $data = [
-            'title' => 'Border Life - LIS',
-            'date' => date('m/d/Y'),
-            'sample' => $sample
-        ];
-        // dd($sample);
 
-        $pdf = PDF::loadView('pdf.usersPdf', $data);
-        return $pdf->stream('users-list.pdf');
+    public function generateQRCode($data)
+    {
+        $qr = QrCode::size(300)->generate($data);
+
+        return $qr;
     }
+
     public function generatePDF(Request $request, $sample_id, $type)
     {
         try {
+            // Fetch sample and related tests
             $sample = Sample::findOrFail($sample_id);
-            $sample->tests;
+            $sample->load('tests');
 
             $tests = $sample->tests()->where('department', $type)->get();
 
+            // Load test reports
             $testReports = collect();
-            // Define the relationship mappings
-            $relationMapping = [
-                '1' => 'biochemHaemoResults', // Biochemistry / Haematology
-                '2' => 'cytologyGynecologyResults', // Cytology / Gynecology
-                '3' => 'urinalysisMicrobiologyResults', // Urinalysis / Microbiology
-            ];
-
-            if (!array_key_exists($type, $relationMapping)) {
-                return response()->json(['error' => 'Invalid report type'], 400);
-            }
-
-            $relationship = $relationMapping[$type];
-
             foreach ($tests as $test) {
-                $testReport = TestReport::with($relationship)
+                $testReport = TestReport::with('biochemHaemoResults')
                     ->where('sample_id', $sample->id)
                     ->where('test_id', $test->id)
                     ->first();
@@ -56,13 +40,25 @@ class PDFController extends Controller
                 }
             }
 
+            // Calculate pagination
+            $perPage = 20;
+            $totalPages = ceil($tests->count() / $perPage);
+            $currentPage = $request->input('page', 1);
+
+            // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
                 'date' => date('m/d/Y'),
                 'sample' => $sample,
                 'testReports' => $testReports,
                 'tests' => $tests,
+                'totalPages' => $totalPages,
+                'currentPage' => $currentPage,
+                'signed_by' => 'Dr. John Doe', // Replace with actual data
+                'validated_by' => 'Admin User', // Replace with actual data
             ];
+
+            // Load the view based on $type
             $viewMapping = [
                 '1' => 'pdf.biochemHaemoPdf', // Biochemistry / Haematology
                 '2' => 'pdf.cytologyGynecologyPdf', // Cytology / Gynecology
@@ -74,8 +70,15 @@ class PDFController extends Controller
             }
 
             $view = $viewMapping[$type];
+            $qrCode = $this->generateQRCode('https://20.dev.webberz.com/');
+            $data['qrCode'] = $qrCode;
+            // Generate PDF using Dompdf
             $pdf = PDF::loadView($view, $data);
 
+            // (Optional) Set paper size and orientation
+            $pdf->setPaper('A4', 'portrait');
+
+            // Stream the generated PDF file to the browser
             return $pdf->stream('Report.pdf');
 
         } catch (\Exception $e) {
