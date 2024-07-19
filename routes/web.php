@@ -112,8 +112,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
         Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
         Route::post('/complete-test', [TestReportController::class, 'completetest'])->name('test-reports.completetest');
+        Route::post('/uncomplete-test', [TestReportController::class, 'uncompletetest'])->name('test-reports.uncompletetest');
 
         Route::post('/sensitivity/report', [TestReportController::class, 'getsensitivityitems'])->name('test-reports.getsensitivityitems');
+        Route::get('/partials/procedure/{procedure}', [TestReportController::class, 'getProcedurePartial'])->name('test-reports.getProcedurePartial');
+
 
         // sign report
         Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');

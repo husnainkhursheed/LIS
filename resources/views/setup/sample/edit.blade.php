@@ -96,8 +96,11 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
                                             @foreach ($patients as $patient)
+                                            @php
+                                                $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
+                                            @endphp
                                                 <option value="{{ $patient->id }}" {{ $sample->patient_id == $patient->id ? 'selected' : ''}}>
-                                                    {{ $patient->first_name }}</option>
+                                                    {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
                         </div>
@@ -154,15 +157,21 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Test Requested</label>
-                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
+                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
                                 @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach>
-                                        {{ $test->name }}</option>
+                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
+                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
                         </div>
                     </div>
                 </div>
@@ -460,6 +469,26 @@
 
 
     <script>
+        $(document).ready(function() {
+            let totalCost = 0;
+            $('#test_requested').find('option:selected').each(function() {
+                totalCost += parseFloat($(this).data('cost'));
+            });
+
+            // Update the total_cost input field
+            $('#total_cost').val(totalCost.toFixed(2));
+            $('#test_requested').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost').val(totalCost.toFixed(2));
+            });
+        });
         document.addEventListener("DOMContentLoaded", function() {
             let doctorSelect = document.getElementById('doctor_id');
             if (doctorSelect) {

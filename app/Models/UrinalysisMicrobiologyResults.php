@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\TestReport;
+use App\Models\ProcedureResults;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -32,9 +33,9 @@ class UrinalysisMicrobiologyResults extends Model
         'trichomonas',
         'casts',
         'crystals',
-        'specimen',
-        'procedure',
-        'specimen_note',
+        // 'specimen',
+        // 'procedure',
+        // 'specimen_note',
         'sensitivity_profiles',
         'sensitivity',
         'review',
@@ -43,5 +44,10 @@ class UrinalysisMicrobiologyResults extends Model
     public function testReport()
     {
         return $this->belongsTo(TestReport::class);
+    }
+
+    public function procedureResults()
+    {
+        return $this->hasMany(ProcedureResults::class , 'urinalysis_microbiology_result_id');
     }
 }

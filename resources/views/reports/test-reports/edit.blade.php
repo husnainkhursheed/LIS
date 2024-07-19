@@ -55,6 +55,7 @@
                             <a class="nav-link active px-5" aria-current="page"
                                 href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
+                        {{-- {{dd(Auth::user()->hasRole('Management'))}} --}}
                         @if (!$sample->is_completed)
                             <li class="nav-item border-nav  rounded "  id="SaveReport">
                                 <button class="nav-link px-5">Save</button>
@@ -63,6 +64,7 @@
                         <li class="nav-item border-nav  rounded ">
                             <a class="nav-link px-5" href="#">Delete</a>
                         </li>
+
                         @if ($sample->signed_by)
                             <li class="nav-item border-nav  rounded " id="allreadyassign">
                                 {{-- <a class="nav-link" href="#">Sign</a> --}}
@@ -81,6 +83,15 @@
                                     data-bs-toggle="modal"
                                     href="#completeRecordModal">Complete</a>
                             </li>
+                        @else
+                            {{-- @if (Auth::user()->hasRole('admin')) --}}
+                                <li class="nav-item border-nav  rounded" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                data-bs-placement="top" title="Complete">
+                                    <a class="nav-link uncomplete-report-btn px-5" data-id="{{ $sample->id }}"
+                                        data-bs-toggle="modal"
+                                        href="#UncompleteRecordModal">Un Complete</a>
+                                </li>
+                            {{-- @endif --}}
                         @endif
 
                         <li class="nav-item border-nav  rounded " class="generate-pdf-link">
@@ -517,7 +528,9 @@
                         $urinalysisMicrobiologyResults = $testReport
                             ? $testReport->urinalysisMicrobiologyResults->first()
                             : [];
-                        // dd(json_decode($urinalysisMicrobiologyResults->sensitivity_profiles));
+                            // dd($urinalysisMicrobiologyResults->procedureResults);
+                        $procedureResults = $urinalysisMicrobiologyResults ? $urinalysisMicrobiologyResults->procedureResults : [];
+
 
                         $testIds = $tests->pluck('id')->implode(',');
 
@@ -807,12 +820,12 @@
                                                     value="{{ $urinalysisMicrobiologyResults->crystals ?? '' }}" />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        {{-- <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="specimen" class="form-label">Specimen</label>
                                                 <textarea id="specimen" name="specimen" class="form-control" value="">{{ $urinalysisMicrobiologyResults->specimen ?? '' }}</textarea>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
                                     </div>
                                 </div>
@@ -827,11 +840,11 @@
                                     <div class="row">
                                         <h3 class="text-black">Type of Specimen :</h3>
                                         <div>
-                                            <div class="col-md-6">
+                                            {{-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="procedure" class="form-label">Procedure </label>
                                                     <select class="js-example-basic-multiple" name="procedure"
-                                                        id="procedure">
+                                                        id="procedure" >
                                                         <option value="wet_prep"
                                                             {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'wet_prep' ? 'selected' : '' }}>
                                                             Wet Prep</option>
@@ -854,7 +867,57 @@
                                                     <textarea type="text" id="specimen_note" name="specimen_note" rows="5" class="form-control"
                                                         value="">{{ $urinalysisMicrobiologyResults->specimen_note ?? '' }}</textarea>
                                                 </div>
+                                            </div> --}}
+                                            {{-- {{dd($urinalysisMicrobiologyResults->procedureResults())}} --}}
+                                            {{-- @foreach ($urinalysisMicrobiologyResults->procedureResults as $procedures) --}}
+                                                {{-- <div id="procedures-container">
+                                                    <div class="procedure-group">
+                                                        <div class="form-group">
+                                                            <label for="procedure" class="form-label">Procedure</label>
+                                                            <select class="js-example-basic-multiple procedure" name="procedure[]" id="procedure" >
+                                                                <option value="wet_prep">Wet Prep</option>
+                                                                <option value="gram_stain">Gram Stain</option>
+                                                                <option value="culture">Culture</option>
+                                                                <option value="stool">Stool</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="specimen_note" class="form-label">Note</label>
+                                                            <textarea type="text" id="specimen_note" name="specimen_note[]" rows="5" class="form-control"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="button" id="add-procedure" class="btn btn-primary">Add Procedure</button> --}}
+                                            {{-- @endforeasch --}}
+                                            <div id="procedures-container">
+                                                @foreach ($procedureResults as $index => $procedure)
+                                                    <div class="procedure-group">
+                                                        <div class="form-group">
+                                                            <label for="procedure" class="form-label">Procedure</label>
+                                                            <select class="js-example-basic-multiple procedure" name="procedure[]">
+                                                                <option value="wet_prep" {{ $procedure->procedure == 'wet_prep' ? 'selected' : '' }}>Wet Prep</option>
+                                                                <option value="gram_stain" {{ $procedure->procedure == 'gram_stain' ? 'selected' : '' }}>Gram Stain</option>
+                                                                <option value="culture" {{ $procedure->procedure == 'culture' ? 'selected' : '' }}>Culture</option>
+                                                                <option value="stool" {{ $procedure->procedure == 'stool' ? 'selected' : '' }}>Stool</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="specimen_note" class="form-label">Note</label>
+                                                            <textarea type="text" name="specimen_note[]" rows="5" class="form-control">{{ $procedure->specimen_note }}</textarea>
+                                                        </div>
+                                                        @if ($index > 0)
+                                                            <button type="button" class="remove-procedure btn btn-danger">Remove</button>
+                                                        @endif
+                                                    </div>
+
+                                                @endforeach
                                             </div>
+                                            <button type="button" id="add-procedure" class="btn btn-primary">Add Procedure</button>
+
+
+
+                                            {{-- <button type="submit" class="btn btn-success">Submit</button> --}}
+
                                         </div>
 
 
@@ -1239,6 +1302,44 @@
         </div>
     </div>
 
+    <!--UnCOMPLETE  Modal -->
+    <div class="modal fade zoomIn" id="UncompleteRecordModal" tabindex="-1" aria-labelledby="UncompleteRecordModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="btn-close"></button>
+                </div>
+                <div class="modal-body p-5 text-center">
+                    {{-- <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
+                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
+                    </lord-icon> --}}
+                    <lord-icon
+                        src="https://cdn.lordicon.com/guqkthkk.json"
+                        trigger="loop"
+                        colors="primary:#110a5c"
+                        style="width:90px;height:90px">
+                    </lord-icon>
+                    <div class="mt-4 text-center">
+                        <h4 class="fs-semibold text-black">Are you sure want to Incomplete this Report?</h4>
+                        {{-- <p class="text-muted fs-14 mb-4 pt-1">Deleting your test will
+                            remove all of your information from our database.</p> --}}
+                        <div class="hstack gap-2 justify-content-center remove">
+                            <button class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
+                                data-bs-dismiss="modal" id="deleteRecord-close"><i
+                                    class="ri-close-line me-1 align-middle"></i>
+                                Close</button>
+                            <input type="text" id="complete-record-id" hidden>
+                            <button class="btn btn-primary" id="Uncomplete-record">Yes,
+                                InComplete It !!</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!--COMPLETE  Modal -->
     <div class="modal fade zoomIn" id="completeRecordModal" tabindex="-1" aria-labelledby="completeRecordModal"
         aria-hidden="true">
@@ -1505,10 +1606,42 @@
                     // }
                 });
             });
+
+
+
         });
+
     </script>
     <script>
         jQuery(document).ready(function($) {
+            $('.js-example-basic-multiple').select2();
+
+            $('#add-procedure').click(function() {
+                let newProcedureGroup = `
+                    <div class="procedure-group">
+                        <div class="form-group">
+                            <label for="procedure" class="form-label">Procedure</label>
+                            <select class="js-example-basic-multiple procedure" name="procedure[]">
+                                <option value="wet_prep">Wet Prep</option>
+                                <option value="gram_stain">Gram Stain</option>
+                                <option value="culture">Culture</option>
+                                <option value="stool">Stool</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="specimen_note" class="form-label">Note</label>
+                            <textarea type="text" name="specimen_note[]" rows="5" class="form-control"></textarea>
+                        </div>
+                        <button type="button" class="remove-procedure btn btn-danger">Remove</button>
+                    </div>
+                `;
+                $('#procedures-container').append(newProcedureGroup);
+                $('.js-example-basic-multiple').select2();
+            });
+
+            $(document).on('click', '.remove-procedure', function() {
+                $(this).closest('.procedure-group').remove();
+            });
 
             // generate pdf
             $('.generate-pdf-link').click(function(e) {
@@ -1758,6 +1891,41 @@
 
             });
 
+            $(document).on('click', '#Uncomplete-record', function(event) {
+                // $('#delete-record').on('click', function() {
+                event.preventDefault();
+                // var itemId = $('#delete-record').data('id');
+                var sampleid = $('#sampleid').val();
+                // var deleterecordid = $('#delete-record-id').val();
+                var url = '{{ url('/reports/uncomplete-test') }}';
+                // Prevent the default link behavior
+                // var reporttypeis = $('#report_type').val();
+                data = {
+                    sample_id: sampleid,
+                };
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function(response) {
+                        // Handle the success response
+                        console.log('Success:', response);
+
+                        if (response.success) {
+                            window.location.reload();
+                            $('#UncompleteRecordModal').modal('hide');
+                        }
+
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', xhr, status, error);
+                    }
+                });
+
+            });
+
 
             // Function to reset modal when clicking the "Close" button
             $('#close-modal').on('click', function() {
@@ -1836,7 +2004,9 @@
 
                 // Collect data from each row
 
-
+                var procedures = [];
+                var specimenNotes = [];
+                console.log(procedures);
                 // Gather data from the form based on report type
                 if (reporttypeis == 1) {
                     $('input[data-test-id], textarea[data-test-id]').each(function() {
@@ -1903,6 +2073,14 @@
                         });
                     });
 
+                    $('.procedure-group').each(function() {
+                        var procedure = $(this).find('.procedure').val();
+                        var note = $(this).find('textarea').val();
+
+                        procedures.push(procedure);
+                        specimenNotes.push(note);
+                    });
+
                     console.log(reportData);
                     data = {
                         sampleid: $('#sampleid').val(),
@@ -1929,8 +2107,8 @@
                         casts: $('#casts').val(),
                         crystals: $('#crystals').val(),
                         specimen: $('#specimen').val(),
-                        procedure: $('#procedure').val(),
-                        specimen_note: $('#specimen_note').val(),
+                        procedure: procedures,
+                        specimen_note: specimenNotes,
                         sensitivity_profiles: $('#profiles').val(),
                         sensitivity: JSON.stringify(reportData)
                     };
@@ -2375,6 +2553,7 @@
                 alert('Please select at least one profile.');
             }
         });
+
         $(document).on('click', '#saveReportButton', function() {
             // $('#saveReportButton').click(function() {
             var reportData = [];
