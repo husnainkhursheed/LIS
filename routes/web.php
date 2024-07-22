@@ -112,8 +112,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
         Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
         Route::post('/complete-test', [TestReportController::class, 'completetest'])->name('test-reports.completetest');
+        Route::post('/uncomplete-test', [TestReportController::class, 'uncompletetest'])->name('test-reports.uncompletetest');
 
         Route::post('/sensitivity/report', [TestReportController::class, 'getsensitivityitems'])->name('test-reports.getsensitivityitems');
+        Route::get('/partials/procedure/{procedure}', [TestReportController::class, 'getProcedurePartial'])->name('test-reports.getProcedurePartial');
+
 
         // sign report
         Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');
@@ -133,6 +136,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
+
+    Route::post('/uriRefRanges/store', [CustomDropdownController::class, 'uriRefRangesstore'])->name('uriRefRanges.store');
+    // Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
+    Route::get('uriRefRanges/getvalues/{id}/edit', [CustomDropdownController::class, 'uriRefRangesgetvalues'])->name('uriRefRanges.getvalues');
 
 
     // generate pdf route

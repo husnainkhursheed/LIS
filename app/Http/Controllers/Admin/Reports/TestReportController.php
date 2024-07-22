@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
+use App\Models\Note;
 use App\Models\Test;
 use App\Models\Sample;
+use App\Models\AuditTrail;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
+use App\Models\ProcedureResults;
 use App\Models\BiochemHaemoResults;
 use App\Models\SensitivityProfiles;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Note;
 use App\Models\CytologyGynecologyResults;
+use App\Models\UrinalysisReferenceRanges;
 use App\Models\UrinalysisMicrobiologyResults;
-use App\Models\AuditTrail;
 
 class TestReportController extends Controller
 {
@@ -31,13 +33,13 @@ class TestReportController extends Controller
        $patientName = $request->input('patient_name');
        $query = Sample::query()->orderBy('received_date', 'asc');
        $currentUser = Auth::user();
-        if ($currentUser->hasRole('Lab')) {
-            // Filter samples by the current user's departments through the related tests
-            $departmentIds = $currentUser->departments;
-            $query->whereHas('tests', function($testQuery) use ($departmentIds) {
-                $testQuery->whereIn('department', $departmentIds);
-            });
-        }
+        // if ($currentUser->hasRole('Lab')) {
+        //     // Filter samples by the current user's departments through the related tests
+        //     $departmentIds = $currentUser->departments;
+        //     $query->whereHas('tests', function($testQuery) use ($departmentIds) {
+        //         $testQuery->whereIn('department', $departmentIds);
+        //     });
+        // }
         if ($request->filled('test_number')) {
             $query->where('test_number', $request->test_number);
         }
@@ -86,7 +88,7 @@ class TestReportController extends Controller
         // Collect test reports with their related results
         $testReports = collect(); // Initialize as a collection
         foreach ($tests as $test) {
-            $testReport = TestReport::with('biochemHaemoResults')
+            $testReport = TestReport::with(['biochemHaemoResults', 'urinalysisMicrobiologyResults.procedureResults'])
                 ->where('sample_id', $sample->id)
                 ->where('test_id', $test->id)
                 ->first();
@@ -112,7 +114,9 @@ class TestReportController extends Controller
 
         $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles'));
+        $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
+
+        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)
@@ -123,6 +127,17 @@ class TestReportController extends Controller
             ->get();
 
         return response()->json($profiles);
+    }
+
+    public function getProcedurePartial($procedure)
+    {
+        $procedureResult = new ProcedureResults();
+        $procedureResult->procedure = $procedure;
+        $procedureResult->specimen_note = '';
+        $procedureResult->sensitivity_profiles = '';
+
+        $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
+        return view('partials.procedures', compact('procedureResult','senstivityprofiles'))->render();
     }
 
 
@@ -244,7 +259,7 @@ class TestReportController extends Controller
                 // dd($testReport);
 
                 // Save the data into BiochemHaemoResults table
-                UrinalysisMicrobiologyResults::updateOrCreate(
+                $urinalysisMicrobiologyResult = UrinalysisMicrobiologyResults::updateOrCreate(
                     ['test_report_id' => $testReport->id], // Condition to check
                     [
                         'history' => $data['history'] ?? null,
@@ -268,44 +283,55 @@ class TestReportController extends Controller
                         'trichomonas'=> $data['trichomonas'] ?? null,
                         'casts'=> $data['casts'] ?? null,
                         'crystals'=> $data['crystals'] ?? null,
-                        'specimen'=> $data['specimen'] ?? null,
-                        'procedure'=> $data['procedure'] ?? null,
+                        // 'specimen'=> $data['specimen'] ?? null,
+                        // 'procedure'=> $data['procedure'] ?? null,
                         'sensitivity'=> $data['sensitivity'] ?? null,
-                        'specimen_note'=> $data['specimen_note'] ?? null,
+                        // 'specimen_note'=> $data['specimen_note'] ?? null,
                         'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
 
                     ]
                 );
-                // CytologyGynecologyResults::updateOrCreate(
-                //     ['test_report_id' => $data['testReport']], // Condition to check
-                //     [ // Data to update or create
-                //         'history' => $data['history'],
-                //         'last_period' => $data['last_period'],
-                //         'contraceptive' => $data['contraceptive'],
-                //         'result' => $data['result'],
-                //         'previous_pap' => $data['previous_pap'],
-                //         'cervix_examination' => $data['cervix_examination'],
-                //         'specimen_adequacy' => $data['specimen_adequacy'],
-                //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
-                //         'recommend' => $data['recommend']
-                //     ]
-                // );
+
+                // $specimen_notes = $data['specimen_note'];
+                // dd($urinalysisMicrobiologyResult->id);
+
+                // Now save the procedure results
+            if (isset($data['procedure']) && isset($data['specimen_note'])) {
+                $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $urinalysisMicrobiologyResult->id)->get();
+                $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
+
+                $procedures = $data['procedure'];
+                // dd($procedures);
+                $specimen_notes = $data['specimen_note'];
+                // dd($specimen_notes);
+                $newProcedureIds = [];
+
+                foreach ($procedures as $index => $procedure) {
+                    if (!empty($procedure)) {
+                        $procedureNote = $specimen_notes[$index] ?? null;
+                        // dd($urinalysisMicrobiologyResult->id);
+                        $procedureResult = ProcedureResults::updateOrCreate(
+                            [
+                                'urinalysis_microbiology_result_id' => $urinalysisMicrobiologyResult->id,
+                                'procedure' => $procedure,
+                            ],
+                            [
+
+                                'specimen_note' => $procedureNote
+                            ]
+                        );
+
+                        $newProcedureIds[] = $procedureResult->id;
+                    }
+                }
+
+                // Determine which procedures to delete
+                $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
+
+                // Delete procedures that are not present in the request
+                ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
             }
-            // Save the data into BiochemHaemoResults table
-            // CytologyGynecologyResults::updateOrCreate(
-            //     ['test_report_id' => $data['testReport']], // Condition to check
-            //     [ // Data to update or create
-            //         'history' => $data['history'],
-            //         'last_period' => $data['last_period'],
-            //         'contraceptive' => $data['contraceptive'],
-            //         'result' => $data['result'],
-            //         'previous_pap' => $data['previous_pap'],
-            //         'cervix_examination' => $data['cervix_examination'],
-            //         'specimen_adequacy' => $data['specimen_adequacy'],
-            //         'diagnostic_interpretation' => $data['diagnostic_interpretation'],
-            //         'recommend' => $data['recommend']
-            //     ]
-            // );
+            }
         }
 
         return response()->json([
@@ -438,6 +464,32 @@ class TestReportController extends Controller
         $testReport->is_completed = true;
         $testReport->completed_by = $user->id;
         $testReport->completed_at = now();
+        $testReport->save();
+
+        return response()->json([
+            'success' => 'Report Completed successfully.',
+            'sample' => $testReport,
+        ]);
+    }
+
+    public function uncompletetest(Request $request){
+        $user = Auth::user();
+        $testReport = Sample::find($request->sample_id);
+
+        // Check if the report is already signed
+        // if ($testReport->signed_by) {
+        //     // Fetch the user who signed the report
+        //     $signedByUser = Sample::find($testReport->signed_by);
+        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
+        // }
+
+        // Update the test-reports table with the user ID in the signed_by column
+        $testReport->is_completed = false;
+        $testReport->completed_by = null;
+        $testReport->completed_at = null;
+        $testReport->is_signed = false;
+        $testReport->signed_by = null;
+        $testReport->signed_at = null;
         $testReport->save();
 
         return response()->json([
