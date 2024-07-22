@@ -2437,7 +2437,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Dropdown</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Set Normal Range</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
@@ -3629,7 +3629,7 @@
                         // Handle the success response
                         console.log('Success:', response);
                         if (response.success) {
-                            // isDirty = false;
+                            isDirty = false;
                             Toastify({
                                 text: response.message,
                                 gravity: 'top',

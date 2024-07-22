@@ -115,7 +115,7 @@ use \Carbon\Carbon;
                                                 </div> --}}
 
                                             </td>
-                                            <td>{!! $testReport->is_completed ? '<span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>' : '<span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>'!!}</td>
+                                            <td>{!! $testReport->is_completed ? '<span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>' : ''!!}</td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
                                                     <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Generate PDF">
