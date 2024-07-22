@@ -31,21 +31,32 @@ use \Carbon\Carbon;
                                 <input class="form-control me-2 main-search" type="search" placeholder="Search" aria-label="Search" name="search" value="{{ request('search') }}">
                                 <button class="btn search-btn" type="submit">Search</button>
                             </form>
-                            <form class="d-flex" method="GET" action="{{ route('root') }}">
-                                <input type="hidden" name="search" value="{{ request('search') }}">
-                                <select class="form-select sort-dropdown" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
-                                    <option selected disabled>Sort By</option>
-                                    <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option>
-                                    <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
-                                    <option value="first_name" {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Patient Name</option>
-                                    <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
-                                </select>
+                            {{-- <div class="d-flex gap-2"> --}}
+                                <form class="d-flex gap-2" method="GET" action="{{ route('root') }}">
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
+                                    <select class="form-select sort-dropdown" aria-label="Default select example" name="entries_shown" onchange="this.form.submit()">
+                                        <option selected disabled>Entries to be shown</option>
+                                        <option value="last_20_days" {{ request('entries_shown') == 'last_20_days' ? 'selected' : '' }}>Last 20 days</option>
+                                        <option value="last_3_years" {{ request('entries_shown') == 'last_3_years' ? 'selected' : '' }}>Last 3 years</option>
+                                        <option value="all" {{ request('entries_shown') == 'all' ? 'selected' : '' }}>All</option>
+                                    </select>
+                                {{-- </form>
+                                <form class="" method="GET" action="{{ route('root') }}">
+                                    <input type="hidden" name="search" value="{{ request('search') }}"> --}}
+                                    <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
+                                        <option selected disabled>Sort By</option>
+                                        <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option>
+                                        <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
+                                        <option value="first_name" {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Patient Name</option>
+                                        <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
+                                    </select>
 
-                                {{-- <select class="form-select sort-order-dropdown" aria-label="Default select example" name="sort_order" onchange="this.form.submit()">
-                                    <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending</option>
-                                    <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending</option>
-                                </select> --}}
-                            </form>
+                                    {{-- <select class="form-select sort-order-dropdown" aria-label="Default select example" name="sort_order" onchange="this.form.submit()">
+                                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                        <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending</option>
+                                    </select> --}}
+                                </form>
+                            {{-- </div> --}}
                         </div>
                     </nav>
 

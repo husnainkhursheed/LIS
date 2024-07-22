@@ -1,74 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Border Life - LIS</title>
 
     <style>
-        html,
-        body {
-            margin: 10px;
-            padding: 10px;
-            font-family: sans-serif;
+        @page {
+            margin: 10mm 10mm 30mm 10mm;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        p,
-        span,
-        label {
-            font-family: sans-serif;
+        body {
+            font-family: 'Cambria', sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 0px !important;
+            margin-bottom: 20px;
         }
 
         table thead th {
-            height: 2px;
             text-align: left;
             font-size: 14px;
-            font-family: sans-serif;
         }
 
-        table,
         th,
         td {
-            /* border: 1px solid #ddd; */
             padding: 8px;
             font-size: 14px;
-        }
-
-        .heading {
-            font-size: 18px;
-            margin-top: 12px;
-            margin-bottom: 12px;
-            font-family: sans-serif;
-        }
-
-        .small-heading {
-            font-size: 18px;
-            font-family: sans-serif;
-        }
-
-        .total-heading {
-            font-size: 18px;
-            font-weight: 700;
-            font-family: sans-serif;
-        }
-
-        .order-details tbody tr td:nth-child(1) {
-            width: 20%;
-        }
-
-        .order-details tbody tr td:nth-child(3) {
-            width: 20%;
         }
 
         .order-details h2 {
@@ -86,20 +48,10 @@
             text-align: right;
         }
 
-        .text-center {
-            text-align: center;
-        }
-
         .company-data span {
-            margin-bottom: 4px;
             display: inline-block;
-            font-family: sans-serif;
             font-size: 14px;
             font-weight: 400;
-        }
-
-        .no-border {
-            border: 1px solid #3d90ca !important;
         }
 
         .bg-blue {
@@ -107,47 +59,78 @@
             /* background-color: #3d90ca; */
             color: #3d90ca;
         }
+
+        .footer {
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            bottom: -20mm;
+            left: 0;
+            right: 0;
+            font-size: 12px;
+
+        }
+
+        .footer .left,
+        .footer .center,
+        .footer .right {
+            display: inline-block;
+            width: 35%;
+        }
+
     </style>
 </head>
+
 <body>
 
     <table class="order-details">
         <thead>
             <tr>
                 <th width="50%" colspan="2">
-                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
+                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo">
                     <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
-                    {{-- <h2 class="text-start">Funda Ecommerce</h2> --}}
                 </th>
                 <th width="50%" colspan="2" class="text-end company-data">
+                    <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
                     <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
                     <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
                 </th>
             </tr>
             <tr>
-                <th width="50%" colspan="2" style="vertical-align: top; font-size:12px;">
-                    <h2>Patient Information</h2>
-                    <span style="margin-right:15px; "><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? '' }}</span>
-                    <span style="margin-right:15px; "><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
-                    <span><strong>DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
-                    <span><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</span>
+                <th width="40%" style="vertical-align: top;">
+                    <h2>Patient Information</h2><br>
+                    <span><strong>Name:</strong>
+                        {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
+                    </span><br><br>
+                    <span><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
+                    <span><strong> &nbsp;&nbsp;&nbsp;&nbsp; DOB:</strong>{{ $sample->patient->dob ?? '' }}</span>
+                    <br><br>
                 </th>
-                <th width="50%" colspan="2" class="company-data" style="vertical-align: top; font-size:12px;">
+                <th width="60%" colspan="3" class="company-data" style="vertical-align: top;">
                     <h2>Report Information</h2>
-                    <span style="margin-right:50px; "><strong>Lab Ref:</strong>
-                        {{ $sample->access_number ?? '' }}</span>
-                    <span><strong>Company:</strong> PRIVATE</span>
-                    <span><strong>Collection Date:</strong> {{ $sample->collected_date ?? '' }}</span><br>
-                    <span><strong>Received Date:</strong> {{ $sample->received_date ?? '' }}</span><br>
-                    <span><strong>Report Date:</strong>
-                        {{ $sample->created_at ? $sample->created_at->format('Y-m-d') : '' }}</span>
+                    <table>
+                        <tr>
+                            <td><strong>Collection Date:</strong> {{
+                                \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
+                            <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Received Date:</strong> {{
+                                \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
+                            <td><strong>Company:</strong> PRIVATE</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Report Date:</strong> {{
+                                \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
+                            <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
+                        </tr>
+                    </table>
                 </th>
             </tr>
             <tr>
                 <th colspan="4">
                     @php
-                        $testNames = $tests->pluck('name')->implode(', ');
+                    $testNames = $tests->pluck('name')->implode(', ');
                     @endphp
                     <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? '' }}</strong></span>
                 </th>
@@ -159,29 +142,49 @@
         <tbody>
             @foreach ($tests as $index => $test)
             @php
-                $testReport = $testReports
-                    ->where('test_id', $test->id)
-                    ->where('sample_id', $sample->id)
-                    ->first();
-                // dd($testReport);
-                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-                // dd($cytologyGynecologyResults);
+            $testReport = $testReports
+            ->where('test_id', $test->id)
+            ->where('sample_id', $sample->id)
+            ->first();
+            // dd($testReport);
+            $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+            // dd($cytologyGynecologyResults);
             @endphp
             <tr>
-                <td colspan="2"> <span> <strong> LAST PERIOD:   </strong></span> {{$cytologyGynecologyResults->last_period ?? ''}}</td>
-                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span> {{$cytologyGynecologyResults->contraceptive ?? ''}}</td>
+                <td colspan="2"> <span> <strong> LAST PERIOD: </strong></span> {{$cytologyGynecologyResults->last_period
+                    ?? ''}}</td>
+                <td colspan="2"> <span> <strong> CONTRACEPTIVE: </strong></span>
+                    {{$cytologyGynecologyResults->contraceptive ?? ''}}</td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> PREVIOUS PAP:  </strong></span> {{$cytologyGynecologyResults->previous_pap ?? ''}}</td>
-                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result ?? ''}}</td>
+                <td colspan="2"> <span> <strong> PREVIOUS PAP: </strong></span>
+                    {{$cytologyGynecologyResults->previous_pap ?? ''}}</td>
+                <td colspan="2"> <span> <strong> RESULT: </strong></span> {{$cytologyGynecologyResults->result ?? ''}}
+                </td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> CERVIX EXAMINATION:   </strong></span> {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
-                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}</td>
+                <td colspan="2"> <span> <strong> CERVIX EXAMINATION: </strong></span>
+                    {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
+                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}
+                </td>
             </tr>
             @endforeach
         </tbody>
     </table>
+
+    {{-- loop for $cytologyGynecologyResults->specimen_adequacy / SPECIMEN ADEQUACY --}}
+
+    @foreach ($tests as $index => $test)
+    @php
+    $testReport = $testReports
+    ->where('test_id', $test->id)
+    ->where('sample_id', $sample->id)
+    ->first();
+    // dd($testReport);
+    $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+    // dd($cytologyGynecologyResults);
+    @endphp
+    @if ($cytologyGynecologyResults->specimen_adequacy)
 
     <table>
         <thead>
@@ -190,24 +193,27 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($tests as $index => $test)
-            @php
-                $testReport = $testReports
-                    ->where('test_id', $test->id)
-                    ->where('sample_id', $sample->id)
-                    ->first();
-                // dd($testReport);
-                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-                // dd($cytologyGynecologyResults);
-            @endphp
             <tr>
                 <td colspan="4">{{$cytologyGynecologyResults->specimen_adequacy ?? ''}}</td>
             </tr>
-            @endforeach
-
-
         </tbody>
     </table>
+    @endif
+    @endforeach
+
+    {{-- loop for $cytologyGynecologyResults->diagnostic_interpretation / DIAGNOSTIC INTERPRETATION --}}
+
+    @foreach ($tests as $index => $test)
+    @php
+    $testReport = $testReports
+    ->where('test_id', $test->id)
+    ->where('sample_id', $sample->id)
+    ->first();
+
+    $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+
+    @endphp
+    @if ($cytologyGynecologyResults->diagnostic_interpretation)
 
     <table>
         <thead>
@@ -216,24 +222,27 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($tests as $index => $test)
-            @php
-                $testReport = $testReports
-                    ->where('test_id', $test->id)
-                    ->where('sample_id', $sample->id)
-                    ->first();
-
-                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-
-            @endphp
             <tr>
                 <td colspan="4">{{$cytologyGynecologyResults->diagnostic_interpretation ?? ''}}</td>
             </tr>
-            @endforeach
-
-
         </tbody>
     </table>
+    @endif
+    @endforeach
+
+    {{-- loop for $cytologyGynecologyResults->recommend / RECOMMENDATION --}}
+
+    @foreach ($tests as $index => $test)
+    @php
+    $testReport = $testReports
+    ->where('test_id', $test->id)
+    ->where('sample_id', $sample->id)
+    ->first();
+
+    $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
+
+    @endphp
+    @if ($cytologyGynecologyResults->recommend)
 
     <table>
         <thead>
@@ -242,25 +251,27 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($tests as $index => $test)
-            @php
-                $testReport = $testReports
-                    ->where('test_id', $test->id)
-                    ->where('sample_id', $sample->id)
-                    ->first();
-
-                $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-
-            @endphp
             <tr>
                 <td colspan="4">{{$cytologyGynecologyResults->recommend ?? ''}}</td>
             </tr>
-            @endforeach
-
-
         </tbody>
     </table>
+    @endif
+    @endforeach
 
-
+    <script type="text/php">
+        if ( isset($pdf) ) {
+            $pdf->page_script('
+                if ($PAGE_COUNT ) {
+                    $font = $fontMetrics->get_font("Cambria, serif", "normal");
+                    $size = 10;
+                    $pdf->text(45, 810, "Signed by: Dr. John Doe", $font, $size);
+                    $pdf->text(245, 810, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                    $pdf->text(435, 810, "Validated by: Admin User", $font, $size);
+                }
+            ');
+        }
+    </script>
 </body>
+
 </html>

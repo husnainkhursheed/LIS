@@ -57,6 +57,7 @@ class TestController extends Controller
             'department' => 'required',
             'specimen_type' => 'required',
             'cost' => 'required',
+            'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
        $reference_range = $request->input('reference_range');
@@ -65,6 +66,7 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
+        $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
@@ -121,6 +123,7 @@ class TestController extends Controller
             'department' => 'required',
             'specimen_type' => 'required',
             'cost' => 'required',
+            'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
         $reference_range = $request->input('reference_range');
@@ -130,6 +133,7 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
+        $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');

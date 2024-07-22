@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('department', ['1', '2', '3']);
             $table->string('specimen_type');
             $table->decimal('cost', 8, 2);
+            $table->text('calculation_explanation')->nullable();
             $table->text('reference_range')->nullable();
             $table->text('basic_low_value_ref_range')->nullable();
             $table->text('basic_high_value_ref_range')->nullable();

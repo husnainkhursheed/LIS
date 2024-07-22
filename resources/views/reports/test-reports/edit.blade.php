@@ -1077,7 +1077,7 @@
                         <input type="hidden" id="id-field" />
                         <input type="hidden" id="sample_id" name="sample_id" value="{{ $sample->id }}">
                         <div class="row g-3">
-                            <div class="col-lg-12">
+                            <div class="col-lg-6">
                                 <div>
                                     <label for="companyname-field" class="form-label">Name of charge item</label>
                                     <input type="text" id="name" name="name" class="form-control"
@@ -1110,6 +1110,12 @@
                                     <label for="cost" class="form-label">Cost</label>
                                     <input type="number" id="cost" name="cost" class="form-control"
                                         placeholder="Enter Cost" required />
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div>
+                                    <label for="Calculation-Explanation" class="form-label">Calculation Explanation</label>
+                                    <textarea name="calculation_explanation" id="calculation_explanation" class="form-control" cols="30" rows="3"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-12">
