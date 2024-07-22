@@ -2233,7 +2233,7 @@
 
                                             {{-- <button type="button" id="add-procedure" class="btn btn-primary">Add Procedure</button> --}}
                                             <div id="procedures-container">
-                                                <button type="button" class="btn btn-primary add-btn align-item-end ms-auto"  id="add-procedure" ><i class="ri-add-line align-bottom me-1 "></i> Add
+                                                <button type="button" class="btn btn-primary add-btn float-end mb-1"  id="add-procedure" ><i class="ri-add-line align-bottom me-1 "></i> Add
                                                     Procedure</button>
                                                 @foreach ($procedureResults as $index => $procedure)
                                                     <div class="procedure-group">
@@ -2251,7 +2251,7 @@
                                                             <textarea type="text" name="specimen_note[]" rows="5" class="form-control">{{ $procedure->specimen_note }}</textarea>
                                                         </div>
                                                         @if ($index > 0)
-                                                            <button type="button" class="remove-procedure btn btn-danger">Remove</button>
+                                                            <button type="button" class="remove-procedure btn btn-danger float-end mt-1">Remove</button>
                                                         @endif
                                                     </div>
 
@@ -3078,7 +3078,7 @@
                             <label for="specimen_note" class="form-label">Note</label>
                             <textarea type="text" name="specimen_note[]" rows="5" class="form-control"></textarea>
                         </div>
-                        <button type="button" class="remove-procedure btn btn-danger">Remove</button>
+                        <button type="button" class="remove-procedure btn btn-danger float-end">Remove</button>
                     </div>
                 `;
                 $('#procedures-container').append(newProcedureGroup);

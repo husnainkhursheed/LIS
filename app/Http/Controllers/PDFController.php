@@ -7,7 +7,9 @@ use App\Models\Sample;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\UrinalysisReferenceRanges;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 class PDFController extends Controller
 {
 
@@ -45,12 +47,15 @@ class PDFController extends Controller
             $totalPages = ceil($tests->count() / $perPage);
             $currentPage = $request->input('page', 1);
 
+            $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
+
             // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
                 'date' => date('m/d/Y'),
                 'sample' => $sample,
                 'testReports' => $testReports,
+                'referenceRanges' => $referenceRanges,
                 'tests' => $tests,
                 'totalPages' => $totalPages,
                 'currentPage' => $currentPage,
