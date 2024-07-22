@@ -137,6 +137,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
     Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
 
+    Route::post('/uriRefRanges/store', [CustomDropdownController::class, 'uriRefRangesstore'])->name('uriRefRanges.store');
+    // Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
+    Route::get('uriRefRanges/getvalues/{id}/edit', [CustomDropdownController::class, 'uriRefRangesgetvalues'])->name('uriRefRanges.getvalues');
+
 
     // generate pdf route
     Route::get('generate-pdf/{id}/{type}', [App\Http\Controllers\PDFController::class, 'generatePDF']);

@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\CytologyGynecologyResults;
+use App\Models\UrinalysisReferenceRanges;
 use App\Models\UrinalysisMicrobiologyResults;
 
 class TestReportController extends Controller
@@ -32,13 +33,13 @@ class TestReportController extends Controller
        $patientName = $request->input('patient_name');
        $query = Sample::query()->orderBy('received_date', 'asc');
        $currentUser = Auth::user();
-        if ($currentUser->hasRole('Lab')) {
-            // Filter samples by the current user's departments through the related tests
-            $departmentIds = $currentUser->departments;
-            $query->whereHas('tests', function($testQuery) use ($departmentIds) {
-                $testQuery->whereIn('department', $departmentIds);
-            });
-        }
+        // if ($currentUser->hasRole('Lab')) {
+        //     // Filter samples by the current user's departments through the related tests
+        //     $departmentIds = $currentUser->departments;
+        //     $query->whereHas('tests', function($testQuery) use ($departmentIds) {
+        //         $testQuery->whereIn('department', $departmentIds);
+        //     });
+        // }
         if ($request->filled('test_number')) {
             $query->where('test_number', $request->test_number);
         }
@@ -113,7 +114,9 @@ class TestReportController extends Controller
 
         $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles'));
+        $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
+
+        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)
