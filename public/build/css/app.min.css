@@ -17331,7 +17331,7 @@ table thead {
 }
 
 .sort-dropdown {
-    /* width: 7%; */
+    width: auto;
     background-color: #EDF0F3;
 }
 

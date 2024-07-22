@@ -64,6 +64,19 @@ class HomeController extends Controller
             });
         }
 
+        // Handle entries shown filter
+        if ($request->has('entries_shown')) {
+            $entriesShown = $request->input('entries_shown');
+            $now = now();
+
+            if ($entriesShown == 'last_20_days') {
+                $query->where('received_date', '>=', $now->subDays(20));
+            } elseif ($entriesShown == 'last_3_years') {
+                $query->where('received_date', '>=', $now->subYears(3));
+            }
+        }
+
+
         // Handle sorting
         if ($request->has('sort_by')) {
             $sortBy = $request->input('sort_by');

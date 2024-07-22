@@ -91,15 +91,15 @@
             <h2>Report Information</h2>
             <table>
                 <tr>
-                    <td><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d/m/Y') }}</td>
+                    <td><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
                     <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
                 </tr>
                 <tr>
-                    <td><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d/m/Y') }}</td>
+                    <td><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
                     <td><strong>Company:</strong> PRIVATE</td>
                 </tr>
                 <tr>
-                    <td><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d/m/Y') }}</td>
+                    <td><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
                     <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
                 </tr>
             </table>
@@ -152,7 +152,7 @@
             }
         @endphp
 
-        @if ($description || $testResults || $referenceRange)
+        @if ($testResults)
             <tr>
                 <td>{{ $description }}</td>
                 <td >{{ $testResults }}</td>
