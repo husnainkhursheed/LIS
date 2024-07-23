@@ -218,6 +218,17 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if (!$urinalysisMicrobiologyResults->s_gravity && !$urinalysisMicrobiologyResults->ph &&
+                        !$urinalysisMicrobiologyResults->leucocytes && !$urinalysisMicrobiologyResults->nitrite && !$urinalysisMicrobiologyResults->glucose &&
+                        !$urinalysisMicrobiologyResults->ketones && !$urinalysisMicrobiologyResults->proteins && !$urinalysisMicrobiologyResults->urobilinogen
+                        && !$urinalysisMicrobiologyResults->bilirubin && !$urinalysisMicrobiologyResults->blood && !$urinalysisMicrobiologyResults->colour && !$urinalysisMicrobiologyResults->appearance
+                        )
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                         @endif
                         @if ($urinalysisMicrobiologyResults->s_gravity)
                         <tr>
                             <td><strong> S. Gravity: </strong> </td>
@@ -533,13 +544,23 @@
                         <tr>
                             <th class="heading" colspan="3" style="text-align: center">MICROSCOPY</th>
                         </tr>
-                        <tr class="bg-blue">
+                        <tr class="bg-blue" >
                             <th width="30%">Test</th>
                             <th>Results</th>
                             <th>Normal Range</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @if (!$urinalysisMicrobiologyResults->white_cells && !$urinalysisMicrobiologyResults->epith_cells &&
+                        !$urinalysisMicrobiologyResults->red_cells && !$urinalysisMicrobiologyResults->casts && !$urinalysisMicrobiologyResults->crystals &&
+                        !$urinalysisMicrobiologyResults->bacteria && !$urinalysisMicrobiologyResults->yeast && !$urinalysisMicrobiologyResults->trichomonas
+                        )
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                         @endif
                         @if ($urinalysisMicrobiologyResults->epith_cells)
                         <tr>
                             <td><strong> Epith. Cells: </strong> </td>
