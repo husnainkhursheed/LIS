@@ -14,113 +14,110 @@
     use Carbon\Carbon;
 @endphp
 @section('content')
-    <style>
-        #reportStickyNav {
+        <style>
+            #reportStickyNav {
             top: 86px;
             background-color: #22416b;
-        }
+            }
 
-        .border-nav {
-            font-size: .9375rem;
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            border: 2px solid #3AAFE2;
-            background-color: #3AAFE2;
-        }
+            .border-nav {
+                font-size: .85rem;
+                font-weight: 600;
+                font-family: 'Montserrat', sans-serif;
+                border: 2px solid #3AAFE2;
+                background-color: #3AAFE2;
+            }
 
-        .border-nav:hover {
-            background-color: #22416b;
-            transition: 0.3s;
-        }
+            .border-nav:hover {
+                background-color: #22416b;
+                transition: 0.3s;
+            }
 
-        .select2-container--default .select2-results__option[aria-selected=true] {
-            background-color: #eff2f7;
-        }
-    </style>
+            .select2-container--default .select2-results__option[aria-selected=true] {
+                background-color: #eff2f7;
+            }
+            .navbar-nav .nav-item {
+                    flex: 1;
+                    text-align: center;
+                }
+                .navbar-nav .nav-link {
+                    display: block;
+                    width: 100%;
+                }
+                .navbar-nav .nav-item .sub-link {
+                    padding: 0.4rem 0rem;
+                }
+                @media (max-width: 992px) {
+                    .navbar-nav .nav-item {
+                        flex: none;
+                        width: 100%;
+                    }
+
+                }
+                @media (max-width: 1350px) {
+                    .navbar-nav .nav-link {
+                        font-size: 0.59rem; /* Adjust font size for smaller screens */
+                    }
+                }
+        </style>
 
     {{-- //start  --}}
     <div class="container-fluid">
         <nav class="navbar navbar-expand-lg sticky-top navbar-light rounded" id="reportStickyNav">
             <div class="container-fluid">
                 {{-- <a class="navbar-brand text-white" href="#">Navbar</a> --}}
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                <button class="navbar-toggler bg-white mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse justify-content-center " id="navbarNav">
-
-                    <ul class="navbar-nav gap-5">
-
-                        <li class="nav-item border-nav  rounded ">
-                            <a class="nav-link active px-5" aria-current="page"
-                                href="{{ url('/reports/test-reports') }}">Find</a>
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav d-flex gap-1 justify-content-center w-100">
+                        <li class="nav-item border-nav rounded flex-grow-1">
+                            <a class="nav-link sub-link active" aria-current="page" href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
-                        {{-- {{dd(Auth::user()->hasRole('Management'))}} --}}
                         @if (!$sample->is_completed)
-                            <li class="nav-item border-nav  rounded "  id="SaveReport">
-                                <button class="nav-link px-5">Save</button>
+                            <li class="nav-item border-nav rounded flex-grow-1" id="SaveReport">
+                                <button class="nav-link sub-link">Save</button>
                             </li>
                         @endif
-                        <li class="nav-item border-nav  rounded ">
-                            <a class="nav-link px-5" href="#">Delete</a>
+                        <li class="nav-item border-nav rounded flex-grow-1">
+                            <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
-
                         @if ($sample->signed_by)
-                            <li class="nav-item border-nav  rounded " id="allreadyassign">
-                                {{-- <a class="nav-link" href="#">Sign</a> --}}
-                                <a class="nav-link px-5" href="#">Signed</a>
+                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                <a class="nav-link sub-link " href="#">Signed</a>
                             </li>
                         @else
-                            <li class="nav-item border-nav  rounded " id="assign">
-                                {{-- <a class="nav-link" href="#">Sign</a> --}}
-                                <a class="nav-link px-5" href="#" id="sign-link">Sign</a>
+                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
                             </li>
                         @endif
                         @if (!$sample->is_completed)
-                            <li class="nav-item border-nav  rounded" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                            data-bs-placement="top" title="Complete">
-                                <a class="nav-link complete-report-btn px-5" data-id="{{ $sample->id }}"
-                                    data-bs-toggle="modal"
+                            <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                data-bs-placement="top" title="Complete">
+                                <a class="nav-link sub-link complete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
                                     href="#completeRecordModal">Complete</a>
                             </li>
                         @else
-                            {{-- @if (Auth::user()->hasRole('admin')) --}}
-                                <li class="nav-item border-nav  rounded" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                            <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                 data-bs-placement="top" title="Complete">
-                                    <a class="nav-link uncomplete-report-btn px-5" data-id="{{ $sample->id }}"
-                                        data-bs-toggle="modal"
-                                        href="#UncompleteRecordModal">Un Complete</a>
-                                </li>
-                            {{-- @endif --}}
+                                <a class="nav-link sub-link uncomplete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
+                                    href="#UncompleteRecordModal">Un Complete</a>
+                            </li>
                         @endif
-
-                        <li class="nav-item border-nav  rounded " class="generate-pdf-link">
-                            <a class="nav-link " aria-current="page" id="pdfbtn"
+                        <li class="nav-item border-nav rounded flex-grow-1">
+                            <a class="nav-link sub-link" aria-current="page" id="pdfbtn"
                                 href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
                         </li>
-                        @foreach ($tests as $test)
-                            @php
-                                $testReport = $testReports
-                                    ->where('test_id', $test->id)
-                                    ->where('sample_id', $sample->id)
-                                    ->first();
-                                // dd($testReport);
-                                // $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
-                                // dd($biochemHaemoResults);
-
-                                // $testIds = $tests->pluck('id')->implode(',');
-
-                            @endphp
-                        @endforeach
-                        <li class="nav-item border-nav px-5 rounded " class="">
-                            <a class="nav-link " aria-current="page" id=""
-                                href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}" >Audit Trail</a>
+                        <li class="nav-item border-nav rounded flex-grow-1">
+                            <a class="nav-link sub-link" aria-current="page" id=""
+                                href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}">Audit Trail</a>
                         </li>
-
                     </ul>
                 </div>
             </div>
         </nav>
+
 
             <div class="row pt-3" >
                 @if ($sample->signed_by)
