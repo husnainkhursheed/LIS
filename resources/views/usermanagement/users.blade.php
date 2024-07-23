@@ -352,7 +352,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-lg-12" id="department_area">
+                            {{-- <div class="col-lg-12" id="department_area">
                                 <div>
                                     <label for="departments" class="form-label">Departments</label>
                                     <select class="form-control js-example-basic-multiple" name="departments[]" id="departments" multiple="multiple">
@@ -361,7 +361,7 @@
                                         <option value="3">Urinalysis / Microbiology</option>
                                     </select>
                                 </div>
-                            </div>
+                            </div> --}}
                             {{-- <div class="col-lg-12">
                                 <div>
                                     <label for="leads_score-field" class="form-label">Roles</label>
@@ -606,33 +606,33 @@
 
     </script>
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
-    // Initialize select2
-    $('.js-example-basic-multiple').select2();
+    //    document.addEventListener('DOMContentLoaded', function() {
+    //         // Initialize select2
+    //         $('.js-example-basic-multiple').select2();
 
-    $('#role_ids').on('change', function() {
-        var selectedRoles = $(this).val();
-        var showDepartment = false;
+    //         $('#role_ids').on('change', function() {
+    //             var selectedRoles = $(this).val();
+    //             var showDepartment = false;
 
-        // Check if any of the selected roles is "Lab"
-        $('#role_ids option:selected').each(function() {
-            if ($(this).text().trim().toLowerCase() === 'lab') {
-                showDepartment = true;
-            }
-        });
+    //             // Check if any of the selected roles is "Lab"
+    //             $('#role_ids option:selected').each(function() {
+    //                 if ($(this).text().trim().toLowerCase() === 'lab') {
+    //                     showDepartment = true;
+    //                 }
+    //             });
 
-        // Show or hide the department area based on the selected roles
-        if (showDepartment) {
-            $('#department_area').show();
-        } else {
-            $('#department_area').hide();
-            $('#departments').val('').trigger('change');
-        }
-    });
+    //             // Show or hide the department area based on the selected roles
+    //             if (showDepartment) {
+    //                 $('#department_area').show();
+    //             } else {
+    //                 $('#department_area').hide();
+    //                 $('#departments').val('').trigger('change');
+    //             }
+    //         });
 
-    // Trigger change event to set initial visibility of department area
-    $('#role_ids').trigger('change');
-});
+    //         // Trigger change event to set initial visibility of department area
+    //         $('#role_ids').trigger('change');
+    //     });
 
 
 // password ERROR
