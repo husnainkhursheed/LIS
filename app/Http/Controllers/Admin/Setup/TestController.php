@@ -178,4 +178,11 @@ class TestController extends Controller
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');
     }
+
+    public function calcvalues($id){
+        $test = Test::find($id);
+        return response()->json([
+            'test' => $test,
+        ]);
+    }
 }

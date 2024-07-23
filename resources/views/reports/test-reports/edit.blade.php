@@ -266,7 +266,8 @@
                             <th>Flag </th>
                             <th>Reference Range </th>
                             <th>Test Notes </th>
-                            <th class="rounded-end-3"></th>
+                            <th></th>
+                            <th class="rounded-end-3">Calc</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -350,6 +351,13 @@
                                                 <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                             </a>
                                         </li>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($test->calculation_explanation)
+                                        <a href="" class="getcalc" data-bs-toggle="modal"
+                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                        class="badge bg-info text-white">show</span> </a>
                                     @endif
                                 </td>
                             </tr>
@@ -2432,6 +2440,22 @@
 
     </script>
 
+    <div class="modal fade" id="showModalcalc" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="exampleModalLabel">Calculation Explanation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="close-modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <p class="calc-container"></p>
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="showModalRefferenceranges" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -3302,6 +3326,10 @@
                 resetModal();
             });
 
+            $('#showModalRefferenceranges').on('hidden.bs.modal', function() {
+                resetModal();
+            });
+
             $(document).on('click', '.remove-item-btn', function() {
                 // event.preventDefault();
                 // $('.remove-item-btn').on('click', function() {
@@ -3889,6 +3917,27 @@
                             $('#female_high_value').prop('required', false);
                             $('#nomanualvalues').val(test.nomanualvalues_ref_range);
                         }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr, status, error);
+                    // Handle errors if needed
+                }
+            });
+        });
+
+        $(document).on('click', '.getcalc', function() {
+            var test_id = $(this).data('id');
+            // $('#analyte').val(dropdownName); // Set the dropdown name
+            var url = '{{ url('getcalc') }}' + '/' + test_id + '/edit';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                        var test = response.test;
+                        // console.log(response);
+                        $('.calc-container').text(test.calculation_explanation);
+
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr, status, error);
