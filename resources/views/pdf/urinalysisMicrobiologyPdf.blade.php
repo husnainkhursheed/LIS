@@ -74,6 +74,9 @@
         .text-end {
             text-align: right;
         }
+        .text-center {
+            text-align: center;
+        }
 
         .company-data span {
             display: inline-block;
