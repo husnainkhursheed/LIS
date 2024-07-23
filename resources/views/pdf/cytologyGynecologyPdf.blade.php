@@ -19,7 +19,19 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            page-break-inside: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
         }
 
         table thead th {
@@ -36,7 +48,7 @@
         .order-details h2 {
             margin-top: 0;
             margin-bottom: 10px;
-            border-bottom: 1px solid #3d90ca;
+            border-bottom: 2px solid #3d90ca;
             padding-bottom: 5px;
         }
 

@@ -79,7 +79,8 @@ class PDFController extends Controller
             $data['qrCode'] = $qrCode;
             // Generate PDF using Dompdf
             $pdf = PDF::loadView($view, $data);
-
+            $pdf->setOption('isHtml5ParserEnabled', true);
+            $pdf->setOption('isPhpEnabled', true);
             // (Optional) Set paper size and orientation
             $pdf->setPaper('A4', 'portrait');
 
