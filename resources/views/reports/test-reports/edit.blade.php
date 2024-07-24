@@ -59,6 +59,37 @@
                         font-size: 0.59rem; /* Adjust font size for smaller screens */
                     }
                 }
+                .modal.right .modal-dialog {
+                        position: fixed;
+                        right: 0;
+                        margin: auto;
+                        width: 30% !important;
+                        height: 100%;
+                    }
+
+                    .modal.right .modal-content {
+                        height: 100%;
+                        overflow-y: auto;
+                    }
+
+                    .modal.right .modal-body {
+                        padding: 15px 15px 80px;
+                    }
+
+                    .note-item {
+                        cursor: pointer;
+                        background-color: #f2fafc;
+                        padding: 10px;
+                        margin-bottom: 10px;
+                        border-radius: 5px;
+                        transition: background-color 0.3s;
+                        font-weight: 700;
+                    }
+
+                    .note-item:hover {
+                        background-color: #e9ecef;
+                        /* Hover background color */
+                    }
         </style>
 
     {{-- //start  --}}
@@ -448,37 +479,7 @@
                     <h4 class="text-dark">Notes </h4>
                 </div>
                 <style>
-                    .modal.right .modal-dialog {
-                        position: fixed;
-                        right: 0;
-                        margin: auto;
-                        width: 30% !important;
-                        height: 100%;
-                    }
 
-                    .modal.right .modal-content {
-                        height: 100%;
-                        overflow-y: auto;
-                    }
-
-                    .modal.right .modal-body {
-                        padding: 15px 15px 80px;
-                    }
-
-                    .note-item {
-                        cursor: pointer;
-                        background-color: #f2fafc;
-                        padding: 10px;
-                        margin-bottom: 10px;
-                        border-radius: 5px;
-                        transition: background-color 0.3s;
-                        font-weight: 700;
-                    }
-
-                    .note-item:hover {
-                        background-color: #e9ecef;
-                        /* Hover background color */
-                    }
                 </style>
                 <div class="row pt-3">
                     <div class="col-md-4">
@@ -2369,6 +2370,17 @@
                                                 <input type="text" id="test_number" name="test_number" class="form-control" value=""/>
                                             </div>
                                         </div> --}}
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="review" class="form-label">Review
+                                                    @if (!$sample->is_completed)
+                                                    <span class="badge bg-info text-white add-note" data-target="#review"> Add Note</span>
+                                                    @endif
+                                                </label>
+                                                <textarea name="review" id="review" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->review ?? '' }}</textarea>
+                                                {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2911,7 +2923,7 @@
     {{-- end sign modal  --}}
 
     {{-- report notes modal  --}}
-    <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+    {{-- <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-scrollable">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
@@ -2925,7 +2937,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <script>
         $(document).ready(function() {
             $('.add-note').on('click', function() {

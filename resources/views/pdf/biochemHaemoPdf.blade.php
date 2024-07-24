@@ -182,12 +182,13 @@
 <script type="text/php">
     if ( isset($pdf) ) {
         $pdf->page_script('
-            if ($PAGE_COUNT ) {
+            if ($PAGE_COUNT > 0) {
                 $font = $fontMetrics->get_font("Cambria, serif", "normal");
                 $size = 10;
-                $pdf->text(45, 810, "Signed by: Dr. John Doe", $font, $size);
-                $pdf->text(245, 810, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
-                $pdf->text(435, 810, "Validated by: Admin User", $font, $size);
+                $pdf->text(45, 775, "Signed by: Dr. John Doe", $font, $size);
+                $pdf->text(435, 775, "Validated by: Admin User", $font, $size);
+                $pdf->text(35, 790, "_______________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
+                $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
             }
         ');
     }
