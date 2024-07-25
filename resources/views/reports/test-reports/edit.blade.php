@@ -2374,11 +2374,10 @@
                                             <div class="form-group">
                                                 <label for="review" class="form-label">Review
                                                     @if (!$sample->is_completed)
-                                                    <span class="badge bg-info text-white add-note" data-target="#review"> Add Note</span>
+                                                    <span class="badge bg-info text-white add-urine-note" data-target="#review"> Add Note</span>
                                                     @endif
                                                 </label>
                                                 <textarea name="review" id="review" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->review ?? '' }}</textarea>
-                                                {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -2407,7 +2406,7 @@
             </div>
         </div>
     </div>
-    <script>
+    {{-- <script>
        $(document).ready(function() {
             $('.add-note').on('click', function() {
                 var targetTextarea = $($(this).data('target'));
@@ -2447,7 +2446,7 @@
             });
         });
 
-    </script>
+    </script> --}}
 
     <div class="modal fade" id="showModalcalc" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -2940,6 +2939,7 @@
     </div> --}}
     <script>
         $(document).ready(function() {
+            // cytology notes request handle for ajax
             $('.add-note').on('click', function() {
                 var targetTextarea = $($(this).data('target'));
                 $('#notesModal').modal('show');
@@ -2947,6 +2947,65 @@
                 $.ajax({
                     type: 'GET',
                     url: '{{ route('fetch-notes-cytology') }}',
+                    success: function(notes) {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+
+                        if (notes.length > 0) {
+                            notes.forEach(function(note) {
+                                // Create the note item with comment initially hidden
+                                var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
+                                var noteComment = $('<div class="note-comment" style="display:none;">' + note.comment + '</div>');
+
+                                // Append note item and comment to the container
+                                notesContainer.append(noteItem);
+                                notesContainer.append(noteComment);
+
+                                // Toggle the comment on note item click
+                                noteItem.on('click', function() {
+                                    noteComment.toggle();
+                                });
+
+                                // Append the comment to the textarea on comment click
+                                noteComment.on('click', function() {
+                                    var selectedComment = $(this).text();
+                                    var currentText = targetTextarea.val();
+                                    targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedComment);
+                                    $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a comment
+                                });
+                                 // Filter notes based on search input
+                                $('#note-search').on('input', function() {
+                                    var searchTerm = $(this).val().toLowerCase();
+                                    $('.note-item').each(function() {
+                                        var noteText = $(this).text().toLowerCase();
+                                        if (noteText.includes(searchTerm)) {
+                                            $(this).show();
+                                        } else {
+                                            $(this).hide();
+                                        }
+                                    });
+                                });
+                            });
+                        } else {
+                            notesContainer.append('<p>No notes available.</p>');
+                        }
+                    },
+                    error: function() {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+                        notesContainer.append('<p>Error fetching notes.</p>');
+                    }
+                });
+            });
+
+            //urinalysis notes request handle for ajax
+            $('.add-urine-note').on('click', function() {
+                var targetTextarea = $($(this).data('target'));
+                $('#notesModal').modal('show');
+
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ route('fetch-notes-urinalysis') }}',
                     success: function(notes) {
                         var notesContainer = $('#notes-container');
                         notesContainer.empty();
