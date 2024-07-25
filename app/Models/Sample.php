@@ -64,7 +64,10 @@ class Sample extends Model
         return $this->belongsTo(User::class, 'signed_by');
     }
 
-
+    public function validateBy()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
 
 
 }
