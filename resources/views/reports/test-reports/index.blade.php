@@ -311,23 +311,23 @@ use \Carbon\Carbon;
 
 
 
-            var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
+            // var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
 
-            // Check if the current user is in the "Lab" role
-            if (currentUser === 'Lab') {
-                console.log('clicked');
-                var labDepartments = {!! json_encode(Auth::user()->departments) !!}; // Get the department IDs associated with the user
+            // // Check if the current user is in the "Lab" role
+            // if (currentUser === 'Lab') {
+            //     console.log('clicked');
+            //     var labDepartments = {!! json_encode(Auth::user()->departments) !!}; // Get the department IDs associated with the user
 
-                // Loop through each option in the select element
-                $('#report_type option').each(function() {
-                    var departmentId = $(this).val(); // Get the value of the option
+            //     // Loop through each option in the select element
+            //     $('#report_type option').each(function() {
+            //         var departmentId = $(this).val(); // Get the value of the option
 
-                    // Check if the department ID is not in the user's associated departments
-                    if (!labDepartments.includes(departmentId)) {
-                        $(this).hide(); // Hide the option
-                    }
-                });
-            }
+            //         // Check if the department ID is not in the user's associated departments
+            //         if (!labDepartments.includes(departmentId)) {
+            //             $(this).hide(); // Hide the option
+            //         }
+            //     });
+            // }
         });
         jQuery(document).ready(function($) {
             $('#SaveReport').on('click', function(event) {

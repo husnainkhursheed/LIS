@@ -19,12 +19,12 @@ class TestController extends Controller
     {
         $query = Test::query();
 
-        $currentUser = Auth::user();
-        if ($currentUser->hasRole('Lab')) {
-            // Filter tests by the current user's departments
-            $departmentIds = $currentUser->departments;
-            $query->whereIn('department', $departmentIds);
-        }
+        // $currentUser = Auth::user();
+        // if ($currentUser->hasRole('Lab')) {
+        //     // Filter tests by the current user's departments
+        //     $departmentIds = $currentUser->departments;
+        //     $query->whereIn('department', $departmentIds);
+        // }
 
         // Handle search
         if ($request->has('search')) {

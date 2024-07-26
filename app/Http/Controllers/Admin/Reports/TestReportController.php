@@ -95,28 +95,13 @@ class TestReportController extends Controller
 
             $testReports->push($testReport); // Add to the collection
         }
-        // dd($testReports);
-        // dd($testReport->BiochemHaemoResults);
-
-        // $sample = Sample::find($id);
-        // $reporttype = $request->report_type;
         $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
-        $bilirubinropdown = CustomDropdown::where('dropdown_name', 'Bilirubin')->get();
-        // $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Bilirubin')->get();
-        $blooddropdown = CustomDropdown::where('dropdown_name', 'Blood')->get();
-        $leucocytesdropdown = CustomDropdown::where('dropdown_name', 'Leucocytes')->get();
-        $glucosedropdown = CustomDropdown::where('dropdown_name', 'Glucose')->get();
-        $nitritedropdown = CustomDropdown::where('dropdown_name', 'Nitrite')->get();
-        $ketonesdropdown = CustomDropdown::where('dropdown_name', 'Ketones')->get();
-        $urobilinogendropdown = CustomDropdown::where('dropdown_name', 'Urobilinogen')->get();
-        $proteinsdropdown = CustomDropdown::where('dropdown_name', 'Proteins')->get();
-        $bacteriadropdown = CustomDropdown::where('dropdown_name', 'Bacteria')->get();
 
         $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
 
         $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','bilirubinropdown','blooddropdown','leucocytesdropdown','glucosedropdown','nitritedropdown','ketonesdropdown','urobilinogendropdown','proteinsdropdown','bacteriadropdown','senstivityprofiles','referenceRanges'));
+        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)

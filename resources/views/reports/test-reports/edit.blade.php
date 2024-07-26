@@ -83,14 +83,16 @@
                         <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
-                        @if ($sample->signed_by)
-                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
-                                <a class="nav-link sub-link " href="#">Signed</a>
-                            </li>
-                        @else
-                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
-                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
-                            </li>
+                        @if (auth()->user()->hasRole('admin'))
+                            @if ($sample->signed_by)
+                                <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                    <a class="nav-link sub-link " href="#">Signed</a>
+                                </li>
+                            @else
+                                <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                    <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
+                                </li>
+                            @endif
                         @endif
                         @if (!$sample->is_completed)
                             <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
@@ -99,11 +101,13 @@
                                     href="#completeRecordModal">Complete</a>
                             </li>
                         @else
-                            <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                data-bs-placement="top" title="Complete">
-                                <a class="nav-link sub-link uncomplete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
-                                    href="#UncompleteRecordModal">Un Complete</a>
-                            </li>
+                            @if (auth()->user()->hasRole('admin'))
+                                <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                    data-bs-placement="top" title="Complete">
+                                    <a class="nav-link sub-link uncomplete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
+                                        href="#UncompleteRecordModal">Un Complete</a>
+                                </li>
+                            @endif
                         @endif
                         <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link" aria-current="page" id="pdfbtn"
@@ -3560,6 +3564,7 @@
                         note: $('#note').val(),
                         testsData: testsData,
                     };
+                    console.log(data);
                 } else if (reporttypeis == 2) {
                     data = {
                         sampleid: $('#sampleid').val(),

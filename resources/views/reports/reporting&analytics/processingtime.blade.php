@@ -41,16 +41,17 @@
                 <div class="row d-flex align-items-end">
                     <div class="col-3">
                         <label for="date_from">Date From</label>
-                        <input type="date" name="date_from" id="date_from" value="{{ $date_from }}"
+                        <input type="date" name="date_from" id="date_from" value="{{ old('start_date') }}"
                             class="form-control">
                     </div>
                     <div class="col-3">
                         <label for="date_to">Date To</label>
-                        <input type="date" name="date_to" id="date_to" value="{{ $date_to }}"
+                        <input type="date" name="date_to" id="date_to" value="{{ old('end_date') }}"
                             class="form-control">
                     </div>
                     <div class="col-2">
                         <button type="submit" class="btn search-btn">Get</button>
+                        <button type="submit" name="export" value="excel">Export to Excel</button>
                     </div>
                 </div>
             </form>

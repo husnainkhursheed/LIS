@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Test;
 use App\Models\Sample;
 use App\Models\AuditTrail;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TimeTakenReportExport;
 
 class ReportingandAnalyticsController extends Controller
 {
@@ -15,35 +18,110 @@ class ReportingandAnalyticsController extends Controller
 
 
     public function index(Request $request) {
-        $date_from = $request->input('date_from');
-        $date_to = $request->input('date_to');
+        $startDate = $request->input('date_from');
+        $endDate = $request->input('date_to');
 
-        $samplesQuery = Sample::query();
+        // Validate the date range
+        // $request->validate([
+        //     'start_date' => 'required|date',
+        //     'end_date' => 'required|date|after_or_equal:start_date',
+        // ]);
 
-        if ($date_from && $date_to) {
-            $samplesQuery->whereBetween('received_date', [$date_from, $date_to]);
-        }
+        // Fetch the samples within the date range
+            $samples = Sample::whereBetween('received_date', [$startDate, $endDate])->get();
 
-        $samples = $samplesQuery->get();
+            $reportData = [];
+            $totalDays = 0;
+            $completedCount = 0;
+            $outliersCount = 0;
+            $pendingCount = 0;
 
-        // Calculate time taken and format it for display
-        $processedSamples = $samples->map(function ($sample) {
-            $submitted_at = Carbon::parse($sample->received_date . ' ' . $sample->received_time);
-            $results_entered_at = $sample->completed_at ? Carbon::parse($sample->completed_at) : null;
+            foreach ($samples as $sample) {
+                $test = Test::find($sample->test_id); // Assuming sample has a test_id foreign key to tests table
+                $submittedDateTime = Carbon::parse($sample->received_date . ' ' . $sample->received_time);
+                $completedDateTime = $sample->completed_at ? Carbon::parse($sample->completed_at) : null;
 
-            $time_taken_days = $results_entered_at ? $submitted_at->diffInDays($results_entered_at) : null;
-            $time_taken_hours = $results_entered_at ? $submitted_at->diffInHours($results_entered_at) : null;
+                if ($completedDateTime) {
+                    $timeTaken = $submittedDateTime->diff($completedDateTime);
+                    $daysTaken = $timeTaken->days;
+                    $totalDays += $daysTaken;
+                    $completedCount++;
+                    $outlier = $daysTaken > 10; // Define outlier condition as required
+                    if ($outlier) {
+                        $outliersCount++;
+                    }
 
-            return [
-                'test_number' => $sample->test_number,
-                'submitted_at' => $submitted_at->format('Y-m-d H:i:s'),
-                'results_entered_at' => $results_entered_at ? $results_entered_at->format('Y-m-d H:i:s') : null,
-                'time_taken_days' => $time_taken_days,
-                'time_taken_hours' => $time_taken_hours,
+                    $reportData[] = [
+                        // 'department' => $test->department,
+                        'test_number' => $sample->test_number,
+                        'access_number' => $sample->access_number,
+                        // 'test_name' => $test->name,
+                        'received_date' => $sample->received_date,
+                        'completed_date' => $sample->completed_at,
+                        'in_progress' => 'FALSE',
+                        'number_of_days' => $daysTaken
+                    ];
+                } else {
+                    $pendingCount++;
+
+                    $reportData[] = [
+                        // 'department' => $test->department,
+                        'test_number' => $sample->test_number,
+                        'access_number' => $sample->access_number,
+                        // 'test_name' => $test->name,
+                        'received_date' => $sample->received_date,
+                        'completed_date' => 'N/A',
+                        'in_progress' => 'TRUE',
+                        'number_of_days' => 'N/A'
+                    ];
+                }
+            }
+
+            $avgDays = $completedCount ? $totalDays / $completedCount : 0;
+            $outliersPercentage = $completedCount ? ($outliersCount / $completedCount) * 100 : 0;
+
+            $summary = [
+                'total_days' => $totalDays,
+                'avg_days' => $avgDays,
+                'total_outliers' => $outliersCount,
+                'outliers_percentage' => $outliersPercentage,
+                'total_completed' => $completedCount,
+                'total_pending' => $pendingCount,
             ];
-        });
+            $processedSamples = $reportData;
 
-        return view('reports.reporting&analytics.processingtime', compact('processedSamples', 'date_from', 'date_to'));
+            if ($request->has('export') && $request->input('export') == 'excel') {
+                return Excel::download(new TimeTakenReportExport($reportData, $startDate, $endDate, $summary), 'time_taken_report.xlsx');
+            }
+
+            return view('reports.reporting&analytics.processingtime', compact('processedSamples','reportData', 'startDate', 'endDate', 'summary'));
+
+        // $samplesQuery = Sample::query();
+
+        // if ($date_from && $date_to) {
+        //     $samplesQuery->whereBetween('received_date', [$date_from, $date_to]);
+        // }
+
+        // $samples = $samplesQuery->get();
+
+        // // Calculate time taken and format it for display
+        // $processedSamples = $samples->map(function ($sample) {
+        //     $submitted_at = Carbon::parse($sample->received_date . ' ' . $sample->received_time);
+        //     $results_entered_at = $sample->completed_at ? Carbon::parse($sample->completed_at) : null;
+
+        //     $time_taken_days = $results_entered_at ? $submitted_at->diffInDays($results_entered_at) : null;
+        //     $time_taken_hours = $results_entered_at ? $submitted_at->diffInHours($results_entered_at) : null;
+
+        //     return [
+        //         'test_number' => $sample->test_number,
+        //         'submitted_at' => $submitted_at->format('Y-m-d H:i:s'),
+        //         'results_entered_at' => $results_entered_at ? $results_entered_at->format('Y-m-d H:i:s') : null,
+        //         'time_taken_days' => $time_taken_days,
+        //         'time_taken_hours' => $time_taken_hours,
+        //     ];
+        // });
+
+        // return view('reports.reporting&analytics.processingtime', compact('processedSamples', 'date_from', 'date_to'));
     }
 
     public function auditTrails($id , $reporttype){
