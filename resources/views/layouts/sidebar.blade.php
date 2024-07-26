@@ -51,6 +51,15 @@
                         </a>
                     </li>
                 @endcanany
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('export-reports') }}">
+                        <span class="">
+                            <img src="{{ URL::asset('build/icons/sample.png') }}" alt="" height="18">
+                        </span>
+                        {{-- <i class="ri-dashboard-2-line"></i> --}}
+                        <span class="pt-1">export</span>
+                    </a>
+                </li>
 
                 @canany('UserManagement access')
                     <li class="nav-item">

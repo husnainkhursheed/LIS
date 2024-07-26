@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Models\Sample;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
+use App\Exports\ReportsExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\UrinalysisReferenceRanges;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -98,5 +100,26 @@ class PDFController extends Controller
         }
     }
 
+
+    public function export()
+    {
+        $data = [
+            ['','5E81C1', 'BR-1235', 'Blood Work', '02-Jul-2024', '07-Jul-2024', '', 5],
+            ['','52D5C0', 'AR-254', 'Chemistry', '02-Jul-2024', '', 'TRUE', 7],
+            ['','62E562', 'BR-5685', 'Blood Work', '05-Jul-2024', '12-Jul-2024', '', 7],
+            ['','5D96E2', 'CL-587', 'Fractional', '07-Jul-2024', '10-Jul-2024', '', 3],
+            ['','68R1Y8', 'CL-125', 'Analysis', '08-Jul-2024', '11-Jul-2024', '', 3],
+            ['','75D26E', 'AR-658', 'Fractional', '10-Jul-2024', '15-Jul-2024', '', 5],
+            ['','12GR28', 'CL-658', 'Diarlivel', '11-Jul-2024', '', 'TRUE', 5],
+            ['Total # of Days:','','','','','','','23'],
+            ['Avg # of Days:','','','','','','','7.67'],
+            ['Total Outliers:','','','','','','','2'],
+            ['Outliers (%):','','','','','','','40'],
+            ['Total Tests: Completed:','','','','','','','6'],
+            ['Total Tests: Pending:','','','','','','','2'],
+        ];
+
+        return Excel::download(new ReportsExport($data), 'reports.xlsx');
+    }
 
 }

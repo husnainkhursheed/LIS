@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // use App\Http\Controllers\CustomDropdownController;
+use App\Http\Controllers\PDFController;
 use App\Http\Controllers\Admin\Setup\NoteController;
 use App\Http\Controllers\Admin\Setup\TestController;
 use App\Http\Controllers\Admin\Setup\DoctorController;
@@ -144,9 +145,11 @@ Route::middleware(['auth'])->group(function () {
 
 
     // generate pdf route
-    Route::get('generate-pdf/{id}/{type}', [App\Http\Controllers\PDFController::class, 'generatePDF']);
+    Route::get('generate-pdf/{id}/{type}', [PDFController::class, 'generatePDF']);
     Route::get('generate-pdf/{id}', [App\Http\Controllers\PDFController::class, 'generatePDF1']);
 
+    // export data reports in excel
+    Route::get('export-reports', [PDFController::class, 'export']);
 
 
     Route::get('verify/{token}', [UsersController::class, 'verify']);
