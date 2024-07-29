@@ -75,7 +75,7 @@
                         <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link active" aria-current="page" href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
-                        @if (!$sample->is_completed)
+                        @if (!$allTestsCompleted)
                             <li class="nav-item border-nav rounded flex-grow-1" id="SaveReport">
                                 <button class="nav-link sub-link">Save</button>
                             </li>
@@ -84,7 +84,7 @@
                             <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
                         @if (auth()->user()->hasRole('admin'))
-                            @if ($sample->signed_by)
+                            @if ($testReports[0]->signed_by ?? false)
                                 <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
                                     <a class="nav-link sub-link " href="#">Signed</a>
                                 </li>
@@ -94,7 +94,7 @@
                                 </li>
                             @endif
                         @endif
-                        @if (!$sample->is_completed)
+                        @if (!$allTestsCompleted)
                             <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                 data-bs-placement="top" title="Complete">
                                 <a class="nav-link sub-link complete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
@@ -124,22 +124,22 @@
 
 
             <div class="row pt-3" >
-                @if ($sample->signed_by)
+                @if ($testReports[0]->signed_by ?? false)
                     <div class="col-md-6" id="report_signed_input">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Report Signed By</label>
                             <input type="text" class="form-control" id="report_signed"
-                                value="{{ 'Report signed by ' . $sample->signedBy->first_name . ' on ' . $sample->signed_at }}"
+                                value="{{ 'Report signed by ' . $testReports[0]->signedBy->first_name . ' on ' . $testReports[0]->signed_at }}"
                                 disabled />
                         </div>
                     </div>
                 @endif
-                @if ($sample->is_completed)
+                @if ($allTestsCompleted)
                     <div class="col-md-6" id="report_signed_input">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Report Completed On</label>
                             <input type="text" class="form-control" id="report_signed"
-                                value="{{ 'Report Completed on ' . $sample->completed_at }}"
+                                value="{{ 'Report Completed on ' . $completedat }}"
                                 disabled />
                         </div>
                     </div>
@@ -253,7 +253,7 @@
                 </div>
                 <div class="card-header d-flex justify-content-between">
                     <h3 class="text-dark">List of tests</h3>
-                    @if (!$sample->is_completed)
+                    @if (!$allTestsCompleted)
                     <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                         id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
                         Test</button>
@@ -343,7 +343,7 @@
                                     <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
                                 </td>
                                 <td>
-                                    @if ($index > 0 && !$sample->is_completed)
+                                    @if ($index > 0 && !$allTestsCompleted)
                                         <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                             data-bs-placement="top" title="Delete">
                                             <a class="remove-item-btn" data-id="{{ $test->id }}"
@@ -407,7 +407,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="custom" class="form-label">Contraceptive
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <a href=""
                                     class="customDropdownEdit" data-bs-toggle="modal" data-id="Contraceptive"
                                     data-bs-target="#showModalDropdown"> <span class="badge bg-info text-white"> Add
@@ -488,7 +488,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
                                     Note</span>
                                 @endif
@@ -501,7 +501,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
                                     Add Note</span>
                                 @endif
@@ -515,7 +515,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="recommend" class="form-label">Recommend
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#recommend"> Add Note</span>
                                 @endif
                             </label>
@@ -1353,7 +1353,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="bilirubin" class="form-label">Bilirubin
-                                                    @if (!$sample->is_completed)
+                                                    @if (!$allTestsCompleted)
                                                     <a href="" class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Bilirubin" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a>
@@ -1373,7 +1373,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="blood" class="form-label">Blood
-                                                    @if (!$sample->is_completed) <a href=""
+                                                    @if (!$allTestsCompleted) <a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal" data-id="Blood"
                                                         data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a>@endif</label>
@@ -1389,7 +1389,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="leucocytes" class="form-label">Leucocytes @if (!$sample->is_completed)<a href=""
+                                                <label for="leucocytes" class="form-label">Leucocytes @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Leucocytes" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a>@endif</label>
@@ -1406,7 +1406,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="glucose" class="form-label">Glucose @if (!$sample->is_completed)<a href=""
+                                                <label for="glucose" class="form-label">Glucose @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Glucose" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -1422,7 +1422,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="nitrite" class="form-label">Nitrite @if (!$sample->is_completed)<a href=""
+                                                <label for="nitrite" class="form-label">Nitrite @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Nitrite" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -1438,7 +1438,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="ketones" class="form-label">Ketones @if (!$sample->is_completed)<a href=""
+                                                <label for="ketones" class="form-label">Ketones @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Ketones" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -1454,7 +1454,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="urobilinogen" class="form-label">Urobilinogen @if (!$sample->is_completed)<a
+                                                <label for="urobilinogen" class="form-label">Urobilinogen @if (!$allTestsCompleted)<a
                                                         href="" class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Urobilinogen" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -1471,7 +1471,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="proteins" class="form-label">Proteins @if (!$sample->is_completed)<a href=""
+                                                <label for="proteins" class="form-label">Proteins @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Proteins" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -2114,7 +2114,7 @@
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="bacteria" class="form-label">Bacteria @if (!$sample->is_completed)<a href=""
+                                                <label for="bacteria" class="form-label">Bacteria @if (!$allTestsCompleted)<a href=""
                                                         class="customDropdownEdit" data-bs-toggle="modal"
                                                         data-id="Bacteria" data-bs-target="#showModalDropdown"> <span
                                                             class="badge bg-info text-white"> Add New</span> </a> @endif</label>
@@ -2276,7 +2276,7 @@
 
 
                                         <h3 class="text-black">Sensitivity :</h3>
-                                        @if (!$sample->is_completed)
+                                        @if (!$allTestsCompleted)
                                             <form id="profileForm" class="d-flex align-items-center">
                                                 @csrf
                                                 <div class="form-group mb-0 mr-2 col-6">
@@ -3397,12 +3397,14 @@
                 event.preventDefault();
                 // var itemId = $('#delete-record').data('id');
                 var sampleid = $('#sampleid').val();
+                var reporttypeis = $('#reporttypeis').val();
                 // var deleterecordid = $('#delete-record-id').val();
                 var url = '{{ url('/reports/complete-test') }}';
                 // Prevent the default link behavior
                 // var reporttypeis = $('#report_type').val();
                 data = {
                     sample_id: sampleid,
+                    reporttypeis: reporttypeis,
                 };
 
                 $.ajax({
@@ -3432,12 +3434,14 @@
                 event.preventDefault();
                 // var itemId = $('#delete-record').data('id');
                 var sampleid = $('#sampleid').val();
+                var reporttypeis = $('#reporttypeis').val();
                 // var deleterecordid = $('#delete-record-id').val();
                 var url = '{{ url('/reports/uncomplete-test') }}';
                 // Prevent the default link behavior
                 // var reporttypeis = $('#report_type').val();
                 data = {
                     sample_id: sampleid,
+                    reporttypeis: reporttypeis,
                 };
 
                 $.ajax({
@@ -3556,6 +3560,7 @@
 
                         testsData[testId][fieldName] = $(this).val();
                     });
+                    console.log(testsData);
                     data = {
                         sampleid: $('#sampleid').val(),
                         // testReport: $('#testReport').val(),
@@ -3564,7 +3569,7 @@
                         note: $('#note').val(),
                         testsData: testsData,
                     };
-                    console.log(data);
+                    // console.log(data);
                 } else if (reporttypeis == 2) {
                     data = {
                         sampleid: $('#sampleid').val(),
@@ -4124,6 +4129,7 @@
                 password: $('#password').val(),
                 test_report_id: $('#test_report_id').val(),
                 report_sample_id: $('#report_sample_id').val(),
+                reporttypeis: $('#reporttypeis').val(),
                 _token: $('input[name="_token"]').val()
             };
 

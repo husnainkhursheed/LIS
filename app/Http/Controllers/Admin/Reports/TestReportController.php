@@ -59,10 +59,27 @@ class TestReportController extends Controller
 
 
         $testReports = $query->paginate(10);
+        // $testReports->getCollection()->transform(function ($sample) {
+        //     $sample->unique_departments = $sample->tests->pluck('department')->unique();
+        //     return $sample;
+        // });
         $testReports->getCollection()->transform(function ($sample) {
+            $departmentsStatus = $sample->tests->groupBy('department')->map(function ($tests, $department) use ($sample) {
+                $allCompleted = TestReport::where('sample_id', $sample->id)
+                    ->whereIn('test_id', $tests->pluck('id'))
+                    ->get()
+                    ->every('is_completed');
+
+                return [
+                    'department' => $department,
+                    'is_completed' => $allCompleted
+                ];
+            });
             $sample->unique_departments = $sample->tests->pluck('department')->unique();
+            $sample->unique_departments_status = $departmentsStatus;
             return $sample;
         });
+        // dd($testReports[0]->unique_departments_status);
         return view('reports/test-reports.index', compact('testReports','testNumber', 'accessNumber', 'patientName'));
     }
 
@@ -87,21 +104,46 @@ class TestReportController extends Controller
         // Find or create a test report for the selected test and sample
         // Collect test reports with their related results
         $testReports = collect(); // Initialize as a collection
+        // foreach ($tests as $test) {
+        //     $testReport = TestReport::with(['biochemHaemoResults', 'urinalysisMicrobiologyResults.procedureResults'])
+        //         ->where('sample_id', $sample->id)
+        //         ->where('test_id', $test->id)
+        //         ->first();
+
+        //     $testReports->push($testReport); // Add to the collection
+        // }
+
+        $allTestsCompleted = true; // Flag to check if all tests are completed
+        $completedat = null;
+
         foreach ($tests as $test) {
             $testReport = TestReport::with(['biochemHaemoResults', 'urinalysisMicrobiologyResults.procedureResults'])
                 ->where('sample_id', $sample->id)
                 ->where('test_id', $test->id)
                 ->first();
 
-            $testReports->push($testReport); // Add to the collection
+            if ($testReport) {
+                $testReports->push($testReport);
+
+                $completedBy = $testReport->completed_by;
+                $completedat = $testReport->completed_at;
+                if (!$testReport->is_completed) {
+                    $allTestsCompleted = false; // Set flag to false if any test is not completed
+                }
+            } else {
+                $allTestsCompleted = false; // Set flag to false if any test report is not found
+            }
         }
+
+        // dd($allTestsCompleted);
+
         $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
 
         $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
 
         $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
 
-        return view('reports/test-reports.edit', compact('sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
+        return view('reports/test-reports.edit', compact('completedat','allTestsCompleted','sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)
@@ -389,20 +431,32 @@ class TestReportController extends Controller
         // dd($request->report_sample_id);
 
         // Find the test report
-        $testReport = Sample::find($request->report_sample_id);
-
+        $sample = Sample::findOrFail($request->report_sample_id);
+        $reporttypeis = $request->reporttypeis;
+        // $tests = $sample->tests()->where('department', $reporttypeis)->pluck('id');
+        $test_ids = $sample->tests()->where('department', $reporttypeis)->pluck('tests.id');
+        $testReports =  TestReport::where('sample_id', $request->report_sample_id)->whereIn('test_id', $test_ids)->get();
+        // dd($testReport);
         // Check if the report is already signed
-        if ($testReport->signed_by) {
-            // Fetch the user who signed the report
-            $signedByUser = Sample::find($testReport->signed_by);
-            return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
-        }
+        // if ($testReport->signed_by) {
+        //     // Fetch the user who signed the report
+        //     $signedByUser = Sample::find($testReport->signed_by);
+        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
+        // }
 
         // Update the test-reports table with the user ID in the signed_by column
-        $testReport->is_signed = true;
-        $testReport->signed_by = $user->id;
-        $testReport->signed_at = now();
-        $testReport->save();
+        foreach ($testReports as $testReport) {
+            // Check if the report is already signed
+            // if ($testReport->is_signed) {
+            //     return response()->json(['error' => 'One or more reports are already signed.'], 400);
+            // }
+
+            // Update the test report with the signed information
+            $testReport->is_signed = true;
+            $testReport->signed_by = $user->id;
+            $testReport->signed_at = now();
+            $testReport->save();
+        }
 
         // AuditTrail::create([
         //     'test_report_id' => $testReport->id,
@@ -436,20 +490,31 @@ class TestReportController extends Controller
 
     public function completetest(Request $request){
         $user = Auth::user();
-        $testReport = Sample::find($request->sample_id);
+        $sample = Sample::find($request->sample_id);
+        $reporttypeis = $request->reporttypeis;
 
-        // Check if the report is already signed
-        // if ($testReport->signed_by) {
-        //     // Fetch the user who signed the report
-        //     $signedByUser = Sample::find($testReport->signed_by);
-        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
-        // }
+        $tests = $sample->tests()->where('department', $reporttypeis)->get();
 
-        // Update the test-reports table with the user ID in the signed_by column
-        $testReport->is_completed = true;
-        $testReport->completed_by = $user->id;
-        $testReport->completed_at = now();
-        $testReport->save();
+        // $test_ids = $sample->tests()->where('department', $reporttypeis)->pluck('tests.id');
+        // $testReport =  TestReport::where('sample_id', $sample->id)->whereIn('test_id', $test_ids)->get();
+        // dd($testReport);
+
+
+            // dd($tests);
+        foreach ($tests as $testId ) {
+            // Find or create the test report
+            $testReport = TestReport::updateOrCreate(
+                [
+                    'sample_id' => $sample->id,
+                    'test_id' => $testId->id
+                ],
+                [
+                    'is_completed' => true,
+                    'completed_by' => $user->id,
+                    'completed_at' => now(),
+                ]
+            );
+        }
 
         return response()->json([
             'success' => 'Report Completed successfully.',
@@ -459,23 +524,37 @@ class TestReportController extends Controller
 
     public function uncompletetest(Request $request){
         $user = Auth::user();
-        $testReport = Sample::find($request->sample_id);
+        $sample = Sample::find($request->sample_id);
+        $reporttypeis = $request->reporttypeis;
 
-        // Check if the report is already signed
-        // if ($testReport->signed_by) {
-        //     // Fetch the user who signed the report
-        //     $signedByUser = Sample::find($testReport->signed_by);
-        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
-        // }
+        $tests = $sample->tests()->where('department', $reporttypeis)->get();
+            // dd($test_ids);
+        foreach ($tests as $testId ) {
+            // Find or create the test report
+            $testReport = TestReport::updateOrCreate(
+                [
+                    'sample_id' => $sample->id,
+                    'test_id' => $testId->id
+                ],
+                [
+                    'is_completed' => false,
+                    'completed_by' => null,
+                    'completed_at' => null,
+                    'is_signed' => false,
+                    'signed_by' => null,
+                    'signed_at' => null,
+                ]
+            );
+        }
 
         // Update the test-reports table with the user ID in the signed_by column
-        $testReport->is_completed = false;
-        $testReport->completed_by = null;
-        $testReport->completed_at = null;
-        $testReport->is_signed = false;
-        $testReport->signed_by = null;
-        $testReport->signed_at = null;
-        $testReport->save();
+        // $testReport->is_completed = false;
+        // $testReport->completed_by = null;
+        // $testReport->completed_at = null;
+        // $testReport->is_signed = false;
+        // $testReport->signed_by = null;
+        // $testReport->signed_at = null;
+        // $testReport->save();
 
         return response()->json([
             'success' => 'Report Completed successfully.',

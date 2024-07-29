@@ -21,8 +21,11 @@ class TestReport extends Model
         'results',
         'notes',
         'is_completed',
+        'completed_by',
+        'completed_at',
         'is_signed',
         'signed_by',
+        'signed_at',
     ];
 
     public function sample()
