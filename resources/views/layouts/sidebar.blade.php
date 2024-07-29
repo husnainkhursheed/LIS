@@ -505,7 +505,7 @@
         </div>
         <div class="fixed-bottom mb-4">
             <ul class="navbar-nav" id="navbar-nav">
-                <li class="nav-item ">
+                <li class="nav-item " style="width: fit-content;">
                     <a style="width: fit-content;" class="nav-link menu-link d-flex align-middle"
                         href="javascript:void();"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
