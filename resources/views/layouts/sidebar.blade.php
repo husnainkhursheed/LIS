@@ -488,11 +488,11 @@
                             <ul class="nav nav-sm flex-column">
                                 @canany('Manage TestReports')
                                     <li class="nav-item">
-                                        <a href="{{ url('/reports/test-reports') }}" class="nav-link">Test Reports</a>
+                                        <a href="{{ url('/reports/test-reports') }}" class="nav-link px-0">Test Reports</a>
                                     </li>
                                 @endcanany
                                 <li class="nav-item">
-                                    <a href="{{ url('/reports/processing-time') }}" class="nav-link">Processing Time</a>
+                                    <a href="{{ url('/reports/processing-time') }}" class="nav-link px-0 py-2">Processing Time</a>
                                 </li>
 
                             </ul>
