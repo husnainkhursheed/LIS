@@ -33,20 +33,20 @@
                 <li class="menu-title"><span>@lang('translation.menu')</span></li>
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex gap-3 align-middle" href="/">
-                        <span class="">
+                        {{-- <span class="">
                             <img src="{{ URL::asset('build/icons/dashboard.png') }}" alt="" height="18">
-                        </span>
-                        {{-- <i class="ri-dashboard-2-line"></i> --}}
+                        </span> --}}
+                        <i class="ri-dashboard-fill"></i>
                         <span class="pt-1">Dashboards</span>
                     </a>
                 </li>
                 @canany('Sample create')
                     <li class="nav-item">
                         <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('/sample/create') }}">
-                            <span class="">
+                            {{-- <span class="">
                                 <img src="{{ URL::asset('build/icons/sample.png') }}" alt="" height="18">
-                            </span>
-                            {{-- <i class="ri-dashboard-2-line"></i> --}}
+                            </span> --}}
+                            <i class="ri-test-tube-fill"></i>
                             <span class="pt-1">New Sample</span>
                         </a>
                     </li>
@@ -56,10 +56,10 @@
                     <li class="nav-item">
                         <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarAuth"
                             data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
-                            <span class="">
+                            {{-- <span class="">
                                 <img src="{{ URL::asset('build/icons/users.png') }}" alt="" height="18">
-                            </span>
-                            {{-- <i class="ri-account-circle-line"></i> --}}
+                            </span> --}}
+                            <i class="ri-group-fill"></i>
                             <span class="pt-1">Users</span>
                         </a>
                         <div class="collapse menu-dropdown" id="sidebarAuth">
@@ -428,10 +428,10 @@
                 <li class="nav-item">
                     <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarSetup"
                         data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarSetup">
-                        <span class="">
+                        {{-- <span class="">
                             <img src="{{ URL::asset('build/icons/assets.png') }}" alt="" height="18">
-                        </span>
-                        {{-- <i class="mdi mdi-cogs"></i>  --}}
+                        </span> --}}
+                        <i class="ri-briefcase-4-fill"></i>
                         <span class="pt-1">Assets</span>
                     </a>
                     <div class="collapse menu-dropdown" id="sidebarSetup">
@@ -477,10 +477,10 @@
                         <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarreport"
                             data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarreport">
 
-                            <span class="">
+                            {{-- <span class="">
                                 <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
-                            </span>
-                            {{-- <i class="ri-account-circle-line"></i> --}}
+                            </span> --}}
+                            <i class="ri-file-list-fill"></i>
                             <span class="pt-1">Reports</span>
                         </a>
 
@@ -506,12 +506,13 @@
         <div class="fixed-bottom mb-4">
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item ">
-                    <a style="width: fit-content;" class="nav-link menu-link d-flex gap-2 align-middle"
+                    <a style="width: fit-content;" class="nav-link menu-link d-flex align-middle"
                         href="javascript:void();"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <span class="">
+                        {{-- <span class="">
                             <img src="{{ URL::asset('build/icons/md-log-out.png') }}" alt="" height="18">
-                        </span>
+                        </span> --}}
+                        <i class="ri-logout-circle-line text-white"></i>
                         <span class="text-white pt-1"> Logout</span>
                     </a>
 
