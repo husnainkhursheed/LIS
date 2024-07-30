@@ -102,10 +102,13 @@ class TestController extends Controller
         $test->save();
 
         if ($request->ajax()) {
+            $test_profileId = $request->input('test_profiles');
+            $test_profile = TestProfiles::findOrFail($test_profileId);
+            $test_profile_name = $test_profile->id;
             $sample = Sample::find($request->sample_id);
             $sample->tests()->attach($test);
 
-            return response()->json(['success' => true, 'test' => $test]);
+            return response()->json(['success' => true, 'test' => $test, 'test_profile_name' => $test_profile_name]);
         }
 
         Session::flash('message', 'Created successfully!');

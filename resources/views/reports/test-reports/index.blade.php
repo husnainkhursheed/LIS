@@ -131,6 +131,7 @@ use \Carbon\Carbon;
                                                             ''
                                                      @endswitch : {!! $departmentStatus['is_completed'] ? ' <span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>' : '' !!}
                                                 </div>
+                                                {{-- {{dd($departmentStatus['is_completed'])}} --}}
                                             @endforeach</td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">
