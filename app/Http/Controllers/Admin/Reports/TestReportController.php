@@ -7,6 +7,7 @@ use App\Models\Test;
 use App\Models\Sample;
 use App\Models\AuditTrail;
 use App\Models\TestReport;
+use App\Models\TestProfiles;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
 use App\Models\ProcedureResults;
@@ -100,6 +101,7 @@ class TestReportController extends Controller
 
         // $test = Test::findOrFail($request->test_charges);
         $tests = $sample->tests()->where('department', $reporttype)->get();
+        // $tests->test_profiles;
         // dd($tests);
         // Find or create a test report for the selected test and sample
         // Collect test reports with their related results
@@ -137,13 +139,26 @@ class TestReportController extends Controller
 
         // dd($allTestsCompleted);
 
+        // If the department is 1, categorize the tests by their profiles
+        $categorizedTests = [];
+        if ($reporttype == '1') {
+            foreach ($tests as $test) {
+                $profileId = $test->test_profiles ? $test->test_profiles->id : 'no-profile';
+                $profileName = $test->test_profiles ? $test->test_profiles->name : 'No Profile';
+                $categorizedTests[$profileId]['name'] = $profileName;
+                $categorizedTests[$profileId]['tests'][] = $test;
+            }
+        }
+
+        $test_profiles = TestProfiles::all();
+
         $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
 
         $senstivityprofiles = SensitivityProfiles::with('sensitivityValues')->get();
 
         $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
 
-        return view('reports/test-reports.edit', compact('completedat','allTestsCompleted','sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
+        return view('reports/test-reports.edit', compact('test_profiles','categorizedTests','completedat','allTestsCompleted','sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)

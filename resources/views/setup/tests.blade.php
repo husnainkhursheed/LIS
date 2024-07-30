@@ -531,7 +531,7 @@
                         if (test.department == 1) {
                             $('#test_profiles_container').show();
                             $('#test_profiles').prop('required', true);
-                            $('#test_profiles').val(test.test_profiles);
+                            $('#test_profiles').val(test.test_profile_id);
                         }
                         if (test.reference_range === 'basic_ref') {
                             $('#basic_ref').prop('checked', true);

@@ -27,6 +27,6 @@ class Test extends Model
     }
 
     public function test_profiles(){
-        return $this->belongsTo(TestProfiles::class);
+        return $this->belongsTo(TestProfiles::class ,'test_profile_id');
     }
 }
