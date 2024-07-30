@@ -467,6 +467,11 @@
                                     <a href="{{ url('/note') }}" class="nav-link px-0 py-2">Notes</a>
                                 </li>
                             @endcanany
+                            {{-- @canany('Notes access') --}}
+                            <li class="nav-item">
+                                <a href="{{ url('/TestProfile') }}" class="nav-link px-0 py-2">Test Profiles</a>
+                            </li>
+                        {{-- @endcanany --}}
                         </ul>
                     </div>
                 </li>
