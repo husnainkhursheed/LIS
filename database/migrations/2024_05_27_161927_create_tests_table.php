@@ -26,6 +26,11 @@ return new class extends Migration
             $table->text('female_low_value_ref_range')->nullable();
             $table->text('female_high_value_ref_range')->nullable();
             $table->text('nomanualvalues_ref_range')->nullable();
+            $table->unsignedBigInteger('test_profile_id')->nullable();
+            $table->foreign('test_profile_id')
+                  ->references('id')
+                  ->on('test_profiles')
+                  ->onDelete('cascade');
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });

@@ -247,6 +247,17 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-lg-6" id="test_profiles_container">
+                                <div>
+                                    <label for="test_profiles" class="form-label">Profiles</label>
+                                    <select class="form-control" name="test_profiles" id="test_profiles">
+                                        <option value="">Select Profiles</option>
+                                        @foreach ($test_profiles as $item)
+                                            <option value="{{$item->id}}">{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="specimen_type" class="form-label">Specimen Type</label>
@@ -407,7 +418,7 @@
 
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsTestsCompletedive.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
@@ -421,10 +432,20 @@
     <script>
         $(document).ready(function() {
             // Hide optionalValues by default
+            $('#test_profiles_container').hide();
             $('#optionalValues').hide();
             $('#noManualValues').hide();
             $('#basicValues').show();
-
+            $('#department').on('change', function(){
+                // console.log('Department');
+                if (this.value == '1') {
+                    $('#test_profiles_container').show();
+                    $('#test_profiles').prop('required', true);
+                }else{
+                    $('#test_profiles_container').hide();
+                    $('#test_profiles').prop('required', false);
+                }
+            });
             // Show/hide fields based on selected reference range
             $('input[name="reference_range"]').on('change', function() {
                 if (this.value === 'basic_ref') {
@@ -507,7 +528,11 @@
                         $('#cost').val(test.cost);
                         $('#calculation_explanation').val(test.calculation_explanation);
                         $('#reference_range').val(test.reference_range);
-
+                        if (test.department == 1) {
+                            $('#test_profiles_container').show();
+                            $('#test_profiles').prop('required', true);
+                            $('#test_profiles').val(test.test_profiles);
+                        }
                         if (test.reference_range === 'basic_ref') {
                             $('#basic_ref').prop('checked', true);
                             $('#optional_ref').prop('checked', false);
@@ -615,6 +640,8 @@
             $('#basicValues').show();
             $('#optionalValues').hide();
             $('#noManualValues').hide();
+            $('#test_profiles_container').hide();
+            $('#test_profiles').prop('required', false);
             $('#basic_low_value_ref_range').prop('required', true);
             $('#basic_high_value_ref_range').prop('required', true);
             $('#male_low_value_ref_range').prop('required', false);
