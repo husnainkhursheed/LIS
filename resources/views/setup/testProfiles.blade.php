@@ -279,7 +279,7 @@
                         // $('#surgeries').val(surgeries).trigger('change');
 
                         // Update modal title
-                        $('#exampleModalLabel').html("Edit Note");
+                        $('#exampleModalLabel').html("Edit Profile");
 
                         // Display the modal footer
                         $('#showModal .modal-footer').css('display', 'block');
