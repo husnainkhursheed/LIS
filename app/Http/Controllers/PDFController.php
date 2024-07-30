@@ -42,6 +42,16 @@ class PDFController extends Controller
                 }
             }
 
+            $categorizedTests = [];
+            if ($type == '1') {
+                foreach ($tests as $test) {
+                    $profileId = $test->test_profiles ? $test->test_profiles->id : 'no-profile';
+                    $profileName = $test->test_profiles ? $test->test_profiles->name : 'No Profile';
+                    $categorizedTests[$profileId]['name'] = $profileName;
+                    $categorizedTests[$profileId]['tests'][] = $test;
+                }
+            }
+
             // Calculate pagination
             $perPage = 20;
             $totalPages = ceil($tests->count() / $perPage);
@@ -57,6 +67,7 @@ class PDFController extends Controller
                 'testReports' => $testReports,
                 'referenceRanges' => $referenceRanges,
                 'tests' => $tests,
+                'categorizedTests' => $categorizedTests,
                 'totalPages' => $totalPages,
                 'currentPage' => $currentPage,
                 'signed_by' => 'Dr. John Doe', // Replace with actual data
