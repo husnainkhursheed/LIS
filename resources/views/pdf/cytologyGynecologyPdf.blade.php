@@ -19,7 +19,19 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            page-break-inside: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
         }
 
         table thead th {
@@ -36,7 +48,7 @@
         .order-details h2 {
             margin-top: 0;
             margin-bottom: 10px;
-            border-bottom: 1px solid #3d90ca;
+            border-bottom: 2px solid #3d90ca;
             padding-bottom: 5px;
         }
 
@@ -259,19 +271,20 @@
     @endif
     @endforeach
 
-    <script type="text/php">
-        if ( isset($pdf) ) {
-            $pdf->page_script('
-                if ($PAGE_COUNT ) {
-                    $font = $fontMetrics->get_font("Cambria, serif", "normal");
-                    $size = 10;
-                    $pdf->text(45, 810, "Signed by: Dr. John Doe", $font, $size);
-                    $pdf->text(245, 810, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
-                    $pdf->text(435, 810, "Validated by: Admin User", $font, $size);
-                }
-            ');
-        }
-    </script>
+        <script type="text/php">
+            if ( isset($pdf) ) {
+                $pdf->page_script('
+                    if ($PAGE_COUNT > 0) {
+                        $font = $fontMetrics->get_font("Cambria, serif", "normal");
+                        $size = 9;
+                        $pdf->text(45, 786, "Signed by: {{$signed_by}}", $font, $size);
+                        $pdf->text(448, 786, "Validated by: {{$validated_by}}", $font, $size);
+                        $pdf->text(30, 795, "___________________________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
+                        $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                    }
+                ');
+            }
+        </script>
 </body>
 
 </html>

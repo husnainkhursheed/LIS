@@ -48,8 +48,14 @@ class PDFController extends Controller
             $currentPage = $request->input('page', 1);
 
             $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
-
-            // Data for PDF view
+            $signed_by = $sample::with('signedBy','validateBy')->get();
+            foreach ($signed_by as $sample) {
+                // Access the signed user's name
+                $signedUserName = $sample->signedBy->first_name ?? 'No Signer';
+                $validateUserName = $sample->validateBy->first_name ?? 'No Validator';
+                // dd($signedUserName);
+            }
+                        // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
                 'date' => date('m/d/Y'),
@@ -59,8 +65,8 @@ class PDFController extends Controller
                 'tests' => $tests,
                 'totalPages' => $totalPages,
                 'currentPage' => $currentPage,
-                'signed_by' => 'Dr. John Doe', // Replace with actual data
-                'validated_by' => 'Admin User', // Replace with actual data
+                'signed_by' => $signedUserName, // Replace with actual data
+                'validated_by' => $validateUserName, // Replace with actual data
             ];
 
             // Load the view based on $type
@@ -79,7 +85,8 @@ class PDFController extends Controller
             $data['qrCode'] = $qrCode;
             // Generate PDF using Dompdf
             $pdf = PDF::loadView($view, $data);
-
+            $pdf->setOption('isHtml5ParserEnabled', true);
+            $pdf->setOption('isPhpEnabled', true);
             // (Optional) Set paper size and orientation
             $pdf->setPaper('A4', 'portrait');
 

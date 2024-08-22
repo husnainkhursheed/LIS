@@ -59,6 +59,37 @@
                         font-size: 0.59rem; /* Adjust font size for smaller screens */
                     }
                 }
+                .modal.right .modal-dialog {
+                        position: fixed;
+                        right: 0;
+                        margin: auto;
+                        width: 30% !important;
+                        height: 100%;
+                    }
+
+                    .modal.right .modal-content {
+                        height: 100%;
+                        overflow-y: auto;
+                    }
+
+                    .modal.right .modal-body {
+                        padding: 15px 15px 80px;
+                    }
+
+                    .note-item {
+                        cursor: pointer;
+                        background-color: #f2fafc;
+                        padding: 10px;
+                        margin-bottom: 10px;
+                        border-radius: 5px;
+                        transition: background-color 0.3s;
+                        font-weight: 700;
+                    }
+
+                    .note-item:hover {
+                        background-color: #e9ecef;
+                        /* Hover background color */
+                    }
         </style>
 
     {{-- //start  --}}
@@ -452,37 +483,7 @@
                     <h4 class="text-dark">Notes </h4>
                 </div>
                 <style>
-                    .modal.right .modal-dialog {
-                        position: fixed;
-                        right: 0;
-                        margin: auto;
-                        width: 30% !important;
-                        height: 100%;
-                    }
 
-                    .modal.right .modal-content {
-                        height: 100%;
-                        overflow-y: auto;
-                    }
-
-                    .modal.right .modal-body {
-                        padding: 15px 15px 80px;
-                    }
-
-                    .note-item {
-                        cursor: pointer;
-                        background-color: #f2fafc;
-                        padding: 10px;
-                        margin-bottom: 10px;
-                        border-radius: 5px;
-                        transition: background-color 0.3s;
-                        font-weight: 700;
-                    }
-
-                    .note-item:hover {
-                        background-color: #e9ecef;
-                        /* Hover background color */
-                    }
                 </style>
                 <div class="row pt-3">
                     <div class="col-md-4">
@@ -2373,6 +2374,16 @@
                                                 <input type="text" id="test_number" name="test_number" class="form-control" value=""/>
                                             </div>
                                         </div> --}}
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="review" class="form-label">Review
+                                                    @if (!$sample->is_completed)
+                                                    <span class="badge bg-info text-white add-urine-note" data-target="#review"> Add Note</span>
+                                                    @endif
+                                                </label>
+                                                <textarea name="review" id="review" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->review ?? '' }}</textarea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2399,7 +2410,7 @@
             </div>
         </div>
     </div>
-    <script>
+    {{-- <script>
        $(document).ready(function() {
             $('.add-note').on('click', function() {
                 var targetTextarea = $($(this).data('target'));
@@ -2439,7 +2450,7 @@
             });
         });
 
-    </script>
+    </script> --}}
 
     <div class="modal fade" id="showModalcalc" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -2915,7 +2926,7 @@
     {{-- end sign modal  --}}
 
     {{-- report notes modal  --}}
-    <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+    {{-- <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-scrollable">
             <div class="modal-content border-0">
                 <div class="modal-header bg-primary-subtle p-3">
@@ -2929,9 +2940,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <script>
         $(document).ready(function() {
+            // cytology notes request handle for ajax
             $('.add-note').on('click', function() {
                 var targetTextarea = $($(this).data('target'));
                 $('#notesModal').modal('show');
@@ -2939,6 +2951,65 @@
                 $.ajax({
                     type: 'GET',
                     url: '{{ route('fetch-notes-cytology') }}',
+                    success: function(notes) {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+
+                        if (notes.length > 0) {
+                            notes.forEach(function(note) {
+                                // Create the note item with comment initially hidden
+                                var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
+                                var noteComment = $('<div class="note-comment" style="display:none;">' + note.comment + '</div>');
+
+                                // Append note item and comment to the container
+                                notesContainer.append(noteItem);
+                                notesContainer.append(noteComment);
+
+                                // Toggle the comment on note item click
+                                noteItem.on('click', function() {
+                                    noteComment.toggle();
+                                });
+
+                                // Append the comment to the textarea on comment click
+                                noteComment.on('click', function() {
+                                    var selectedComment = $(this).text();
+                                    var currentText = targetTextarea.val();
+                                    targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedComment);
+                                    $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a comment
+                                });
+                                 // Filter notes based on search input
+                                $('#note-search').on('input', function() {
+                                    var searchTerm = $(this).val().toLowerCase();
+                                    $('.note-item').each(function() {
+                                        var noteText = $(this).text().toLowerCase();
+                                        if (noteText.includes(searchTerm)) {
+                                            $(this).show();
+                                        } else {
+                                            $(this).hide();
+                                        }
+                                    });
+                                });
+                            });
+                        } else {
+                            notesContainer.append('<p>No notes available.</p>');
+                        }
+                    },
+                    error: function() {
+                        var notesContainer = $('#notes-container');
+                        notesContainer.empty();
+                        notesContainer.append('<p>Error fetching notes.</p>');
+                    }
+                });
+            });
+
+            //urinalysis notes request handle for ajax
+            $('.add-urine-note').on('click', function() {
+                var targetTextarea = $($(this).data('target'));
+                $('#notesModal').modal('show');
+
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ route('fetch-notes-urinalysis') }}',
                     success: function(notes) {
                         var notesContainer = $('#notes-container');
                         notesContainer.empty();
