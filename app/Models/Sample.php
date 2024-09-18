@@ -69,5 +69,12 @@ class Sample extends Model
         return $this->belongsTo(User::class, 'completed_by');
     }
 
+        // Many-to-Many relationship with TestProfile
+        public function testProfiles()
+        {
+            return $this->belongsToMany(TestProfile::class, 'sample_profiles');
+        }
+
+
 
 }
