@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Setup;
 
 use App\Models\Test;
 use App\Models\Sample;
+use App\Models\TestProfiles;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,7 @@ class TestController extends Controller
     }
     public function index(Request $request)
     {
+
         $query = Test::query();
 
         // $currentUser = Auth::user();
@@ -47,7 +49,9 @@ class TestController extends Controller
 
         $tests = $query->paginate(10);
 
-        return view('setup.tests',compact('tests'));
+        $test_profiles = TestProfiles::all();
+
+        return view('setup.tests',compact('tests','test_profiles'));
     }
 
     public function store(Request $request)
@@ -68,6 +72,7 @@ class TestController extends Controller
         $test->cost  = $request->input('cost');
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
+        $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
@@ -97,10 +102,13 @@ class TestController extends Controller
         $test->save();
 
         if ($request->ajax()) {
+            $test_profileId = $request->input('test_profiles');
+            $test_profile = TestProfiles::findOrFail($test_profileId);
+            $test_profile_name = $test_profile->id;
             $sample = Sample::find($request->sample_id);
             $sample->tests()->attach($test);
 
-            return response()->json(['success' => true, 'test' => $test]);
+            return response()->json(['success' => true, 'test' => $test, 'test_profile_name' => $test_profile_name]);
         }
 
         Session::flash('message', 'Created successfully!');
@@ -135,6 +143,7 @@ class TestController extends Controller
         $test->cost  = $request->input('cost');
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
+        $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');

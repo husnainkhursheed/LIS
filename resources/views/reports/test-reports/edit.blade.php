@@ -303,100 +303,184 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        @foreach ($tests as $index => $test)
-                            @php
-                                $testReport = $testReports
-                                    ->where('test_id', $test->id)
-                                    ->where('sample_id', $sample->id)
-                                    ->first();
-                                // dd($testReport);
-                                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                                // dd($biochemHaemoResults);
-                            @endphp
-                            <tr>
-                                <td>
-                                    <input type="text" data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][id]" class="form-control"
-                                        value="{{ $test->id }}" hidden disabled />
-                                    <input type="text" data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][description]" class="form-control"
-                                        value="{{ $test->name }}" disabled />
-                                </td>
-                                <td>
-                                    <input type="text"  data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
-                                        value="{{ $biochemHaemoResults->test_results ?? '' }}"
-                                        data-basic-low="{{ $test->basic_low_value_ref_range }}"
-                                        data-basic-high="{{ $test->basic_high_value_ref_range }}"
-                                        data-male-low="{{ $test->male_low_value_ref_range }}"
-                                        data-male-high="{{ $test->male_high_value_ref_range }}"
-                                        data-female-low="{{ $test->female_low_value_ref_range }}"
-                                        data-female-high="{{ $test->female_high_value_ref_range }}"
-                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
-                                </td>
-                                <td>
-                                    <input type="text"  data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
-                                    @php
-                                        $background = '';
-                                        if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                            $background = 'bg-success';
-                                        } elseif (
-                                            !empty($biochemHaemoResults) &&
-                                            $biochemHaemoResults->flag == 'High'
-                                        ) {
-                                            $background = 'bg-danger';
-                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                            $background = 'bg-warning';
-                                        }
-                                    @endphp
-                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
-                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
-
-                                </td>
-
-                                <td>
-                                    <p class="reference-range">
-                                        @if ($test->reference_range == 'basic_ref')
-                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                        @elseif ($test->reference_range == 'optional_ref')
-                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                            <br>
-                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                                        @elseif ($test->reference_range == 'no_manual_tag')
-                                            {{ $test->nomanualvalues_ref_range }}
+                        @if ($reporttype == '1')
+                        @foreach ($categorizedTests as $profileId => $profileData)
+                        <tr id="{{ $profileId }}">
+                            <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                        </tr>
+                            @foreach ($profileData['tests'] as $index => $test)
+                                @php
+                                    $testReport = $testReports
+                                        ->where('test_id', $test->id)
+                                        ->where('sample_id', $sample->id)
+                                        ->first();
+                                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][id]" class="form-control"
+                                            value="{{ $test->id }}" hidden disabled />
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][description]" class="form-control"
+                                            value="{{ $test->name }}" disabled />
+                                    </td>
+                                    <td>
+                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                            data-male-low="{{ $test->male_low_value_ref_range }}"
+                                            data-male-high="{{ $test->male_high_value_ref_range }}"
+                                            data-female-low="{{ $test->female_low_value_ref_range }}"
+                                            data-female-high="{{ $test->female_high_value_ref_range }}"
+                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                    </td>
+                                    <td>
+                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                        @php
+                                            $background = '';
+                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                $background = 'bg-success';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                $background = 'bg-danger';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                $background = 'bg-warning';
+                                            }
+                                        @endphp
+                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                    </td>
+                                    <td>
+                                        <p class="reference-range">
+                                            @if ($test->reference_range == 'basic_ref')
+                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'optional_ref')
+                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                <br>
+                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'no_manual_tag')
+                                                {{ $test->nomanualvalues_ref_range }}
+                                            @endif
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                    </td>
+                                    <td>
+                                        @if ($index > 0 && !$allTestsCompleted)
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                    href="#deleteRecordModal">
+                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                </a>
+                                            </li>
                                         @endif
-                                    </p>
-                                </td>
-                                <td>
-                                    <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
-                                </td>
-                                <td>
-                                    @if ($index > 0 && !$allTestsCompleted)
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                            data-bs-placement="top" title="Delete">
-                                            <a class="remove-item-btn" data-id="{{ $test->id }}"
-                                                data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
-                                                href="#deleteRecordModal">
-                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                            </a>
-                                        </li>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($test->calculation_explanation)
-                                        <a href="" class="getcalc" data-bs-toggle="modal"
-                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
-                                                        class="badge bg-info text-white">show</span> </a>
-                                    @endif
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td>
+                                        @if ($test->calculation_explanation)
+                                            <a href="" class="getcalc" data-bs-toggle="modal"
+                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                            class="badge bg-info text-white">show</span> </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
                         @endforeach
 
+                        @else
+                            @foreach ($tests as $index => $test)
+                                @php
+                                    $testReport = $testReports
+                                        ->where('test_id', $test->id)
+                                        ->where('sample_id', $sample->id)
+                                        ->first();
+                                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][id]" class="form-control"
+                                            value="{{ $test->id }}" hidden disabled />
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][description]" class="form-control"
+                                            value="{{ $test->name }}" disabled />
+                                    </td>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                            data-male-low="{{ $test->male_low_value_ref_range }}"
+                                            data-male-high="{{ $test->male_high_value_ref_range }}"
+                                            data-female-low="{{ $test->female_low_value_ref_range }}"
+                                            data-female-high="{{ $test->female_high_value_ref_range }}"
+                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                    </td>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                        @php
+                                            $background = '';
+                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                $background = 'bg-success';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                $background = 'bg-danger';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                $background = 'bg-warning';
+                                            }
+                                        @endphp
+                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                    </td>
+                                    <td>
+                                        <p class="reference-range">
+                                            @if ($test->reference_range == 'basic_ref')
+                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'optional_ref')
+                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                <br>
+                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'no_manual_tag')
+                                                {{ $test->nomanualvalues_ref_range }}
+                                            @endif
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                    </td>
+                                    <td>
+                                        @if ($index > 0 && !$allTestsCompleted)
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                    href="#deleteRecordModal">
+                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                </a>
+                                            </li>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($test->calculation_explanation)
+                                            <a href="" class="getcalc" data-bs-toggle="modal"
+                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                            class="badge bg-info text-white">show</span> </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
+
             @endif
 
             {{-- Cytology / Gynecology Test Results  --}}
@@ -2641,6 +2725,17 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-lg-6" id="test_profiles_container">
+                                <div>
+                                    <label for="test_profPiles" class="form-label">Profiles</label>
+                                    <select class="form-control" name="test_profiles" id="test_profiles">
+                                        <option value="">Select Profiles</option>
+                                        @foreach ($test_profiles as $item)
+                                            <option value="{{$item->id}}">{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="specimen_type" class="form-label">Specimen Type</label>
@@ -3211,6 +3306,19 @@
             $('#urioptionalValues').hide();
             $('#urinoManualValues').hide();
             $('#uribasicValues').show();
+
+            $('#test_profiles_container').hide();
+
+            $('#department').on('change', function(){
+                // console.log('Department');
+                if (this.value == '1') {
+                    $('#test_profiles_container').show();
+                    $('#test_profiles').prop('required', true);
+                }else{
+                    $('#test_profiles_container').hide();
+                    $('#test_profiles').prop('required', false);
+                }
+            });
 
             // Show/hide fields based on selected reference range
             $('input[name="reference_range"]').on('change', function() {
@@ -3815,11 +3923,12 @@
                                 '<td><li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete"><a class="remove-item-btn" data-id="' +
                                 response.test.id + '" data-sampleid="' + sampleid +
                                 '" data-bs-toggle="modal" href="#deleteRecordModal"><i class="ri-delete-bin-fill align-bottom text-muted"></i></a></li></td>' +
+                                '<td><a href="" class="getcalc" data-bs-toggle="modal" data-id="'+ response.test.id +'" data-bs-target="#showModalcalc"> <span class="badge bg-info text-white">show</span> </a></td>' +
                                 '</tr>';
                             if (response.test.department === '1') {
-                                $('#tests-table tbody').append(newRow);
+                                $(`#${response.test_profile_name}`).after(newRow);
                             }
-
+                            // console.log($(`#${response.test_profile_name}`).get(0));
                             bindTestResultChangeEvent();
 
                             // Close the modal
