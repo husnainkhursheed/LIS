@@ -26,7 +26,9 @@ class Test extends Model
         return $this->belongsToMany(Sample::class, 'sample_tests');
     }
 
-    public function test_profiles(){
-        return $this->belongsTo(TestProfiles::class ,'test_profile_id');
+    // Many-to-Many relationship with TestProfile
+    public function testProfiles()
+    {
+        return $this->belongsToMany(TestProfile::class, 'profile_tests');
     }
 }
