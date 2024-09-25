@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Sample;
+use App\Models\TestReport;
 use Illuminate\Http\Request;
+use App\Models\BiochemHaemoResults;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Models\CytologyGynecologyResults;
+use App\Models\UrinalysisMicrobiologyResults;
 
 class HomeController extends Controller
 {
@@ -92,6 +96,92 @@ class HomeController extends Controller
         }
 
         $samples = $query->paginate(15);
+
+
+
+
+
+        $samples->getCollection()->transform(function ($sample) {
+            // Fetch individual tests with direct department association
+            $individualTests = $sample->tests()->get();
+
+            // Get departments for individual tests directly from the 'tests' table
+            $individualTestDepartments = $individualTests->pluck('department')->unique();
+
+            // Initialize collection for profile-related tests
+            $profileTests = collect();
+            $profileDepartments = collect();
+
+            // Fetch profile tests and their departments
+            foreach ($sample->testProfiles as $profile) {
+                $profileTests = $profileTests->merge($profile->tests()->where('is_urine_type', 1)->get());
+
+                // Fetch profile departments from the relationship (ensure profile->departments exists)
+                if ($profile->departments) {
+                    $profileDepartments = $profileDepartments->merge(
+                        $profile->departments->pluck('department')
+                    );
+                }
+            }
+
+            // Merge individual and profile-related departments
+            $allDepartments = $individualTestDepartments->merge($profileDepartments)->unique();
+
+            // Merge individual and profile tests
+            $tests = $individualTests->merge($profileTests);
+
+            // Group tests by department and check if all tests in each department are completed
+            $departmentsStatus = $allDepartments->mapWithKeys(function ($department) use ($tests, $sample) {
+                // Filter tests for the current department
+                $departmentTests = $tests->filter(function ($test) use ($department) {
+                    return $test->department === $department;
+                });
+
+                $departmentTestsReports = TestReport::where('sample_id', $sample->id)
+                    ->whereIn('test_id', $departmentTests->pluck('id'))
+                    ->get();
+
+                $isCompleted = false;
+                switch ($department) {
+                    case '2':
+                        $isCompleted = CytologyGynecologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                    case '1':
+                        $isCompleted = BiochemHaemoResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                    case '3':
+                        $isCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                }
+
+                return [
+                    $department => [
+                        'is_completed' => $isCompleted,
+                    ],
+                ];
+            });
+
+            // Check if all departments are completed
+            $allDepartmentsCompleted = $departmentsStatus->every(function ($status) {
+                return $status['is_completed'];
+            });
+
+            // Add the 'all_departments_completed' attribute to the sample object
+            $sample->all_departments_completed = $allDepartmentsCompleted;
+
+            // Store unique department statuses
+            $sample->unique_departments = $allDepartments;
+            $sample->unique_departments_status = $departmentsStatus;
+
+            return $sample;
+        });
+
         return view('index' , compact('samples'));
     }
 

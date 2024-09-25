@@ -70,10 +70,10 @@ class Sample extends Model
     }
 
         // Many-to-Many relationship with TestProfile
-        public function testProfiles()
-        {
-            return $this->belongsToMany(TestProfile::class, 'sample_profiles');
-        }
+    public function testProfiles()
+    {
+        return $this->belongsToMany(TestProfile::class, 'sample_profiles');
+    }
 
 
 

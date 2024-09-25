@@ -94,6 +94,7 @@ use \Carbon\Carbon;
                                                     @csrf
                                                     <select class="test-reports-dropdown" name="report_type" id="report_type" required>
                                                         {{-- <option value="">Select Report Type</option> --}}
+                                                        {{-- {{dd($testReport->unique_departments)}} --}}
                                                         @foreach($testReport->unique_departments as $department)
                                                             <option value="{{ $department }}">@if($department == 1)
                                                                 Biochemistry / Haematology
@@ -115,23 +116,26 @@ use \Carbon\Carbon;
                                                 </div> --}}
 
                                             </td>
-                                            <td>@foreach ($testReport->unique_departments_status as $departmentStatus)
+                                            <td>@foreach ($testReport->unique_departments_status as $index => $departmentStatus)
+                                                {{-- {{dd($testReport->unique_departments_status)}} --}}
                                                 <div>
-                                                     @switch($departmentStatus['department'])
-                                                         @case($departmentStatus['department'] == 1)
-                                                            Bio
-                                                             @break
-                                                         @case($departmentStatus['department'] == 2)
-                                                            Cyto
-                                                             @break
-                                                         @case($departmentStatus['department'] == 3)
-                                                            Urin
-                                                             @break
-                                                         @default
-                                                            ''
-                                                     @endswitch : {!! $departmentStatus['is_completed'] ? ' <span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>' : '' !!}
+                                                    @switch($index)
+                                                        @case('1')
+                                                            Biochemistry / Haematology
+                                                            @break
+                                                        @case('2')
+                                                            Cytology / Gynecology
+                                                            @break
+                                                        @case('3')
+                                                            Urinalysis / Microbiology
+                                                            @break
+                                                        @default
+                                                            Unknown Department
+                                                    @endswitch:
+                                                    {!! $departmentStatus['is_completed']
+                                                        ? '<span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>'
+                                                        : '<span class="badge bg-warning-subtle text-warning mb-0 me-1">PENDING</span>' !!}
                                                 </div>
-                                                {{-- {{dd($departmentStatus['is_completed'])}} --}}
                                             @endforeach</td>
                                             <td>
                                                 <ul class="list-inline hstack gap-2 mb-0">

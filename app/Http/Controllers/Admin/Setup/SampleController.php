@@ -6,10 +6,13 @@ use App\Models\Test;
 use App\Models\Doctor;
 use App\Models\Sample;
 use App\Models\Patient;
+use App\Models\TestReport;
 use App\Models\Institution;
+use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+
 
 class SampleController extends Controller
 {
@@ -40,9 +43,10 @@ class SampleController extends Controller
         $institutions = Institution::where('is_active', 1)->get();
         $patients = Patient::where('is_active', 1)->get();
         $tests = Test::where('is_active', 1)->get();
+        $test_profiles = TestProfile::all();
         $test_number = strtoupper(substr(md5(time()), 0, 6));
 
-        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests','test_number'));
+        return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','test_number'));
     }
 
     /**
@@ -61,7 +65,8 @@ class SampleController extends Controller
             'institution_id' => 'required',
             'doctor_id' => 'required',
             'bill_to' => 'required',
-            'test_requested' => 'required',
+            // 'test_requested' => 'required',
+            'test_profiles' => 'required',
        ]);
         //    dd($request->all());
 
@@ -80,6 +85,7 @@ class SampleController extends Controller
        $sample->save();
        // Attach the tests to the sample
        $sample->tests()->attach($request->test_requested);
+       $sample->testProfiles()->attach($request->test_profiles);
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -103,10 +109,10 @@ class SampleController extends Controller
         $institutions = Institution::where('is_active', 1)->get();
         $patients = Patient::where('is_active', 1)->get();
         $tests = Test::where('is_active', 1)->get();
-
+        $test_profiles = TestProfile::all();
         $sample = Sample::find($id);
 
-        return view('setup.sample.edit' , compact('doctors', 'institutions', 'patients','tests','sample'));
+        return view('setup.sample.edit' , compact('test_profiles','doctors', 'institutions', 'patients','tests','sample'));
     }
 
     /**
@@ -123,7 +129,7 @@ class SampleController extends Controller
             'institution_id' => 'required',
             'doctor_id' => 'required',
             'bill_to' => 'required',
-            'test_requested' => 'required',
+            // 'test_requested' => 'required',
        ]);
 
         $sample = Sample::findOrFail($id);
@@ -138,13 +144,52 @@ class SampleController extends Controller
         $sample->bill_to = $request->bill_to;
         $sample->notes = $request->notes;
 
-        // Detach the existing tests from the sample
-        $sample->tests()->detach();
 
-        // Attach the updated tests to the sample
-        $sample->tests()->attach($request->test_requested);
 
         $sample->save();
+
+         // Get the list of test IDs from the request
+         $newTestIds = $request->test_requested ?? [];
+         $newProfileIds = $request->test_profiles ?? [];
+
+         // Find the current test IDs attached to the sample
+         $currentTestIds = $sample->tests()->pluck('tests.id')->toArray();
+         $currentProfileIds = $sample->testProfiles()->pluck('test_profiles.id')->toArray();
+
+         // Identify the test IDs that are being removed
+         $removedTestIds = array_diff($currentTestIds, $newTestIds);
+         $removedProfileIds = array_diff($currentProfileIds, $newProfileIds);
+        //  dd($removedProfileIds);
+
+        //  dd($getProfileTestsforremove[0]->tests());
+        //  dd($getProfileTestsforremove);
+
+         // Delete the `test_reports` associated with the removed tests
+         if (!empty($removedTestIds)) {
+             TestReport::where('sample_id', $sample->id)
+                 ->whereIn('test_id', $removedTestIds)
+                 ->delete();
+         }
+         if (!empty($removedProfileIds)) {
+            foreach ($removedProfileIds as $key => $value) {
+                $getProfileTestsforremove = TestProfile::find($value);
+                // dd($getProfileTestsforremove);
+                $getProfileTestsforremove = $getProfileTestsforremove->tests()->pluck('tests.id')->toArray();
+
+                 TestReport::where('sample_id', $sample->id)
+                     ->whereIn('test_id', $getProfileTestsforremove)
+                     ->delete();
+            }
+
+         }
+
+         // Detach the existing tests and profiles from the sample
+         $sample->tests()->detach();
+         $sample->testProfiles()->detach();
+
+         // Attach the updated tests to the sample
+         $sample->tests()->attach($request->test_requested);
+         $sample->testProfiles()->attach($request->test_profiles);
 
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');

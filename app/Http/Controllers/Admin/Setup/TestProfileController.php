@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin\Setup;
 
-use App\Models\TestProfiles;
+use App\Models\TestProfile;
 use Illuminate\Http\Request;
+use App\Models\ProfileDepartment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 
@@ -16,14 +17,14 @@ class TestProfileController extends Controller
 
     public function index(Request $request)
     {
-        $query = TestProfiles::query();
+        $query = TestProfile::query();
         // Handle search
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function($query) use ($searchTerm) {
                 $query->where('code', 'like', '%' . $searchTerm . '%')
                       ->orWhere('name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('specimen_type', 'like', '%' . $searchTerm . '%');
+                      ->orWhere('cost', 'like', '%' . $searchTerm . '%');
 
             });
         }
@@ -35,24 +36,31 @@ class TestProfileController extends Controller
         }
 
         $notes = $query->paginate(10);
-        // $notes = TestProfiles::all();
-        // $practices = Practice::paginate(10);
         return view('setup.testProfiles',compact('notes'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'code' => 'required',
+            // 'code' => 'required',
             'name' => 'required',
-            'specimen_type' => 'required',
+            'cost' => 'required',
+            'department' => 'required',
        ]);
 
-        $note = new TestProfiles();
-        $note->code  = $request->input('code');
-        $note->name  = $request->input('name');
-        $note->specimen_type  = $request->input('specimen_type');
-        $note->save();
+        $testprofile = new TestProfile();
+        // $testprofile->code  = $request->input('code');
+        $testprofile->name  = $request->input('name');
+        $testprofile->cost  = $request->input('cost');
+        // $testprofile->save();
+        if($testprofile->save()) {
+            foreach($request->department as $department) {
+                ProfileDepartment::create([
+                    'test_profile_id' => $testprofile->id,
+                    'department' => $department,
+                ]);
+            }
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -61,26 +69,39 @@ class TestProfileController extends Controller
 
     public function edit($id)
     {
-        $note = TestProfiles::find($id);
+        $note = TestProfile::find($id);
+        $profiledepartment = ProfileDepartment::where('test_profile_id', $note->id)->get();
+
         return response()->json([
             'note' => $note,
+            'profiledepartment' => $profiledepartment,
         ]);
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'code' => 'required',
+            // 'code' => 'required',
             'name' => 'required',
-            'specimen_type' => 'required',
+            'cost' => 'required',
        ]);
 
 
-        $note = TestProfiles::find($id);
-        $note->code  = $request->input('code');
-        $note->name  = $request->input('name');
-        $note->specimen_type  = $request->input('specimen_type');
-        $note->update();
+        $testprofile = TestProfile::find($id);
+        // $testprofile->code  = $request->input('code');
+        $testprofile->name  = $request->input('name');
+        $testprofile->cost  = $request->input('cost');
+        // $note->update();
+        // dd($request->department);
+        if($testprofile->update()) {
+            ProfileDepartment::where('test_profile_id', $testprofile->id)->delete();
+            foreach($request->department as $department) {
+                ProfileDepartment::create([
+                    'test_profile_id' => $testprofile->id,
+                    'department' => $department,
+                ]);
+            }
+        }
 
 
         Session::flash('message', 'Updated successfully!');
@@ -91,7 +112,7 @@ class TestProfileController extends Controller
 
     public function destroy($id)
     {
-        $note = TestProfiles::find($id);
+        $note = TestProfile::find($id);
         $note->delete();
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');

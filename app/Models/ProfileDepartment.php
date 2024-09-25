@@ -11,6 +11,6 @@ class ProfileDepartment extends Model
 
     protected $fillable = [
         'test_profile_id',
-        'test_id',
+        'department',
     ];
 }

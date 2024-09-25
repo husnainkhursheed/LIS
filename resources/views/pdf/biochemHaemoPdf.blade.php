@@ -121,9 +121,16 @@
     <tr>
         <th colspan="4">
             @php
-                $testNames = $tests->pluck('name')->implode(', ');
-            @endphp
-            Request: {{ $testNames ?? '' }}
+            // Assuming $sample->tests is a collection or array of test objects
+            $testNames = $tests->pluck('name')->implode(', ');
+            $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
+            // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+            $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                                $query->where('department', $reporttype);
+                            })->with('tests')->pluck('name')->implode(', ');
+
+        @endphp
+        <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
         </th>
     </tr>
     <tr class="bg-blue">
@@ -134,48 +141,54 @@
     </tr>
     </thead>
     <tbody>
-    @foreach ($tests as $index => $test)
-        @php
-            $testReport = $testReports
-                ->where('test_id', $test->id)
-                ->where('sample_id', $sample->id)
-                ->first();
-            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-            $description = $biochemHaemoResults->description ?? '';
-            $testResults = $biochemHaemoResults->test_results ?? '';
-            $flag = $biochemHaemoResults->flag ?? '';
-            $background = '';
-
-            if ($flag == 'Normal') {
-                $background = 'color:#40bb82';
-            } elseif ($flag == 'High') {
-                $background = 'color:red';
-            } elseif ($flag == 'Low') {
-                $background = 'color:#ffca5b';
-            }
-
-            $referenceRange = '';
-
-            if ($test->reference_range == 'basic_ref') {
-                $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
-            } elseif ($test->reference_range == 'optional_ref') {
-                $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
-            } elseif ($test->reference_range == 'no_manual_tag') {
-                $referenceRange = ($test->nomanualvalues_ref_range ?? '');
-            }
-        @endphp
-
-        @if ($testResults)
-            <tr>
-                <td>{{ $description }}</td>
-                <td >{{ $testResults }}</td>
-                <td>
-                    <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
-                </td>
-                <td style="text-align: center">{!! $referenceRange !!}</td>
+        @foreach ($categorizedTests as $profileId => $profileData)
+            <tr id="{{ $profileId }}">
+                <td colspan="4"><strong>{{ $profileData['name'] }}</strong></td>
             </tr>
-        @endif
-    @endforeach
+            @foreach ($profileData['tests'] as $index => $test)
+                @php
+                    $testReport = $testReports
+                        ->where('test_id', $test->id)
+                        ->where('sample_id', $sample->id)
+                        ->first();
+                    // $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                    $description = $biochemHaemoResults->description ?? '';
+                    $testResults = $biochemHaemoResults->test_results ?? '';
+                    $flag = $biochemHaemoResults->flag ?? '';
+                    $background = '';
+
+                    if ($flag == 'Normal') {
+                        $background = 'color:#40bb82';
+                    } elseif ($flag == 'High') {
+                        $background = 'color:red';
+                    } elseif ($flag == 'Low') {
+                        $background = 'color:#ffca5b';
+                    }
+
+                    $referenceRange = '';
+
+                    if ($test->reference_range == 'basic_ref') {
+                        $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
+                    } elseif ($test->reference_range == 'optional_ref') {
+                        $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
+                    } elseif ($test->reference_range == 'no_manual_tag') {
+                        $referenceRange = ($test->nomanualvalues_ref_range ?? '');
+                    }
+                @endphp
+
+                @if ($testResults)
+                    <tr>
+                        <td>{{ $description }}</td>
+                        <td >{{ $testResults }}</td>
+                        <td>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
+                        </td>
+                        <td style="text-align: center">{!! $referenceRange !!}</td>
+                    </tr>
+                @endif
+            @endforeach
+        @endforeach
     </tbody>
 </table>
 

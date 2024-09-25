@@ -10,6 +10,6 @@ class ProfileTest extends Model
     use HasFactory;
     protected $fillable = [
         'test_profile_id',
-        'department',
+        'test_id',
     ];
 }

@@ -25,4 +25,9 @@ class TestProfile extends Model
     {
         return $this->belongsToMany(Sample::class, 'sample_profiles');
     }
+
+    public function departments()
+    {
+        return $this->hasMany(ProfileDepartment::class, 'test_profile_id');
+    }
 }

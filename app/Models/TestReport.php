@@ -62,4 +62,9 @@ class TestReport extends Model
     {
         return $this->hasMany(UrinalysisMicrobiologyResults::class);
     }
+     // Add the relationship for test profiles through the Test model (if needed)
+     public function testProfile()
+     {
+         return $this->hasOneThrough(TestProfile::class, Test::class, 'id', 'id', 'test_id', 'test_profile_id');
+     }
 }

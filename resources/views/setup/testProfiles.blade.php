@@ -65,20 +65,20 @@
                         <table id="" class="table table-striped display table-responsive rounded">
                             <thead>
                                 <tr>
-                                    <th class="rounded-start-3 ">Code</th>
-                                    <th>Name</th>
-                                    <th>Specimen Type</th>
+                                    {{-- <th class="rounded-start-3 ">Code</th> --}}
+                                    <th class="rounded-start-3">Name</th>
+                                    <th>Cost</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($notes as $note)
                                     <tr>
-                                        <td>{{ $note->code }}</td>
+                                        {{-- <td>{{ $note->code }}</td> --}}
                                         <td>
                                             {{ $note->name }}
                                         </td>
-                                        <td>{{ $note->specimen_type  }}</td>
+                                        <td>{{ $note->cost  }}</td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
@@ -152,18 +152,7 @@
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="companyname-field"
-                                        class="form-label">Code</label>
-                                    <input type="text" id="code" name="code"
-                                        class="form-control"
-                                        placeholder="EnterCode" required />
-                                </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
-                            </div>
+
                             <div class="col-lg-6">
                                 <div>
                                     <label for="name" class="form-label">Name</label>
@@ -174,10 +163,19 @@
                             </div>
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="specimen_type" class="form-label">Specimen Type</label>
-                                    <input type="text" id="specimen_type" class="form-control" name="specimen_type"
-                                        placeholder="Enter Specimen Type" required >
+                                    <label for="cost" class="form-label">Cost</label>
+                                    <input type="number" id="cost" name="cost" class="form-control"
+                                        placeholder="Enter Cost" required />
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="test_requested" class="form-label">Departments</label>
+                                <select class="js-example-basic-multiple" name="department[]" id="department" multiple="multiple">
+                                    <option value="">Select Department</option>
+                                    <option value="1">Biochemistry / Haematology</option>
+                                    <option value="2">Cytology / Gynecology</option>
+                                    <option value="3">Urinalysis / Microbiology</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -268,15 +266,15 @@
                         $('#id-field').val(note.id);
                         $('#code').val(note.code);
                         $('#name').val(note.name);
-                        $('#specimen_type').val(note.specimen_type);
+                        $('#cost').val(note.cost);
                         // $('#area').val(patient.area);
                         // $('#email').val(patient.email);
 
-                        // var surgeries = SetupPractice.surgeries.map(function(surgery) {
-                        //         return surgery.id;
-                        //     });
+                        var profiledepartment = response.profiledepartment.map(function(surgery) {
+                                return surgery.department;
+                            });
 
-                        // $('#surgeries').val(surgeries).trigger('change');
+                        $('#department').val(profiledepartment).trigger('change');
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit Profile");
@@ -319,9 +317,9 @@
             // }
             $('#code').val('');
             $('#name').val('');
-            $('#specimen_type ').val('');
+            $('#cost ').val('');
             // $('#surgeries').val("");
-            // $('#surgeries').val("").trigger('change');
+            $('#surgeries').val("").trigger('change');
 
         }
 

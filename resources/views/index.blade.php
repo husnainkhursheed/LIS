@@ -73,71 +73,35 @@ use \Carbon\Carbon;
                     </thead>
                     <tbody>
                         @foreach ($samples as $sample)
-                            <tr>
-                                <td>{{ $sample->test_number }}</td>
-                                <td>{{ $sample->access_number }}</td>
-                                <td>{{ "{$sample->patient->first_name} {$sample->patient->surname}" }}</td>
-                                <td>{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}</td>
-
-
-
-                                <td>
-                                    <a href="#showModal" data-bs-toggle="modal">
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/report.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a>
-
-                                    @can('Sample edit')
-                                        <li class="list-inline-item" data-bs-toggle="tooltip"
-                                            data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                            <a  id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                height="20"></a>
-                                        </li>
-                                    @endcan
-                                    @can('Sample delete')
-                                        <li class="list-inline-item" data-bs-toggle="tooltip"
-                                            data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                            <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                                href="#deleteRecordModal">
-                                                <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                    height="20">
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    {{-- <a href="">
-
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a>
-                                    <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                        href="#deleteRecordModal">
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a> --}}
-                                </td>
-                                {{-- <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                            @if (!$sample->all_departments_completed) <!-- Only show incomplete samples -->
+                                <tr>
+                                    <td>{{ $sample->test_number }}</td>
+                                    <td>{{ $sample->access_number }}</td>
+                                    <td>{{ "{$sample->patient->first_name} {$sample->patient->surname}" }}</td>
+                                    <td>{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}</td>
+                                    <td>
+                                        <a href="#showModal" data-bs-toggle="modal">
+                                            <span class="logo-sm">
+                                                <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
+                                            </span>
+                                        </a>
+                                        @can('Sample edit')
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                <a id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}" href="#showModal" data-bs-toggle="modal">
+                                                    <img src="{{ URL::asset('build/images/Vector.png') }}" alt="" height="20">
                                                 </a>
                                             </li>
-                                        </ul>
-                                    </td> --}}
-                            </tr>
+                                        @endcan
+                                        @can('Sample delete')
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal" href="#deleteRecordModal">
+                                                    <img src="{{ URL::asset('build/images/delete.png') }}" alt="" height="20">
+                                                </a>
+                                            </li>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

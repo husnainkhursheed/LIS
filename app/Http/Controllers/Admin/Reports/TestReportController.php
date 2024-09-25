@@ -7,7 +7,7 @@ use App\Models\Test;
 use App\Models\Sample;
 use App\Models\AuditTrail;
 use App\Models\TestReport;
-use App\Models\TestProfiles;
+use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
 use App\Models\ProcedureResults;
@@ -29,18 +29,12 @@ class TestReportController extends Controller
 
     public function index(Request $request)
     {
-       $testNumber = $request->input('test_number');
-       $accessNumber = $request->input('access_number');
-       $patientName = $request->input('patient_name');
-       $query = Sample::query()->orderBy('received_date', 'asc');
-       $currentUser = Auth::user();
-        // if ($currentUser->hasRole('Lab')) {
-        //     // Filter samples by the current user's departments through the related tests
-        //     $departmentIds = $currentUser->departments;
-        //     $query->whereHas('tests', function($testQuery) use ($departmentIds) {
-        //         $testQuery->whereIn('department', $departmentIds);
-        //     });
-        // }
+        $testNumber = $request->input('test_number');
+        $accessNumber = $request->input('access_number');
+        $patientName = $request->input('patient_name');
+        $query = Sample::query()->orderBy('received_date', 'asc');
+        $currentUser = Auth::user();
+
         if ($request->filled('test_number')) {
             $query->where('test_number', $request->test_number);
         }
@@ -53,36 +47,101 @@ class TestReportController extends Controller
             $searchTerm = $request->input('patient_name');
             $query->whereHas('patient', function ($query) use ($searchTerm) {
                 $query->where('surname', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('first_name', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('first_name', 'like', '%' . $searchTerm . '%');
             });
         }
 
-
-
         $testReports = $query->paginate(10);
-        // $testReports->getCollection()->transform(function ($sample) {
-        //     $sample->unique_departments = $sample->tests->pluck('department')->unique();
-        //     return $sample;
-        // });
+
         $testReports->getCollection()->transform(function ($sample) {
-            $departmentsStatus = $sample->tests->groupBy('department')->map(function ($tests, $department) use ($sample) {
-                $allCompleted = TestReport::where('sample_id', $sample->id)
-                    ->whereIn('test_id', $tests->pluck('id'))
-                    ->get()
-                    ->every('is_completed');
+            // Fetch individual tests with direct department association
+            $individualTests = $sample->tests()->get();
+
+            // Get departments for individual tests directly from the 'tests' table
+            $individualTestDepartments = $individualTests->pluck('department')->unique();
+
+            // Initialize collection for profile-related tests
+            $profileTests = collect();
+            $profileDepartments = collect();
+
+            // Fetch profile tests and their departments
+            foreach ($sample->testProfiles as $profile) {
+                $profileTests = $profileTests->merge($profile->tests()->where('is_urine_type', 1)->get());
+
+                // Fetch profile departments from the relationship (ensure profile->departments exists)
+                if ($profile->departments) {
+                    $profileDepartments = $profileDepartments->merge(
+                        $profile->departments->pluck('department')
+                    );
+                }
+            }
+
+            // Merge individual and profile-related departments
+            $allDepartments = $individualTestDepartments->merge($profileDepartments)->unique();
+
+            // Merge individual and profile tests
+            $tests = $individualTests->merge($profileTests);
+            // dd($sample);
+            // Group tests by department and check if all tests in each department are completed
+            $departmentsStatus = $allDepartments->mapWithKeys(function ($department) use ($tests, $sample) {
+                // Filter tests for the current department
+                $departmentTests = $tests->filter(function ($test) use ($department) {
+                    // Ensure the test and its profile's departments are properly checked
+                    return $test->department === $department ||
+                        $test->testProfiles->contains(function ($testProfile) use ($department) {
+                            return $testProfile->departments->contains('department', $department);
+                        });
+                });
+                // dd($sample);
+                $departmentTestsReports = TestReport::where('sample_id', $sample->id)
+                ->whereIn('test_id', $departmentTests->pluck('id'))
+                ->get();
+                // dd($departmentTestsReports);
+                // Determine completion status for each department by looking at the appropriate result table
+                $isCompleted = false;
+                switch ($department) {
+                    case '2':
+                        $isCompleted = CytologyGynecologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                    case '1':
+                        // dd($departmentTests->count());
+                        // dd($isCompleted = BiochemHaemoResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                        // ->where('is_completed', true)
+                        // ->count());
+                        $isCompleted = BiochemHaemoResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                    case '3':
+                        // dd($departmentTests->count());
+                        $isCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+                }
 
                 return [
-                    'department' => $department,
-                    'is_completed' => $allCompleted
+                    $department => [
+                        'is_completed' => $isCompleted,
+                    ],
                 ];
             });
-            $sample->unique_departments = $sample->tests->pluck('department')->unique();
+
+            // Store unique department statuses
+            $sample->unique_departments = $allDepartments;
             $sample->unique_departments_status = $departmentsStatus;
+
             return $sample;
         });
-        // dd($testReports[0]->unique_departments_status);
-        return view('reports/test-reports.index', compact('testReports','testNumber', 'accessNumber', 'patientName'));
+
+
+        return view('reports/test-reports.index', compact('testReports', 'testNumber', 'accessNumber', 'patientName'));
     }
+
+
+
 
     public function edit($id)
     {
@@ -97,60 +156,144 @@ class TestReportController extends Controller
     public function getreportforedit(Request $request, $id){
         $reporttype = $request->report_type;
         $sample = Sample::findOrFail($id);
-        $sample->tests;
 
-        // $test = Test::findOrFail($request->test_charges);
-        $tests = $sample->tests()->where('department', $reporttype)->get();
-        // $tests->test_profiles;
+        $individualTests = $sample->tests()->where('department', $reporttype)->get();
+
+        // Get the profiles associated with the sample
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+            $query->where('department', $reporttype);
+        })->with('tests')->get();
+        // dd($profiles);
+
+        // Collect all the tests from the profiles that match the department
+        $profileTests = collect();
+        foreach ($profiles as $profile) {
+            // Add tests from each profile that match the department
+            $profileTests = $profileTests->merge(
+                $profile->tests()->get()
+            );
+        }
+
+        // Combine individual tests and profile tests
+        $tests = $individualTests->merge($profileTests);
+
         // dd($tests);
-        // Find or create a test report for the selected test and sample
+
         // Collect test reports with their related results
         $testReports = collect(); // Initialize as a collection
-        // foreach ($tests as $test) {
-        //     $testReport = TestReport::with(['biochemHaemoResults', 'urinalysisMicrobiologyResults.procedureResults'])
-        //         ->where('sample_id', $sample->id)
-        //         ->where('test_id', $test->id)
-        //         ->first();
-
-        //     $testReports->push($testReport); // Add to the collection
-        // }
 
         $allTestsCompleted = true; // Flag to check if all tests are completed
         $completedat = null;
 
         foreach ($tests as $test) {
-            $testReport = TestReport::with(['biochemHaemoResults', 'urinalysisMicrobiologyResults.procedureResults'])
-                ->where('sample_id', $sample->id)
-                ->where('test_id', $test->id)
-                ->first();
+            // Fetch the related TestReport with its results based on the report type
+            $testReport = TestReport::with([
+                'biochemHaemoResults',
+                'cytologyGynecologyResults',
+                'urinalysisMicrobiologyResults'
+            ])
+            ->where('sample_id', $sample->id)
+            ->where('test_id', $test->id)
+            ->first();
+            // dd($testReport);
+            // if(empty($testReport)){  
+            //     continue;
+            // }
+            // if (!empty($testReport) && empty($testReport->urinalysisMicrobiologyResults->first())) {
+            //     continue;
+            // }
+
 
             if ($testReport) {
-                $testReports->push($testReport);
+                 // Store the TestReport for further use if needed
 
-                $completedBy = $testReport->completed_by;
-                $completedat = $testReport->completed_at;
-                if (!$testReport->is_completed) {
-                    $allTestsCompleted = false; // Set flag to false if any test is not completed
+                // Determine the completed status based on the report type
+                switch ($reporttype) {
+                    case 1: // Biochemistry/Haematology Results
+                        if (empty($testReport->biochemHaemoResults->first())) {
+                            break;
+                        }
+                        $testReports->push($testReport);
+                        foreach ($testReport->biochemHaemoResults as $result) {
+                            $completedBy = $result->completed_by ?? null;
+                            $completedat = $result->completed_at ?? null;
+                            if (!$result->is_completed) {
+                                $allTestsCompleted = false; // Set flag to false if any result is not completed
+                            }
+                        }
+                        break;
+
+                    case 2: // Cytology/Gynecology Results
+                        if ( empty($testReport->cytologyGynecologyResults->first())) {
+                            break;
+                        }
+                        // dd($testReport->cytologyGynecologyResults->first());
+                        $testReports->push($testReport);
+                        foreach ($testReport->cytologyGynecologyResults as $result) {
+                            $completedBy = $result->completed_by ?? null;
+                            $completedat = $result->completed_at ?? null;
+                            if (!$result->is_completed) {
+                                $allTestsCompleted = false; // Set flag to false if any result is not completed
+                            }
+                        }
+                        break;
+
+                    case 3: // Urinalysis/Microbiology Results
+                        if (empty($testReport->urinalysisMicrobiologyResults->first())) {
+                            break;
+                        }
+                        $testReports->push($testReport);
+                        foreach ($testReport->urinalysisMicrobiologyResults as $result) {
+                            $completedBy = $result->completed_by ?? null;
+                            $completedat = $result->completed_at ?? null;
+                            if (!$result->is_completed) {
+                                $allTestsCompleted = false; // Set flag to false if any result is not completed
+                            }
+                        }
+                        break;
+
+                    default:
+                        $testReports->push($testReport);
+                        // Handle other report types if necessary
+                        $allTestsCompleted = false; // Set flag to false if the report type is not recognized
+                        break;
                 }
+
             } else {
-                $allTestsCompleted = false; // Set flag to false if any test report is not found
+                $allTestsCompleted = false; // Set flag to false if no TestReport is found
             }
         }
+
 
         // dd($allTestsCompleted);
 
         // If the department is 1, categorize the tests by their profiles
         $categorizedTests = [];
-        if ($reporttype == '1') {
+        if ($reporttype == '1' || $reporttype == '3') {
             foreach ($tests as $test) {
-                $profileId = $test->test_profiles ? $test->test_profiles->id : 'no-profile';
-                $profileName = $test->test_profiles ? $test->test_profiles->name : 'No Profile';
-                $categorizedTests[$profileId]['name'] = $profileName;
-                $categorizedTests[$profileId]['tests'][] = $test;
+                // Check if there are any test profiles
+                if ($test->testProfiles->isNotEmpty()) {
+                    // Loop through the test profiles since it's a collection
+                    foreach ($test->testProfiles as $profile) {
+                        $profileId = $profile->id;
+                        $profileName = $profile->name;
+                        $categorizedTests[$profileId]['name'] = $profileName;
+                        $categorizedTests[$profileId]['tests'][] = $test;
+                    }
+                } else {
+                    // Handle the case where there is no profile
+                    $profileId = 'no-profile';
+                    $profileName = 'Individual Tests';
+                    $categorizedTests[$profileId]['name'] = $profileName;
+                    $categorizedTests[$profileId]['tests'][] = $test;
+                }
             }
         }
 
-        $test_profiles = TestProfiles::all();
+        // dd($categorizedTests);
+
+
+        $test_profiles = TestProfile::all();
 
         $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
 
@@ -187,6 +330,7 @@ class TestReportController extends Controller
     {
         // Gather data from the request
         $data = $request->all();
+        // dd($data);
         $user = Auth::user();
 
         // dd($data);
@@ -284,96 +428,157 @@ class TestReportController extends Controller
         }
 
         if ($data['reporttype'] == 3) {
-            $test_ids = explode(',', $data['testIds']);
-            // dd($data['sensitivity_profiles']);
-            foreach ($test_ids as $testId ) {
+            foreach ($data['testsData'] as $testId => $testData) {
                 // Find or create the test report
                 $testReport = TestReport::firstOrCreate(
                     [
                         'sample_id' => $data['sampleid'],
                         'test_id' => $testId
                     ]
-                    // [
-                    //     'is_completed' => false,
-                    //     'is_signed' => false
-                    // ]
                 );
-                // dd($testReport);
 
                 // Save the data into BiochemHaemoResults table
-                $urinalysisMicrobiologyResult = UrinalysisMicrobiologyResults::updateOrCreate(
-                    ['test_report_id' => $testReport->id], // Condition to check
-                    [
-                        'history' => $data['history'] ?? null,
-                        's_gravity'=> $data['s_gravity'] ?? null,
-                        'ph'=> $data['ph'] ?? null,
-                        'bilirubin'=> $data['bilirubin'] ?? null,
-                        'blood'=> $data['blood'] ?? null,
-                        'leucocytes'=> $data['leucocytes'] ?? null,
-                        'glucose'=> $data['glucose'] ?? null,
-                        'nitrite'=> $data['nitrite'] ?? null,
-                        'ketones'=> $data['ketones'] ?? null,
-                        'urobilinogen'=> $data['urobilinogen'] ?? null,
-                        'proteins'=> $data['proteins'] ?? null,
-                        'colour'=> $data['colour'] ?? null,
-                        'appearance'=> $data['appearance'] ?? null,
-                        'epith_cells'=> $data['epith_cells'] ?? null,
-                        'bacteria'=> $data['bacteria'] ?? null,
-                        'white_cells'=> $data['white_cells'] ?? null,
-                        'yeast'=> $data['yeast'] ?? null,
-                        'red_cells'=> $data['red_cells'] ?? null,
-                        'trichomonas'=> $data['trichomonas'] ?? null,
-                        'casts'=> $data['casts'] ?? null,
-                        'crystals'=> $data['crystals'] ?? null,
-                        // 'specimen'=> $data['specimen'] ?? null,
-                        // 'procedure'=> $data['procedure'] ?? null,
-                        'sensitivity'=> $data['sensitivity'] ?? null,
-                        // 'specimen_note'=> $data['specimen_note'] ?? null,
-                        'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
-
-                    ]
+                $result =  UrinalysisMicrobiologyResults::updateOrCreate(
+                    ['test_report_id' => $testReport->id]
                 );
+                // Condition to check
+                // Capture original values
+                // $originalValues = $result->getOriginal();
 
-                // $specimen_notes = $data['specimen_note'];
-                // dd($urinalysisMicrobiologyResult->id);
+                // Update or create the result
+                $result->sensitivity = $data['sensitivity'] ?? null;
+                $result->sensitivity_profiles =  $data['sensitivity_profiles'] ?? null;
+                $result->description = $testData['description'] ?? $result->description;
+                $result->test_results = $testData['test_results'] ?? $result->test_results;
+                $result->flag = $testData['flag'] ?? $result->flag;
+                $result->reference_range = $testData['reference_range'] ?? $result->reference_range;
+                $result->test_notes = $testData['test_notes'] ?? $result->test_notes;
+                $result->save();
+                // );
+                if (isset($data['procedure']) && isset($data['specimen_note'])) {
+                    $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $result->id)->get();
+                    $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
 
-                // Now save the procedure results
-            if (isset($data['procedure']) && isset($data['specimen_note'])) {
-                $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $urinalysisMicrobiologyResult->id)->get();
-                $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
+                    $procedures = $data['procedure'];
+                    // dd($procedures);
+                    $specimen_notes = $data['specimen_note'];
+                    // dd($specimen_notes);
+                    $newProcedureIds = [];
 
-                $procedures = $data['procedure'];
-                // dd($procedures);
-                $specimen_notes = $data['specimen_note'];
-                // dd($specimen_notes);
-                $newProcedureIds = [];
+                    foreach ($procedures as $index => $procedure) {
+                        if (!empty($procedure)) {
+                            $procedureNote = $specimen_notes[$index] ?? null;
+                            // dd($result->id);
+                            $procedureResult = ProcedureResults::updateOrCreate(
+                                [
+                                    'urinalysis_microbiology_result_id' => $result->id,
+                                    'procedure' => $procedure,
+                                ],
+                                [
 
-                foreach ($procedures as $index => $procedure) {
-                    if (!empty($procedure)) {
-                        $procedureNote = $specimen_notes[$index] ?? null;
-                        // dd($urinalysisMicrobiologyResult->id);
-                        $procedureResult = ProcedureResults::updateOrCreate(
-                            [
-                                'urinalysis_microbiology_result_id' => $urinalysisMicrobiologyResult->id,
-                                'procedure' => $procedure,
-                            ],
-                            [
+                                    'specimen_note' => $procedureNote
+                                ]
+                            );
 
-                                'specimen_note' => $procedureNote
-                            ]
-                        );
-
-                        $newProcedureIds[] = $procedureResult->id;
+                            $newProcedureIds[] = $procedureResult->id;
+                        }
                     }
+
+                    // Determine which procedures to delete
+                    $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
+
+                    // Delete procedures that are not present in the request
+                    ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
                 }
+                // $changes = [];
+                // foreach ($result->getChanges() as $field => $newValue) {
+                //     if (array_key_exists($field, $originalValues)) {
+                //         $changes[$field] = [
+                //             'from' => $originalValues[$field],
+                //             'to' => $newValue,
+                //         ];
+                //     }
+                // }
 
-                // Determine which procedures to delete
-                $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
+                // $this->addAuditTrail($testReport, $user, $changes);
 
-                // Delete procedures that are not present in the request
-                ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
             }
-            }
+            // $test_ids = explode(',', $data['testIds']);
+            // foreach ($test_ids as $testId ) {
+            //     // Find or create the test report
+            //     $testReport = TestReport::firstOrCreate(
+            //         [
+            //             'sample_id' => $data['sampleid'],
+            //             'test_id' => $testId
+            //         ]
+            //     );
+            //     // Save the data into BiochemHaemoResults table
+            //     $urinalysisMicrobiologyResult = UrinalysisMicrobiologyResults::updateOrCreate(
+            //         ['test_report_id' => $testReport->id], // Condition to check
+            //         [
+            //             'history' => $data['history'] ?? null,
+            //             's_gravity'=> $data['s_gravity'] ?? null,
+            //             'ph'=> $data['ph'] ?? null,
+            //             'bilirubin'=> $data['bilirubin'] ?? null,
+            //             'blood'=> $data['blood'] ?? null,
+            //             'leucocytes'=> $data['leucocytes'] ?? null,
+            //             'glucose'=> $data['glucose'] ?? null,
+            //             'nitrite'=> $data['nitrite'] ?? null,
+            //             'ketones'=> $data['ketones'] ?? null,
+            //             'urobilinogen'=> $data['urobilinogen'] ?? null,
+            //             'proteins'=> $data['proteins'] ?? null,
+            //             'colour'=> $data['colour'] ?? null,
+            //             'appearance'=> $data['appearance'] ?? null,
+            //             'epith_cells'=> $data['epith_cells'] ?? null,
+            //             'bacteria'=> $data['bacteria'] ?? null,
+            //             'white_cells'=> $data['white_cells'] ?? null,
+            //             'yeast'=> $data['yeast'] ?? null,
+            //             'red_cells'=> $data['red_cells'] ?? null,
+            //             'trichomonas'=> $data['trichomonas'] ?? null,
+            //             'casts'=> $data['casts'] ?? null,
+            //             'crystals'=> $data['crystals'] ?? null,
+            //             'sensitivity'=> $data['sensitivity'] ?? null,
+            //             'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
+            //         ]
+            //     );
+
+            //     // Now save the procedure results
+            //     if (isset($data['procedure']) && isset($data['specimen_note'])) {
+            //         $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $urinalysisMicrobiologyResult->id)->get();
+            //         $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
+
+            //         $procedures = $data['procedure'];
+            //         // dd($procedures);
+            //         $specimen_notes = $data['specimen_note'];
+            //         // dd($specimen_notes);
+            //         $newProcedureIds = [];
+
+            //         foreach ($procedures as $index => $procedure) {
+            //             if (!empty($procedure)) {
+            //                 $procedureNote = $specimen_notes[$index] ?? null;
+            //                 // dd($urinalysisMicrobiologyResult->id);
+            //                 $procedureResult = ProcedureResults::updateOrCreate(
+            //                     [
+            //                         'urinalysis_microbiology_result_id' => $urinalysisMicrobiologyResult->id,
+            //                         'procedure' => $procedure,
+            //                     ],
+            //                     [
+
+            //                         'specimen_note' => $procedureNote
+            //                     ]
+            //                 );
+
+            //                 $newProcedureIds[] = $procedureResult->id;
+            //             }
+            //         }
+
+            //         // Determine which procedures to delete
+            //         $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
+
+            //         // Delete procedures that are not present in the request
+            //         ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
+            //     }
+            // }
         }
 
         return response()->json([
@@ -443,35 +648,84 @@ class TestReportController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Password is incorrect.'], 401);
         }
-        // dd($request->report_sample_id);
 
         // Find the test report
         $sample = Sample::findOrFail($request->report_sample_id);
         $reporttypeis = $request->reporttypeis;
         // $tests = $sample->tests()->where('department', $reporttypeis)->pluck('id');
-        $test_ids = $sample->tests()->where('department', $reporttypeis)->pluck('tests.id');
-        $testReports =  TestReport::where('sample_id', $request->report_sample_id)->whereIn('test_id', $test_ids)->get();
-        // dd($testReport);
-        // Check if the report is already signed
-        // if ($testReport->signed_by) {
-        //     // Fetch the user who signed the report
-        //     $signedByUser = Sample::find($testReport->signed_by);
-        //     return response()->json(['error' => 'Report already signed by ' . $signedByUser->first_name . ' on ' . $testReport->signed_at], 400);
-        // }
+        $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
+
+        // Get the profiles associated with the sample
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
+            $query->where('department', $reporttypeis);
+        })->with('tests')->get();
+
+        // Collect all the tests from the profiles that match the department
+        $profileTests = collect();
+        foreach ($profiles as $profile) {
+            // Add tests from each profile that match the department
+            $profileTests = $profileTests->merge(
+                $profile->tests()->get()
+            );
+        }
+
+        // Combine individual tests and profile tests
+        $tests = $individualTests->merge($profileTests);
+        foreach ($tests as $testId ) {
+            // Find or create the test report
+
+            $testReport = TestReport::where('sample_id',$sample->id)->where('test_id',$testId->id)->first();
+            if(empty($testReport)){
+                continue;
+            }
+
+            switch ($reporttypeis) {
+                case 1: // Biochemistry/Haematology Results
+                    BiochemHaemoResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_signed' => true,
+                            'signed_by' => $user->id,
+                            'signed_at' => now(),
+                        ]);
+                    break;
+
+                case 2: // Cytology/Gynecology Results
+                    CytologyGynecologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_signed' => true,
+                            'signed_by' => $user->id,
+                            'signed_at' => now(),
+                        ]);
+                    break;
+
+                case 3: // Urinalysis/Microbiology Results
+                    UrinalysisMicrobiologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_signed' => true,
+                            'signed_by' => $user->id,
+                            'signed_at' => now(),
+                        ]);
+                    break;
+
+                default:
+                    // Handle other cases if needed
+                    break;
+            }
+        }
 
         // Update the test-reports table with the user ID in the signed_by column
-        foreach ($testReports as $testReport) {
-            // Check if the report is already signed
-            // if ($testReport->is_signed) {
-            //     return response()->json(['error' => 'One or more reports are already signed.'], 400);
-            // }
+        // foreach ($testReports as $testReport) {
+        //     // Check if the report is already signed
+        //     // if ($testReport->is_signed) {
+        //     //     return response()->json(['error' => 'One or more reports are already signed.'], 400);
+        //     // }
 
-            // Update the test report with the signed information
-            $testReport->is_signed = true;
-            $testReport->signed_by = $user->id;
-            $testReport->signed_at = now();
-            $testReport->save();
-        }
+        //     // Update the test report with the signed information
+        //     $testReport->is_signed = true;
+        //     $testReport->signed_by = $user->id;
+        //     $testReport->signed_at = now();
+        //     $testReport->save();
+        // }
 
         // AuditTrail::create([
         //     'test_report_id' => $testReport->id,
@@ -508,7 +762,29 @@ class TestReportController extends Controller
         $sample = Sample::find($request->sample_id);
         $reporttypeis = $request->reporttypeis;
 
-        $tests = $sample->tests()->where('department', $reporttypeis)->get();
+        // $tests = $sample->tests()->where('department', $reporttypeis)->get();
+
+        $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
+
+        // Get the profiles associated with the sample
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
+            $query->where('department', $reporttypeis);
+        })->with('tests')->get();
+
+        // dd($profiles);
+
+        // Collect all the tests from the profiles that match the department
+        $profileTests = collect();
+        foreach ($profiles as $profile) {
+            // Add tests from each profile that match the department
+            $profileTests = $profileTests->merge(
+                $profile->tests()->get()
+            );
+        }
+
+        // Combine individual tests and profile tests
+        $tests = $individualTests->merge($profileTests);
+        // dd($tests);
 
         // $test_ids = $sample->tests()->where('department', $reporttypeis)->pluck('tests.id');
         // $testReport =  TestReport::where('sample_id', $sample->id)->whereIn('test_id', $test_ids)->get();
@@ -518,17 +794,54 @@ class TestReportController extends Controller
             // dd($tests);
         foreach ($tests as $testId ) {
             // Find or create the test report
-            $testReport = TestReport::updateOrCreate(
-                [
-                    'sample_id' => $sample->id,
-                    'test_id' => $testId->id
-                ],
-                [
-                    'is_completed' => true,
-                    'completed_by' => $user->id,
-                    'completed_at' => now(),
-                ]
-            );
+
+            $testReport = TestReport::where('sample_id',$sample->id)->where('test_id',$testId->id)->first();
+            if(empty($testReport)){
+                continue;
+            }
+            //     [
+            //         'sample_id' => $sample->id,
+            //         'test_id' => $testId->id
+            //     ],
+            //     [
+            //         'is_completed' => true,
+            //         'completed_by' => $user->id,
+            //         'completed_at' => now(),
+            //     ]
+            // );
+            // Update the status in the appropriate results table based on reporttypeis
+            switch ($reporttypeis) {
+                case 1: // Biochemistry/Haematology Results
+                    BiochemHaemoResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => true,
+                            'completed_by' => $user->id,
+                            'completed_at' => now(),
+                        ]);
+                    break;
+
+                case 2: // Cytology/Gynecology Results
+                    CytologyGynecologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => true,
+                            'completed_by' => $user->id,
+                            'completed_at' => now(),
+                        ]);
+                    break;
+
+                case 3: // Urinalysis/Microbiology Results
+                    UrinalysisMicrobiologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => true,
+                            'completed_by' => $user->id,
+                            'completed_at' => now(),
+                        ]);
+                    break;
+
+                default:
+                    // Handle other cases if needed
+                    break;
+            }
         }
 
         return response()->json([
@@ -542,24 +855,88 @@ class TestReportController extends Controller
         $sample = Sample::find($request->sample_id);
         $reporttypeis = $request->reporttypeis;
 
-        $tests = $sample->tests()->where('department', $reporttypeis)->get();
+        $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
+
+        // Get the profiles associated with the sample
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
+            $query->where('department', $reporttypeis);
+        })->with('tests')->get();
+
+        // dd($profiles);
+
+        // Collect all the tests from the profiles that match the department
+        $profileTests = collect();
+        foreach ($profiles as $profile) {
+            // Add tests from each profile that match the department
+            $profileTests = $profileTests->merge(
+                $profile->tests()->get()
+            );
+        }
+
+        // Combine individual tests and profile tests
+        $tests = $individualTests->merge($profileTests);
             // dd($test_ids);
         foreach ($tests as $testId ) {
             // Find or create the test report
-            $testReport = TestReport::updateOrCreate(
-                [
-                    'sample_id' => $sample->id,
-                    'test_id' => $testId->id
-                ],
-                [
-                    'is_completed' => false,
-                    'completed_by' => null,
-                    'completed_at' => null,
-                    'is_signed' => false,
-                    'signed_by' => null,
-                    'signed_at' => null,
-                ]
-            );
+            $testReport = TestReport::where('sample_id',$sample->id)->where('test_id',$testId->id)->first();
+            if(empty($testReport)){
+                continue;
+            }
+
+            //     [
+            //         'sample_id' => $sample->id,
+            //         'test_id' => $testId->id
+            //     ],
+            //     [
+            //         'is_completed' => false,
+            //         'completed_by' => null,
+            //         'completed_at' => null,
+            //         'is_signed' => false,
+            //         'signed_by' => null,
+            //         'signed_at' => null,
+            //     ]
+            // );
+            switch ($reporttypeis) {
+                case 1: // Biochemistry/Haematology Results
+                    BiochemHaemoResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => false,
+                            'completed_by' => null,
+                            'completed_at' => null,
+                            'is_signed' => false,
+                            'signed_by' => null,
+                            'signed_at' => null,
+                        ]);
+                    break;
+
+                case 2: // Cytology/Gynecology Results
+                    CytologyGynecologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => false,
+                            'completed_by' => null,
+                            'completed_at' => null,
+                            'is_signed' => false,
+                            'signed_by' => null,
+                            'signed_at' => null,
+                        ]);
+                    break;
+
+                case 3: // Urinalysis/Microbiology Results
+                    UrinalysisMicrobiologyResults::where('test_report_id', $testReport->id)
+                        ->update([
+                            'is_completed' => false,
+                            'completed_by' => null,
+                            'completed_at' => null,
+                            'is_signed' => false,
+                            'signed_by' => null,
+                            'signed_at' => null,
+                        ]);
+                    break;
+
+                default:
+                    // Handle other cases if needed
+                    break;
+            }
         }
 
         // Update the test-reports table with the user ID in the signed_by column

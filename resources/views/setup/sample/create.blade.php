@@ -180,9 +180,26 @@
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
-                            <label for="test_requested" class="form-label">Test Requested</label>
+                            <label for="test_profiles" class="form-label">Test Profiles</label>
+                            <select class="js-example-basic-multiple" name="test_profiles[]" id="test_profiles" multiple="multiple">
+                                @foreach ($test_profiles as $item)
+                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}">{{$item->name.' '. $item->cost}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="form-group">
+                            <label for="test_requested" class="form-label">Individual Tests</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
-                                @foreach ($tests as $test)
+                                {{-- {{dd($tests->where('department'!= null))}} --}}
+                                @foreach ($tests->where('department', '!=', null) as $test)
                                     <option value="{{ $test->id }}" data-cost="{{ $test->cost }}">
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
@@ -501,6 +518,17 @@
 
                 // Update the total_cost input field
                 $('#total_cost').val(totalCost.toFixed(2));
+            });
+            $('#test_profiles').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost_profile').val(totalCost.toFixed(2));
             });
             // Initialize Select2
             // $('#doctor_id').select2();

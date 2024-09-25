@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Setup;
 
 use App\Models\Test;
 use App\Models\Sample;
-use App\Models\TestProfiles;
+use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +49,7 @@ class TestController extends Controller
 
         $tests = $query->paginate(10);
 
-        $test_profiles = TestProfiles::all();
+        $test_profiles = TestProfile::all();
 
         return view('setup.tests',compact('tests','test_profiles'));
     }
@@ -58,9 +58,9 @@ class TestController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'department' => 'required',
+            // 'department' => 'required',
             'specimen_type' => 'required',
-            'cost' => 'required',
+            // 'cost' => 'required',
             'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
@@ -72,7 +72,9 @@ class TestController extends Controller
         $test->cost  = $request->input('cost');
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
-        $test->test_profile_id  = $request->input('test_profiles');
+        $test->urin_test_type  = $request->input('urin_test_type');
+        $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
+        // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
@@ -100,15 +102,22 @@ class TestController extends Controller
         }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
+        $test->testProfiles()->attach($request->input('test_profiles'));
 
         if ($request->ajax()) {
+            // dd($test);
+            if(!empty($request->input('test_profiles'))){
             $test_profileId = $request->input('test_profiles');
-            $test_profile = TestProfiles::findOrFail($test_profileId);
+            $test_profile = TestProfile::findOrFail($test_profileId);
             $test_profile_name = $test_profile->id;
-            $sample = Sample::find($request->sample_id);
-            $sample->tests()->attach($test);
+            }
+            if(empty($request->input('test_profiles'))){
+                $sample = Sample::find($request->sample_id);
+                // dd($sample);
+                $sample->tests()->attach($test);
+            }
 
-            return response()->json(['success' => true, 'test' => $test, 'test_profile_name' => $test_profile_name]);
+            return response()->json(['success' => true, 'test' => $test, 'test_profile_name' => $test_profile_name ?? null]);
         }
 
         Session::flash('message', 'Created successfully!');
@@ -119,8 +128,11 @@ class TestController extends Controller
     public function edit($id)
     {
         $tests = Test::find($id);
+        $testProfiles = $tests->testProfiles()->first();
+        // dd($testProfiles);
         return response()->json([
             'tests' => $tests,
+            'testProfiles' => $testProfiles,
         ]);
     }
 
@@ -128,9 +140,9 @@ class TestController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'department' => 'required',
+            // 'department' => 'required',
             'specimen_type' => 'required',
-            'cost' => 'required',
+            // 'cost' => 'required',
             'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
@@ -143,7 +155,9 @@ class TestController extends Controller
         $test->cost  = $request->input('cost');
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
-        $test->test_profile_id  = $request->input('test_profiles');
+        $test->urin_test_type  = $request->input('urin_test_type');
+        $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
+        // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
@@ -172,6 +186,8 @@ class TestController extends Controller
 
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
+        $test->testProfiles()->detach();
+        $test->testProfiles()->attach($request->input('test_profiles'));
 
 
         Session::flash('message', 'Updated successfully!');
