@@ -50,13 +50,13 @@
                             class="form-control">
                     </div>
                     <div class="col-2">
-                        <button type="submit" class="btn search-btn">Get</button>
-                        <button type="submit" name="export" value="excel">Export to Excel</button>
+                        {{-- <button type="submit" class="btn search-btn">Get</button> --}}
+                        <button type="submit" name="export" class="btn search-btn" value="excel">Export to Excel</button>
                     </div>
                 </div>
             </form>
 
-            <div class="card-body">
+            {{-- <div class="card-body">
                 <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
                     <thead>
                         <tr>
@@ -77,7 +77,7 @@
                         @endforeach
                     </tbody>
                 </table>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -142,7 +142,7 @@
                 e.preventDefault();
                 var testReportId = $(this).data('test-report-id');
                 // var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
-                var reportType = $(this).closest('tr').find('.test-reports-dropdown')
+                var reportType = $(this).closest('tr').find('.test-reports-dropdown') 
                     .val(); // Get the report type from the closest dropdown
 
                 // Construct the URL dynamically

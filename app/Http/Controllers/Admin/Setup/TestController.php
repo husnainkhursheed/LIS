@@ -57,7 +57,7 @@ class TestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|unique:tests,name', // Make sure to replace 'your_table_name' with the actual name of your database table
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
@@ -139,7 +139,7 @@ class TestController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|unique:tests,name',
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',

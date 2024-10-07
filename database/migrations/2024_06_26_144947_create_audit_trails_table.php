@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('audit_trails', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
+            $table->integer('test_report_id');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamp('changed_at');
             $table->string('field_name')->nullable();

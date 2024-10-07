@@ -14,6 +14,11 @@
     use Carbon\Carbon;
 @endphp
 @section('content')
+@if (session('alert'))
+    <div class="alert alert-warning">
+        {{ session('alert') }}
+    </div>
+@endif
         <style>
             #reportStickyNav {
             top: 86px;
@@ -111,7 +116,7 @@
                                 <button class="nav-link sub-link">Save</button>
                             </li>
                         @endif
-                        <li class="nav-item border-nav rounded flex-grow-1">
+                        <li class="nav-item border-nav rounded flex-grow-1">    
                             <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
 
@@ -726,9 +731,9 @@
                             ->where('test_id', $test->id)
                             ->where('sample_id', $sample->id)
                             ->first();
-                        if (empty($testReport)) {
-                            continue;
-                        }
+                        // if (empty($testReport)) {
+                        //     continue;
+                        // }
                         // dd($testReport);
                         $urinalysisMicrobiologyResults = $testReport
                             ? $testReport->urinalysisMicrobiologyResults->first()

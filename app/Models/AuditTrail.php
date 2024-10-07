@@ -25,10 +25,10 @@ class AuditTrail extends Model
         'changes' => 'array',
     ];
 
-    public function testReport()
-    {
-        return $this->belongsTo(TestReport::class);
-    }
+    // public function testReport()
+    // {
+    //     return $this->belongsTo(TestReport::class);
+    // }
 
     public function user()
     {

@@ -283,7 +283,7 @@
                                                     }
                                                 @endphp
                                                     <tr>
-                                                        <td><strong> {{ $test->description ?? '' }} </strong> </td>
+                                                        <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
                                                         <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
                                                         <td>
                                                             <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
@@ -380,7 +380,7 @@
                                             }
                                         @endphp
                                             <tr>
-                                                <td><strong> {{ $test->description ?? '' }} </strong> </td>
+                                                <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
                                                 <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
                                                 <td>
                                                     <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>

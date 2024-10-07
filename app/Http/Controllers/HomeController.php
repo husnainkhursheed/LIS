@@ -112,9 +112,11 @@ class HomeController extends Controller
             $profileTests = collect();
             $profileDepartments = collect();
 
+            // dd($sample->testProfiles[0]->tests);
+
             // Fetch profile tests and their departments
             foreach ($sample->testProfiles as $profile) {
-                $profileTests = $profileTests->merge($profile->tests()->where('is_urine_type', 1)->get());
+                $profileTests = $profileTests->merge($profile->tests()->get());
 
                 // Fetch profile departments from the relationship (ensure profile->departments exists)
                 if ($profile->departments) {
@@ -126,6 +128,7 @@ class HomeController extends Controller
 
             // Merge individual and profile-related departments
             $allDepartments = $individualTestDepartments->merge($profileDepartments)->unique();
+            // dd($allDepartments);
 
             // Merge individual and profile tests
             $tests = $individualTests->merge($profileTests);
@@ -134,7 +137,11 @@ class HomeController extends Controller
             $departmentsStatus = $allDepartments->mapWithKeys(function ($department) use ($tests, $sample) {
                 // Filter tests for the current department
                 $departmentTests = $tests->filter(function ($test) use ($department) {
-                    return $test->department === $department;
+                    // Ensure the test and its profile's departments are properly checked
+                    return $test->department === $department ||
+                        $test->testProfiles->contains(function ($testProfile) use ($department) {
+                            return $testProfile->departments->contains('department', $department);
+                        });
                 });
 
                 $departmentTestsReports = TestReport::where('sample_id', $sample->id)
@@ -144,6 +151,9 @@ class HomeController extends Controller
                 $isCompleted = false;
                 switch ($department) {
                     case '2':
+                        // $departmentTests = $tests->filter(function ($test) use ($department) {
+                        //         return $test->department === $department;
+                        //     });
                         $isCompleted = CytologyGynecologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
                             ->where('is_completed', true)
                             ->count() == $departmentTests->count();
@@ -154,9 +164,12 @@ class HomeController extends Controller
                             ->count() == $departmentTests->count();
                         break;
                     case '3':
+                        $testscount = $departmentTests->filter(function ($test) {
+                            return $test->urin_test_type !== null;
+                        });
                         $isCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
                             ->where('is_completed', true)
-                            ->count() == $departmentTests->count();
+                            ->count() == $testscount->count();
                         break;
                 }
 
@@ -171,6 +184,7 @@ class HomeController extends Controller
             $allDepartmentsCompleted = $departmentsStatus->every(function ($status) {
                 return $status['is_completed'];
             });
+            // dd($allDepartmentsCompleted);
 
             // Add the 'all_departments_completed' attribute to the sample object
             $sample->all_departments_completed = $allDepartmentsCompleted;
