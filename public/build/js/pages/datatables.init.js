@@ -95,7 +95,13 @@ document.addEventListener('DOMContentLoaded', function () {
 //buttons exmples
 document.addEventListener('DOMContentLoaded', function () {
   let table = new DataTable('#buttons-datatables', {
-        dom: 'Bfrtip',
+        dom: 'lBfrtip', // Add 'l' to include the length menu
+        lengthMenu: [[-1], ['All']], // Disable pagination by showing all records
+        pageLength: -1, // Set to -1 to show all records by default
+        order: [[0, 'asc']],  // Keep default order setting
+        buttons: [
+            'copy', 'csv', 'excel', 'print'
+        ]
 
     });
 });

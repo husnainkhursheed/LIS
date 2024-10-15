@@ -68,6 +68,7 @@
                                     <th class="rounded-start-3 ">Name</th>
                                     <th>Telephone</th>
                                     <th>Sex</th>
+                                    <th>Status</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
@@ -77,6 +78,8 @@
                                         <td>{{ $patient->first_name }}</td>
                                         <td>{{ $patient->contact_number }}</td>
                                         <td>{{ $patient->sex }}</td>
+                                        <td>{{ $patient->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
 
                                         {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
@@ -257,7 +260,7 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -265,7 +268,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -366,6 +369,8 @@
                         //     });
 
                         // $('#surgeries').val(surgeries).trigger('change');
+
+                        $('#is_active').prop('checked', patient.is_active);
 
 
                         // Set the checkbox town for is_active

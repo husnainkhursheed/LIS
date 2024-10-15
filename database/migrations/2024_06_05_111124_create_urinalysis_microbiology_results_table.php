@@ -34,8 +34,10 @@ return new class extends Migration
             $table->text('trichomonas')->nullable();
             $table->text('casts')->nullable();
             $table->text('crystals')->nullable();
-            $table->text('specimen')->nullable();
-            $table->string('procedure')->nullable();
+            // $table->text('specimen')->nullable();
+            // $table->text('specimen_note')->nullable();
+            // $table->string('procedure')->nullable();
+            $table->text('sensitivity_profiles')->nullable();
             $table->text('sensitivity')->nullable();
             $table->text('review')->nullable();
             $table->timestamps();

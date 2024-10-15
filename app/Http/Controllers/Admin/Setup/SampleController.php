@@ -36,10 +36,10 @@ class SampleController extends Controller
     public function create()
     {
         //
-        $doctors = Doctor::all();
-        $institutions = Institution::all();
-        $patients = Patient::all();
-        $tests = Test::all();
+        $doctors = Doctor::where('is_active', 1)->get();
+        $institutions = Institution::where('is_active', 1)->get();
+        $patients = Patient::where('is_active', 1)->get();
+        $tests = Test::where('is_active', 1)->get();
         $test_number = strtoupper(substr(md5(time()), 0, 6));
 
         return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests','test_number'));
@@ -63,7 +63,7 @@ class SampleController extends Controller
             'bill_to' => 'required',
             'test_requested' => 'required',
        ]);
-    //    dd($request->all());
+        //    dd($request->all());
 
 
        $sample = new Sample();
@@ -76,6 +76,7 @@ class SampleController extends Controller
        $sample->doctor_id = $request->doctor_id;
        $sample->institution_id = $request->institution_id;
        $sample->bill_to = $request->bill_to;
+       $sample->notes = $request->notes;
        $sample->save();
        // Attach the tests to the sample
        $sample->tests()->attach($request->test_requested);
@@ -98,14 +99,14 @@ class SampleController extends Controller
      */
     public function edit(string $id)
     {
-        $doctors = Doctor::all();
-        $institutions = Institution::all();
-        $patients = Patient::all();
-        $tests = Test::all();
+        $doctors = Doctor::where('is_active', 1)->get();
+        $institutions = Institution::where('is_active', 1)->get();
+        $patients = Patient::where('is_active', 1)->get();
+        $tests = Test::where('is_active', 1)->get();
 
         $sample = Sample::find($id);
 
-        return view('setup.sample.edit' ,compact('doctors', 'institutions', 'patients','tests','sample'));
+        return view('setup.sample.edit' , compact('doctors', 'institutions', 'patients','tests','sample'));
     }
 
     /**
@@ -135,6 +136,7 @@ class SampleController extends Controller
         $sample->doctor_id = $request->doctor_id;
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
+        $sample->notes = $request->notes;
 
         // Detach the existing tests from the sample
         $sample->tests()->detach();

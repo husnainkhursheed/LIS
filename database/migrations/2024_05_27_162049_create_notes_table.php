@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('note_code');
             $table->enum('department', ['1', '2', '3']);
             $table->text('comment');
+            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });
     }

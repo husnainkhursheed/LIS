@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-        Roles
+        Users
 @endsection
 @section('css')
     <!--datatable css-->
@@ -13,6 +13,11 @@
 @endsection
 @section('content')
     <style>
+         .error-message {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
         /* .time {
             font-size: 18px;
             font-weight: bold;
@@ -319,24 +324,44 @@
 
                                 </div>
                                 <br>
-                                {{-- <div>
-                                    <label for="user_password" class="form-label">
-                                        Password</label>
-                                    <input type="password" id="user_password" name="password"
-                                        class="form-control" />
-                                </div> --}}
+                                @php
+                                $user = Auth::user();
+                                $roleName = $user->getRoleNames()->first();
+                              @endphp
+
+                            @if($roleName === 'Management')
+                                <div>
+                                    <label for="user_password" class="form-label">Password</label>
+                                    <input type="password" id="user_password" name="password" class="form-control" />
+                                    <span id="passwordHelpBlock" class="form-text">
+                                        Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.
+                                    </span>
+                                    <span id="passwordError" class="error-message">Invalid password format.</span>
+                                </div>
+                            @endif
                             </div>
                             <!--end col-->
                             <div class="col-lg-12">
                                 <label for="role_select" class="form-label">
                                     User Type</label>
-                                <select class="js-example-basic-multiple" name="role_ids[]" id="role_ids" multiple="multiple">
+                                <select class="js-example-basic-multiple" name="role_ids[]" id="role_ids">
                                     @foreach ($roles as $rolevalue)
                                             <option value="{{ $rolevalue->id }}">
                                                 {{ $rolevalue->name }}</option>
                                         @endforeach
                                 </select>
                             </div>
+
+                            {{-- <div class="col-lg-12" id="department_area">
+                                <div>
+                                    <label for="departments" class="form-label">Departments</label>
+                                    <select class="form-control js-example-basic-multiple" name="departments[]" id="departments" multiple="multiple">
+                                        <option value="1">Biochemistry / Haematology</option>
+                                        <option value="2">Cytology / Gynecology</option>
+                                        <option value="3">Urinalysis / Microbiology</option>
+                                    </select>
+                                </div>
+                            </div> --}}
                             {{-- <div class="col-lg-12">
                                 <div>
                                     <label for="leads_score-field" class="form-label">Roles</label>
@@ -464,8 +489,12 @@
                         var roleIds = leadType.roles.map(function(role) {
                             return role.id;
                         });
+                        var department_ids = leadType.departments.map(function(department) {
+                            return department;
+                        });
 
                         $('#role_ids').val(roleIds).trigger('change');
+                        $('#departments').val(department_ids).trigger('change');
                         // Set the checkbox state for is_active
                         $('#is_active').prop('checked', leadType.is_active);
 
@@ -476,7 +505,8 @@
                         $('#showModal .modal-footer').css('display', 'block');
 
                         // Change the button text
-                        $('#add-btn').html("Update");
+                        // $('#add-btn').html("Update");
+                        $('#add-btn').html("Update").addClass("validate-class");
                         var form = $('#leadtype_form');
 
                         // Update the form action (assuming the form has an ID of 'your-form-id')
@@ -522,8 +552,10 @@
             $('#id-field').val('');
             $('#first_name').val('');
             $('#user_email').val('');
+            $('#surname').val('');
             $('#user_password').val('');
-            $('#role_ids').val('');
+            $('#role_ids').val('').trigger('change');
+            $('#department').val('').trigger('change');
             $('#is_active').prop('checked', true);
             $('#lead-img').attr('src', '{{ URL::asset("build/images/users/user-dummy-img.jpg") }}');
         }
@@ -571,19 +603,70 @@
             // }, 5000); // 5000 milliseconds = 5 seconds
     });
 
-    document.querySelector("#lead-image-input").addEventListener("change", function () {
-        var preview = document.querySelector("#lead-img");
-        var file = document.querySelector("#lead-image-input").files[0];
-        console.log(file);
-        var reader = new FileReader();
-        reader.addEventListener("load",function () {
-            preview.src = reader.result;
-        },false);
-        if (file) {
-            reader.readAsDataURL(file);
-        }
-    });
+
     </script>
+    <script>
+    //    document.addEventListener('DOMContentLoaded', function() {
+    //         // Initialize select2
+    //         $('.js-example-basic-multiple').select2();
+
+    //         $('#role_ids').on('change', function() {
+    //             var selectedRoles = $(this).val();
+    //             var showDepartment = false;
+
+    //             // Check if any of the selected roles is "Lab"
+    //             $('#role_ids option:selected').each(function() {
+    //                 if ($(this).text().trim().toLowerCase() === 'lab') {
+    //                     showDepartment = true;
+    //                 }
+    //             });
+
+    //             // Show or hide the department area based on the selected roles
+    //             if (showDepartment) {
+    //                 $('#department_area').show();
+    //             } else {
+    //                 $('#department_area').hide();
+    //                 $('#departments').val('').trigger('change');
+    //             }
+    //         });
+
+    //         // Trigger change event to set initial visibility of department area
+    //         $('#role_ids').trigger('change');
+    //     });
+
+
+// password ERROR
+    document.getElementById('user_password').addEventListener('input', function() {
+                const password = this.value;
+                const passwordError = document.getElementById('passwordError');
+                const submitBtn = document.getElementById('add-btn');
+                // console.log(submitBtn);
+                const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+                if (password === "") {
+                    passwordError.style.display = 'none';
+                    submitBtn.disabled = false; // Enable the submit button if the password is empty
+                } else if (pattern.test(password)) {
+                    passwordError.style.display = 'none';
+                    submitBtn.disabled = false; // Enable the submit button if the password is valid
+                } else {
+                    passwordError.style.display = 'block';
+                    submitBtn.disabled = true; // Disable the submit button if the password is invalid
+                }
+            });
+// validate update btn
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const password = document.getElementById('user_password').value;
+        //     const submitBtn = document.getElementsByClassName('validate-class');
+        //     console.log(submitBtn[0]);
+        //     const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        //     if (password === "" || !pattern.test(password)) {
+        //         submitBtn.disabled = true; // Disable the submit button initially if the password is invalid or empty
+        //     }
+        // });
+        </script>
+
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
 @endsection

@@ -59,7 +59,12 @@ class DoctorController extends Controller
         $doctor->address_line_2  = $request->input('address_line_2');
         $doctor->area  = $request->input('area');
         $doctor->email  = $request->input('email');
+        $doctor->is_active  = $request->has('is_active') ? 1 : 0;
         $doctor->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'doctor' => $doctor]);
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -92,7 +97,10 @@ class DoctorController extends Controller
         $doctor->address_line_2  = $request->input('address_line_2');
         $doctor->area  = $request->input('area');
         $doctor->email  = $request->input('email');
+        $doctor->is_active  = $request->has('is_active') ? 1 : 0;
         $doctor->update();
+
+
 
 
         Session::flash('message', 'Updated successfully!');

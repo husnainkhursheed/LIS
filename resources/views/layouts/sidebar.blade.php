@@ -18,7 +18,8 @@
                 <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="31">
             </span>
         </a> --}}
-        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
+        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
+            id="vertical-hover">
             <i class="ri-record-circle-line"></i>
         </button>
     </div>
@@ -36,50 +37,51 @@
                             <img src="{{ URL::asset('build/icons/dashboard.png') }}" alt="" height="18">
                         </span>
                         {{-- <i class="ri-dashboard-2-line"></i> --}}
-                         <span class="pt-1">Dashboards</span>
+                        <span class="pt-1">Dashboards</span>
                     </a>
                 </li>
                 @canany('Sample create')
-                <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('/sample/create') }}">
-                        <span class="">
-                            <img src="{{ URL::asset('build/icons/sample.png') }}" alt="" height="18">
-                        </span>
-                        {{-- <i class="ri-dashboard-2-line"></i> --}}
-                         <span class="pt-1">New Sample</span>
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('/sample/create') }}">
+                            <span class="">
+                                <img src="{{ URL::asset('build/icons/sample.png') }}" alt="" height="18">
+                            </span>
+                            {{-- <i class="ri-dashboard-2-line"></i> --}}
+                            <span class="pt-1">New Sample</span>
+                        </a>
+                    </li>
                 @endcanany
 
                 @canany('UserManagement access')
-                <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarAuth" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
-                        <span class="">
-                            <img src="{{ URL::asset('build/icons/users.png') }}" alt="" height="18">
-                        </span>
-                        {{-- <i class="ri-account-circle-line"></i> --}}
-                         <span class="pt-1">Users</span>
-                    </a>
-                    <div class="collapse menu-dropdown" id="sidebarAuth">
-                        <ul class="nav nav-sm flex-column">
-                            {{-- <li class="nav-item">
+                    <li class="nav-item">
+                        <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarAuth"
+                            data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
+                            <span class="">
+                                <img src="{{ URL::asset('build/icons/users.png') }}" alt="" height="18">
+                            </span>
+                            {{-- <i class="ri-account-circle-line"></i> --}}
+                            <span class="pt-1">Users</span>
+                        </a>
+                        <div class="collapse menu-dropdown" id="sidebarAuth">
+                            <ul class="nav nav-sm flex-column">
+                                {{-- <li class="nav-item">
                                 <a href="{{ url('/permissions') }}" class="nav-link px-0 py-2">Permissions</a>
                             </li> --}}
-                            <li class="nav-item">
-                                <a href="{{ url('/roles') }}" class="nav-link px-0 py-2">Roles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url('/users') }}" class="nav-link px-0 py-2">Users</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/roles') }}" class="nav-link px-0 py-2">Roles</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/users') }}" class="nav-link px-0 py-2">Users</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                 @endcanany
                 {{-- <li class="nav-item">
                     <a class="nav-link menu-link" href="{{url('/')}}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                         <i class="ri-dashboard-2-line"></i> <span>@lang('translation.dashboards')</span>
                     </a> --}}
-                    {{-- <div class="collapse menu-dropdown" id="sidebarDashboards">
+                {{-- <div class="collapse menu-dropdown" id="sidebarDashboards">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
                                 <a href="dashboard-analytics" class="nav-link">@lang('translation.analytics')</a>
@@ -423,90 +425,94 @@
                     </div>
                 </li> <!-- end Dashboard Menu --> --}}
                 {{-- @canany(['Practice Access']) --}}
-                    <li class="nav-item">
-                        <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarSetup" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarSetup">
-                            <span class="">
-                                <img src="{{ URL::asset('build/icons/assets.png') }}" alt="" height="18">
-                            </span>
-                            {{-- <i class="mdi mdi-cogs"></i>  --}}
-                            <span class="pt-1">Assets</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarSetup">
-                            <ul class="nav nav-sm flex-column">
-                                {{-- @canany('Practice Access')
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarSetup"
+                        data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarSetup">
+                        <span class="">
+                            <img src="{{ URL::asset('build/icons/assets.png') }}" alt="" height="18">
+                        </span>
+                        {{-- <i class="mdi mdi-cogs"></i>  --}}
+                        <span class="pt-1">Assets</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarSetup">
+                        <ul class="nav nav-sm flex-column">
+                            {{-- @canany('Practice Access')
                                     <li class="nav-item">
                                         <a href="{{ url('/practice') }}" class="nav-link">Practice</a>
                                     </li>
                                 @endcanany --}}
-                                @canany('Institution access')
+                            @canany('Institution access')
                                 <li class="nav-item">
                                     <a href="{{ url('/institution') }}" class="nav-link px-0 py-2">Institutions</a>
                                 </li>
-                                @endcanany
-                                @canany('Doctor access')
+                            @endcanany
+                            @canany('Doctor access')
                                 <li class="nav-item">
                                     <a href="{{ url('/doctor') }}" class="nav-link px-0 py-2">Doctors</a>
                                 </li>
-                                @endcanany
-                                @canany('Patient access')
+                            @endcanany
+                            @canany('Patient access')
                                 <li class="nav-item">
                                     <a href="{{ url('/patient') }}" class="nav-link px-0 py-2">Patients</a>
                                 </li>
-                                @endcanany
-                                @canany('TestCharges access')
+                            @endcanany
+                            @canany('TestCharges access')
                                 <li class="nav-item">
-                                    <a href="{{ url('/test') }}" class="nav-link px-0 py-2">Charges and Reference Ranges</a>
+                                    <a href="{{ url('/test') }}" class="nav-link px-0 py-2">Charges and Reference
+                                        Ranges</a>
                                 </li>
-                                @endcanany
-                                @canany('Notes access')
+                            @endcanany
+                            @canany('Notes access')
                                 <li class="nav-item">
                                     <a href="{{ url('/note') }}" class="nav-link px-0 py-2">Notes</a>
                                 </li>
-                                @endcanany
-                            </ul>
-                        </div>
-                    </li>
-                {{-- @endcanany --}}
-                @canany('Manage TestReports')
-                <li class="nav-item">
-
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarreport" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarreport">
-
-                        <span class="">
-                            <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
-                        </span>
-                        {{-- <i class="ri-account-circle-line"></i> --}}
-                         <span class="pt-1">Reports</span>
-                    </a>
-
-                    <div class="collapse menu-dropdown" id="sidebarreport">
-                        <ul class="nav nav-sm flex-column">
-                            @canany('Manage TestReports')
-                            <li class="nav-item">
-                                <a href="{{ url('/reports/test-reports') }}" class="nav-link">Test Reports</a>
-                            </li>
                             @endcanany
-                            {{-- <li class="nav-item">
-                                <a href="{{ url('/roles') }}" class="nav-link">Roles</a>
-
-                            </li>--}}
-
                         </ul>
                     </div>
                 </li>
+                {{-- @endcanany --}}
+                @canany('Manage TestReports')
+                    <li class="nav-item">
 
-                {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span>@lang('translation.pages')</span></li> --}}
+                        <a class="nav-link menu-link d-flex gap-3 align-middle" href="#sidebarreport"
+                            data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarreport">
+
+                            <span class="">
+                                <img src="{{ URL::asset('build/icons/report.png') }}" alt="" height="18">
+                            </span>
+                            {{-- <i class="ri-account-circle-line"></i> --}}
+                            <span class="pt-1">Reports</span>
+                        </a>
+
+                        <div class="collapse menu-dropdown" id="sidebarreport">
+                            <ul class="nav nav-sm flex-column">
+                                @canany('Manage TestReports')
+                                    <li class="nav-item">
+                                        <a href="{{ url('/reports/test-reports') }}" class="nav-link">Test Reports</a>
+                                    </li>
+                                @endcanany
+                                <li class="nav-item">
+                                    <a href="{{ url('/reports/processing-time') }}" class="nav-link">Processing Time</a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
+
+                    {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span>@lang('translation.pages')</span></li> --}}
                 @endcanany
             </ul>
         </div>
         <div class="fixed-bottom mb-4">
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item ">
-                    <a class="nav-link menu-link d-flex gap-2 align-middle" href="javascript:void();"  onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <a style="width: fit-content;" class="nav-link menu-link d-flex gap-2 align-middle"
+                        href="javascript:void();"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/md-log-out.png') }}" alt="" height="18">
                         </span>
-                         <span class="text-white pt-1"> Logout</span>
+                        <span class="text-white pt-1"> Logout</span>
                     </a>
 
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -524,58 +530,56 @@
 <div class="vertical-overlay"></div>
 
 <script>
-$(document).ready(function () {
-    // Get the current path or URL
-    var currentPath = window.location.pathname;
+    $(document).ready(function() {
+        // Get the current path or URL
+        var currentPath = window.location.pathname;
 
-    // Specify the default active link
-    var defaultActiveLink = '/';
+        // Specify the default active link
+        var defaultActiveLink = '/';
 
-    // Function to add the active class to the correct menu item
-    function activateLink(linkPath) {
-        // Remove active class from all nav-links
-        $('.nav-item .nav-link').removeClass('active');
-        // Remove active class from all nav-items
-        $('.nav-item').removeClass('active');
+        // Function to add the active class to the correct menu item
+        function activateLink(linkPath) {
+            // Remove active class from all nav-links
+            $('.nav-item .nav-link').removeClass('active');
+            // Remove active class from all nav-items
+            $('.nav-item').removeClass('active');
 
-        // Add active class to the current nav-link
-        $('.nav-item .nav-link[href="' + linkPath + '"]').addClass('active');
+            // Add active class to the current nav-link
+            $('.nav-item .nav-link[href="' + linkPath + '"]').addClass('active');
 
-        // Handle the parent elements based on the structure
-        $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.collapse').addClass('show');
-        $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.nav-item').addClass('active');
-    }
+            // Handle the parent elements based on the structure
+            $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.collapse').addClass('show');
+            $('.nav-item .nav-link[href="' + linkPath + '"]').parents('.nav-item').addClass('active');
+        }
 
-    // Check if the current path is the default active link
-    if (currentPath === defaultActiveLink) {
-        activateLink(defaultActiveLink);
-    } else {
-        // Iterate through all nav-links to find the best match
-        $('.nav-item .nav-link').each(function () {
-            var linkPath = $(this).attr('href');
+        // Check if the current path is the default active link
+        if (currentPath === defaultActiveLink) {
+            activateLink(defaultActiveLink);
+        } else {
+            // Iterate through all nav-links to find the best match
+            $('.nav-item .nav-link').each(function() {
+                var linkPath = $(this).attr('href');
 
-            // Ensure we check against the full URL without query strings or hashes
-            var fullPath = new URL(linkPath, window.location.origin).pathname;
+                // Ensure we check against the full URL without query strings or hashes
+                var fullPath = new URL(linkPath, window.location.origin).pathname;
 
-            // Check if the current path exactly matches the linkPath
-            if (currentPath === fullPath) {
-                activateLink(linkPath);
-                return false; // Break the loop once a match is found
-            }
-        });
+                // Check if the current path exactly matches the linkPath
+                if (currentPath === fullPath) {
+                    activateLink(linkPath);
+                    return false; // Break the loop once a match is found
+                }
+            });
 
-        // If no exact match is found, find the closest parent path match
-        $('.nav-item .nav-link').each(function () {
-            var linkPath = $(this).attr('href');
-            var fullPath = new URL(linkPath, window.location.origin).pathname;
+            // If no exact match is found, find the closest parent path match
+            $('.nav-item .nav-link').each(function() {
+                var linkPath = $(this).attr('href');
+                var fullPath = new URL(linkPath, window.location.origin).pathname;
 
-            if (currentPath.startsWith(fullPath) && fullPath !== defaultActiveLink) {
-                activateLink(linkPath);
-                return false; // Break the loop once a match is found
-            }
-        });
-    }
-});
-
+                if (currentPath.startsWith(fullPath) && fullPath !== defaultActiveLink) {
+                    activateLink(linkPath);
+                    return false; // Break the loop once a match is found
+                }
+            });
+        }
+    });
 </script>
-

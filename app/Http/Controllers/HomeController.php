@@ -38,7 +38,17 @@ class HomeController extends Controller
     public function root(Request $request)
     {
         // $samples = Sample::paginate(10);
-        $query = Sample::query();
+        $query = Sample::with('patient');
+
+        // // Check if the current user has the "Lab" role
+        // $currentUser = Auth::user();
+        // if ($currentUser->hasRole('Lab')) {
+        //     // Filter samples by the current user's departments through the related tests
+        //     $departmentIds = $currentUser->departments;
+        //     $query->whereHas('tests', function($testQuery) use ($departmentIds) {
+        //         $testQuery->whereIn('department', $departmentIds);
+        //     });
+        // }
 
         // Handle search
         if ($request->has('search')) {
@@ -46,15 +56,39 @@ class HomeController extends Controller
             $query->where(function($query) use ($searchTerm) {
                 $query->where('test_number', 'like', '%' . $searchTerm . '%')
                       ->orWhere('access_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('received_date', 'like', '%' . $searchTerm . '%');
-
+                      ->orWhere('received_date', 'like', '%' . $searchTerm . '%')
+                      ->orWhereHas('patient', function($patientQuery) use ($searchTerm) {
+                          $patientQuery->where('first_name', 'like', '%' . $searchTerm . '%')
+                                       ->orWhere('surname', 'like', '%' . $searchTerm . '%');
+                      });
             });
         }
 
+        // Handle entries shown filter
+        if ($request->has('entries_shown')) {
+            $entriesShown = $request->input('entries_shown');
+            $now = now();
+
+            if ($entriesShown == 'last_20_days') {
+                $query->where('received_date', '>=', $now->subDays(20));
+            } elseif ($entriesShown == 'last_3_years') {
+                $query->where('received_date', '>=', $now->subYears(3));
+            }
+        }
+
+
         // Handle sorting
         if ($request->has('sort_by')) {
+            $sortBy = $request->input('sort_by');
             $sortOrder = $request->input('sort_order') ?? 'asc'; // Default to ascending if not specified
-            $query->orderBy($request->input('sort_by'), $sortOrder);
+
+            // Handle sorting by patient columns
+            if (in_array($sortBy, ['first_name', 'surname'])) {
+                $query->join('patients', 'samples.patient_id', '=', 'patients.id')
+                    ->orderBy('patients.' . $sortBy, $sortOrder);
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
         }
 
         $samples = $query->paginate(15);

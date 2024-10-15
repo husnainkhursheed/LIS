@@ -96,8 +96,11 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
                                             @foreach ($patients as $patient)
+                                            @php
+                                                $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
+                                            @endphp
                                                 <option value="{{ $patient->id }}" {{ $sample->patient_id == $patient->id ? 'selected' : ''}}>
-                                                    {{ $patient->first_name }}</option>
+                                                    {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
                         </div>
@@ -138,22 +141,37 @@
                                 {{-- <option selected>Choose Institution</option> --}}
                                 <option value="Patient" {{ $sample->bill_to == 'Patient' ? 'selected' : ''}}>Patient</option>
                                 <option value="Doctor"  {{ $sample->bill_to == 'Doctor' ? 'selected' : ''}}>Doctor</option>
-                                <option value="Other"  {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
+                                <option value="Other"   {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control">{{ $sample->notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Test Requested</label>
-                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
+                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
                                 @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach>
-                                        {{ $test->name }}</option>
+                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
+                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
                         </div>
                     </div>
                 </div>
@@ -231,7 +249,7 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -239,7 +257,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -318,7 +336,7 @@
                                         placeholder="Enter Area" required />
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -326,7 +344,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -405,7 +423,7 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -413,7 +431,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -451,6 +469,35 @@
 
 
     <script>
+        $(document).ready(function() {
+            let totalCost = 0;
+            $('#test_requested').find('option:selected').each(function() {
+                totalCost += parseFloat($(this).data('cost'));
+            });
+
+            // Update the total_cost input field
+            $('#total_cost').val(totalCost.toFixed(2));
+            $('#test_requested').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost').val(totalCost.toFixed(2));
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            let doctorSelect = document.getElementById('doctor_id');
+            if (doctorSelect) {
+                let lastOption = doctorSelect.options[doctorSelect.options.length - 1];
+                if (!Array.from(doctorSelect.options).some(option => option.selected)) {
+                    lastOption.selected = true;
+                }
+            }
+        });
         document.querySelector("#lead-image-input").addEventListener("change", function() {
             var preview = document.querySelector("#lead-img");
             var file = document.querySelector("#lead-image-input").files[0];

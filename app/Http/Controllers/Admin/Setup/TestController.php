@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin\Setup;
 
 use App\Models\Test;
+use App\Models\Sample;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class TestController extends Controller
@@ -16,6 +18,13 @@ class TestController extends Controller
     public function index(Request $request)
     {
         $query = Test::query();
+
+        $currentUser = Auth::user();
+        if ($currentUser->hasRole('Lab')) {
+            // Filter tests by the current user's departments
+            $departmentIds = $currentUser->departments;
+            $query->whereIn('department', $departmentIds);
+        }
 
         // Handle search
         if ($request->has('search')) {
@@ -48,16 +57,51 @@ class TestController extends Controller
             'department' => 'required',
             'specimen_type' => 'required',
             'cost' => 'required',
+            'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
-
+       $reference_range = $request->input('reference_range');
         $test = new Test();
         $test->name  = $request->input('name');
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
+        $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
+        if($reference_range == 'basic_ref'){
+            $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
+            $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }else if($reference_range == 'optional_ref'){
+            $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
+            $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
+            $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }elseif ($reference_range == 'no_manual_tag') {
+            $test->nomanualvalues_ref_range = $request->input('nomanualvalues_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+        }
+        $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
+
+        if ($request->ajax()) {
+            $sample = Sample::find($request->sample_id);
+            $sample->tests()->attach($test);
+
+            return response()->json(['success' => true, 'test' => $test]);
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -79,15 +123,45 @@ class TestController extends Controller
             'department' => 'required',
             'specimen_type' => 'required',
             'cost' => 'required',
+            'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
+        $reference_range = $request->input('reference_range');
 
         $test = Test::find($id);
         $test->name  = $request->input('name');
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
+        $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
+        if($reference_range == 'basic_ref'){
+            $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
+            $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }else if($reference_range == 'optional_ref'){
+            $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
+            $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
+            $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->nomanualvalues_ref_range = null;
+        }elseif ($reference_range == 'no_manual_tag') {
+            $test->nomanualvalues_ref_range = $request->input('nomanualvalues_ref_range');
+            $test->basic_low_value_ref_range  = null;
+            $test->basic_high_value_ref_range  = null;
+            $test->male_low_value_ref_range  = null;
+            $test->male_high_value_ref_range  = null;
+            $test->female_low_value_ref_range  = null;
+            $test->female_high_value_ref_range  = null;
+        }
+
+        $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
 
 
@@ -103,5 +177,12 @@ class TestController extends Controller
         $test->delete();
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');
+    }
+
+    public function calcvalues($id){
+        $test = Test::find($id);
+        return response()->json([
+            'test' => $test,
+        ]);
     }
 }
