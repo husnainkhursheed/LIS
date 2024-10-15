@@ -191,6 +191,17 @@
                             <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
                         </div>
                     </div>
+                     <!-- Row for Grand Total -->
+                     <div class="row align-items-center p-0" style="text-align: right">
+                        <div class="col-md-10 form-group mt-2">
+                            <label for="grand_total" class="form-label">Grand Total:</label>
+                        </div>
+                        <div class="col-md-2 p-0">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="grand_total" id="grand_total" disabled>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -488,39 +499,46 @@
     <script>
         $(document).ready(function() {
             let totalCost = 0;
-            let total_cost_profile = 0;
-            $('#test_requested').find('option:selected').each(function() {
+        let total_cost_profile = 0;
+
+        $('#test_requested').find('option:selected').each(function() {
+            totalCost += parseFloat($(this).data('cost'));
+        });
+        $('#test_profiles').find('option:selected').each(function() {
+            total_cost_profile += parseFloat($(this).data('cost'));
+        });
+
+        function updateGrandTotal() {
+            let grandTotal = totalCost + total_cost_profile;
+            $('#grand_total').val(grandTotal.toFixed(2));
+        }
+
+        $('#total_cost').val(totalCost.toFixed(2));
+        $('#total_cost_profile').val(total_cost_profile.toFixed(2));
+        updateGrandTotal();
+
+        $('#test_requested').on('change', function() {
+            totalCost = 0;
+
+            $(this).find('option:selected').each(function() {
                 totalCost += parseFloat($(this).data('cost'));
             });
-            $('#test_profiles').find('option:selected').each(function() {
+
+            $('#total_cost').val(totalCost.toFixed(2));
+            updateGrandTotal();
+        });
+
+        $('#test_profiles').on('change', function() {
+            total_cost_profile = 0;
+
+            $(this).find('option:selected').each(function() {
                 total_cost_profile += parseFloat($(this).data('cost'));
             });
 
-            // Update the total_cost input field
-            $('#total_cost').val(totalCost.toFixed(2));
             $('#total_cost_profile').val(total_cost_profile.toFixed(2));
-            $('#test_requested').on('change', function() {
-                let totalCost = 0;
+            updateGrandTotal();
+        });
 
-                // Iterate through each selected option
-                $(this).find('option:selected').each(function() {
-                    totalCost += parseFloat($(this).data('cost'));
-                });
-
-                // Update the total_cost input field
-                $('#total_cost').val(totalCost.toFixed(2));
-            });
-            $('#test_profiles').on('change', function() {
-                let totalCost = 0;
-
-                // Iterate through each selected option
-                $(this).find('option:selected').each(function() {
-                    totalCost += parseFloat($(this).data('cost'));
-                });
-
-                // Update the total_cost input field
-                $('#total_cost_profile').val(totalCost.toFixed(2));
-            });
         });
         document.addEventListener("DOMContentLoaded", function() {
             let doctorSelect = document.getElementById('doctor_id');

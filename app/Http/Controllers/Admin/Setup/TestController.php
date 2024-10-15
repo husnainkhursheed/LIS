@@ -61,7 +61,7 @@ class TestController extends Controller
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
-            'calculation_explanation' => 'required',
+            // 'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
        $reference_range = $request->input('reference_range');
@@ -139,11 +139,11 @@ class TestController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|unique:tests,name',
+            // 'name' => 'required|unique:tests,name',
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
-            'calculation_explanation' => 'required',
+            // 'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
         $reference_range = $request->input('reference_range');

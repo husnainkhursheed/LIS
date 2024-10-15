@@ -212,6 +212,18 @@
                             <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
                         </div>
                     </div>
+                    <!-- Row for Grand Total -->
+                    <div class="row align-items-center p-0" style="text-align: right">
+                        <div class="col-md-10 form-group mt-2">
+                            <label for="grand_total" class="form-label">Grand Total:</label>
+                        </div>
+                        <div class="col-md-2 p-0">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="grand_total" id="grand_total" disabled>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="row">
@@ -508,6 +520,16 @@
 
     <script>
        $(document).ready(function() {
+
+
+                function calculateGrandTotal() {
+                let totalCost = parseFloat($('#total_cost').val()) || 0;
+                let totalProfileCost = parseFloat($('#total_cost_profile').val()) || 0;
+                let grandTotal = totalCost + totalProfileCost;
+
+                $('#grand_total').val(grandTotal.toFixed(2));
+            }
+
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
 
@@ -518,6 +540,7 @@
 
                 // Update the total_cost input field
                 $('#total_cost').val(totalCost.toFixed(2));
+                calculateGrandTotal();
             });
             $('#test_profiles').on('change', function() {
                 let totalCost = 0;
@@ -529,6 +552,8 @@
 
                 // Update the total_cost input field
                 $('#total_cost_profile').val(totalCost.toFixed(2));
+
+                calculateGrandTotal();
             });
             // Initialize Select2
             // $('#doctor_id').select2();

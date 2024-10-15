@@ -523,7 +523,7 @@
                 $('#test_profiles_container').show();
                 $('#is_urine_type_container').show();
                 $('#cost_container').hide();
-                $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
+                $('#specimen_type, #test_profiles').attr('required', true); //#calculation_explanation,
                 $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
 
 
@@ -553,7 +553,7 @@
                 $('#test_profiles_container').hide();
                 $('#is_urine_type_container').hide();
                 $('#cost_container').show();
-                $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
+                $('#specimen_type, #cost, #department').attr('required', true);  //#calculation_explanation,
                 $('#urin_test_type_container').hide();
                 $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
 
