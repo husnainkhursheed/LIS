@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('tests', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('department', ['1', '2', '3']);
+            $table->enum('department', ['1', '2', '3'])->nullable();
             $table->string('specimen_type');
-            $table->decimal('cost', 8, 2);
+            $table->decimal('cost', 8, 2)->nullable();
             $table->text('calculation_explanation')->nullable();
             $table->text('reference_range')->nullable();
             $table->text('basic_low_value_ref_range')->nullable();
@@ -26,7 +26,14 @@ return new class extends Migration
             $table->text('female_low_value_ref_range')->nullable();
             $table->text('female_high_value_ref_range')->nullable();
             $table->text('nomanualvalues_ref_range')->nullable();
+            $table->enum('urin_test_type', ['1', '2'])->nullable();
+            // $table->unsignedBigInteger('test_profile_id')->nullable();
+            // $table->foreign('test_profile_id')
+            //       ->references('id')
+            //       ->on('test_profiles')
+            //       ->onDelete('cascade');
             $table->tinyInteger('is_active')->default(1);
+            $table->tinyInteger('is_urine_type')->default(0);
             $table->timestamps();
         });
     }

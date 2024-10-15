@@ -345,7 +345,7 @@
                                 <label for="role_select" class="form-label">
                                     User Type</label>
                                 <select class="js-example-basic-multiple" name="role_ids[]" id="role_ids">
-                                    @foreach ($roles as $rolevalue)
+                                        @foreach ($roles as $rolevalue)
                                             <option value="{{ $rolevalue->id }}">
                                                 {{ $rolevalue->name }}</option>
                                         @endforeach

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\Setup\PatientController;
 use App\Http\Controllers\Admin\Setup\PracticeController;
 use App\Http\Controllers\ReportingandAnalyticsController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
+use App\Http\Controllers\Admin\Setup\TestProfileController;
 use App\Http\Controllers\Admin\Reports\TestReportController;
 use App\Http\Controllers\Admin\Setup\CustomDropdownController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
@@ -93,6 +94,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/note/{id}/edit', [NoteController::class, 'edit'])->name('note.edit');
     Route::post('/note/{id}', [NoteController::class, 'update'])->name('note.update');
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
+
+    // test profile crud  working
+    Route::get('/TestProfile', [TestProfileController::class, 'index'])->name('TestProfile.index');
+    Route::post('/TestProfile', [TestProfileController::class, 'store'])->name('TestProfile.store');
+    Route::get('/TestProfile/{id}/edit', [TestProfileController::class, 'edit'])->name('TestProfile.edit');
+    Route::post('/TestProfile/{id}', [TestProfileController::class, 'update'])->name('TestProfile.update');
+    Route::delete('/TestProfile/{id}', [TestProfileController::class, 'destroy'])->name('TestProfile.destroy');
+
 
     Route::get('/profile', [SenstivityItemsController::class, 'index'])->name('profile.index');
     Route::post('/profile', [SenstivityItemsController::class, 'store'])->name('profile.store');

@@ -20,27 +20,125 @@ class PDFController extends Controller
         return $qr;
     }
 
-    public function generatePDF(Request $request, $sample_id, $type)
+    public function generatePDF(Request $request, $sample_id, $reporttype)
     {
         try {
             // Fetch sample and related tests
             $sample = Sample::findOrFail($sample_id);
-            $sample->load('tests');
+            $individualTests = $sample->tests()->where('department', $reporttype)->get();
 
-            $tests = $sample->tests()->where('department', $type)->get();
+            // Get the profiles associated with the sample
+            $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                $query->where('department', $reporttype);
+            })->with('tests')->get();
 
-            // Load test reports
-            $testReports = collect();
+            // Collect all the tests from the profiles that match the department
+            $profileTests = collect();
+            foreach ($profiles as $profile) {
+                // Add tests from each profile that match the department
+                $profileTests = $profileTests->merge(
+                    $profile->tests()->get()
+                );
+            }
+
+            // Combine individual tests and profile tests
+            $tests = $individualTests->merge($profileTests);
+            // dd($tests->count());
+
+            // Collect test reports with their related results
+            $testReports = collect(); // Initialize as a collection
+
+            $allTestsCompleted = true; // Flag to check if all tests are completed
+            $completedat = null;
+            $completedBy = null;
+            $signed_by = null;
+
             foreach ($tests as $test) {
-                $testReport = TestReport::with('biochemHaemoResults')
-                    ->where('sample_id', $sample->id)
-                    ->where('test_id', $test->id)
-                    ->first();
+                // Fetch the related TestReport with its results based on the report type
+                $testReport = TestReport::with([
+                    'biochemHaemoResults',
+                    'cytologyGynecologyResults',
+                    'urinalysisMicrobiologyResults'
+                ])
+                ->where('sample_id', $sample->id)
+                ->where('test_id', $test->id)
+                ->first();
+                if(empty($testReport)){
+                    continue;
+                }
 
                 if ($testReport) {
-                    $testReports->push($testReport);
+                    $testReports->push($testReport); // Store the TestReport for further use if needed
+
+                    // Determine the completed status based on the report type
+                    switch ($reporttype) {
+                        case 1: // Biochemistry/Haematology Results
+                            foreach ($testReport->biochemHaemoResults as $result) {
+                                $completedBy = $result->completed_by ?? null;
+                                $completedat = $result->completed_at ?? null;
+                                $signed_by = $result->signed_by ?? null;
+                                if (!$result->is_completed) {
+                                    $allTestsCompleted = false; // Set flag to false if any result is not completed
+                                }
+                            }
+                            break;
+
+                        case 2: // Cytology/Gynecology Results
+                            foreach ($testReport->cytologyGynecologyResults as $result) {
+                                $completedBy = $result->completed_by ?? null;
+                                $completedat = $result->completed_at ?? null;
+                                if (!$result->is_completed) {
+                                    $allTestsCompleted = false; // Set flag to false if any result is not completed
+                                }
+                            }
+                            break;
+
+                        case 3: // Urinalysis/Microbiology Results
+                            foreach ($testReport->urinalysisMicrobiologyResults as $result) {
+                                $completedBy = $result->completed_by ?? null;
+                                $completedat = $result->completed_at ?? null;
+                                if (!$result->is_completed) {
+                                    $allTestsCompleted = false; // Set flag to false if any result is not completed
+                                }
+                            }
+                            break;
+
+                        default:
+                            // Handle other report types if necessary
+                            $allTestsCompleted = false; // Set flag to false if the report type is not recognized
+                            break;
+                    }
+                } else {
+                    $allTestsCompleted = false; // Set flag to false if no TestReport is found
                 }
             }
+
+
+            // dd($allTestsCompleted);
+
+            // If the department is 1, categorize the tests by their profiles
+            $categorizedTests = [];
+            if ($reporttype == '1' || $reporttype == '3') {
+                foreach ($tests as $test) {
+                    // Check if there are any test profiles
+                    if ($test->testProfiles->isNotEmpty()) {
+                        // Loop through the test profiles since it's a collection
+                        foreach ($test->testProfiles as $profile) {
+                            $profileId = $profile->id;
+                            $profileName = $profile->name;
+                            $categorizedTests[$profileId]['name'] = $profileName;
+                            $categorizedTests[$profileId]['tests'][] = $test;
+                        }
+                    } else {
+                        // Handle the case where there is no profile
+                        $profileId = 'no-profile';
+                        $profileName = 'Individual Tests';
+                        $categorizedTests[$profileId]['name'] = $profileName;
+                        $categorizedTests[$profileId]['tests'][] = $test;
+                    }
+                }
+            }
+
 
             // Calculate pagination
             $perPage = 20;
@@ -48,13 +146,13 @@ class PDFController extends Controller
             $currentPage = $request->input('page', 1);
 
             $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
-            $signed_by = $sample::with('signedBy','validateBy')->get();
-            foreach ($signed_by as $sample) {
-                // Access the signed user's name
-                $signedUserName = $sample->signedBy->first_name ?? 'No Signer';
-                $validateUserName = $sample->validateBy->first_name ?? 'No Validator';
-                // dd($signedUserName);
-            }
+            // $signed_by = $sample::with('signedBy','validateBy')->get();
+            // foreach ($signed_by as $sample) {
+            //     // Access the signed user's name
+            //     $signedUserName = $sample->signedBy->first_name ?? 'No Signer';
+            //     $validateUserName = $sample->validateBy->first_name ?? 'No Validator';
+            //     // dd($signedUserName);
+            // }
                         // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
@@ -63,10 +161,12 @@ class PDFController extends Controller
                 'testReports' => $testReports,
                 'referenceRanges' => $referenceRanges,
                 'tests' => $tests,
+                'categorizedTests' => $categorizedTests,
                 'totalPages' => $totalPages,
                 'currentPage' => $currentPage,
-                'signed_by' => $signedUserName, // Replace with actual data
-                'validated_by' => $validateUserName, // Replace with actual data
+                'reporttype' => $reporttype,
+                'signed_by' => optional(User::find($signed_by))->first_name, // Replace with actual data
+                'validated_by' => optional(User::find($completedBy))->first_name, // Replace with actual data
             ];
 
             // Load the view based on $type
@@ -76,11 +176,11 @@ class PDFController extends Controller
                 '3' => 'pdf.urinalysisMicrobiologyPdf', // Urinalysis / Microbiology
             ];
 
-            if (!array_key_exists($type, $viewMapping)) {
+            if (!array_key_exists($reporttype, $viewMapping)) {
                 return response()->json(['error' => 'Invalid report type'], 400);
             }
 
-            $view = $viewMapping[$type];
+            $view = $viewMapping[$reporttype];
             $qrCode = $this->generateQRCode('https://20.dev.webberz.com/');
             $data['qrCode'] = $qrCode;
             // Generate PDF using Dompdf

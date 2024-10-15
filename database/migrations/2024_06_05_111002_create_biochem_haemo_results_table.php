@@ -21,6 +21,12 @@ return new class extends Migration
             $table->text('flag')->nullable();
             $table->text('reference_range')->nullable();
             $table->text('test_notes')->nullable();
+            $table->boolean('is_signed')->default(false);
+            $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('signed_at')->nullable();
+            $table->boolean('is_completed')->default(false);
+            $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
 
         });

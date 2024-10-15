@@ -51,14 +51,14 @@ use \Carbon\Carbon;
                                     @foreach ($records as $record)
                                     <tr>
                                         {{-- {{dd($record->id)}} --}}
-                                        <td>{{$record->testReport->sample->test_number}}</td>
+                                        <td>{{$sample->test_number}}</td>
                                         <td>{{$record->user->first_name}}</td>
                                         <td>{{$record->changed_at}}</td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{$record->testReport->id}}" data-changedat="{{$record->changed_at}}"  href="#showModal" data-bs-target="#auditModal" data-bs-toggle="modal"><i
+                                                    <a class="edit-item-btn" data-id="{{$record->test_report_id}}" data-changedat="{{$record->changed_at}}"  href="#showModal" data-bs-target="#auditModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
                                             </ul>

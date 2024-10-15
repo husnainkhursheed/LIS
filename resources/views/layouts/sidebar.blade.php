@@ -458,6 +458,9 @@
                             @endcanany
                             @canany('TestCharges access')
                                 <li class="nav-item">
+                                    <a href="{{ url('/TestProfile') }}" class="nav-link px-0 py-2">Test Profiles</a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="{{ url('/test') }}" class="nav-link px-0 py-2">Charges and Reference
                                         Ranges</a>
                                 </li>
@@ -467,6 +470,9 @@
                                     <a href="{{ url('/note') }}" class="nav-link px-0 py-2">Notes</a>
                                 </li>
                             @endcanany
+                            {{-- @canany('Notes access') --}}
+
+                        {{-- @endcanany --}}
                         </ul>
                     </div>
                 </li>

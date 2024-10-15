@@ -14,6 +14,11 @@
     use Carbon\Carbon;
 @endphp
 @section('content')
+@if (session('alert'))
+    <div class="alert alert-warning">
+        {{ session('alert') }}
+    </div>
+@endif
         <style>
             #reportStickyNav {
             top: 86px;
@@ -106,35 +111,93 @@
                         <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link active" aria-current="page" href="{{ url('/reports/test-reports') }}">Find</a>
                         </li>
-                        @if (!$sample->is_completed)
+                        @if (!$allTestsCompleted)
                             <li class="nav-item border-nav rounded flex-grow-1" id="SaveReport">
                                 <button class="nav-link sub-link">Save</button>
                             </li>
                         @endif
-                        <li class="nav-item border-nav rounded flex-grow-1">
+                        <li class="nav-item border-nav rounded flex-grow-1">    
                             <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
-                        @if ($sample->signed_by)
-                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
-                                <a class="nav-link sub-link " href="#">Signed</a>
-                            </li>
-                        @else
-                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
-                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
-                            </li>
+
+                        @if (auth()->user()->hasRole('admin'))
+                            @if ($testReports->isNotEmpty())
+
+                                {{-- Based on reporttype, determine which results to show --}}
+                                @if ($reporttype == 1) {{-- Biochem/Haematology --}}
+                                    @if ($testReports[0]->biochemHaemoResults->isNotEmpty())
+                                        @php
+                                            $biochemResult = $testReports[0]->biochemHaemoResults->first();
+                                        @endphp
+                                        @if ($biochemResult->signed_by ?? false)
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                                <a class="nav-link sub-link " href="#">Signed</a>
+                                            </li>
+                                        @else
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
+                                            </li>
+                                        @endif
+                                    @endif
+                                @elseif ($reporttype == 2) {{-- Cytology/Gynecology --}}
+                                    @if ($testReports[0]->cytologyGynecologyResults->isNotEmpty())
+                                        @php
+                                            $cytologyResult = $testReports[0]->cytologyGynecologyResults->first();
+                                        @endphp
+                                        @if ($cytologyResult->signed_by ?? false)
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                                <a class="nav-link sub-link " href="#">Signed</a>
+                                            </li>
+                                        @else
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
+                                            </li>
+                                        @endif
+                                    @endif
+                                @elseif ($reporttype == 3) {{-- Urinalysis/Microbiology --}}
+                                    @if ($testReports[0]->urinalysisMicrobiologyResults->isNotEmpty())
+                                        @php
+                                            $urinalysisResult = $testReports[0]->urinalysisMicrobiologyResults->first();
+                                        @endphp
+                                        @if ($urinalysisResult->signed_by ?? false)
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                                <a class="nav-link sub-link " href="#">Signed</a>
+                                            </li>
+                                        @else
+                                            <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                                <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
+                                            </li>
+                                        @endif
+
+                                    @endif
+
+                                @endif
+
+                            @endif
+                            {{-- @if ($testReports[0]->signed_by ?? false)
+                                <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
+                                    <a class="nav-link sub-link " href="#">Signed</a>
+                                </li>
+                            @else
+                                <li class="nav-item border-nav rounded flex-grow-1" id="assign">
+                                    <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
+                                </li>
+                            @endif --}}
                         @endif
-                        @if (!$sample->is_completed)
+                        @if (!$allTestsCompleted)
                             <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                 data-bs-placement="top" title="Complete">
                                 <a class="nav-link sub-link complete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
                                     href="#completeRecordModal">Complete</a>
                             </li>
                         @else
-                            <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                data-bs-placement="top" title="Complete">
-                                <a class="nav-link sub-link uncomplete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
-                                    href="#UncompleteRecordModal">Un Complete</a>
-                            </li>
+                            @if (auth()->user()->hasRole('admin'))
+                                <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                    data-bs-placement="top" title="Complete">
+                                    <a class="nav-link sub-link uncomplete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
+                                        href="#UncompleteRecordModal">Un Complete</a>
+                                </li>
+                            @endif
                         @endif
                         <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link" aria-current="page" id="pdfbtn"
@@ -151,22 +214,67 @@
 
 
             <div class="row pt-3" >
-                @if ($sample->signed_by)
-                    <div class="col-md-6" id="report_signed_input">
-                        <div class="form-group">
-                            <label for="access_number" class="form-label">Report Signed By</label>
-                            <input type="text" class="form-control" id="report_signed"
-                                value="{{ 'Report signed by ' . $sample->signedBy->first_name . ' on ' . $sample->signed_at }}"
-                                disabled />
-                        </div>
-                    </div>
+                @if ($testReports->isNotEmpty())
+
+                    {{-- Based on reporttype, determine which results to show --}}
+                    @if ($reporttype == 1) {{-- Biochem/Haematology --}}
+                        @if ($testReports[0]->biochemHaemoResults->isNotEmpty())
+                            @php
+                                $biochemResult = $testReports[0]->biochemHaemoResults->first();
+                            @endphp
+                            @if ($biochemResult->signed_by ?? false)
+                                <div class="col-md-6" id="report_signed_input">
+                                    <div class="form-group">
+                                        <label for="access_number" class="form-label">Report Signed By</label>
+                                        <input type="text" class="form-control" id="report_signed"
+                                            value="{{ 'Report signed by ' . $biochemResult->signedBy->first_name . ' on ' . $biochemResult->signed_at }}"
+                                            disabled />
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                    @elseif ($reporttype == 2) {{-- Cytology/Gynecology --}}
+                        @if ($testReports[0]->cytologyGynecologyResults->isNotEmpty())
+                            @php
+                                $cytologyResult = $testReports[0]->cytologyGynecologyResults->first();
+                            @endphp
+                            @if ($cytologyResult->signed_by ?? false)
+                                <div class="col-md-6" id="report_signed_input">
+                                    <div class="form-group">
+                                        <label for="access_number" class="form-label">Report Signed By</label>
+                                        <input type="text" class="form-control" id="report_signed"
+                                            value="{{ 'Report signed by ' . $cytologyResult->signedBy->first_name . ' on ' . $cytologyResult->signed_at }}"
+                                            disabled />
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                    @elseif ($reporttype == 3) {{-- Urinalysis/Microbiology --}}
+                        @if ($testReports[0]->urinalysisMicrobiologyResults->isNotEmpty())
+                            @php
+                                $urinalysisResult = $testReports[0]->urinalysisMicrobiologyResults->first();
+                            @endphp
+                            @if ($urinalysisResult->signed_by ?? false)
+                                <div class="col-md-6" id="report_signed_input">
+                                    <div class="form-group">
+                                        <label for="access_number" class="form-label">Report Signed By</label>
+                                        <input type="text" class="form-control" id="report_signed"
+                                            value="{{ 'Report signed by ' . $urinalysisResult->signedBy->first_name . ' on ' . $urinalysisResult->signed_at }}"
+                                            disabled />
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                    @endif
+
                 @endif
-                @if ($sample->is_completed)
+
+                @if ($allTestsCompleted)
                     <div class="col-md-6" id="report_signed_input">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Report Completed On</label>
                             <input type="text" class="form-control" id="report_signed"
-                                value="{{ 'Report Completed on ' . $sample->completed_at }}"
+                                value="{{ 'Report Completed on ' . $completedat }}"
                                 disabled />
                         </div>
                     </div>
@@ -245,9 +353,14 @@
                         @php
                             // Assuming $sample->tests is a collection or array of test objects
                             $testNames = $tests->pluck('name')->implode(', ');
+                            $individualtests = $sample->tests()->where('department',$reporttype)->pluck('name')->implode(', ');
+                            // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+                            $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                                $query->where('department', $reporttype);
+                            })->with('tests')->pluck('name')->implode(', ');
                         @endphp
                         <input type="text" id="test_number" name="test_number" class="form-control"
-                            value="{{ $testNames }}" disabled />
+                            value="{{ $sampleprofiles  . ', ' . $individualtests }}" disabled />
                     </div>
                 </div>
             </div>
@@ -280,7 +393,7 @@
                 </div>
                 <div class="card-header d-flex justify-content-between">
                     <h3 class="text-dark">List of tests</h3>
-                    @if (!$sample->is_completed)
+                    @if (!$allTestsCompleted)
                     <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                         id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
                         Test</button>
@@ -299,100 +412,186 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        @foreach ($tests as $index => $test)
-                            @php
-                                $testReport = $testReports
-                                    ->where('test_id', $test->id)
-                                    ->where('sample_id', $sample->id)
-                                    ->first();
-                                // dd($testReport);
-                                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                                // dd($biochemHaemoResults);
-                            @endphp
-                            <tr>
-                                <td>
-                                    <input type="text" data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][id]" class="form-control"
-                                        value="{{ $test->id }}" hidden disabled />
-                                    <input type="text" data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][description]" class="form-control"
-                                        value="{{ $test->name }}" disabled />
-                                </td>
-                                <td>
-                                    <input type="text"  data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
-                                        value="{{ $biochemHaemoResults->test_results ?? '' }}"
-                                        data-basic-low="{{ $test->basic_low_value_ref_range }}"
-                                        data-basic-high="{{ $test->basic_high_value_ref_range }}"
-                                        data-male-low="{{ $test->male_low_value_ref_range }}"
-                                        data-male-high="{{ $test->male_high_value_ref_range }}"
-                                        data-female-low="{{ $test->female_low_value_ref_range }}"
-                                        data-female-high="{{ $test->female_high_value_ref_range }}"
-                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
-                                </td>
-                                <td>
-                                    <input type="text"  data-test-id="{{ $test->id }}"
-                                        name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                        @if ($reporttype == '1')
+                            @foreach ($categorizedTests as $profileId => $profileData)
+                                <tr id="{{ $profileId }}">
+                                    <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                                </tr>
+                                @foreach ($profileData['tests'] as $index => $test)
                                     @php
-                                        $background = '';
-                                        if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                            $background = 'bg-success';
-                                        } elseif (
-                                            !empty($biochemHaemoResults) &&
-                                            $biochemHaemoResults->flag == 'High'
-                                        ) {
-                                            $background = 'bg-danger';
-                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                            $background = 'bg-warning';
-                                        }
+                                        $testReport = $testReports
+                                            ->where('test_id', $test->id)
+                                            ->where('sample_id', $sample->id)
+                                            ->first();
+                                        $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
                                     @endphp
-                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
-                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
 
-                                </td>
 
-                                <td>
-                                    <p class="reference-range">
-                                        @if ($test->reference_range == 'basic_ref')
-                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                        @elseif ($test->reference_range == 'optional_ref')
-                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                            <br>
-                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                                        @elseif ($test->reference_range == 'no_manual_tag')
-                                            {{ $test->nomanualvalues_ref_range }}
+                                    <tr>
+                                        <td>
+                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][id]" class="form-control"
+                                                value="{{ $test->id }}" hidden disabled />
+                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][description]" class="form-control"
+                                                value="{{ $test->name }}" disabled />
+                                        </td>
+                                        <td>
+                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                        </td>
+                                        <td>
+                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                            @php
+                                                $background = '';
+                                                if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                    $background = 'bg-success';
+                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                    $background = 'bg-danger';
+                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                    $background = 'bg-warning';
+                                                }
+                                            @endphp
+                                            <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                        </td>
+                                        <td>
+                                            <p class="reference-range">
+                                                @if ($test->reference_range == 'basic_ref')
+                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                @elseif ($test->reference_range == 'optional_ref')
+                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                    <br>
+                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                @elseif ($test->reference_range == 'no_manual_tag')
+                                                    {{ $test->nomanualvalues_ref_range }}
+                                                @endif
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                        </td>
+                                        <td>
+                                            @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                    data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                        data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($test->calculation_explanation)
+                                                <a href="" class="getcalc" data-bs-toggle="modal"
+                                                data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                class="badge bg-info text-white">show</span> </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+
+                        @else
+                            @foreach ($tests as $index => $test)
+                                @php
+                                    $testReport = $testReports
+                                        ->where('test_id', $test->id)
+                                        ->where('sample_id', $sample->id)
+                                        ->first();
+                                    $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][id]" class="form-control"
+                                            value="{{ $test->id }}" hidden disabled />
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][description]" class="form-control"
+                                            value="{{ $test->name }}" disabled />
+                                    </td>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                            data-male-low="{{ $test->male_low_value_ref_range }}"
+                                            data-male-high="{{ $test->male_high_value_ref_range }}"
+                                            data-female-low="{{ $test->female_low_value_ref_range }}"
+                                            data-female-high="{{ $test->female_high_value_ref_range }}"
+                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                    </td>
+                                    <td>
+                                        <input type="text" data-test-id="{{ $test->id }}"
+                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                        @php
+                                            $background = '';
+                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                $background = 'bg-success';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                $background = 'bg-danger';
+                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                $background = 'bg-warning';
+                                            }
+                                        @endphp
+                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                    </td>
+                                    <td>
+                                        <p class="reference-range">
+                                            @if ($test->reference_range == 'basic_ref')
+                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'optional_ref')
+                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                <br>
+                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                            @elseif ($test->reference_range == 'no_manual_tag')
+                                                {{ $test->nomanualvalues_ref_range }}
+                                            @endif
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                    </td>
+                                    <td>
+                                        @if ($index > 0 && !$allTestsCompleted)
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                    href="#deleteRecordModal">
+                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                </a>
+                                            </li>
                                         @endif
-                                    </p>
-                                </td>
-                                <td>
-                                    <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
-                                </td>
-                                <td>
-                                    @if ($index > 0 && !$sample->is_completed)
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                            data-bs-placement="top" title="Delete">
-                                            <a class="remove-item-btn" data-id="{{ $test->id }}"
-                                                data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
-                                                href="#deleteRecordModal">
-                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                            </a>
-                                        </li>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($test->calculation_explanation)
-                                        <a href="" class="getcalc" data-bs-toggle="modal"
-                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
-                                                        class="badge bg-info text-white">show</span> </a>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-
+                                    </td>
+                                    <td>
+                                        @if ($test->calculation_explanation)
+                                            <a href="" class="getcalc" data-bs-toggle="modal"
+                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                            class="badge bg-info text-white">show</span> </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
+
             @endif
 
             {{-- Cytology / Gynecology Test Results  --}}
@@ -408,6 +607,7 @@
                         // dd($biochemHaemoResults);
 
                         $testIds = $tests->pluck('id')->implode(',');
+                        // dd($testIds);
 
                     @endphp
                 @endforeach
@@ -434,7 +634,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="custom" class="form-label">Contraceptive
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <a href=""
                                     class="customDropdownEdit" data-bs-toggle="modal" data-id="Contraceptive"
                                     data-bs-target="#showModalDropdown"> <span class="badge bg-info text-white"> Add
@@ -485,7 +685,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="specimen_adequacy" class="form-label">Specimen Adequacy
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#specimen_adequacy"> Add
                                     Note</span>
                                 @endif
@@ -498,7 +698,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="diagnostic_interpretation" class="form-label">Diagnostic Interpretation
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#diagnostic_interpretation">
                                     Add Note</span>
                                 @endif
@@ -512,7 +712,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="recommend" class="form-label">Recommend
-                                @if (!$sample->is_completed)
+                                @if (!$allTestsCompleted)
                                 <span class="badge bg-info text-white add-note" data-target="#recommend"> Add Note</span>
                                 @endif
                             </label>
@@ -524,12 +724,16 @@
             @endif
             {{-- Urinalysis / Microbiology Test Results  --}}
             @if ($reporttype == 3)
+
                 @foreach ($tests as $test)
                     @php
                         $testReport = $testReports
                             ->where('test_id', $test->id)
                             ->where('sample_id', $sample->id)
                             ->first();
+                        // if (empty($testReport)) {
+                        //     continue;
+                        // }
                         // dd($testReport);
                         $urinalysisMicrobiologyResults = $testReport
                             ? $testReport->urinalysisMicrobiologyResults->first()
@@ -542,6 +746,7 @@
 
                     @endphp
                 @endforeach
+                {{-- {{dd($urinalysisMicrobiologyResults)}} --}}
                 <input type="hidden" id="urinalysis_test_id" name="urinalysis_test_id[]" value="{{ $testIds }}"
                     hidden>
                 <div class="card-header py-1">
@@ -578,1605 +783,415 @@
                             <table id="tests-table" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
-                                        <th class="rounded-start-3 ">Test</th>
+                                        <th class="rounded-start-3 ">Description</th>
                                         <th>Test Results </th>
-                                        {{-- <th>Flag </th> --}}
-                                        <th>Normal Range </th>
+                                        <th>Flag </th>
+                                        <th>Reference Range </th>
+                                        <th>Test Notes </th>
                                         <th></th>
+                                        <th class="rounded-end-3">Calc</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        {{------------------- s gravity ------------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="s_gravity" class="form-control"
-                                                    value="S. Gravity" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="s_gravity_result" class="form-control test-result" id="s_gravity_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->s_gravity ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td> --}}
-                                                {{-- <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
+                                    @if ($reporttype == '3')
+                                        @foreach ($categorizedTests as $profileId => $profileData)
+                                            <tr id="{{ $profileId }}">
+                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                                            </tr>
+                                            @php
+                                                $microscopyTests = collect();
+                                                $chemicalAnalysisTests = collect();
+                                                // dd($profileData['tests']);
+                                                foreach ($profileData['tests'] as $test) {
+                                                    // dd($profileData['tests']);
+                                                    if ($test->urin_test_type === '2') {
+                                                        $microscopyTests->push($test);
+                                                    } elseif ($test->urin_test_type === '1') {
+                                                        $chemicalAnalysisTests->push($test);
                                                     }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span> --}}
-
-                                            {{-- </td> --}}
-
-                                            <td>
-                                                <p class="uri-reference-range-s_gravity">
-                                                    @if(isset($referenceRanges['s_gravity']))
-                                                        {{-- {{ $referenceRanges['s_gravity']->low . '-' . $referenceRanges['s_gravity']->high}} --}}
-                                                        @if ($referenceRanges['s_gravity']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['s_gravity']->low . '-' . $referenceRanges['s_gravity']->high }}
-                                                        @elseif ($referenceRanges['s_gravity']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['s_gravity']->male_low . '-' . $referenceRanges['s_gravity']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['s_gravity']->female_low . '-' .$referenceRanges['s_gravity']->female_high }}
-                                                        @elseif ($referenceRanges['s_gravity']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['s_gravity']->nomanualvalues_ref_range }}
+                                                }
+                                                // dd($microscopyTests);
+                                            @endphp
+                                            @foreach ($chemicalAnalysisTests as $index => $test)
+                                                @php
+                                                    $testReport = $testReports
+                                                        ->where('test_id', $test->id)
+                                                        ->where('sample_id', $sample->id)
+                                                        ->first();
+                                                    $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
+                                                @endphp
+                                                <tr>
+                                                    <td>
+                                                        <input type="text" data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][id]" class="form-control"
+                                                            value="{{ $test->id }}" hidden disabled />
+                                                        <input type="text" data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][description]" class="form-control"
+                                                            value="{{ $test->name }}" disabled />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                            data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                            data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                            data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                            data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                        @php
+                                                            $background = '';
+                                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                                $background = 'bg-success';
+                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                                $background = 'bg-danger';
+                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                                $background = 'bg-warning';
+                                                            }
+                                                        @endphp
+                                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <p class="reference-range">
+                                                            @if ($test->reference_range == 'basic_ref')
+                                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                            @elseif ($test->reference_range == 'optional_ref')
+                                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                <br>
+                                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                            @elseif ($test->reference_range == 'no_manual_tag')
+                                                                {{ $test->nomanualvalues_ref_range }}
+                                                            @endif
+                                                        </p>
+                                                    </td>
+                                                    <td>
+                                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                    </td>
+                                                    <td>
+                                                        @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                                data-bs-placement="top" title="Delete">
+                                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                    href="#deleteRecordModal">
+                                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                                </a>
+                                                            </li>
                                                         @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="s_gravity" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{--------------------- PH --------------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="bilirubin" class="form-control"
-                                                    value="Bilirubin" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="bilirubin_result" class="form-control test-result" id="bilirubin_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->bilirubin ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @bilirubinp
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endbilirubinp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-bilirubin">
-                                                    @if(isset($referenceRanges['bilirubin']))
-                                                        {{-- {{ $referenceRanges['bilirubin']->low . '-' . $referenceRanges['bilirubin']->high}} --}}
-                                                        @if ($referenceRanges['bilirubin']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['bilirubin']->low . '-' . $referenceRanges['bilirubin']->high }}
-                                                        @elseif ($referenceRanges['bilirubin']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['bilirubin']->male_low . '-' . $referenceRanges['bilirubin']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['bilirubin']->female_low . '-' .$referenceRanges['bilirubin']->female_high }}
-                                                        @elseif ($referenceRanges['bilirubin']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['bilirubin']->nomanualvalues_ref_range }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($test->calculation_explanation)
+                                                            <a href="" class="getcalc" data-bs-toggle="modal"
+                                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                            class="badge bg-info text-white">show</span> </a>
                                                         @endif
-                                                    @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
 
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="bilirubin" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{--------------------- PH --------------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="ph" class="form-control"
-                                                    value="PH" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="ph_result" class="form-control test-result" id="ph_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->ph ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-ph">
-                                                    @if(isset($referenceRanges['ph']))
-                                                        {{-- {{ $referenceRanges['ph']->low . '-' . $referenceRanges['ph']->high}} --}}
-                                                        @if ($referenceRanges['ph']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['ph']->low . '-' . $referenceRanges['ph']->high }}
-                                                        @elseif ($referenceRanges['ph']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['ph']->male_low . '-' . $referenceRanges['ph']->male_high }}
+                                    @else
+                                        @foreach ($tests as $index => $test)
+                                            @php
+                                                $testReport = $testReports
+                                                    ->where('test_id', $test->id)
+                                                    ->where('sample_id', $sample->id)
+                                                    ->first();
+                                                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                            @endphp
+                                            <tr>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][id]" class="form-control"
+                                                        value="{{ $test->id }}" hidden disabled />
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][description]" class="form-control"
+                                                        value="{{ $test->name }}" disabled />
+                                                </td>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                        value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                        data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                        data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                        data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                        data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                        data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                        data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                    @php
+                                                        $background = '';
+                                                        if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                            $background = 'bg-success';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                            $background = 'bg-danger';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                            $background = 'bg-warning';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                </td>
+                                                <td>
+                                                    <p class="reference-range">
+                                                        @if ($test->reference_range == 'basic_ref')
+                                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'optional_ref')
+                                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
                                                             <br>
-                                                            Female: {{ $referenceRanges['ph']->female_low . '-' .$referenceRanges['ph']->female_high }}
-                                                        @elseif ($referenceRanges['ph']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['ph']->nomanualvalues_ref_range }}
+                                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'no_manual_tag')
+                                                            {{ $test->nomanualvalues_ref_range }}
                                                         @endif
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                </td>
+                                                <td>
+                                                    @if ($index > 0 && !$allTestsCompleted)
+                                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                            data-bs-placement="top" title="Delete">
+                                                            <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                href="#deleteRecordModal">
+                                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                            </a>
+                                                        </li>
                                                     @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="ph" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- blood ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="blood" class="form-control"
-                                                    value="Blood" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="blood_result" class="form-control test-result" id="blood_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->blood ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-blood">
-                                                    @if(isset($referenceRanges['blood']))
-                                                        {{-- {{ $referenceRanges['blood']->low . '-' . $referenceRanges['blood']->high}} --}}
-                                                        @if ($referenceRanges['blood']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['blood']->low . '-' . $referenceRanges['blood']->high }}
-                                                        @elseif ($referenceRanges['blood']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['blood']->male_low . '-' . $referenceRanges['blood']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['blood']->female_low . '-' .$referenceRanges['blood']->female_high }}
-                                                        @elseif ($referenceRanges['blood']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['blood']->nomanualvalues_ref_range }}
-                                                        @endif
+                                                </td>
+                                                <td>
+                                                    @if ($test->calculation_explanation)
+                                                        <a href="" class="getcalc" data-bs-toggle="modal"
+                                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                        class="badge bg-info text-white">show</span> </a>
                                                     @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="blood" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                         {{------------------- Leucocytes ---------------}}
-                                         <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="leucocytes" class="form-control"
-                                                    value="Leucocytes" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="leucocytes_result" class="form-control test-result" id="leucocytes_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->leucocytes ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-leucocytes">
-                                                    @if(isset($referenceRanges['leucocytes']))
-                                                        {{-- {{ $referenceRanges['leucocytes']->low . '-' . $referenceRanges['leucocytes']->high}} --}}
-                                                        @if ($referenceRanges['leucocytes']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['leucocytes']->low . '-' . $referenceRanges['leucocytes']->high }}
-                                                        @elseif ($referenceRanges['leucocytes']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['leucocytes']->male_low . '-' . $referenceRanges['leucocytes']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['leucocytes']->female_low . '-' .$referenceRanges['leucocytes']->female_high }}
-                                                        @elseif ($referenceRanges['leucocytes']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['leucocytes']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="leucocytes" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- Glucose ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="glucose" class="form-control"
-                                                    value="Glucose" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="glucose_result" class="form-control test-result" id="glucose_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->glucose ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-glucose">
-                                                    @if(isset($referenceRanges['glucose']))
-                                                        {{-- {{ $referenceRanges['glucose']->low . '-' . $referenceRanges['glucose']->high}} --}}
-                                                        @if ($referenceRanges['glucose']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['glucose']->low . '-' . $referenceRanges['glucose']->high }}
-                                                        @elseif ($referenceRanges['glucose']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['glucose']->male_low . '-' . $referenceRanges['glucose']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['glucose']->female_low . '-' .$referenceRanges['glucose']->female_high }}
-                                                        @elseif ($referenceRanges['glucose']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['glucose']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="glucose" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- nitrite ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="nitrite" class="form-control"
-                                                    value="Nitrite" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="nitrite_result" class="form-control test-result" id="nitrite_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->nitrite ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-nitrite">
-                                                    @if(isset($referenceRanges['nitrite']))
-                                                        {{-- {{ $referenceRanges['nitrite']->low . '-' . $referenceRanges['nitrite']->high}} --}}
-                                                        @if ($referenceRanges['nitrite']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['nitrite']->low . '-' . $referenceRanges['nitrite']->high }}
-                                                        @elseif ($referenceRanges['nitrite']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['nitrite']->male_low . '-' . $referenceRanges['nitrite']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['nitrite']->female_low . '-' .$referenceRanges['nitrite']->female_high }}
-                                                        @elseif ($referenceRanges['nitrite']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['nitrite']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="nitrite" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- ketones ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="ketones" class="form-control"
-                                                    value="Ketones" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="ketones_result" class="form-control test-result" id="ketones_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->ketones ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-ketones">
-                                                    @if(isset($referenceRanges['ketones']))
-                                                        {{-- {{ $referenceRanges['ketones']->low . '-' . $referenceRanges['ketones']->high}} --}}
-                                                        @if ($referenceRanges['ketones']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['ketones']->low . '-' . $referenceRanges['ketones']->high }}
-                                                        @elseif ($referenceRanges['ketones']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['ketones']->male_low . '-' . $referenceRanges['ketones']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['ketones']->female_low . '-' .$referenceRanges['ketones']->female_high }}
-                                                        @elseif ($referenceRanges['ketones']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['ketones']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="ketones" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- urobilinogen ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="urobilinogen" class="form-control"
-                                                    value="Urobilinogen" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="urobilinogen_result" class="form-control test-result" id="urobilinogen_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->urobilinogen ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-urobilinogen">
-                                                    @if(isset($referenceRanges['urobilinogen']))
-                                                        {{-- {{ $referenceRanges['urobilinogen']->low . '-' . $referenceRanges['urobilinogen']->high}} --}}
-                                                        @if ($referenceRanges['urobilinogen']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['urobilinogen']->low . '-' . $referenceRanges['urobilinogen']->high }}
-                                                        @elseif ($referenceRanges['urobilinogen']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['urobilinogen']->male_low . '-' . $referenceRanges['urobilinogen']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['urobilinogen']->female_low . '-' .$referenceRanges['urobilinogen']->female_high }}
-                                                        @elseif ($referenceRanges['urobilinogen']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['urobilinogen']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="urobilinogen" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- Proteins ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="proteins" class="form-control"
-                                                    value="Proteins" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="proteins_result" class="form-control test-result" id="proteins_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->proteins ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-proteins">
-                                                    @if(isset($referenceRanges['proteins']))
-                                                        {{-- {{ $referenceRanges['proteins']->low . '-' . $referenceRanges['proteins']->high}} --}}
-                                                        @if ($referenceRanges['proteins']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['proteins']->low . '-' . $referenceRanges['proteins']->high }}
-                                                        @elseif ($referenceRanges['proteins']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['proteins']->male_low . '-' . $referenceRanges['proteins']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['proteins']->female_low . '-' .$referenceRanges['proteins']->female_high }}
-                                                        @elseif ($referenceRanges['proteins']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['proteins']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="proteins" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-
-
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                             </table>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="colour" class="form-label">Colour</label>
-                                        <input type="text" id="colour" name="colour" class="form-control"
-                                            value="{{ $urinalysisMicrobiologyResults->colour ?? '' }}" />
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="appearance" class="form-label">Appearance</label>
-                                        <input type="text" id="appearance" name="appearance"
-                                            class="form-control"
-                                            value="{{ $urinalysisMicrobiologyResults->appearance ?? '' }}" />
-                                    </div>
-                                </div>
-                            </div>
-                            {{-- <div class="d-flex">
 
-                                <div class="flex-grow-1 ms-2">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="s_gravity" class="form-label">S. Gravity</label>
-                                                <input type="number" id="s_gravity" name="s_gravity"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->s_gravity ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="ph" class="form-label">PH</label>
-                                                <input type="text" id="ph" name="ph" class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->ph ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="bilirubin" class="form-label">Bilirubin
-                                                    @if (!$sample->is_completed)
-                                                    <a href="" class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Bilirubin" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a>
-                                                    @endif
-                                                        </label>
-                                                <select class="js-example-basic-multiple" name="bilirubin"
-                                                    id="Bilirubin">
-                                                    @foreach ($bilirubinropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->bilirubin === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="blood" class="form-label">Blood
-                                                    @if (!$sample->is_completed) <a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal" data-id="Blood"
-                                                        data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a>@endif</label>
-                                                <select class="js-example-basic-multiple" name="blood" id="Blood">
-                                                    @foreach ($blooddropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->blood === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="leucocytes" class="form-label">Leucocytes @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Leucocytes" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a>@endif</label>
-                                                <select class="js-example-basic-multiple" name="leucocytes"
-                                                    id="Leucocytes">
-                                                    @foreach ($leucocytesdropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->leucocytes === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="glucose" class="form-label">Glucose @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Glucose" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="glucose" id="Glucose">
-                                                    @foreach ($glucosedropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->glucose === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="nitrite" class="form-label">Nitrite @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Nitrite" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="nitrite" id="Nitrite">
-                                                    @foreach ($nitritedropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->nitrite === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="ketones" class="form-label">Ketones @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Ketones" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="ketones" id="Ketones">
-                                                    @foreach ($ketonesdropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->ketones === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="urobilinogen" class="form-label">Urobilinogen @if (!$sample->is_completed)<a
-                                                        href="" class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Urobilinogen" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="urobilinogen"
-                                                    id="Urobilinogen">
-                                                    @foreach ($urobilinogendropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->urobilinogen === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="proteins" class="form-label">Proteins @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Proteins" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="proteins" id="Proteins">
-                                                    @foreach ($proteinsdropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->proteins === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="colour" class="form-label">Colour</label>
-                                                <input type="text" id="colour" name="colour" class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->colour ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="appearance" class="form-label">Appearance</label>
-                                                <input type="text" id="appearance" name="appearance"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->appearance ?? '' }}" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> --}}
 
                         </div>
                         <div class="tab-pane" id="pill-justified-profile-1" role="tabpanel">
                             <table id="tests-table" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
-                                        <th class="rounded-start-3 ">Test</th>
+                                        <th class="rounded-start-3 ">Description</th>
                                         <th>Test Results </th>
-                                        {{-- <th>Flag </th> --}}
-                                        <th>Normal Range </th>
+                                        <th>Flag </th>
+                                        <th>Reference Range </th>
+                                        <th>Test Notes </th>
                                         <th></th>
+                                        <th class="rounded-end-3">Calc</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        {{------------------- epith_cells ------------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="epith_cells" class="form-control"
-                                                    value="Epith. Cells" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="epith_cells_result" class="form-control test-result" id="epith_cells_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->epith_cells ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
+                                    @if ($reporttype == '3')
+                                        @foreach ($categorizedTests as $profileId => $profileData)
+                                            <tr id="{{ $profileId }}">
+                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                                            </tr>
+                                            @php
+                                                $microscopyTests = collect();
+                                                $chemicalAnalysisTests = collect();
+                                                // dd($profileData['tests']);
+                                                foreach ($profileData['tests'] as $test) {
+                                                    // dd($profileData['tests']);
+                                                    if ($test->urin_test_type === '2') {
+                                                        $microscopyTests->push($test);
+                                                    } elseif ($test->urin_test_type === '1') {
+                                                        $chemicalAnalysisTests->push($test);
                                                     }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-
-                                            <td>
-                                                <p class="uri-reference-range-epith_cells">
-                                                    @if(isset($referenceRanges['epith_cells']))
-                                                        {{-- {{ $referenceRanges['epith_cells']->low . '-' . $referenceRanges['epith_cells']->high}} --}}
-                                                        @if ($referenceRanges['epith_cells']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['epith_cells']->low . '-' . $referenceRanges['epith_cells']->high }}
-                                                        @elseif ($referenceRanges['epith_cells']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['epith_cells']->male_low . '-' . $referenceRanges['epith_cells']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['epith_cells']->female_low . '-' .$referenceRanges['epith_cells']->female_high }}
-                                                        @elseif ($referenceRanges['epith_cells']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['epith_cells']->nomanualvalues_ref_range }}
+                                                }
+                                                // dd($microscopyTests);
+                                            @endphp
+                                            @foreach ($microscopyTests as $index => $test)
+                                                @php
+                                                    $testReport = $testReports
+                                                        ->where('test_id', $test->id)
+                                                        ->where('sample_id', $sample->id)
+                                                        ->first();
+                                                    $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
+                                                @endphp
+                                                <tr>
+                                                    <td>
+                                                        <input type="text" data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][id]" class="form-control"
+                                                            value="{{ $test->id }}" hidden disabled />
+                                                        <input type="text" data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][description]" class="form-control"
+                                                            value="{{ $test->name }}" disabled />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                            data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                            data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                            data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                            data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text"  data-test-id="{{ $test->id }}"
+                                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                        @php
+                                                            $background = '';
+                                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                                $background = 'bg-success';
+                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                                $background = 'bg-danger';
+                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                                $background = 'bg-warning';
+                                                            }
+                                                        @endphp
+                                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <p class="reference-range">
+                                                            @if ($test->reference_range == 'basic_ref')
+                                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                            @elseif ($test->reference_range == 'optional_ref')
+                                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                <br>
+                                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                            @elseif ($test->reference_range == 'no_manual_tag')
+                                                                {{ $test->nomanualvalues_ref_range }}
+                                                            @endif
+                                                        </p>
+                                                    </td>
+                                                    <td>
+                                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                    </td>
+                                                    <td>
+                                                        @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                                data-bs-placement="top" title="Delete">
+                                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                    href="#deleteRecordModal">
+                                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                                </a>
+                                                            </li>
                                                         @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="epith_cells" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{--------------------- bacteria --------------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="bacteria" class="form-control"
-                                                    value="Bacteria" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="bacteria_result" class="form-control test-result" id="bacteria_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->bacteria ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @bacteriap
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endbacteriap --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-bacteria">
-                                                    @if(isset($referenceRanges['bacteria']))
-                                                        {{-- {{ $referenceRanges['bacteria']->low . '-' . $referenceRanges['bacteria']->high}} --}}
-                                                        @if ($referenceRanges['bacteria']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['bacteria']->low . '-' . $referenceRanges['bacteria']->high }}
-                                                        @elseif ($referenceRanges['bacteria']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['bacteria']->male_low . '-' . $referenceRanges['bacteria']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['bacteria']->female_low . '-' .$referenceRanges['bacteria']->female_high }}
-                                                        @elseif ($referenceRanges['bacteria']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['bacteria']->nomanualvalues_ref_range }}
+                                                    </td>
+                                                    <td>
+                                                        @if ($test->calculation_explanation)
+                                                            <a href="" class="getcalc" data-bs-toggle="modal"
+                                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                            class="badge bg-info text-white">show</span> </a>
                                                         @endif
-                                                    @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
 
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="bacteria" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- white_cells ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="white_cells" class="form-control"
-                                                    value="White Cells" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="white_cells_result" class="form-control test-result" id="white_cells_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->white_cells ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-white_cells">
-                                                    @if(isset($referenceRanges['white_cells']))
-                                                        {{-- {{ $referenceRanges['white_cells']->low . '-' . $referenceRanges['white_cells']->high}} --}}
-                                                        @if ($referenceRanges['white_cells']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['white_cells']->low . '-' . $referenceRanges['white_cells']->high }}
-                                                        @elseif ($referenceRanges['white_cells']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['white_cells']->male_low . '-' . $referenceRanges['white_cells']->male_high }}
+                                    @else
+                                        @foreach ($tests as $index => $test)
+                                            @php
+                                                $testReport = $testReports
+                                                    ->where('test_id', $test->id)
+                                                    ->where('sample_id', $sample->id)
+                                                    ->first();
+                                                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                            @endphp
+                                            <tr>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][id]" class="form-control"
+                                                        value="{{ $test->id }}" hidden disabled />
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][description]" class="form-control"
+                                                        value="{{ $test->name }}" disabled />
+                                                </td>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                        value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                        data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                        data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                        data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                        data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                        data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                        data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                    @php
+                                                        $background = '';
+                                                        if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                            $background = 'bg-success';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                            $background = 'bg-danger';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                            $background = 'bg-warning';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                </td>
+                                                <td>
+                                                    <p class="reference-range">
+                                                        @if ($test->reference_range == 'basic_ref')
+                                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'optional_ref')
+                                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
                                                             <br>
-                                                            Female: {{ $referenceRanges['white_cells']->female_low . '-' .$referenceRanges['white_cells']->female_high }}
-                                                        @elseif ($referenceRanges['white_cells']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['white_cells']->nomanualvalues_ref_range }}
+                                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'no_manual_tag')
+                                                            {{ $test->nomanualvalues_ref_range }}
                                                         @endif
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                </td>
+                                                <td>
+                                                    @if ($index > 0 && !$allTestsCompleted)
+                                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                            data-bs-placement="top" title="Delete">
+                                                            <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                href="#deleteRecordModal">
+                                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                            </a>
+                                                        </li>
                                                     @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="white_cells" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                         {{------------------- yeast ---------------}}
-                                         <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="yeast" class="form-control"
-                                                    value="Yeast" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="yeast_result" class="form-control test-result" id="yeast_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->yeast ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-yeast">
-                                                    @if(isset($referenceRanges['yeast']))
-                                                        {{-- {{ $referenceRanges['yeast']->low . '-' . $referenceRanges['yeast']->high}} --}}
-                                                        @if ($referenceRanges['yeast']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['yeast']->low . '-' . $referenceRanges['yeast']->high }}
-                                                        @elseif ($referenceRanges['yeast']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['yeast']->male_low . '-' . $referenceRanges['yeast']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['yeast']->female_low . '-' .$referenceRanges['yeast']->female_high }}
-                                                        @elseif ($referenceRanges['yeast']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['yeast']->nomanualvalues_ref_range }}
-                                                        @endif
+                                                </td>
+                                                <td>
+                                                    @if ($test->calculation_explanation)
+                                                        <a href="" class="getcalc" data-bs-toggle="modal"
+                                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                        class="badge bg-info text-white">show</span> </a>
                                                     @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="yeast" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- red_cells ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="red_cells" class="form-control"
-                                                    value="Red Cells" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="red_cells_result" class="form-control test-result" id="red_cells_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->red_cells ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-red_cells">
-                                                    @if(isset($referenceRanges['red_cells']))
-                                                        {{-- {{ $referenceRanges['red_cells']->low . '-' . $referenceRanges['red_cells']->high}} --}}
-                                                        @if ($referenceRanges['red_cells']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['red_cells']->low . '-' . $referenceRanges['red_cells']->high }}
-                                                        @elseif ($referenceRanges['red_cells']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['red_cells']->male_low . '-' . $referenceRanges['red_cells']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['red_cells']->female_low . '-' .$referenceRanges['red_cells']->female_high }}
-                                                        @elseif ($referenceRanges['red_cells']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['red_cells']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="red_cells" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- trichomonas ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="trichomonas" class="form-control"
-                                                    value="Trichomonas" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="trichomonas_result" class="form-control test-result" id="trichomonas_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->trichomonas ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-trichomonas">
-                                                    @if(isset($referenceRanges['trichomonas']))
-                                                        {{-- {{ $referenceRanges['trichomonas']->low . '-' . $referenceRanges['trichomonas']->high}} --}}
-                                                        @if ($referenceRanges['trichomonas']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['trichomonas']->low . '-' . $referenceRanges['trichomonas']->high }}
-                                                        @elseif ($referenceRanges['trichomonas']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['trichomonas']->male_low . '-' . $referenceRanges['trichomonas']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['trichomonas']->female_low . '-' .$referenceRanges['trichomonas']->female_high }}
-                                                        @elseif ($referenceRanges['trichomonas']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['trichomonas']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="trichomonas" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-                                        {{------------------- Casts ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="casts" class="form-control"
-                                                    value="Casts" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="casts_result" class="form-control test-result" id="casts_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->casts ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-casts">
-                                                    @if(isset($referenceRanges['casts']))
-                                                        {{-- {{ $referenceRanges['casts']->low . '-' . $referenceRanges['casts']->high}} --}}
-                                                        @if ($referenceRanges['casts']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['casts']->low . '-' . $referenceRanges['casts']->high }}
-                                                        @elseif ($referenceRanges['casts']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['casts']->male_low . '-' . $referenceRanges['casts']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['casts']->female_low . '-' .$referenceRanges['casts']->female_high }}
-                                                        @elseif ($referenceRanges['casts']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['casts']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="casts" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-
-                                        {{------------------- crystals ---------------}}
-                                        <tr>
-                                            <td>
-                                                <input type="text" data-test-id=""
-                                                    name="crystals" class="form-control"
-                                                    value="Crystals" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="crystals_result" class="form-control test-result" id="crystals_result"
-                                                    value="{{ $urinalysisMicrobiologyResults->crystals ?? '' }}"
-                                                    data-basic-low=""
-                                                    data-basic-high=""
-                                                    data-male-low=""
-                                                    data-male-high=""
-                                                    data-female-low=""
-                                                    data-female-high=""
-                                                    data-nomanual-set="" />
-                                            </td>
-                                            {{-- <td>
-                                                <input type="text"  data-test-id=""
-                                                    name="flag" class="form-control flag-input"
-                                                    value="" style="width: 80px;"/> --}}
-                                                {{-- @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (
-                                                        !empty($biochemHaemoResults) &&
-                                                        $biochemHaemoResults->flag == 'High'
-                                                    ) {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp --}}
-                                                {{-- <span class="badge badge-pill flag-badge d-none"
-                                                    data-key="t-hot"></span>
-
-                                            </td> --}}
-                                            <td>
-                                                <p class="uri-reference-range-crystals">
-                                                    @if(isset($referenceRanges['crystals']))
-                                                        {{-- {{ $referenceRanges['crystals']->low . '-' . $referenceRanges['crystals']->high}} --}}
-                                                        @if ($referenceRanges['crystals']->urireference_range == 'uri_basic_ref')
-                                                            {{ $referenceRanges['crystals']->low . '-' . $referenceRanges['crystals']->high }}
-                                                        @elseif ($referenceRanges['crystals']->urireference_range == 'uri_optional_ref')
-                                                            Male: {{ $referenceRanges['crystals']->male_low . '-' . $referenceRanges['crystals']->male_high }}
-                                                            <br>
-                                                            Female: {{ $referenceRanges['crystals']->female_low . '-' .$referenceRanges['crystals']->female_high }}
-                                                        @elseif ($referenceRanges['crystals']->urireference_range == 'uri_no_manual_tag')
-                                                            {{ $referenceRanges['crystals']->nomanualvalues_ref_range }}
-                                                        @endif
-                                                    @endif
-
-                                                    {{--
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <a href="" class="uriRefRangesEdit" data-bs-toggle="modal"
-                                                data-id="crystals" data-bs-target="#showModalRefferenceranges"> <span
-                                                    class="badge bg-info text-white"> Set Range</span> </a>
-                                            </td>
-                                        </tr>
-
-
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                             </table>
-                            {{-- <div class="d-flex">
-
-                                <div class="flex-grow-1 ms-2">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="epith" class="form-label">Epith</label>
-                                                <input type="text" id="epith_cells" name="epith_cells"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->epith_cells ?? '' }}" />
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="bacteria" class="form-label">Bacteria @if (!$sample->is_completed)<a href=""
-                                                        class="customDropdownEdit" data-bs-toggle="modal"
-                                                        data-id="Bacteria" data-bs-target="#showModalDropdown"> <span
-                                                            class="badge bg-info text-white"> Add New</span> </a> @endif</label>
-                                                <select class="js-example-basic-multiple" name="bacteria "
-                                                    id="Bacteria">
-                                                    @foreach ($bacteriadropdown as $test)
-                                                        <option value="{{ $test->value }}"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->bacteria === $test->value ? 'selected' : '' }}>
-                                                            {{ $test->value }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="white_cells" class="form-label">White cells </label>
-                                                <input type="text" id="white_cells" name="white_cells "
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->white_cells ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="yeast" class="form-label">Yeast </label>
-                                                <input type="text" id="yeast" name="yeast" class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->yeast ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="red_cells" class="form-label">Red Cells</label>
-                                                <input type="text" id="red_cells" name="red_cells"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->red_cells ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="trichomonas" class="form-label">Trichomonas </label>
-                                                <input type="text" id="trichomonas" name="trichomonas"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->trichomonas ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="casts" class="form-label">Casts </label>
-                                                <input type="text" id="casts" name="casts" class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->casts ?? '' }}" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="crystals" class="form-label">Crystals </label>
-                                                <input type="text" id="crystals" name="crystals"
-                                                    class="form-control"
-                                                    value="{{ $urinalysisMicrobiologyResults->crystals ?? '' }}" />
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-                                </div>
-                            </div> --}}
                         </div>
                         <div class="tab-pane" id="pill-justified-messages-1" role="tabpanel">
                             <div class="d-flex">
@@ -2241,7 +1256,9 @@
                                             <div id="procedures-container">
                                                 <button type="button" class="btn btn-primary add-btn float-end mb-1"  id="add-procedure" ><i class="ri-add-line align-bottom me-1 "></i> Add
                                                     Procedure</button>
+                                                    {{-- {{dd($procedureResults)}} --}}
                                                 @foreach ($procedureResults as $index => $procedure)
+
                                                     <div class="procedure-group">
                                                         <div class="form-group">
                                                             <label for="procedure" class="form-label">Procedure</label>
@@ -2273,7 +1290,7 @@
 
 
                                         <h3 class="text-black">Sensitivity :</h3>
-                                        @if (!$sample->is_completed)
+                                        @if (!$allTestsCompleted)
                                             <form id="profileForm" class="d-flex align-items-center">
                                                 @csrf
                                                 <div class="form-group mb-0 mr-2 col-6">
@@ -2609,22 +1626,44 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url('/test') }}" method="Post"
-                    autocomplete="off">
+                <form class="tablelist-form" id="leadtype_form" action="{{ url("/test") }}" method="Post" autocomplete="off">
                     @csrf
+                    <div class="text-center mb-4">
+                        {{-- <h4 class="fw-semibold fs-22">Plans & Pricing</h4>
+                        <p class="text-muted mb-4 fs-15">Simple pricing. No hidden fees. Advanced features for you business.</p> --}}
+                        <input type="hidden" id="sample_id" name="sample_id"
+                        value="{{ $sample->id }}">
+                        <div class="d-inline-flex">
+                            <ul class="nav nav-pills arrow-navtabs plan-nav rounded mb-3 p-1" id="pills-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold active" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab" aria-selected="true">Profile Test</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold" id="individual-tab" data-bs-toggle="pill" data-bs-target="#individual" type="button" role="tab" aria-selected="false">Individual Test</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
-                        <input type="hidden" id="sample_id" name="sample_id" value="{{ $sample->id }}">
                         <div class="row g-3">
                             <div class="col-lg-6">
                                 <div>
-                                    <label for="companyname-field" class="form-label">Name of charge item</label>
-                                    <input type="text" id="name" name="name" class="form-control"
+                                    <label for="companyname-field"
+                                        class="form-label">Name of charge item</label>
+                                    <input type="text" id="name" name="name"
+                                        class="form-control"
                                         placeholder="Enter Name" required />
                                 </div>
                                 {{-- @error('v_name')
                                     <div class="text-danger">{{$message}}</div>
                                 @enderror --}}
+                            </div>
+                            <div class="col-lg-6" id="is_urine_type_container">
+                                <div>
+                                    <input type="checkbox" id="is_urine_type" name="is_urine_type">
+                                    <label for="is_urine_type" class="form-label">Is Urine Type</label>
+                                </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
@@ -2637,6 +1676,28 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-lg-6" id="urin_test_type_container">
+                                <div>
+                                    <label for="urin_test_type" class="form-label">Select Type</label>
+                                    <select class="form-control" name="urin_test_type" id="urin_test_type">
+                                        <option value="">Select type</option>
+                                        <option value="1">Chemical Analysis</option>
+                                        <option value="2">Microscopy</option>
+                                        {{-- <option value="3">Urinalysis / Microbiology</option> --}}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="test_profiles_container">
+                                <div>
+                                    <label for="test_profiles" class="form-label">Profiles</label>
+                                    <select class="form-control" name="test_profiles" id="test_profiles">
+                                        <option value="">Select Profiles</option>
+                                        @foreach ($test_profiles as $item)
+                                            <option value="{{$item->id}}">{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="specimen_type" class="form-label">Specimen Type</label>
@@ -2644,7 +1705,7 @@
                                         placeholder="Enter Specimen Type" required />
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-6" id="cost_container">
                                 <div>
                                     <label for="cost" class="form-label">Cost</label>
                                     <input type="number" id="cost" name="cost" class="form-control"
@@ -2728,12 +1789,12 @@
                                 </div>
                             </div>
                             <div class="row" id="noManualValues">
-                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" class="form-control" cols="30" rows="4"></textarea>
+                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
-                                        checked>
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
                                     <label class="form-check-label" for="is_active">
                                         Active
                                     </label>
@@ -2743,7 +1804,8 @@
                     </div>
                     <div class="modal-footer">
                         <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-light"
+                                data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-success" id="add-btn">Add Test</button>
                         </div>
                     </div>
@@ -2883,6 +1945,7 @@
                             // dd($biochemHaemoResults);
 
                             $testIds = $tests->pluck('id')->implode(',');
+                            // dd($testIds);
 
                         @endphp
                     @endforeach
@@ -3208,6 +2271,71 @@
             $('#urinoManualValues').hide();
             $('#uribasicValues').show();
 
+            $('#test_profiles_container').hide();
+
+            $('#department').on('change', function(){
+                // console.log('Department');
+                if (this.value == '3') {
+                    $('#urin_test_type_container').show();
+                    $('#urin_test_type').prop('required', true);
+                }else{
+                    $('#urin_test_type_container').hide();
+                    $('#urin_test_type').prop('required', false);
+                    $('#urin_test_type').val('');
+                }
+            });
+
+            $('#profile-tab').on('click', function () {
+                // Show Profile Test fields
+                $('#department').closest('.col-lg-6').hide();
+                $('#test_profiles_container').show();
+                $('#is_urine_type_container').show();
+                $('#cost_container').hide();
+                $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
+                $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
+
+
+                // Handle checkbox 'Is urine type'
+                $('#is_urine_type').on('change', function () {
+                    if ($(this).is(':checked')) {
+                        $('#urin_test_type_container').show();
+                        $('#urin_test_type').attr('required', true); // Make urine type required
+                    } else {
+                        $('#urin_test_type_container').hide();
+                        $('#urin_test_type').removeAttr('required'); // Remove urine type required
+                        $('#urin_test_type').val('');
+                    }
+                });
+
+                // Set required attributes for Profile Test fields
+                $('#department, #cost').attr('required', false);
+                $('#department').val('');
+                $('#cost').val('');
+                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
+                // $('#nomanualvalues_ref_range').removeAttr('required');
+            });
+
+            $('#individual-tab').on('click', function () {
+                // Show Individual Test fields
+                $('#department').closest('.col-lg-6').show();
+                $('#test_profiles_container').hide();
+                $('#is_urine_type_container').hide();
+                $('#cost_container').show();
+                $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
+                $('#urin_test_type_container').hide();
+                $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
+
+                // Set required attributes for Individual Test fields
+                $('#test_profiles').attr('required', false);
+                $('#test_profiles').val('');
+                $('#is_urine_type').prop('checked', false);
+                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
+                // $('#nomanualvalues_ref_range').attr('required', true);
+            });
+
+            // Default selection to Profile Test on page load
+            $('#profile-tab').trigger('click');
+
             // Show/hide fields based on selected reference range
             $('input[name="reference_range"]').on('change', function() {
                 if (this.value === 'basic_ref') {
@@ -3464,12 +2592,14 @@
                 event.preventDefault();
                 // var itemId = $('#delete-record').data('id');
                 var sampleid = $('#sampleid').val();
+                var reporttypeis = $('#reporttypeis').val();
                 // var deleterecordid = $('#delete-record-id').val();
                 var url = '{{ url('/reports/complete-test') }}';
                 // Prevent the default link behavior
                 // var reporttypeis = $('#report_type').val();
                 data = {
                     sample_id: sampleid,
+                    reporttypeis: reporttypeis,
                 };
 
                 $.ajax({
@@ -3499,12 +2629,14 @@
                 event.preventDefault();
                 // var itemId = $('#delete-record').data('id');
                 var sampleid = $('#sampleid').val();
+                var reporttypeis = $('#reporttypeis').val();
                 // var deleterecordid = $('#delete-record-id').val();
                 var url = '{{ url('/reports/uncomplete-test') }}';
                 // Prevent the default link behavior
                 // var reporttypeis = $('#report_type').val();
                 data = {
                     sample_id: sampleid,
+                    reporttypeis: reporttypeis,
                 };
 
                 $.ajax({
@@ -3623,6 +2755,7 @@
 
                         testsData[testId][fieldName] = $(this).val();
                     });
+                    console.log(testsData);
                     data = {
                         sampleid: $('#sampleid').val(),
                         // testReport: $('#testReport').val(),
@@ -3631,6 +2764,7 @@
                         note: $('#note').val(),
                         testsData: testsData,
                     };
+                    // console.log(data);
                 } else if (reporttypeis == 2) {
                     data = {
                         sampleid: $('#sampleid').val(),
@@ -3647,6 +2781,8 @@
                         recommend: $('#recommend').val()
                     };
                 } else if (reporttypeis == 3) {
+                    console.log('Please select report type');
+
                     var reportData = [];
                     $('#reportContainer .form-group').each(function() {
 
@@ -3683,38 +2819,62 @@
                         procedures.push(procedure);
                         specimenNotes.push(note);
                     });
+                    $('input[data-test-id], textarea[data-test-id]').each(function() {
+                        var testId = $(this).data('test-id');
+                        var fieldName = $(this).attr('name').split('[')[2].slice(0, -
+                        1); // Extract the field name
 
-                    console.log(reportData);
+                        if (!testsData[testId]) {
+                            testsData[testId] = {};
+                        }
+
+                        testsData[testId][fieldName] = $(this).val();
+                    });
+                    console.log(testsData);
                     data = {
                         sampleid: $('#sampleid').val(),
-                        testIds: $('#urinalysis_test_id').val(),
+                        // testReport: $('#testReport').val(),
                         reporttype: reporttypeis,
-                        s_gravity: $('#s_gravity_result').val(),
-                        ph: $('#ph_result').val(),
-                        bilirubin: $('#bilirubin_result').val(),
-                        blood: $('#blood_result').val(),
-                        leucocytes: $('#leucocytes_result').val(),
-                        glucose: $('#glucose_result').val(),
-                        nitrite: $('#nitrite_result').val(),
-                        ketones: $('#ketones_result').val(),
-                        urobilinogen: $('#urobilinogen_result').val(),
-                        proteins: $('#proteins_result').val(),
-                        colour: $('#colour').val(),
-                        appearance: $('#appearance').val(),
-                        epith_cells: $('#epith_cells_result').val(),
-                        bacteria: $('#bacteria_result').val(),
-                        white_cells: $('#white_cells_result').val(),
-                        yeast: $('#yeast_result').val(),
-                        red_cells: $('#red_cells_result').val(),
-                        trichomonas: $('#trichomonas_result').val(),
-                        casts: $('#casts_result').val(),
-                        crystals: $('#crystals_result').val(),
-                        specimen: $('#specimen').val(),
+                        // reference: $('#reference').val(),
+                        // note: $('#note').val(),
+                        testsData: testsData,
                         procedure: procedures,
                         specimen_note: specimenNotes,
                         sensitivity_profiles: $('#profiles').val(),
                         sensitivity: JSON.stringify(reportData)
                     };
+
+                    // console.log(reportData);
+                    // data = {
+                    //     sampleid: $('#sampleid').val(),
+                    //     testIds: $('#urinalysis_test_id').val(),
+                    //     reporttype: reporttypeis,
+                    //     s_gravity: $('#s_gravity_result').val(),
+                    //     ph: $('#ph_result').val(),
+                    //     bilirubin: $('#bilirubin_result').val(),
+                    //     blood: $('#blood_result').val(),
+                    //     leucocytes: $('#leucocytes_result').val(),
+                    //     glucose: $('#glucose_result').val(),
+                    //     nitrite: $('#nitrite_result').val(),
+                    //     ketones: $('#ketones_result').val(),
+                    //     urobilinogen: $('#urobilinogen_result').val(),
+                    //     proteins: $('#proteins_result').val(),
+                    //     colour: $('#colour').val(),
+                    //     appearance: $('#appearance').val(),
+                    //     epith_cells: $('#epith_cells_result').val(),
+                    //     bacteria: $('#bacteria_result').val(),
+                    //     white_cells: $('#white_cells_result').val(),
+                    //     yeast: $('#yeast_result').val(),
+                    //     red_cells: $('#red_cells_result').val(),
+                    //     trichomonas: $('#trichomonas_result').val(),
+                    //     casts: $('#casts_result').val(),
+                    //     crystals: $('#crystals_result').val(),
+                    //     specimen: $('#specimen').val(),
+                    //     procedure: procedures,
+                    //     specimen_note: specimenNotes,
+                    //     sensitivity_profiles: $('#profiles').val(),
+                    //     sensitivity: JSON.stringify(reportData)
+                    // };
                 }
 
                 $.ajax({
@@ -3805,11 +2965,14 @@
                                 '<td><li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete"><a class="remove-item-btn" data-id="' +
                                 response.test.id + '" data-sampleid="' + sampleid +
                                 '" data-bs-toggle="modal" href="#deleteRecordModal"><i class="ri-delete-bin-fill align-bottom text-muted"></i></a></li></td>' +
+                                '<td><a href="" class="getcalc" data-bs-toggle="modal" data-id="'+ response.test.id +'" data-bs-target="#showModalcalc"> <span class="badge bg-info text-white">show</span> </a></td>' +
                                 '</tr>';
-                            if (response.test.department === '1') {
-                                $('#tests-table tbody').append(newRow);
+                            if (response.test_profile_name !== null) {
+                                $(`#${response.test_profile_name}`).after(newRow);
+                            }else{
+                                $('#no-profile').after(newRow);
                             }
-
+                            // console.log($(`#${response.test_profile_name}`).get(0));
                             bindTestResultChangeEvent();
 
                             // Close the modal
@@ -4190,6 +3353,7 @@
                 password: $('#password').val(),
                 test_report_id: $('#test_report_id').val(),
                 report_sample_id: $('#report_sample_id').val(),
+                reporttypeis: $('#reporttypeis').val(),
                 _token: $('input[name="_token"]').val()
             };
 

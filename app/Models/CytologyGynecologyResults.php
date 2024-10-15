@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\TestReport;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,10 +22,20 @@ class CytologyGynecologyResults extends Model
         'specimen_adequacy',
         'diagnostic_interpretation',
         'recommend',
+        'is_completed',
+        'completed_by',
+        'completed_at',
+        'is_signed',
+        'signed_by',
+        'signed_at',
     ];
 
     public function testReport()
     {
         return $this->belongsTo(TestReport::class);
+    }
+    public function signedBy()
+    {
+        return $this->belongsTo(User::class, 'signed_by');
     }
 }

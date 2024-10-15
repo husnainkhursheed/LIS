@@ -23,6 +23,12 @@ return new class extends Migration
             $table->text('specimen_adequacy')->nullable();
             $table->text('diagnostic_interpretation')->nullable();
             $table->text('recommend')->nullable();
+            $table->boolean('is_signed')->default(false);
+            $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('signed_at')->nullable();
+            $table->boolean('is_completed')->default(false);
+            $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
     }

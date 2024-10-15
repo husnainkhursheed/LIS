@@ -142,9 +142,16 @@
             <tr>
                 <th colspan="4">
                     @php
+                    // Assuming $sample->tests is a collection or array of test objects
                     $testNames = $tests->pluck('name')->implode(', ');
-                    @endphp
-                    <span style="white-space: nowrap;"><strong>Request: {{ $testNames ?? '' }}</strong></span>
+                    $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
+                    // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+                    $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                            $query->where('department', $reporttype);
+                        })->with('tests')->pluck('name')->implode(', ');
+
+                @endphp
+                <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
                 </th>
             </tr>
             <tr class="bg-blue">

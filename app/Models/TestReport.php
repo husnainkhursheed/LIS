@@ -21,8 +21,11 @@ class TestReport extends Model
         'results',
         'notes',
         'is_completed',
+        'completed_by',
+        'completed_at',
         'is_signed',
         'signed_by',
+        'signed_at',
     ];
 
     public function sample()
@@ -59,4 +62,9 @@ class TestReport extends Model
     {
         return $this->hasMany(UrinalysisMicrobiologyResults::class);
     }
+     // Add the relationship for test profiles through the Test model (if needed)
+     public function testProfile()
+     {
+         return $this->hasOneThrough(TestProfile::class, Test::class, 'id', 'id', 'test_id', 'test_profile_id');
+     }
 }

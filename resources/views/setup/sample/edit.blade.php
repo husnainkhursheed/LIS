@@ -159,9 +159,26 @@
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
+                            <label for="test_profiles" class="form-label">Test Profiles</label>
+                            <select class="js-example-basic-multiple" name="test_profiles[]" id="test_profiles"  multiple="multiple">
+                                @foreach ($test_profiles as $test)
+                                    <option value="{{ $test->id }}"  @foreach ($sample->testProfiles as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
+                                        {{ $test->name .' '. $test->cost }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost_profile" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="form-group">
                             <label for="test_requested" class="form-label">Test Requested</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
-                                @foreach ($tests as $test)
+                                @foreach ($tests->where('department', '!=', null) as $test)
                                     <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
@@ -471,12 +488,17 @@
     <script>
         $(document).ready(function() {
             let totalCost = 0;
+            let total_cost_profile = 0;
             $('#test_requested').find('option:selected').each(function() {
                 totalCost += parseFloat($(this).data('cost'));
+            });
+            $('#test_profiles').find('option:selected').each(function() {
+                total_cost_profile += parseFloat($(this).data('cost'));
             });
 
             // Update the total_cost input field
             $('#total_cost').val(totalCost.toFixed(2));
+            $('#total_cost_profile').val(total_cost_profile.toFixed(2));
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
 
@@ -487,6 +509,17 @@
 
                 // Update the total_cost input field
                 $('#total_cost').val(totalCost.toFixed(2));
+            });
+            $('#test_profiles').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost_profile').val(totalCost.toFixed(2));
             });
         });
         document.addEventListener("DOMContentLoaded", function() {
