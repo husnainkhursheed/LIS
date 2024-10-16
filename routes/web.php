@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // use App\Http\Controllers\CustomDropdownController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\Setup\NoteController;
 use App\Http\Controllers\Admin\Setup\TestController;
 use App\Http\Controllers\Admin\Setup\DoctorController;
@@ -44,6 +45,12 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/settings', [SettingsController::class, 'change_password_index']);
+    Route::post('/change_password', [SettingsController::class, 'change_password']);
+    Route::post('/social_config', [SettingsController::class, 'change_socialconfig']);
+    // Route::post('/summary_prompt', [SettingsController::class, 'change_summary_prompt']);
+
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permission.index');
 
     Route::get('/roles', [RolesController::class, 'index'])->name('roles.index');
@@ -108,8 +115,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{id}/edit', [SenstivityItemsController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/{id}', [SenstivityItemsController::class, 'update'])->name('profile.update');
     Route::delete('/profile/{id}', [SenstivityItemsController::class, 'destroy'])->name('profile.destroy');
-
+    Route::post('/check-tests-in-profiles', [SampleController::class, 'checkTestsInProfiles'])->name('checkTestsInProfiles');
     Route::resource('/sample', SampleController::class);
+
+
+
 
     Route::prefix('reports')->group(function () {
         Route::get('/test-reports', [TestReportController::class, 'index'])->name('test-reports.index');

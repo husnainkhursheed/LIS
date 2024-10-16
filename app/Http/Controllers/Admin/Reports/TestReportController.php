@@ -167,8 +167,9 @@ class TestReportController extends Controller
         $profileTests = collect();
         foreach ($profiles as $profile) {
             // Add tests from each profile that match the department
+            // dd($profile->tests->where('department', $reporttype));
             $profileTests = $profileTests->merge(
-                $profile->tests
+                $profile->tests,
             );
         }
         // dd($profileTests);
@@ -273,19 +274,24 @@ class TestReportController extends Controller
 
         // If the department is 1, categorize the tests by their profiles
         $categorizedTests = [];
+
+        $sampleProfiles = $sample->testProfiles->pluck('id')->toArray(); // Get profile IDs assigned to the sample
+
         if ($reporttype == '1' || $reporttype == '3') {
             foreach ($tests as $test) {
-                // Check if there are any test profiles
+                // Check if there are any test profiles assigned to the test
                 if ($test->testProfiles->isNotEmpty()) {
-                    // Loop through the test profiles since it's a collection
+                    // Loop through the test profiles and filter them based on the sample's profiles
                     foreach ($test->testProfiles as $profile) {
-                        $profileId = $profile->id;
-                        $profileName = $profile->name;
-                        $categorizedTests[$profileId]['name'] = $profileName;
-                        $categorizedTests[$profileId]['tests'][] = $test;
+                        if (in_array($profile->id, $sampleProfiles)) {
+                            $profileId = $profile->id;
+                            $profileName = $profile->name;
+                            $categorizedTests[$profileId]['name'] = $profileName;
+                            $categorizedTests[$profileId]['tests'][] = $test;
+                        }
                     }
                 } else {
-                    // Handle the case where there is no profile
+                    // Handle the case where there is no profile assigned to the test
                     $profileId = 'no-profile';
                     $profileName = 'Individual Tests';
                     $categorizedTests[$profileId]['name'] = $profileName;
@@ -801,7 +807,8 @@ class TestReportController extends Controller
 
             $testReport = TestReport::where('sample_id',$sample->id)->where('test_id',$testId->id)->first();
             if (empty($testReport)) {
-                session()->flash('alert', 'Test report for Test ID: ' . $testId->name . ' is empty . First Save the Report');
+                // session()->flash('alert', 'Test report for Test ID: ' . $testId->name . ' is empty . First Save the Report');
+                session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                 continue;
             }
             //     [
@@ -818,7 +825,7 @@ class TestReportController extends Controller
             switch ($reporttypeis) {
                 case 1: // Biochemistry/Haematology Results
                     if (empty($testReport->biochemHaemoResults->first())) {
-                        session()->flash('alert', 'Test report for Test ID: ' . $testId->name . ' is empty . First Save the Report');
+                        session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                         break;
                     }
                     BiochemHaemoResults::where('test_report_id', $testReport->id)
@@ -830,8 +837,8 @@ class TestReportController extends Controller
                     break;
 
                 case 2: // Cytology/Gynecology Results
-                    if (empty($testReport->cytologyGynecologyResults->first())) {
-                        session()->flash('alert', 'Test report for Test ID: ' . $testId->name . ' is empty . First Save the Report');
+                    if (empty($testReport->cytologyGynecologyResults->first())) { 
+                        session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                         break;
                     }
                     CytologyGynecologyResults::where('test_report_id', $testReport->id)
@@ -844,7 +851,7 @@ class TestReportController extends Controller
 
                 case 3: // Urinalysis/Microbiology Results
                     if (empty($testReport->urinalysisMicrobiologyResults->first())) {
-                        session()->flash('alert', 'Test report for Test ID: ' . $testId->name . ' is empty . First Save the Report');
+                        session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                         break;
                     }
                     UrinalysisMicrobiologyResults::where('test_report_id', $testReport->id)

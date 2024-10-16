@@ -181,7 +181,7 @@
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_profiles" class="form-label">Test Profiles</label>
-                            <select class="js-example-basic-multiple" name="test_profiles[]" id="test_profiles" multiple="multiple">
+                            <select  class="js-example-basic-multiple"   name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()" multiple="multiple">
                                 @foreach ($test_profiles as $item)
                                             <option value="{{$item->id}}" data-cost="{{ $item->cost }}">{{$item->name.' '. $item->cost}}</option>
                                 @endforeach
@@ -199,7 +199,7 @@
                             <label for="test_requested" class="form-label">Individual Tests</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
                                 {{-- {{dd($tests->where('department'!= null))}} --}}
-                                @foreach ($tests->where('department', '!=', null) as $test)
+                                @foreach ($tests as $test)
                                     <option value="{{ $test->id }}" data-cost="{{ $test->cost }}">
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
@@ -507,7 +507,61 @@
 
 
     <script>
+        function checkTestProfiles() {
+            $('#test_requested').val('').trigger('change');
+            // Get selected profile IDs
+            let selectedProfiles = $('#test_profiles').val();
+            if (selectedProfiles === null || selectedProfiles.length === 0) {
+                console.log('No profiles selected, enabling all options');
+                // Re-enable all options if no profiles are selected
+                $('#test_profiles option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+                $('#test_requested option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+            }
+
+            // Send AJAX request to the server
+            $.ajax({
+                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    profiles: selectedProfiles
+                },
+                success: function(response) {
+                    // Assuming the response contains the IDs of test profiles to hide
+                    if (response.profilesToHide) {
+                        $('#test_profiles option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.profilesToHide.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        $('#test_profiles').select2();
+                        $('#test_requested option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.testIdsInSelectedProfiles.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        $('#test_requested').select2();
+                    }
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
        $(document).ready(function() {
+
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
 

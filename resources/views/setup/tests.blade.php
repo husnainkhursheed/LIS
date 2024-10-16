@@ -221,9 +221,9 @@
                 </div>
                 <form class="tablelist-form" id="leadtype_form" action="{{ url("/test") }}" method="Post" autocomplete="off">
                     @csrf
-                    <div class="text-center mb-4">
-                        {{-- <h4 class="fw-semibold fs-22">Plans & Pricing</h4>
-                        <p class="text-muted mb-4 fs-15">Simple pricing. No hidden fees. Advanced features for you business.</p> --}}
+                    {{-- <div class="text-center mb-4">
+                        <h4 class="fw-semibold fs-22">Plans & Pricing</h4>
+                        <p class="text-muted mb-4 fs-15">Simple pricing. No hidden fees. Advanced features for you business.</p>
 
                         <div class="d-inline-flex">
                             <ul class="nav nav-pills arrow-navtabs plan-nav rounded mb-3 p-1" id="pills-tab" role="tablist">
@@ -235,7 +235,7 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -251,12 +251,12 @@
                                     <div class="text-danger">{{$message}}</div>
                                 @enderror --}}
                             </div>
-                            <div class="col-lg-6" id="is_urine_type_container">
+                            {{-- <div class="col-lg-6" id="is_urine_type_container">
                                 <div>
                                     <input type="checkbox" id="is_urine_type" name="is_urine_type">
                                     <label for="is_urine_type" class="form-label">For Urinalysis</label>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6">
                                 <div>
                                     <label for="department" class="form-label">Department</label>
@@ -279,7 +279,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-6" id="test_profiles_container">
+                            {{-- <div class="col-lg-6" id="test_profiles_container">
                                 <div>
                                     <label for="test_profiles" class="form-label">Profiles</label>
                                     <select class="form-control" name="test_profiles" id="test_profiles">
@@ -289,7 +289,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-6">
                                 <div>
                                     <label for="specimen_type" class="form-label">Specimen Type</label>
@@ -517,56 +517,56 @@
                 }
             });
 
-            $('#profile-tab').on('click', function () {
-                // Show Profile Test fields
-                $('#department').closest('.col-lg-6').hide();
-                $('#test_profiles_container').show();
-                $('#is_urine_type_container').show();
-                $('#cost_container').hide();
-                $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
-                $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
+            // $('#profile-tab').on('click', function () {
+            //     // Show Profile Test fields
+            //     $('#department').closest('.col-lg-6').hide();
+            //     $('#test_profiles_container').show();
+            //     $('#is_urine_type_container').show();
+            //     $('#cost_container').hide();
+            //     $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
+            //     $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
 
 
-                // Handle checkbox 'Is urine type'
-                $('#is_urine_type').on('change', function () {
-                    if ($(this).is(':checked')) {
-                        $('#urin_test_type_container').show();
-                        $('#urin_test_type').attr('required', true); // Make urine type required
-                    } else {
-                        $('#urin_test_type_container').hide();
-                        $('#urin_test_type').removeAttr('required'); // Remove urine type required
-                        $('#urin_test_type').val('');
-                    }
-                });
+            //     // Handle checkbox 'Is urine type'
+            //     $('#is_urine_type').on('change', function () {
+            //         if ($(this).is(':checked')) {
+            //             $('#urin_test_type_container').show();
+            //             $('#urin_test_type').attr('required', true); // Make urine type required
+            //         } else {
+            //             $('#urin_test_type_container').hide();
+            //             $('#urin_test_type').removeAttr('required'); // Remove urine type required
+            //             $('#urin_test_type').val('');
+            //         }
+            //     });
 
-                // Set required attributes for Profile Test fields
-                $('#department, #cost').attr('required', false);
-                $('#department').val('');
-                $('#cost').val('');
-                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
-                // $('#nomanualvalues_ref_range').removeAttr('required');
-            });
+            //     // Set required attributes for Profile Test fields
+            //     $('#department, #cost').attr('required', false);
+            //     $('#department').val('');
+            //     $('#cost').val('');
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
+            //     // $('#nomanualvalues_ref_range').removeAttr('required');
+            // });
 
-            $('#individual-tab').on('click', function () {
-                // Show Individual Test fields
-                $('#department').closest('.col-lg-6').show();
-                $('#test_profiles_container').hide();
-                $('#is_urine_type_container').hide();
-                $('#cost_container').show();
-                $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
-                $('#urin_test_type_container').hide();
-                $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
+            // $('#individual-tab').on('click', function () {
+            //     // Show Individual Test fields
+            //     $('#department').closest('.col-lg-6').show();
+            //     $('#test_profiles_container').hide();
+            //     $('#is_urine_type_container').hide();
+            //     $('#cost_container').show();
+            //     $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
+            //     $('#urin_test_type_container').hide();
+            //     $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
 
-                // Set required attributes for Individual Test fields
-                $('#test_profiles').attr('required', false);
-                $('#test_profiles').val('');
-                $('#is_urine_type').prop('checked', false);
-                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
-                // $('#nomanualvalues_ref_range').attr('required', true);
-            });
+            //     // Set required attributes for Individual Test fields
+            //     $('#test_profiles').attr('required', false);
+            //     $('#test_profiles').val('');
+            //     $('#is_urine_type').prop('checked', false);
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
+            //     // $('#nomanualvalues_ref_range').attr('required', true);
+            // });
 
             // Default selection to Profile Test on page load
-            $('#profile-tab').trigger('click');
+            // $('#profile-tab').trigger('click');
         });
         // $(document).ready(function() {
         //     var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
@@ -682,22 +682,22 @@
 
                         // $('#surgeries').val(surgeries).trigger('change');
 
-                        if (test.department == null) {
-                            // console.log('Please select');
-                            $('#profile-tab').trigger('click');
-                        }else{
-                            $('#individual-tab').trigger('click');
-                        }
+                        // if (test.department == null) {
+                        //     // console.log('Please select');
+                        //     $('#profile-tab').trigger('click');
+                        // }else{
+                        //     $('#individual-tab').trigger('click');
+                        // }
 
                         // Set the checkbox town for is_active
                         $('#is_active').prop('checked', test.is_active);
-                        $('#is_urine_type').prop('checked', test.is_urine_type);
-                        if (test.is_urine_type == 1) {
-                            // console.log('Please select');
-                            $('#urin_test_type_container').show();
-                            $('#urin_test_type').attr('required', true);
-                            $('#urin_test_type').val(test.urin_test_type);
-                        }
+                        // $('#is_urine_type').prop('checked', test.is_urine_type);
+                        // if (test.is_urine_type == 1) {
+                        //     // console.log('Please select');
+                        //     $('#urin_test_type_container').show();
+                        //     $('#urin_test_type').attr('required', true);
+                        //     $('#urin_test_type').val(test.urin_test_type);
+                        // }
                         if (test.department !== null && test.department == 3) {
                             $('#urin_test_type_container').show();
                             $('#urin_test_type').prop('required', true);
@@ -763,13 +763,13 @@
             $('#female_low_value_ref_range').val('');
             $('#female_high_value_ref_range').val('');
             $('#nomanualvalues_ref_range').val('');
-            $('#is_urine_type').prop('checked', false);
+            // $('#is_urine_type').prop('checked', false);
                 $('#urin_test_type_container').hide();
                 $('#urin_test_type').attr('required', true);
                 $('#urin_test_type').val('');
-                $('#department').closest('.col-lg-6').hide();
-                $('#cost_container').hide();
-                $('#profile-tab').trigger('click');
+                // $('#department').closest('.col-lg-6').hide();
+                // $('#cost_container').hide();
+                // $('#profile-tab').trigger('click');
         }
 
         // Event listener for modal close event

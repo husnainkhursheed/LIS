@@ -73,7 +73,7 @@ class TestController extends Controller
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
-        $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
+        // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
@@ -102,7 +102,7 @@ class TestController extends Controller
         }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
-        $test->testProfiles()->attach($request->input('test_profiles'));
+        // $test->testProfiles()->attach($request->input('test_profiles'));
 
         if ($request->ajax()) {
             // dd($test);
@@ -156,7 +156,7 @@ class TestController extends Controller
         $test->calculation_explanation  = $request->input('calculation_explanation');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
-        $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
+        // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
@@ -186,8 +186,8 @@ class TestController extends Controller
 
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->update();
-        $test->testProfiles()->detach();
-        $test->testProfiles()->attach($request->input('test_profiles'));
+        // $test->testProfiles()->detach();
+        // $test->testProfiles()->attach($request->input('test_profiles'));
 
 
         Session::flash('message', 'Updated successfully!');

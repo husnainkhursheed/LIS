@@ -116,7 +116,7 @@
                                 <button class="nav-link sub-link">Save</button>
                             </li>
                         @endif
-                        <li class="nav-item border-nav rounded flex-grow-1">    
+                        <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link sub-link" href="#">Delete</a>
                         </li>
 
@@ -393,11 +393,11 @@
                 </div>
                 <div class="card-header d-flex justify-content-between">
                     <h3 class="text-dark">List of tests</h3>
-                    @if (!$allTestsCompleted)
+                    {{-- @if (!$allTestsCompleted)
                     <button type="button" class="btn btn-primary add-btn align-item-end ms-auto" data-bs-toggle="modal"
                         id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1 "></i> Add
                         Test</button>
-                    @endif
+                    @endif --}}
                 </div>
                 <table id="tests-table" class="table table-striped display table-responsive rounded">
                     <thead>
@@ -783,10 +783,10 @@
                             <table id="tests-table" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
-                                        <th class="rounded-start-3 ">Description</th>
+                                        <th class="rounded-start-3 " colspan="2">Description</th>
                                         <th>Test Results </th>
                                         <th>Flag </th>
-                                        <th>Reference Range </th>
+                                        <th colspan="1">Reference Range </th>
                                         <th>Test Notes </th>
                                         <th></th>
                                         <th class="rounded-end-3">Calc</th>
@@ -821,7 +821,7 @@
                                                     $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
                                                 @endphp
                                                 <tr>
-                                                    <td>
+                                                    <td colspan="2">
                                                         <input type="text" data-test-id="{{ $test->id }}"
                                                             name="tests[{{ $test->id }}][id]" class="form-control"
                                                             value="{{ $test->id }}" hidden disabled />
@@ -858,7 +858,7 @@
                                                         <span class="badge badge-pill flag-badge {{ $background }} d-none"
                                                             data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
                                                     </td>
-                                                    <td>
+                                                    <td colspan="1">
                                                         <p class="reference-range">
                                                             @if ($test->reference_range == 'basic_ref')
                                                                 {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
@@ -1294,9 +1294,11 @@
                                             <form id="profileForm" class="d-flex align-items-center">
                                                 @csrf
                                                 <div class="form-group mb-0 mr-2 col-6">
-                                                    <label for="profiles" class="mr-2">Select Profiles: <a
-                                                            href="{{ route('profile.index') }}" target="blank"> <span
-                                                                class="badge bg-info text-white"> Add New</span> </a></label>
+                                                    <label for="profiles" class="mr-2">Select Profiles: <a href=""
+                                                        data-bs-toggle="modal" data-bs-target="#showModalSensitivity"
+                                                        > <span class="badge bg-info text-white"> Add New</span> </a><a
+                                                        href="{{ route('profile.index') }}" target="blank"> <span
+                                                            class="badge bg-info text-white"> All Items</span> </a></label>
                                                     <select name="profiles[]" id="profiles"
                                                         class="js-example-basic-multiple form-control" multiple>
                                                         @php
@@ -1984,6 +1986,115 @@
 
     {{-- end sign modal  --}}
 
+
+    <div class="modal fade" id="showModalSensitivity" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="exampleModalLabel">Add profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="close-modal"></button>
+                </div>
+                <form class="tablelist-form" id="sensitivity_form_submit" action="{{ url('/profile') }}" method="Post"
+                    autocomplete="off">
+
+                    @csrf
+
+
+
+                    <div class="modal-body">
+                        <input type="hidden" id="id-field" />
+
+                        <div class="row g-3">
+
+                            <!-- Row 1 -->
+
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div>
+                                            <label for="name" class="form-label">Name</label>
+                                            <input type="text" id="name" name="name"
+                                                class="form-control" required />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <!-- Row 2 -->
+
+                            <div class="col-lg-12">
+
+                                <div class="row">
+
+                                    <div class="col-lg-12 mt-2">
+
+                                        <div id="attribute-container">
+
+                                            <div class="row input-group">
+
+                                                <div class="col-md-12"><label for="antibiotic"
+                                                        class="form-label">Antibiotic</label></div>
+
+                                            </div>
+
+                                            <div id="attribute-item">
+
+                                                <div class="row input-group">
+
+                                                    <div class="col-md-12">
+
+                                                        <input type="text" class="form-control antibiotic-value"
+                                                            id="antibiotic" style=""
+                                                            name="antibiotic[]" required />
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-lg-12 mt-2">
+                                        <a id="add-item" class="btn btn-soft-primary fw-medium text-white"><i
+                                                class="ri-add-fill me-1 align-bottom "></i> Add Item</a>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+
+                        </div>
+
+                        <!--end row-->
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <div class="hstack gap-2 justify-content-end">
+
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+
+                            <button type="submit" class="btn btn-success" id="add-btn">Add </button>
+
+                            {{-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> --}}
+
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- report notes modal  --}}
     {{-- <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-scrollable">
@@ -2018,7 +2129,7 @@
                             notes.forEach(function(note) {
                                 // Create the note item with comment initially hidden
                                 var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
-                                var noteComment = $('<div class="note-comment" style="display:none;">' + note.comment + '</div>');
+                                var noteComment = $('<div class="note-comment" style="display:none;cursor: pointer;">' + note.comment + '</div>');
 
                                 // Append note item and comment to the container
                                 notesContainer.append(noteItem);
@@ -2077,7 +2188,7 @@
                             notes.forEach(function(note) {
                                 // Create the note item with comment initially hidden
                                 var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
-                                var noteComment = $('<div class="note-comment" style="display:none;">' + note.comment + '</div>');
+                                var noteComment = $('<div class="note-comment" style="display:none; cursor: pointer;">' + note.comment + '</div>');
 
                                 // Append note item and comment to the container
                                 notesContainer.append(noteItem);
@@ -2214,6 +2325,53 @@
 
     </script>
     <script>
+         $(document).ready(function() {
+
+            // Function to add a new input field and delete button
+
+            function newInput() {
+
+                var newItem =
+
+                    // '<label for="attribute_values" class="form-label">Attribute Value</label>' +
+
+                    '<div class="row input-group">' +
+
+                        '<div class="col-md-10">' +
+
+                        '<input type="hidden" class="form-control mt-1 " style="" id="senstivityItems_ids"  name="senstivityItems_ids[]" required />' +
+
+                        '<input type="text" class="form-control antibiotic-value mt-1 " style="" id="antibiotic"  name="antibiotic[]" required />' +
+
+                        '</div>'+
+
+                        '<div class="col-md-2 mt-3 text-left">' +
+
+                        '<span type="button" class="delete-item fs-5 "  style="margin-left: 4px;"><i class="ri-delete-bin-fill align-bottom text-danger"></i></span>' +
+
+                        '</div>' ;
+
+                    '</div>';
+
+                $('#attribute-item').append(newItem);
+
+            }
+
+            // Function to remove the parent element (item) when delete button is clicked
+
+            $('#attribute-item').on('click', '.delete-item', function() {
+
+                $(this).closest('.input-group').remove();
+
+            });
+
+            // Event handler for the "Add Item" link
+
+            $('#add-item').on('click', function() {
+                newInput();
+            });
+
+        });
         jQuery(document).ready(function($) {
             $('.js-example-basic-multiple').select2();
 
@@ -2285,56 +2443,56 @@
                 }
             });
 
-            $('#profile-tab').on('click', function () {
-                // Show Profile Test fields
-                $('#department').closest('.col-lg-6').hide();
-                $('#test_profiles_container').show();
-                $('#is_urine_type_container').show();
-                $('#cost_container').hide();
-                $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
-                $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
+            // $('#profile-tab').on('click', function () {
+            //     // Show Profile Test fields
+            //     $('#department').closest('.col-lg-6').hide();
+            //     $('#test_profiles_container').show();
+            //     $('#is_urine_type_container').show();
+            //     $('#cost_container').hide();
+            //     $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
+            //     $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
 
 
-                // Handle checkbox 'Is urine type'
-                $('#is_urine_type').on('change', function () {
-                    if ($(this).is(':checked')) {
-                        $('#urin_test_type_container').show();
-                        $('#urin_test_type').attr('required', true); // Make urine type required
-                    } else {
-                        $('#urin_test_type_container').hide();
-                        $('#urin_test_type').removeAttr('required'); // Remove urine type required
-                        $('#urin_test_type').val('');
-                    }
-                });
+            //     // Handle checkbox 'Is urine type'
+            //     $('#is_urine_type').on('change', function () {
+            //         if ($(this).is(':checked')) {
+            //             $('#urin_test_type_container').show();
+            //             $('#urin_test_type').attr('required', true); // Make urine type required
+            //         } else {
+            //             $('#urin_test_type_container').hide();
+            //             $('#urin_test_type').removeAttr('required'); // Remove urine type required
+            //             $('#urin_test_type').val('');
+            //         }
+            //     });
 
-                // Set required attributes for Profile Test fields
-                $('#department, #cost').attr('required', false);
-                $('#department').val('');
-                $('#cost').val('');
-                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
-                // $('#nomanualvalues_ref_range').removeAttr('required');
-            });
+            //     // Set required attributes for Profile Test fields
+            //     $('#department, #cost').attr('required', false);
+            //     $('#department').val('');
+            //     $('#cost').val('');
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
+            //     // $('#nomanualvalues_ref_range').removeAttr('required');
+            // });
 
-            $('#individual-tab').on('click', function () {
-                // Show Individual Test fields
-                $('#department').closest('.col-lg-6').show();
-                $('#test_profiles_container').hide();
-                $('#is_urine_type_container').hide();
-                $('#cost_container').show();
-                $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
-                $('#urin_test_type_container').hide();
-                $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
+            // $('#individual-tab').on('click', function () {
+            //     // Show Individual Test fields
+            //     $('#department').closest('.col-lg-6').show();
+            //     $('#test_profiles_container').hide();
+            //     $('#is_urine_type_container').hide();
+            //     $('#cost_container').show();
+            //     $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
+            //     $('#urin_test_type_container').hide();
+            //     $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
 
-                // Set required attributes for Individual Test fields
-                $('#test_profiles').attr('required', false);
-                $('#test_profiles').val('');
-                $('#is_urine_type').prop('checked', false);
-                // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
-                // $('#nomanualvalues_ref_range').attr('required', true);
-            });
+            //     // Set required attributes for Individual Test fields
+            //     $('#test_profiles').attr('required', false);
+            //     $('#test_profiles').val('');
+            //     $('#is_urine_type').prop('checked', false);
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
+            //     // $('#nomanualvalues_ref_range').attr('required', true);
+            // });
 
             // Default selection to Profile Test on page load
-            $('#profile-tab').trigger('click');
+            // $('#profile-tab').trigger('click');
 
             // Show/hide fields based on selected reference range
             $('input[name="reference_range"]').on('change', function() {
@@ -3054,6 +3212,35 @@
                     // }
                 });
             }
+
+
+            $('#sensitivity_form_submit').on('submit', function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '{{ url("/profile") }}',
+                        method: 'POST',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                // Append the new patient to the dropdown
+                                var newOption = new Option(response.profile.name, response.profile.id, true, true);
+                                $('#profiles').append(newOption).trigger('change');
+
+                                // Close the modal
+                                $('#showModalSensitivity').modal('hide');
+
+                                // Optionally, clear the form inputs
+                                $('#sensitivity_form_submit')[0].reset();
+                            } else {
+                                alert('An error occurred while adding the patient.');
+                            }
+                        },
+                        error: function(response) {
+                            alert('An error occurred. Please check the input data.');
+                        }
+                    });
+                });
 
             // Initial binding for existing elements
             bindTestResultChangeEvent();

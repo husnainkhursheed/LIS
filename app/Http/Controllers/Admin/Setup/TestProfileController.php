@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Setup;
 
+use App\Models\Test;
 use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Models\ProfileDepartment;
@@ -34,9 +35,11 @@ class TestProfileController extends Controller
             $sortOrder = $request->input('sort_order') ?? 'asc'; // Default to ascending if not specified
             $query->orderBy($request->input('sort_by'), $sortOrder);
         }
+        $tests = Test::where('is_active', true)->get();
+        // dd($tests);
 
         $notes = $query->paginate(10);
-        return view('setup.testProfiles',compact('notes'));
+        return view('setup.testProfiles',compact('notes','tests'));
     }
 
     public function store(Request $request)
@@ -61,6 +64,7 @@ class TestProfileController extends Controller
                 ]);
             }
         }
+        $testprofile->tests()->attach($request->tests);
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -71,10 +75,13 @@ class TestProfileController extends Controller
     {
         $note = TestProfile::find($id);
         $profiledepartment = ProfileDepartment::where('test_profile_id', $note->id)->get();
+        $profiletests = $note->tests;
+        // dd($profiletests);
 
         return response()->json([
             'note' => $note,
             'profiledepartment' => $profiledepartment,
+            'profiletests' => $profiletests,
         ]);
     }
 
@@ -103,6 +110,8 @@ class TestProfileController extends Controller
             }
         }
 
+        $testprofile->tests()->detach();
+        $testprofile->tests()->attach($request->tests);
 
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');

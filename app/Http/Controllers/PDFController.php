@@ -118,19 +118,23 @@ class PDFController extends Controller
 
             // If the department is 1, categorize the tests by their profiles
             $categorizedTests = [];
+            $sampleProfiles = $sample->testProfiles->pluck('id')->toArray(); // Get profile IDs assigned to the sample
+
             if ($reporttype == '1' || $reporttype == '3') {
                 foreach ($tests as $test) {
-                    // Check if there are any test profiles
+                    // Check if there are any test profiles assigned to the test
                     if ($test->testProfiles->isNotEmpty()) {
-                        // Loop through the test profiles since it's a collection
+                        // Loop through the test profiles and filter them based on the sample's profiles
                         foreach ($test->testProfiles as $profile) {
-                            $profileId = $profile->id;
-                            $profileName = $profile->name;
-                            $categorizedTests[$profileId]['name'] = $profileName;
-                            $categorizedTests[$profileId]['tests'][] = $test;
+                            if (in_array($profile->id, $sampleProfiles)) {
+                                $profileId = $profile->id;
+                                $profileName = $profile->name;
+                                $categorizedTests[$profileId]['name'] = $profileName;
+                                $categorizedTests[$profileId]['tests'][] = $test;
+                            }
                         }
                     } else {
-                        // Handle the case where there is no profile
+                        // Handle the case where there is no profile assigned to the test
                         $profileId = 'no-profile';
                         $profileName = 'Individual Tests';
                         $categorizedTests[$profileId]['name'] = $profileName;
@@ -138,6 +142,7 @@ class PDFController extends Controller
                     }
                 }
             }
+
 
 
             // Calculate pagination

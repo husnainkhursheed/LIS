@@ -74,6 +74,10 @@ class SenstivityItemsController extends Controller
             }
         }
 
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'profile' => $profile]);
+        }
+
         Session::flash('message', 'Profile created successfully!');
 
         Session::flash('alert-class', 'alert-success');

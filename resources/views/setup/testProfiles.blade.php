@@ -177,6 +177,15 @@
                                     <option value="3">Urinalysis / Microbiology</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="tests" class="form-label">Tests</label>
+                                <select class="js-example-basic-multiple" name="tests[]" id="tests" multiple="multiple">
+                                    {{-- <option value="">Select Department</option> --}}
+                                    @foreach ($tests as $test)
+                                        <option value="{{$test->id}}"> {{$test->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -275,6 +284,12 @@
                             });
 
                         $('#department').val(profiledepartment).trigger('change');
+                        
+                        var profiletests = response.profiletests.map(function(surgery) {
+                                return surgery.id;
+                            });
+
+                        $('#tests').val(profiletests).trigger('change');
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit Profile");

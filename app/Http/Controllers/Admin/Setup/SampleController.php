@@ -143,9 +143,6 @@ class SampleController extends Controller
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
         $sample->notes = $request->notes;
-
-
-
         $sample->save();
 
          // Get the list of test IDs from the request
@@ -206,4 +203,25 @@ class SampleController extends Controller
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');
     }
+
+    public function checkTestsInProfiles(Request $request)
+    {
+        // Get the selected profile IDs from the request
+        $selectedProfileIds = $request->input('profiles');
+
+        // Retrieve all the tests that belong to the selected profiles
+        $selectedProfiles = TestProfile::with('tests')->whereIn('id', $selectedProfileIds)->get();
+        $testIdsInSelectedProfiles = $selectedProfiles->pluck('tests.*.id')->flatten()->unique();
+
+        // Find other profiles that also contain these tests
+        $otherProfilesWithSameTests = TestProfile::whereHas('tests', function($query) use ($testIdsInSelectedProfiles) {
+            $query->whereIn('tests.id', $testIdsInSelectedProfiles); // Fully qualify the 'id' here
+        })->whereNotIn('test_profiles.id', $selectedProfileIds)->get();
+
+        // Return the IDs of the profiles to hide
+        $profilesToHide = $otherProfilesWithSameTests->pluck('id')->toArray();
+
+        return response()->json(['profilesToHide' => $profilesToHide ,'testIdsInSelectedProfiles' => $testIdsInSelectedProfiles]);
+    }
+
 }
