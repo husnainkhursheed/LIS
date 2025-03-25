@@ -57,14 +57,14 @@ class TestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:tests,name', // Make sure to replace 'your_table_name' with the actual name of your database table
+            'name' => 'required|unique:tests,name',
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
-            'calculation_explanation' => 'required',
+            // 'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
-       $reference_range = $request->input('reference_range');
+        $reference_range = $request->input('reference_range');
         $test = new Test();
         $test->name  = $request->input('name');
         $test->department  = $request->input('department');
@@ -139,11 +139,11 @@ class TestController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|unique:tests,name',
+            'name' => 'required|unique:tests,name,' . $id, // Exclude current record's ID
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
-            'calculation_explanation' => 'required',
+            // 'calculation_explanation' => 'required',
             'reference_range' => 'required',
        ]);
         $reference_range = $request->input('reference_range');
