@@ -36,14 +36,16 @@ class TestProfileController extends Controller
             $query->orderBy($request->input('sort_by'), $sortOrder);
         }
         $tests = Test::where('is_active', true)->get();
+        $profiles = \App\Models\TestProfile::all();
         // dd($tests);
 
         $notes = $query->paginate(10);
-        return view('setup.testProfiles',compact('notes','tests'));
+        return view('setup.testProfiles',compact('notes','tests','profiles'));
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             // 'code' => 'required',
             'name' => 'required',
@@ -64,7 +66,19 @@ class TestProfileController extends Controller
                 ]);
             }
         }
-        $testprofile->tests()->attach($request->tests);
+
+        // Attach tests with order preservation
+        // $order = 1;
+        // $testOrder = [];
+        // foreach ($request->tests as $testId) {
+        //     $testOrder[$testId] = ['order' => $order++];
+        // }
+
+        // dd($testOrder);
+        $orderedTests = explode(',', $request->input('ordered_tests'));
+        // dd($orderedTests);
+        $testprofile->tests()->attach($orderedTests);
+        // dd($testprofile->tests);
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -78,11 +92,27 @@ class TestProfileController extends Controller
         $profiletests = $note->tests;
         // dd($profiletests);
 
+
         return response()->json([
             'note' => $note,
             'profiledepartment' => $profiledepartment,
             'profiletests' => $profiletests,
         ]);
+    }
+
+    public function fetchTestsFromProfiles(Request $request)
+    {
+        $profileIds = $request->input('profile_ids', []);
+        $testIds = \App\Models\TestProfile::whereIn('id', $profileIds)
+            ->with('tests')
+            ->get()
+            ->flatMap(function($profile) {
+                return $profile->tests->pluck('id');
+            })
+            ->unique()
+            ->values();
+
+        return response()->json(['test_ids' => $testIds]);
     }
 
     public function update(Request $request, $id)
@@ -111,7 +141,8 @@ class TestProfileController extends Controller
         }
 
         $testprofile->tests()->detach();
-        $testprofile->tests()->attach($request->tests);
+        $orderedTests = explode(',', $request->input('ordered_tests'));
+        $testprofile->tests()->attach($orderedTests);
 
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');
