@@ -294,13 +294,13 @@
                             value="{{ $sample->patient->surname }} {{ $sample->patient->first_name }}" disabled />
                     </div>
                 </div>
-                <div class="col-md-4">
+                {{-- <div class="col-md-4">
                     <div class="form-group">
                         <label for="test_number" class="form-label">Test Number</label>
                         <input type="text" id="test_number" name="test_number" class="form-control form-control-sm"
                             value="{{ $sample->test_number }}" disabled />
                     </div>
-                </div>
+                </div> --}}
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="access_number" class="form-label">Access Number</label>

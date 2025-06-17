@@ -47,8 +47,8 @@ class PatientController extends Controller
         $request->validate([
             'first_name' => 'required',
             'surname' => 'required',
-            'contact_number' => 'required',
-            'dob' => 'required',
+            // 'contact_number' => 'required',
+            // 'dob' => 'required',
             'sex' => 'required',
        ]);
 
@@ -83,8 +83,8 @@ class PatientController extends Controller
         $request->validate([
             'first_name' => 'required',
             'surname' => 'required',
-            'contact_number' => 'required',
-            'dob' => 'required',
+            // 'contact_number' => 'required',
+            // 'dob' => 'required',
             'sex' => 'required',
        ]);
 
@@ -110,5 +110,57 @@ class PatientController extends Controller
         $patient->delete();
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');
+    }
+
+    public function getSuggestions(Request $request)
+    {
+        $field = $request->has('first_name') ? 'first_name' : 'surname';
+        $value = $request->input($field);
+
+        if (strlen($value) < 2) {
+            return response()->json([]);
+        }
+
+        $query = Patient::query();
+
+        if ($field === 'first_name') {
+            $query->where('first_name', 'like', $value . '%')
+                  ->orderBy('first_name')
+                  ->limit(10);
+        } else {
+            $query->where('surname', 'like', $value . '%')
+                  ->orderBy('surname')
+                  ->limit(10);
+        }
+
+        return response()->json($query->get(['id', 'first_name', 'surname', 'dob']));
+    }
+
+    public function checkDuplicates(Request $request)
+    {
+        $firstName = $request->input('first_name');
+        $surname = $request->input('surname');
+        $dob = $request->input('dob');
+
+        if (strlen($firstName) < 2 || strlen($surname) < 2) {
+            return response()->json([]);
+        }
+
+        $duplicates = $this->findPotentialDuplicates($firstName, $surname, $dob);
+
+        return response()->json($duplicates);
+    }
+
+    private function findPotentialDuplicates($firstName, $surname, $dob = null)
+    {
+        $query = Patient::where('first_name', 'like', $firstName . '%')
+                       ->where('surname', 'like', $surname . '%');
+
+        if ($dob) {
+            $query->where('dob', $dob);
+        }
+
+        return $query->limit(5)
+                     ->get(['id', 'first_name', 'surname', 'dob', 'contact_number']);
     }
 }

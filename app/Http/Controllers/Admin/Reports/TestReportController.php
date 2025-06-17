@@ -29,25 +29,31 @@ class TestReportController extends Controller
 
     public function index(Request $request)
     {
-        $testNumber = $request->input('test_number');
+        // $testNumber = $request->input('test_number');
         $accessNumber = $request->input('access_number');
         $patientName = $request->input('patient_name');
         $query = Sample::query()->orderBy('received_date', 'asc');
         $currentUser = Auth::user();
 
-        if ($request->filled('test_number')) {
-            $query->where('test_number', $request->test_number);
-        }
+        // if ($request->filled('test_number')) {
+        //     $query->where('test_number', $request->test_number);
+        // }
 
         if ($request->filled('access_number')) {
             $query->where('access_number', $request->access_number);
         }
 
-        if ($request->filled('patient_name')) {
+        if ($request->filled('patient_name') || $request->filled('dob')) {
             $searchTerm = $request->input('patient_name');
-            $query->whereHas('patient', function ($query) use ($searchTerm) {
-                $query->where('surname', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('first_name', 'like', '%' . $searchTerm . '%');
+            $dob = $request->input('dob');
+            $query->whereHas('patient', function ($query) use ($searchTerm, $dob) {
+                if ($searchTerm) {
+                    $query->where('surname', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('first_name', 'like', '%' . $searchTerm . '%');
+                }
+                if ($dob) {
+                    $query->where('dob', $dob);
+                }
             });
         }
 
@@ -133,7 +139,7 @@ class TestReportController extends Controller
         });
 
 
-        return view('reports/test-reports.index', compact('testReports', 'testNumber', 'accessNumber', 'patientName'));
+        return view('reports/test-reports.index', compact('testReports', 'accessNumber', 'patientName'));
     }
 
 
@@ -280,18 +286,18 @@ class TestReportController extends Controller
         if ($reporttype == '1' || $reporttype == '3') {
             foreach ($tests as $test) {
                 // Check if there are any test profiles assigned to the test
-                if ($test->testProfiles->isNotEmpty()) {
-                    // Loop through the test profiles and filter them based on the sample's profiles
-                    foreach ($test->testProfiles as $profile) {
-                        if (in_array($profile->id, $sampleProfiles)) {
-                            $profileId = $profile->id;
-                            $profileName = $profile->name;
-                            $categorizedTests[$profileId]['name'] = $profileName;
-                            $categorizedTests[$profileId]['tests'][] = $test;
-                        }
+                $testIncludedInProfile = false;
+                foreach ($sample->testProfiles as $profile) {
+                    if ($profile->tests->contains('id', $test->id)) {
+                        $profileId = $profile->id;
+                        $profileName = $profile->name;
+                        $categorizedTests[$profileId]['name'] = $profileName;
+                        $categorizedTests[$profileId]['tests'][] = $test;
+                        $testIncludedInProfile = true;
                     }
-                } else {
-                    // Handle the case where there is no profile assigned to the test
+                }
+                if (!$testIncludedInProfile) {
+                    // Handle the case where the test is not included in any sample profile
                     $profileId = 'no-profile';
                     $profileName = 'Individual Tests';
                     $categorizedTests[$profileId]['name'] = $profileName;
@@ -300,7 +306,7 @@ class TestReportController extends Controller
             }
         }
 
-        // dd($categorizedTestss);
+        // dd($categorizedTests);
 
 
         $test_profiles = TestProfile::all();
@@ -837,7 +843,7 @@ class TestReportController extends Controller
                     break;
 
                 case 2: // Cytology/Gynecology Results
-                    if (empty($testReport->cytologyGynecologyResults->first())) { 
+                    if (empty($testReport->cytologyGynecologyResults->first())) {
                         session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                         break;
                     }

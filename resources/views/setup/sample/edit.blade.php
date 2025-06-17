@@ -48,7 +48,7 @@
             @csrf
             @method('PUT')
                 <div class="row">
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
@@ -56,11 +56,11 @@
                                 <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
                                 disabled required />
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  class="form-control"
+                            <input type="text" id="access_number" name="access_number" disabled  class="form-control"
                                 required value="{{ $sample->access_number }}" />
                         </div>
                     </div>

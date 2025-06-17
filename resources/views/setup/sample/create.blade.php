@@ -72,11 +72,11 @@
                 </h1>
             </header>
             {{-- <div id="liveTime"></div> --}}
-            <form class="tablelist-form" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
+            <form class="" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
             @csrf
 
                 <div class="row">
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" value="{{$test_number}}" class="form-control"
@@ -84,12 +84,14 @@
                                 <input type="text" id="" name="" value="{{$test_number}}" class="form-control"
                                 disabled  />
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  class="form-control"
-                                required />
+                            <input type="text" id="access_number" name="access_number"  value="{{$access_number}}" hi class="form-control"
+                               hidden required />
+                            <input type="text" id="" name="" value="{{$access_number}}" class="form-control"
+                            disabled  />
                         </div>
                     </div>
                 </div>
@@ -512,6 +514,26 @@
         </div>
     </div>
     {{-- end model  --}}
+
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="reviewModalLabel">Review Sample Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reviewContent">
+                        <!-- Review content will be filled by JS -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Edit</button>
+                    <button type="button" class="btn btn-success" id="confirmSubmit">Confirm & Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -535,6 +557,45 @@
 
 
     <script>
+
+            // On confirm, submit the form
+            // $('#confirmSubmit').on('click', function() {
+            //     document.forms['leadtype_form'].submit();
+            // });
+        // Set max for received_date to today
+        var today = new Date().toISOString().split('T')[0];
+        $('#received_date').attr('max', today);
+
+        function validateDates(showAlert = true) {
+            var collected = $('#collected_date').val();
+            var received = $('#received_date').val();
+
+            if (collected && received) {
+                if (collected > received) {
+                    if (showAlert) alert('Collected date cannot be later than received date.');
+                    $('#collected_date').val('');
+                    return false;
+                }
+            }
+            if (received && received > today) {
+                if (showAlert) alert('Received date cannot be in the future.');
+                $('#received_date').val('');
+                return false;
+            }
+            return true;
+        }
+
+        $('#collected_date, #received_date').on('change', function() {
+            validateDates(true);
+        });
+
+        // $('#leadtype_form').on('submit', function(e) {
+        //     if (!validateDates(true)) {
+        //         e.preventDefault();
+        //         return false;
+        //     }
+        // });
+
         function checkTestProfiles() {
             $('#test_requested').val('').trigger('change');
             // Get selected profile IDs
@@ -589,6 +650,48 @@
             });
         }
        $(document).ready(function() {
+
+            $('#submit').on('click', function(e) {
+                e.preventDefault();
+
+                // Gather form data for review
+                let patient = $('#patient_id option:selected').text();
+                let doctor = $('#doctor_id option:selected').text();
+                let institution = $('#institution_id option:selected').text();
+                let billTo = $('#bill_to').val();
+                let collected = $('#collected_date').val();
+                let received = $('#received_date').val();
+                let notes = $('#notes').val();
+                let profiles = $('#test_profiles option:selected').map(function(){return $(this).text();}).get().join(', ');
+                let tests = $('#test_requested option:selected').map(function(){return $(this).text();}).get().join(', ');
+                let totalProfile = $('#total_cost_profile').val();
+                let totalTest = $('#total_cost').val();
+                let grandTotal = $('#grand_total').val();
+
+                let html = `
+                    <strong>Patient:</strong> ${patient}<br>
+                    <strong>Doctor:</strong> ${doctor}<br>
+                    <strong>Institution:</strong> ${institution}<br>
+                    <strong>Bill To:</strong> ${billTo}<br>
+                    <strong>Collected Date:</strong> ${collected}<br>
+                    <strong>Received Date:</strong> ${received}<br>
+                    <strong>Notes:</strong> ${notes}<br>
+                    <strong>Test Profiles:</strong> ${profiles}<br>
+                    <strong>Individual Tests:</strong> ${tests}<br>
+                    <strong>Total Profile Cost:</strong> ${totalProfile}<br>
+                    <strong>Total Test Cost:</strong> ${totalTest}<br>
+                    <strong>Grand Total:</strong> ${grandTotal}<br>
+                `;
+                $('#reviewContent').html(html);
+                $('#reviewModal').modal('show');
+            });
+            document.getElementById('confirmSubmit').addEventListener('click', function () {
+                console.log(document.getElementById('leadtype_form'));
+                document.getElementById('leadtype_form').requestSubmit();
+            });
+
+            // Intercept submit button
+
             function calculateGrandTotal() {
                 let totalCost = parseFloat($('#total_cost').val()) || 0;
                 let totalProfileCost = parseFloat($('#total_cost_profile').val()) || 0;
@@ -721,18 +824,18 @@
                 });
             });
         });
-        document.querySelector("#lead-image-input").addEventListener("change", function() {
-            var preview = document.querySelector("#lead-img");
-            var file = document.querySelector("#lead-image-input").files[0];
-            console.log(file);
-            var reader = new FileReader();
-            reader.addEventListener("load", function() {
-                preview.src = reader.result;
-            }, false);
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        });
+        // document.querySelector("#lead-image-input").addEventListener("change", function() {
+        //     var preview = document.querySelector("#lead-img");
+        //     var file = document.querySelector("#lead-image-input").files[0];
+        //     console.log(file);
+        //     var reader = new FileReader();
+        //     reader.addEventListener("load", function() {
+        //         preview.src = reader.result;
+        //     }, false);
+        //     if (file) {
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {

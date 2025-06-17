@@ -292,9 +292,18 @@
                             </div> --}}
                             <div class="col-lg-6">
                                 <div>
-                                    <label for="specimen_type" class="form-label">Specimen Type</label>
-                                    <input type="text" id="specimen_type" class="form-control" name="specimen_type"
-                                        placeholder="Enter Specimen Type" required />
+                                    <label for="specimen_type" class="form-label">Specimen Type<a href=""
+                                data-bs-toggle="modal" data-bs-target="#showModalSpecimenType"
+                                > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                    {{-- <input type="text" id="specimen_type" class="form-control" name="specimen_type"
+                                        placeholder="Enter Specimen Type" required /> --}}
+                                    <select class="js-example-basic-multiple form-control" name="specimen_type" id="specimen_type">
+                                        @foreach ($specimen_types as $specimen_type)
+
+                                            <option value="{{ $specimen_type->id }}">
+                                                {{ $specimen_type->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-lg-6" id="cost_container">
@@ -328,7 +337,7 @@
                             <div class="row" id="basicValues">
                                 {{-- <label for="" class="form-label">High value with optional sex</label> --}}
                                 {{-- <div> --}}
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
                                         <div>
                                             <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
                                             <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
@@ -336,11 +345,18 @@
                                         </div>
                                     </div>
                                         {{-- <label for="male" class="form-label">High Value</label> --}}
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
                                         <div>
                                             <label for="basic_high_value_ref_range" class="form-label">High Value</label>
                                             <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
                                                 placeholder="Enter High Value" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="basic_unit_value_ref_range" class="form-label">Unit</label>
+                                            <input type="text" id="basic_unit_value_ref_range" class="form-control" name="basic_unit_value_ref_range"
+                                                placeholder="Enter unit" required />
                                         </div>
                                     </div>
                                     {{-- <label for="female" class="form-label">Low value</label> --}}
@@ -348,7 +364,7 @@
                             </div>
                             <div class="row" id="optionalValues">
                                 <h5 for="" class="form-label text-black fw-bolder">Male </h5>
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div>
                                         <label for="male_low_value_ref_range" class="form-label">Low Value</label>
                                         <input type="text" id="male_low_value_ref_range" class="form-control" name="male_low_value_ref_range"
@@ -356,15 +372,22 @@
                                     </div>
                                 </div>
                                     {{-- <label for="male" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div>
                                         <label for="male_high_value_ref_range" class="form-label">High Value</label>
                                         <input type="text" id="male_high_value_ref_range" class="form-control" name="male_high_value_ref_range"
                                             placeholder="Enter High Value"  />
                                     </div>
                                 </div>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="male_unit_value_ref_range" class="form-label">Unit</label>
+                                        <input type="text" id="male_unit_value_ref_range" class="form-control" name="male_unit_value_ref_range"
+                                            placeholder="Enter unit" required />
+                                    </div>
+                                </div>
                                 <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div>
                                         <label for="female_low_value_ref_range" class="form-label">Low Value</label>
                                         <input type="text" id="female_low_value_ref_range" class="form-control" name="female_low_value_ref_range"
@@ -372,16 +395,29 @@
                                     </div>
                                 </div>
                                     {{-- <label for="female" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div>
                                         <label for="female_high_value_ref_range" class="form-label">High Value</label>
                                         <input type="text" id="female_high_value_ref_range" class="form-control" name="female_high_value_ref_range"
                                             placeholder="Enter High Value"  />
                                     </div>
                                 </div>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="female_unit_value_ref_range" class="form-label">Unit</label>
+                                        <input type="text" id="female_unit_value_ref_range" class="form-control" name="female_unit_value_ref_range"
+                                            placeholder="Enter unit" required />
+                                    </div>
+                                </div>
                             </div>
                             <div class="row" id="noManualValues">
                                 <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
+                            </div>
+                            <div class="col-lg-12">
+                                <div>
+                                    <label for="test_notes" class="form-label">Test Notes</label>
+                                    <textarea name="test_notes" id="test_notes" class="form-control" cols="30" rows="3"></textarea>
+                                </div>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
@@ -399,6 +435,44 @@
                             <button type="button" class="btn btn-light"
                                 data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-success" id="add-btn">Add Test</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="showModalSpecimenType" tabindex="-1" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Specimen Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                </div>
+                <form class="tablelist-form" id="specimen_type_form" action="{{ url('/specimen-types') }}" method="POST" autocomplete="off">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="id-field" />
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="name" class="form-label">Specimen Type Name</label>
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Specimen Type Name" required />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="priority" class="form-label">Priority</label>
+                                    <input type="number" id="priority" name="priority" class="form-control" placeholder="Enter Priority" required />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success" id="add-btn">Add Specimen Type</button>
                         </div>
                     </div>
                 </form>
@@ -488,10 +562,13 @@
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', true);
                     $('#basic_high_value_ref_range').prop('required', true);
+                    $('#basic_unit_value_ref_range').prop('required', true);
                     $('#male_low_value_ref_range').prop('required', false);
                     $('#male_high_value_ref_range').prop('required', false);
+                    $('#male_unit_value_ref_range').prop('required', false);
                     $('#female_low_value_ref_range').prop('required', false);
                     $('#female_high_value_ref_range').prop('required', false);
+                    $('#female_unit_value_ref_range').prop('required', false);
                 } else if (this.value === 'optional_ref') {
                     $('#basicValues').hide();
                     $('#optionalValues').show();
@@ -499,10 +576,13 @@
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', false);
                     $('#basic_high_value_ref_range').prop('required', false);
+                    $('#basic_unit_value_ref_range').prop('required', false);
                     $('#male_low_value_ref_range').prop('required', true);
                     $('#male_high_value_ref_range').prop('required', true);
+                    $('#male_unit_value_ref_range').prop('required', true);
                     $('#female_low_value_ref_range').prop('required', true);
                     $('#female_high_value_ref_range').prop('required', true);
+                    $('#female_unit_value_ref_range').prop('required', true);
                 }else if (this.value === 'no_manual_tag') {
                     $('#basicValues').hide();
                     $('#optionalValues').hide();
@@ -510,10 +590,13 @@
                     // Make fields required
                     $('#basic_low_value_ref_range').prop('required', false);
                     $('#basic_high_value_ref_range').prop('required', false);
+                    $('#basic_unit_value_ref_range').prop('required', false);
                     $('#male_low_value_ref_range').prop('required', false);
                     $('#male_high_value_ref_range').prop('required', false);
+                    $('#male_unit_value_ref_range').prop('required', false);
                     $('#female_low_value_ref_range').prop('required', false);
                     $('#female_high_value_ref_range').prop('required', false);
+                    $('#female_unit_value_ref_range').prop('required', false);
                 }
             });
 
@@ -611,6 +694,7 @@
                         $('#specimen_type').val(test.specimen_type);
                         $('#cost').val(test.cost);
                         $('#calculation_explanation').val(test.calculation_explanation);
+                        $('#test_notes').val(test.test_notes);
                         $('#reference_range').val(test.reference_range);
                         // $('#is_urine_type').val(test.is_urine_type);
                         if (response.testProfiles) {
@@ -628,16 +712,22 @@
                             // Make fields required
                             $('#basic_low_value_ref_range').prop('required', true);
                             $('#basic_high_value_ref_range').prop('required', true);
+                            $('#basic_unit_value_ref_range').prop('required', true);
                             $('#male_low_value_ref_range').prop('required', false);
                             $('#male_high_value_ref_range').prop('required', false);
+                            $('#male_unit_value_ref_range').prop('required', false);
                             $('#female_low_value_ref_range').prop('required', false);
                             $('#female_high_value_ref_range').prop('required', false);
+                            $('#female_unit_value_ref_range').prop('required', false);
                             $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
                             $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#basic_unit_value_ref_range').val(test.basic_unit_value_ref_range);
                             $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
                             $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#male_unit_value_ref_range').val(test.male_unit_value_ref_range);
                             $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
                             $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                            $('#female_unit_value_ref_range').val(test.female_unit_value_ref_range);
                         } else if (test.reference_range === 'optional_ref') {
                             $('#basic_ref').prop('checked', false);
                             $('#optional_ref').prop('checked', true);
@@ -648,16 +738,22 @@
                             // Make fields required
                             $('#basic_low_value_ref_range').prop('required', false);
                             $('#basic_high_value_ref_range').prop('required', false);
+                            $('#basic_unit_value_ref_range').prop('required', false);
                             $('#male_low_value_ref_range').prop('required', true);
                             $('#male_high_value_ref_range').prop('required', true);
+                            $('#male_unit_value_ref_range').prop('required', true);
                             $('#female_low_value_ref_range').prop('required', true);
                             $('#female_high_value_ref_range').prop('required', true);
+                            $('#female_unit_value_ref_range').prop('required', false);
                             $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
                             $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#basic_unit_value_ref_range').val(test.basic_unit_value_ref_range);
                             $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
                             $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#male_unit_value_ref_range').val(test.male_unit_value_ref_range);
                             $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
                             $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                            $('#female_unit_value_ref_range').val(test.female_unit_value_ref_range);
                         }else if (test.reference_range === 'no_manual_tag') {
                             $('#basic_ref').prop('checked', false);
                             $('#optional_ref').prop('checked', false);
@@ -667,10 +763,13 @@
                             $('#noManualValues').show();
                             $('#basic_low_value_ref_range').prop('required', false);
                             $('#basic_high_value_ref_range').prop('required', false);
+                            $('#basic_unit_value_ref_range').prop('required', true);
                             $('#male_low_value_ref_range').prop('required', false);
                             $('#male_high_value_ref_range').prop('required', false);
+                            $('#male_unit_value_ref_range').prop('required', false);
                             $('#female_low_value_ref_range').prop('required', false);
                             $('#female_high_value_ref_range').prop('required', false);
+                            $('#female_unit_value_ref_range').prop('required', false);
                             $('#nomanualvalues_ref_range').val(test.nomanualvalues_ref_range);
                         }
                         // $('#area').val(test.area);
@@ -752,20 +851,26 @@
             $('#test_profiles').prop('required', false);
             $('#basic_low_value_ref_range').prop('required', true);
             $('#basic_high_value_ref_range').prop('required', true);
+            $('#basic_unit_value_ref_range').prop('required', true);
             $('#male_low_value_ref_range').prop('required', false);
             $('#male_high_value_ref_range').prop('required', false);
+            $('#male_unit_value_ref_range').prop('required', false);
             $('#female_low_value_ref_range').prop('required', false);
             $('#female_high_value_ref_range').prop('required', false);
+            $('#female_unit_value_ref_range').prop('required', false);
             $('#basic_low_value_ref_range').val('');
             $('#basic_high_value_ref_range').val('');
+            $('#basic_unit_value_ref_range').val('');
             $('#male_low_value_ref_range').val('');
             $('#male_high_value_ref_range').val('');
+            $('#male_unit_value_ref_range').val('');
             $('#female_low_value_ref_range').val('');
             $('#female_high_value_ref_range').val('');
+            $('#female_unit_value_ref_range').val('');
             $('#nomanualvalues_ref_range').val('');
             // $('#is_urine_type').prop('checked', false);
                 $('#urin_test_type_container').hide();
-                $('#urin_test_type').attr('required', true);
+                $('#urin_test_type').attr('required', false);
                 $('#urin_test_type').val('');
                 // $('#department').closest('.col-lg-6').hide();
                 // $('#cost_container').hide();
@@ -809,6 +914,34 @@
         // Function to reset modal when clicking the "Close" button
         $('#close-modal').on('click', function() {
             resetModal();
+        });
+
+        $('#specimen_type_form').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '{{ url("/specimen-types") }}',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Append the new patient to the dropdown
+                        var newOption = new Option(response.specimenType.name, response.specimenType.id, true, true);
+                        $('#specimen_type').append(newOption).trigger('change');
+
+                        // Close the modal
+                        $('#showModalSpecimenType').modal('hide');
+
+                        // Optionally, clear the form inputs
+                        $('#specimen_type_form')[0].reset();
+                    } else {
+                        alert('An error occurred while adding the patient.');
+                    }
+                },
+                error: function(response) {
+                    alert('An error occurred. Please check the input data.');
+                }
+            });
         });
     });
 

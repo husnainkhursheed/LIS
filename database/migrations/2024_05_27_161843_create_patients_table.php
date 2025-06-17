@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('surname');
-            $table->string('contact_number');
-            $table->date('dob');
+            $table->string('contact_number')->default(1);
+            $table->date('dob')->default(1);
             $table->enum('sex', ['Male', 'Female']);
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();

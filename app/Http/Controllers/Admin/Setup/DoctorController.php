@@ -45,11 +45,11 @@ class DoctorController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $doctor = new Doctor();
@@ -83,11 +83,11 @@ class DoctorController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $doctor = Doctor::find($id);

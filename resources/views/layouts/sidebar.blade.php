@@ -32,7 +32,7 @@
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="menu-title"><span>@lang('translation.menu')</span></li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="/">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="/?search=&sort_by=access_number">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/dashboard.png') }}" alt="" height="18">
                         </span>

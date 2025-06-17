@@ -58,8 +58,8 @@ class HomeController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function($query) use ($searchTerm) {
-                $query->where('test_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('access_number', 'like', '%' . $searchTerm . '%')
+                $query->where('access_number', 'like', '%' . $searchTerm . '%')
+                    //   ->orWhere('access_number', 'like', '%' . $searchTerm . '%')
                       ->orWhere('received_date', 'like', '%' . $searchTerm . '%')
                       ->orWhereHas('patient', function($patientQuery) use ($searchTerm) {
                           $patientQuery->where('first_name', 'like', '%' . $searchTerm . '%')
@@ -195,6 +195,7 @@ class HomeController extends Controller
 
             return $sample;
         });
+        // dd($samples);
 
         return view('index' , compact('samples'));
     }

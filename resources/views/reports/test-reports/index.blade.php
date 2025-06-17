@@ -40,10 +40,10 @@ use \Carbon\Carbon;
             </div>
             <form class="mb-4" action="{{ route('test-reports.index') }}" method="GET">
                 <div class="row d-flex align-items-end">
-                    <div class="col-3">
+                    {{-- <div class="col-3">
                         <label for="test_number">Test Number</label>
                         <input type="text" name="test_number" id="test_number"  value="{{ $testNumber ?? '' }}" class="form-control">
-                    </div>
+                    </div> --}}
                     <div class="col-3">
                         <label for="access_number">Access Number</label>
                         <input type="text" name="access_number" id="access_number"  value="{{ $accessNumber ?? '' }}"  class="form-control">
@@ -51,6 +51,10 @@ use \Carbon\Carbon;
                     <div class="col-4">
                         <label for="patient_name">Patient Name</label>
                         <input type="text" name="patient_name" id="patient_name" value="{{ $patientName ?? '' }}" class="form-control">
+                    </div>
+                    <div class="col-2">
+                        <label for="dob">DOB</label>
+                        <input type="date" name="dob" id="dob" value="{{ request('dob') }}" class="form-control">
                     </div>
                     <div class="col-2">
 
@@ -72,7 +76,7 @@ use \Carbon\Carbon;
                             <table id="" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
-                                        <th>Test #</th>
+                                        {{-- <th>Test #</th> --}}
                                         <th>Access #</th>
                                         <th>Patient Name</th>
                                         <th>Date Received</th>
@@ -84,7 +88,7 @@ use \Carbon\Carbon;
                                 <tbody>
                                     @foreach($testReports as $testReport)
                                         <tr>
-                                            <td>{{ $testReport->test_number }}</td>
+                                            {{-- <td>{{ $testReport->test_number }}</td> --}}
                                             <td>{{ $testReport->access_number }}</td>
 
                                             <td>{{ $testReport->patient->first_name }} {{ $testReport->patient->surname }} </td>
