@@ -372,9 +372,9 @@
                                             $referenceRange = '';
 
                                             if ($test->reference_range == 'basic_ref') {
-                                                $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
+                                                $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '') . ' ' . ($test->basic_unit_value_ref_range ?? '');
                                             } elseif ($test->reference_range == 'optional_ref') {
-                                                $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
+                                                $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . ' '. ($test->male_unit_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? ''). ' '. ($test->female_unit_value_ref_range ?? '');
                                             } elseif ($test->reference_range == 'no_manual_tag') {
                                                 $referenceRange = ($test->nomanualvalues_ref_range ?? '');
                                             }

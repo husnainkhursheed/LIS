@@ -468,11 +468,11 @@
                                         <td>
                                             <p class="reference-range">
                                                 @if ($test->reference_range == 'basic_ref')
-                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range.' '.$test->basic_unit_value_ref_range }}
                                                 @elseif ($test->reference_range == 'optional_ref')
-                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range.' '.$test->male_unit_value_ref_range }}
                                                     <br>
-                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range.' '.$test->female_unit_value_ref_range }}
                                                 @elseif ($test->reference_range == 'no_manual_tag')
                                                     {{ $test->nomanualvalues_ref_range }}
                                                 @endif

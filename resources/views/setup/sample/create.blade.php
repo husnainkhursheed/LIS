@@ -101,13 +101,13 @@
                          <div class="form-group">
                             <label for="collected_date" class="form-label">Collected Date</label>
                             <input type="date" id="collected_date" name="collected_date" class="form-control"
-                                required />
+                            value="{{ old('collected_date') }}" required />
                         </div>
                   </div>
                     <div class="col-md-6">
                          <div class="form-group">
                             <label for="received_date" class="form-label">Received Date </label>
-                            <input type="date" class="form-control" id="received_date" name="received_date"/>
+                            <input type="date" class="form-control" id="received_date" name="received_date" value="{{ old('received_date') }}"/>
                         </div>
                      </div>
                 </div>
@@ -119,11 +119,12 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalPatient"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
+                                            <option value=""></option>
                                             @foreach ($patients as $patient)
                                                 @php
                                                     $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
                                                 @endphp
-                                                <option value="{{ $patient->id }}">
+                                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}> 
                                                     {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
@@ -135,8 +136,9 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalDoctor"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="doctor_id" id="doctor_id">
+                                <option value=""></option>
                                 @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}">
+                                    <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
                                         {{ $doctor->name }}</option>
                                 @endforeach
                             </select>
@@ -151,8 +153,9 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalInstitution"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="institution_id" id="institution_id">
+                                <option value=""></option>
                                 @foreach ($institutions as $institution)
-                                <option value="{{ $institution->id }}">
+                                <option value="{{ $institution->id }}" {{ old('institution_id') == $institution->id ? 'selected' : '' }}>
                                     {{ $institution->name }}</option>
                                 @endforeach
                             </select>
@@ -163,29 +166,29 @@
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
                                 {{-- <option selected>Choose Institution</option> --}}
-                                <option value="Patient">Patient</option>
-                                <option value="Doctor">Doctor</option>
-                                <option value="Other">Other</option>
+                                <option value="Patient" {{ old('bill_to') == 'Patient' ? 'selected' : '' }}>Patient</option>
+                                <option value="Doctor" {{ old('bill_to') == 'Doctor' ? 'selected' : '' }}>Doctor</option>
+                                <option value="Other" {{ old('bill_to') == 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="notes" class="form-label">Notes</label>
                             <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control"></textarea>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_profiles" class="form-label">Test Profiles</label>
                             <select  class="js-example-basic-multiple"   name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()" multiple="multiple">
                                 @foreach ($test_profiles as $item)
-                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}">{{$item->name.' '. $item->cost}}</option>
+                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}" {{ (collect(old('test_profiles'))->contains($item->id)) ? 'selected' : '' }}>{{$item->name.' '. $item->cost}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -202,7 +205,7 @@
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
                                 {{-- {{dd($tests->where('department'!= null))}} --}}
                                 @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}" data-cost="{{ $test->cost }}">
+                                    <option value="{{ $test->id }}" data-cost="{{ $test->cost }}" {{ (collect(old('test_requested'))->contains($test->id)) ? 'selected' : '' }}>
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
@@ -661,7 +664,7 @@
                 let billTo = $('#bill_to').val();
                 let collected = $('#collected_date').val();
                 let received = $('#received_date').val();
-                let notes = $('#notes').val();
+                // let notes = $('#notes').val();
                 let profiles = $('#test_profiles option:selected').map(function(){return $(this).text();}).get().join(', ');
                 let tests = $('#test_requested option:selected').map(function(){return $(this).text();}).get().join(', ');
                 let totalProfile = $('#total_cost_profile').val();
@@ -675,7 +678,6 @@
                     <strong>Bill To:</strong> ${billTo}<br>
                     <strong>Collected Date:</strong> ${collected}<br>
                     <strong>Received Date:</strong> ${received}<br>
-                    <strong>Notes:</strong> ${notes}<br>
                     <strong>Test Profiles:</strong> ${profiles}<br>
                     <strong>Individual Tests:</strong> ${tests}<br>
                     <strong>Total Profile Cost:</strong> ${totalProfile}<br>
