@@ -54,17 +54,18 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 4px;
             font-size: 14px;
+            line-height: 1.2;
         }
         .table-wrapper {
            page-break-inside: avoid;
         }
         .order-details h2 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #3d90ca;
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
         .text-start {
@@ -127,48 +128,78 @@
     <table class="order-details">
         <thead>
             <tr>
-                <th width="50%" colspan="2">
-                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
-                    <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
-                    {{-- <h2 class="text-start">Funda Ecommerce</h2> --}}
+                <th width="50%" colspan="2" style="vertical-align: top;">
+                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" style="height: 70px;"><br>
+                    <span style="display: block; font-weight:normal;, font-size: 15px; margin-top: 1px;"><small>ISO:15189 Accredited</small></span>
+                    <span style="margin-top: 8px; display: inline-block;"><small>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</small></span>
                 </th>
                 <th width="50%" colspan="5" class="text-end company-data">
                     <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
-                    <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
-                    <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>TEL: </strong>(868) 229-8643 or 316-1383</span><br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>Mail: </strong>borderlifemedlab@gmail.com</span><br>
                 </th>
             </tr>
             <tr>
-                <th width="40%" colspan="" style="vertical-align: top;  ">
-                    <h2>Patient Information</h2><br>
-                    <span><strong>Name:</strong>
+                <th width="45%" style="vertical-align: top;">
+                    <h2>Patient Information</h2>
+                    <table>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
+                        </tr>
+                        @php
+                            $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                            $age = $dob->age;
+                        @endphp
+                        <tr>
+                            <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Institution:</strong> {{ $sample->institution->name }}</td>
+                        </tr>
+                    </table>
+                    {{-- <span style="font-weight: normal"><strong>Name:</strong>
                         {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
-                    </span><br><br>
-                    <span><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
-                    <span><strong> &nbsp;&nbsp;&nbsp;&nbsp; DOB:</strong>{{ $sample->patient->dob ?? '' }}</span>
-                    <br><br>
+                    </span><span style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span><br><br>
+
+                    <span style="font-weight: normal"><strong> DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</span>@php
+                        $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                        $age = $dob->age;
+                    @endphp
+                    <span style="font-weight: normal">
+                    <strong>Age:</strong> {{ $age }} yrs</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Institution:</strong> {{ $sample->institution->name }}</span> <br> --}}
+
                 </th>
-                <th width="60%" colspan="6" class="company-data" style="vertical-align: top; ">
+                <th width="60%" colspan="6" class="company-data" style="vertical-align: top;">
                     <h2>Report Information</h2>
                     <table>
                         <tr>
-                            <td><strong>Collection Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
-                            <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Received Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
-                            <td><strong>Company:</strong> PRIVATE</td>
+                            <td style="font-weight: normal"><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Sample ID:</strong> {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Report Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
-                            <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
                         </tr>
                     </table>
                 </th>
 
+            </tr>
+            <tr>
+                <td colspan="7">
+                    <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                </td>
             </tr>
             <tr>
                 <th colspan="7" style="">
@@ -204,9 +235,10 @@
             ? $testReport->urinalysisMicrobiologyResults->first()
             : [];
 
-            $procedureResults = $urinalysisMicrobiologyResults
-            ? $urinalysisMicrobiologyResults->procedureResults
-            : [];
+            // $procedureResults = $sample->sensitivityResults
+            // ? $sample->sensitivityResults[0]->sensitivity_profiles
+            // : [];
+            $procedureResults = $sample ? $sample->procedureResults : [];
 
 
 
@@ -407,6 +439,8 @@
     @endphp
 
     @if ($filteredResults->isNotEmpty())
+    <br>
+    <br>
     <table class="table-wrapper">
         <thead>
             <tr>
@@ -424,7 +458,7 @@
             <tr>
                 <td width="10%"><strong>{{ $value->procedure ?? '' }}</strong></td>
                 <td>
-                    {{ $value->specimen_note ?? '' }}
+                    {!! nl2br(e($value->specimen_note ?? '')) !!}
                 </td>
             </tr>
             @endforeach
@@ -433,11 +467,14 @@
     {{-- <div class="page-break"></div> --}}
     @endif
 
+
     @php
-    $data = json_decode($urinalysisMicrobiologyResults->sensitivity ?? '[]', true);
+        $sensitivityResult = $sample->sensitivityResults->first();
+        $data = $sensitivityResult ? json_decode($sensitivityResult->sensitivity, true) : [];
     @endphp
     @if ($data)
-
+    <br>
+    <br>
     <table class="table-wrapper">
         <thead>
             <tr>
@@ -445,10 +482,11 @@
                     SENSITIVITY
                 </th>
             </tr>
+            @foreach ($data as $i)
             <tr class="bg-blue">
                 <th width="40%">MICROORGANISM &nbsp; ISOLATED</th>
                 <th>ANTIBIOTICS </th>
-                <th>MIC(ug/mL)</th>
+                <th>{{ getSensitivityUnitByMicroorganism($i['microorganism']) }}</th>
                 <th>SENSITIVE</th>
                 <th>RESISTANT</th>
                 <th>INTERMEDIATE</th>
@@ -456,26 +494,62 @@
         </thead>
 
         <tbody>
-            @foreach ($data as $i)
-            @foreach ($i['items'] as $index => $item)
-            <tr style="{{ $index === 0 ? '' : '' }}">
-                <td>{{ $index === 0 ? $i['microorganism'] : '' }}</td>
-                <td>{{ $item['antibiotic'] }}</td>
-                <td class="text-center">{{ $item['mic'] }}</td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='sensitive' ? 'checked' : '' }}></td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='resistant' ? 'checked' : '' }}></td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='intermediate' ? 'checked' : '' }}></td>
+
+                @foreach ($i['items'] as $index => $item)
+                <tr style="{{ $index === 0 ? '' : '' }}">
+                    <td>{{ $index === 0 ? $i['microorganism'] : '' }}</td>
+                    <td>{{ $item['antibiotic'] }}</td>
+                    <td class="text-center">{{ $item['mic'] }}</td>
+                    <td class="text-center"><input type="radio"
+                            name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
+                            $item['sensitivity']==='sensitive' ? 'checked' : '' }}></td>
+                    <td class="text-center"><input type="radio"
+                            name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
+                            $item['sensitivity']==='resistant' ? 'checked' : '' }}></td>
+                    <td class="text-center"><input type="radio"
+                            name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
+                            $item['sensitivity']==='intermediate' ? 'checked' : '' }}></td>
+                </tr>
+                @endforeach
+
+        </tbody>
+        @endforeach
+    </table>
+    <br>
+    <br>
+    <table class="table-wrapper">
+        <thead>
+            <tr>
+                <th class="text-start heading" colspan="2">
+                    REVIEW AND RECOMMENDATIONS
+                </th>
             </tr>
-            @endforeach
-            @endforeach
+        </thead>
+        <tbody>
+            <tr>
+                <td>{!! nl2br(e($sensitivityResult->review ?? '')) !!}</td>
+            </tr>
+            <br><br><br>
+            <tr>
+                <td>
+                    <strong>Validated by: </strong>
+                    {{ $validated_by }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <strong>Electronically signed by: </strong>
+                    {{ $signed_by }}
+                </td>
+            </tr>
         </tbody>
     </table>
+
+
+
+
+
+
     @endif
 
         <script type="text/php">
@@ -484,10 +558,17 @@
                     if ($PAGE_COUNT > 0) {
                         $font = $fontMetrics->get_font("Cambria, serif", "normal");
                         $size = 9;
-                        $pdf->text(45, 786, "Signed by: {{$signed_by}}", $font, $size);
-                        $pdf->text(440, 786, "Validated by: {{$validated_by}}", $font, $size);
-                        $pdf->text(30, 795, "______________________________________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
+                        // Centered text calculation
+                        $accreditText = "THIS LABORATORY IS ACCREDITED FOR THE TESTS AND PROFILES MARKED *.";
+                        $directorText = "Lab Director: Dr. Christina Pierre";
+                        $width = $pdf->get_width();
+                        $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                        $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
+                        $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
+                        $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
                         $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                        // Director text below the line and page count
+                        $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
                     }
                 ');
             }

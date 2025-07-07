@@ -8,6 +8,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\TestReport;
 use App\Models\Institution;
+use App\Models\SensitivityResults;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -33,6 +34,15 @@ class Sample extends Model
         'completed_at',
         'notes',
     ];
+
+    public function procedureResults()
+    {
+        return $this->hasMany(ProcedureResults::class);
+    }
+    public function sensitivityResults()
+    {
+        return $this->hasMany(SensitivityResults::class);
+    }
 
     public function tests()
     {

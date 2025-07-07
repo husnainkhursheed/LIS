@@ -35,14 +35,15 @@
             font-size: 14px;
         }
         th, td {
-            padding: 8px;
+            padding: 4px;
             font-size: 14px;
+            line-height: 1.1;
         }
         .order-details h2 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #3d90ca;
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
         .text-start {
             text-align: left;
@@ -80,70 +81,113 @@
 
 <table class="order-details">
     <thead>
-    <tr>
-        <th width="50%" colspan="2">
-            <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo">
-            <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
-        </th>
-        <th width="50%" colspan="2" class="text-end company-data">
-            <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
-            <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
-            <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
-        </th>
-    </tr>
-    <tr>
-        <th width="40%" style="vertical-align: top;">
-            <h2>Patient Information</h2><br>
-            <span><strong>Name:</strong>
-                {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
-            </span><br><br>
-            <span><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
-            <span><strong> &nbsp;&nbsp;&nbsp;&nbsp; DOB:</strong>{{ $sample->patient->dob ?? '' }}</span> <br><br>
-        </th>
-        <th width="60%" colspan="3" class="company-data" style="vertical-align: top;">
-            <h2>Report Information</h2>
-            <table>
-                <tr>
-                    <td><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
-                    <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
-                    <td><strong>Company:</strong> PRIVATE</td>
-                </tr>
-                <tr>
-                    <td><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
-                    <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
-                </tr>
-            </table>
-        </th>
-    </tr>
-    <tr>
-        <th colspan="4">
-            @php
-            // Assuming $sample->tests is a collection or array of test objects
-            $testNames = $tests->pluck('name')->implode(', ');
-            $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
-            // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
-            $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
-                                $query->where('department', $reporttype);
-                            })->with('tests')->pluck('name')->implode(', ');
+        <tr>
+            <th width="50%" colspan="2" style="vertical-align: top;">
+                <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" style="height: 70px;"><br>
+                <span style="display: block; font-weight:normal;, font-size: 15px; margin-top: 1px;"><small>ISO:15189 Accredited</small></span>
+                <p style="margin-top: 8px;"><small>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</small></p>
+            </th>
+            <th width="50%" colspan="2" class="text-end company-data">
+                <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
+                <span style="display: inline-block; text-align: left; width: 100%;"><strong>TEL: </strong>(868) 229-8643 or 316-1383</span><br>
+                <span style="display: inline-block; text-align: left; width: 100%;"><strong>Mail: </strong>borderlifemedlab@gmail.com</span><br>
+            </th>
+        </tr>
+        <tr>
+            <th width="45%" style="vertical-align: top;">
+                <h2>Patient Information</h2>
+                <table>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
+                        <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
+                    </tr>
+                    @php
+                        $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                        $age = $dob->age;
+                    @endphp
+                    <tr>
+                        <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
+                        <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Institution:</strong> {{ $sample->institution->name }}</td>
+                    </tr>
+                </table>
+                {{-- <span style="font-weight: normal"><strong>Name:</strong>
+                    {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
+                </span><span style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span><br><br>
 
-        @endphp
-        <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
-        </th>
-    </tr>
-    <tr class="bg-blue">
-        <th>NAME OF TEST</th>
-        <th>RESULTS</th>
-        <th>FLAG</th>
-        <th>REFERENCE RANGE</th>
-    </tr>
+                <span style="font-weight: normal"><strong> DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</span>@php
+                    $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                    $age = $dob->age;
+                @endphp
+                <span style="font-weight: normal">
+                <strong>Age:</strong> {{ $age }} yrs</span> <br><br>
+                <span style="font-weight: normal">
+                <strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</span> <br><br>
+                <span style="font-weight: normal">
+                <strong>Institution:</strong> {{ $sample->institution->name }}</span> <br> --}}
+
+            </th>
+            <th width="60%" colspan="3" class="company-data" style="vertical-align: top;">
+                <h2>Report Information</h2>
+                <table>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
+                        <td style="font-weight: normal"><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
+                        <td style="font-weight: normal"><strong>Sample ID:</strong> {{ $sample->access_number ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: normal"><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
+                    </tr>
+                </table>
+            </th>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">
+                @php
+                // Assuming $sample->tests is a collection or array of test objects
+                $testNames = $tests->pluck('name')->implode(', ');
+                $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
+                // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+                $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                                    $query->where('department', $reporttype);
+                                })->with('tests')->pluck('name')->implode(', ');
+
+            @endphp
+            <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+            </th>
+        </tr>
+        <tr>
+            <td colspan="4" >
+                <span style="white-space: nowrap;"><strong>Comments: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+            </td>
+        </tr>
+
+
+        <tr class="bg-blue">
+            <th>NAME OF TEST</th>
+            <th>RESULTS</th>
+            <th>FLAG</th>
+            <th>REFERENCE RANGE</th>
+        </tr>
     </thead>
     <tbody>
         @foreach ($categorizedTests as $profileId => $profileData)
             <tr id="{{ $profileId }}">
                 <td colspan="4"><strong>{{ $profileData['name'] }}</strong></td>
+                {{-- <small>{{ $profileData['test_note'] }}</small> --}}
             </tr>
             @foreach ($profileData['tests'] as $index => $test)
                 @php
@@ -155,6 +199,7 @@
                     $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
                     $description = $biochemHaemoResults->description ?? '';
                     $testResults = $biochemHaemoResults->test_results ?? '';
+                    $testNote = $biochemHaemoResults->test_notes ?? '';
                     $flag = $biochemHaemoResults->flag ?? '';
                     $background = '';
 
@@ -163,7 +208,7 @@
                     } elseif ($flag == 'High') {
                         $background = 'color:red';
                     } elseif ($flag == 'Low') {
-                        $background = 'color:#ffca5b';
+                        $background = 'color:red';
                     }
 
                     $referenceRange = '';
@@ -177,18 +222,42 @@
                     }
                 @endphp
 
-                @if ($testResults)
+                {{-- @if ($testResults) --}}
                     <tr>
-                        <td>{{ $description }}</td>
+                        <td>{{ $description }}
+                            @if ($testNote)
+                                <br><small>({{ $testNote }})</small>
+                            @endif
+                        </td>
+
                         <td >{{ $testResults }}</td>
                         <td>
                             <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
                         </td>
-                        <td style="text-align: center">{!! $referenceRange !!}</td>
+                        <td style="text-align: left">{!! $referenceRange !!}</td>
                     </tr>
-                @endif
+                {{-- @endif --}}
             @endforeach
+            <tr>
+                <td colspan="4">
+                    <hr style="border: 0.5px solid #caced1; margin: 10px 0;">
+                </td>
+            </tr>
+
         @endforeach
+        <br><br><br>
+        <tr>
+            <td>
+                <strong>Validated by: </strong>
+                {{ $validated_by }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <strong>This material has been reviewed and the report completed and electronically signed by: </strong>
+                {{ $signed_by }}
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -198,14 +267,20 @@
             if ($PAGE_COUNT > 0) {
                 $font = $fontMetrics->get_font("Cambria, serif", "normal");
                 $size = 9;
-                $pdf->text(45, 786, "Signed by: {{$signed_by}}", $font, $size);
-                $pdf->text(448, 786, "Validated by: {{$validated_by}}", $font, $size);
-                $pdf->text(30, 795, "__________________________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
+                // Centered text calculation
+                $accreditText = "THIS LABORATORY IS ACCREDITED FOR THE TESTS AND PROFILES MARKED *.";
+                $directorText = "Lab Director: Dr. Christina Pierre";
+                $width = $pdf->get_width();
+                $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
+                $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
+                $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
                 $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                // Director text below the line and page count
+                $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
             }
         ');
     }
 </script>
-
 </body>
 </html>

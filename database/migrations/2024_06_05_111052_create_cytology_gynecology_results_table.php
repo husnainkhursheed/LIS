@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('test_report_id')->constrained('test_reports')->onDelete('cascade');
             $table->text('history')->nullable();
-            $table->date('last_period')->nullable();
+            $table->text('last_period')->nullable();
             $table->string('contraceptive')->nullable();
-            $table->date('previous_pap')->nullable();
+            $table->text('previous_pap')->nullable();
             $table->text('result')->nullable();
             $table->text('cervix_examination')->nullable();
             $table->text('specimen_adequacy')->nullable();

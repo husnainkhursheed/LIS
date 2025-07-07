@@ -58,6 +58,8 @@ class SenstivityItemsController extends Controller
         $profile = new SensitivityProfiles();
 
         $profile->name = $request->name;
+        $profile->unit = $request->unit;
+
 
         if ($profile->save()) {
 
@@ -179,11 +181,11 @@ class SenstivityItemsController extends Controller
         // dd($request->attribute_values_ids);
 
 
-
         $profile =  SensitivityProfiles::find($id);
 
         $profile->name = $request->name;
 
+        $profile->unit = $request->unit;
         $profile->update();
 
         // Get the existing AttributeValue IDs associated with the attribute

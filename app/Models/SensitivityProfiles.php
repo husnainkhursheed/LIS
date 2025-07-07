@@ -12,6 +12,7 @@ class SensitivityProfiles extends Model
 
     protected $fillable = [
         'name',
+        'unit',
     ];
 
     public function sensitivityValues()
