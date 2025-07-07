@@ -211,6 +211,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row mb-2">
+                                <div class="col-md-4">
+                                    <label for="unit" class="form-label">Units</label>
+                                    <select class="form-select" id="unit" name="unit" required>
+                                        <option value="Zone (mm)">Zone (mm)</option>
+                                        <option value="MIC (ug/mL)">MIC (ug/mL)</option>
+                                    </select>
+                                </div>
+                            </div>
 
 
 
@@ -230,6 +239,7 @@
                                                         class="form-label">Antibiotic</label></div>
 
                                             </div>
+
 
                                             <div id="attribute-item">
 

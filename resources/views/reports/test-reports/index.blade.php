@@ -48,7 +48,7 @@ use \Carbon\Carbon;
                         <label for="access_number">Access Number</label>
                         <input type="text" name="access_number" id="access_number"  value="{{ $accessNumber ?? '' }}"  class="form-control">
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <label for="patient_name">Patient Name</label>
                         <input type="text" name="patient_name" id="patient_name" value="{{ $patientName ?? '' }}" class="form-control">
                     </div>
@@ -56,11 +56,21 @@ use \Carbon\Carbon;
                         <label for="dob">DOB</label>
                         <input type="date" name="dob" id="dob" value="{{ request('dob') }}" class="form-control">
                     </div>
+
                     <div class="col-2">
 
                         <button type="submit" class="btn search-btn">Search</button>
 
                     </div>
+                    <div class="col-2">
+                        <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
+                            <option selected disabled>Sort By</option>
+                            {{-- <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option> --}}
+                            <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
+                            <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
+                        </select>
+                    </div>
+
                 </div>
 
 

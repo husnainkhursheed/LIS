@@ -11,6 +11,7 @@ use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
 use App\Models\ProcedureResults;
+use App\Models\SensitivityResults;
 use App\Models\BiochemHaemoResults;
 use App\Models\SensitivityProfiles;
 use App\Http\Controllers\Controller;
@@ -32,7 +33,7 @@ class TestReportController extends Controller
         // $testNumber = $request->input('test_number');
         $accessNumber = $request->input('access_number');
         $patientName = $request->input('patient_name');
-        $query = Sample::query()->orderBy('received_date', 'asc');
+        $query = Sample::query();
         $currentUser = Auth::user();
 
         // if ($request->filled('test_number')) {
@@ -55,6 +56,20 @@ class TestReportController extends Controller
                     $query->where('dob', $dob);
                 }
             });
+        }
+
+        if($request->filled('sort_by')) {
+            switch ($request->sort_by) {
+                case 'access_number':
+                    $query->orderBy('access_number', 'asc');
+                    break;
+                case 'received_date':
+                    $query->orderBy('received_date', 'asc');
+                    break;
+                default:
+                    // Default sorting can be applied here if needed
+                    break;
+            }
         }
 
         $testReports = $query->paginate(10);
@@ -307,6 +322,7 @@ class TestReportController extends Controller
         }
 
         // dd($categorizedTests);
+        // sensitivityResults
 
 
         $test_profiles = TestProfile::all();
@@ -371,12 +387,12 @@ class TestReportController extends Controller
 
                    // Update or create the result
                     $result->reference = $data['reference'] ?? $result->reference;
-                    $result->note = $data['note'] ?? $result->note;
+                    $result->note = $data['note'] ?? null;
                     $result->description = $testData['description'] ?? $result->description;
-                    $result->test_results = $testData['test_results'] ?? $result->test_results;
-                    $result->flag = $testData['flag'] ?? $result->flag;
+                    $result->test_results = $testData['test_results'] ?? null;
+                    $result->flag = $testData['flag'] ?? null;
                     $result->reference_range = $testData['reference_range'] ?? $result->reference_range;
-                    $result->test_notes = $testData['test_notes'] ?? $result->test_notes;
+                    $result->test_notes = $testData['test_notes'] ?? null;
                     $result->save();
                 // );
                 $changes = [];
@@ -461,50 +477,17 @@ class TestReportController extends Controller
                 // $originalValues = $result->getOriginal();
 
                 // Update or create the result
-                $result->sensitivity = $data['sensitivity'] ?? null;
-                $result->sensitivity_profiles =  $data['sensitivity_profiles'] ?? null;
+                // $result->sensitivity = $data['sensitivity'] ?? null;
+                // $result->sensitivity_profiles =  $data['sensitivity_profiles'] ?? null;
                 $result->description = $testData['description'] ?? $result->description;
-                $result->test_results = $testData['test_results'] ?? $result->test_results;
-                $result->flag = $testData['flag'] ?? $result->flag;
+                $result->test_results = $testData['test_results'] ?? null;
+                $result->flag = $testData['flag'] ??  null;
                 $result->reference_range = $testData['reference_range'] ?? $result->reference_range;
-                $result->test_notes = $testData['test_notes'] ?? $result->test_notes;
+                $result->test_notes = $testData['test_notes'] ?? null;
+                $result->note = $data['note'] ?? null;
                 $result->save();
                 // );
-                if (isset($data['procedure']) && isset($data['specimen_note'])) {
-                    $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $result->id)->get();
-                    $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
 
-                    $procedures = $data['procedure'];
-                    // dd($procedures);
-                    $specimen_notes = $data['specimen_note'];
-                    // dd($specimen_notes);
-                    $newProcedureIds = [];
-
-                    foreach ($procedures as $index => $procedure) {
-                        if (!empty($procedure)) {
-                            $procedureNote = $specimen_notes[$index] ?? null;
-                            // dd($result->id);
-                            $procedureResult = ProcedureResults::updateOrCreate(
-                                [
-                                    'urinalysis_microbiology_result_id' => $result->id,
-                                    'procedure' => $procedure,
-                                ],
-                                [
-
-                                    'specimen_note' => $procedureNote
-                                ]
-                            );
-
-                            $newProcedureIds[] = $procedureResult->id;
-                        }
-                    }
-
-                    // Determine which procedures to delete
-                    $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
-
-                    // Delete procedures that are not present in the request
-                    ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
-                }
                 $changes = [];
                 foreach ($result->getChanges() as $field => $newValue) {
                     if (array_key_exists($field, $originalValues)) {
@@ -517,6 +500,35 @@ class TestReportController extends Controller
 
                 $this->addAuditTrail($result->id, $user, $changes);
 
+            }
+            if (isset($data['procedure']) && isset($data['specimen_note'])) {
+                // Delete all previous ProcedureResults for this sample
+                ProcedureResults::where('sample_id', $data['sampleid'])->delete();
+
+                $procedures = $data['procedure'];
+                $specimen_notes = $data['specimen_note'];
+
+                foreach ($procedures as $index => $procedure) {
+                    if (!empty($procedure)) {
+                        $procedureNote = $specimen_notes[$index] ?? null;
+                        ProcedureResults::create([
+                            'sample_id' => $data['sampleid'],
+                            'procedure' => $procedure,
+                            'specimen_note' => $procedureNote
+                        ]);
+                    }
+                }
+            }
+            if (isset($data['sensitivity']) && isset($data['sensitivity_profiles'])) {
+                // Delete all previous ProcedureResults for this sample
+                SensitivityResults::where('sample_id', $data['sampleid'])->delete();
+
+                SensitivityResults::create([
+                    'sample_id' => $data['sampleid'],
+                    'sensitivity' => is_array($data['sensitivity']) ? json_encode($data['sensitivity']) : $data['sensitivity'],
+                    'sensitivity_profiles' => is_array($data['sensitivity_profiles']) ? json_encode($data['sensitivity_profiles']) : $data['sensitivity_profiles'],
+                    'review' =>  $data['review'],
+                ]);
             }
             // $test_ids = explode(',', $data['testIds']);
             // foreach ($test_ids as $testId ) {

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('procedure_results', function (Blueprint $table) {
+        Schema::create('sensitivity_results', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('urinalysis_microbiology_result_id')->constrained('urinalysis_microbiology_results')->onDelete('cascade');
             $table->unsignedBigInteger('sample_id')->nullable();
             $table->foreign('sample_id')
                   ->references('id')
                   ->on('samples')
                   ->onDelete('cascade');
-            $table->string('procedure')->nullable();
-            $table->text('specimen_note')->nullable();
+            $table->text('sensitivity_profiles')->nullable();
+            $table->text('sensitivity')->nullable();
+            $table->text('review')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('procedure_results');
+        Schema::dropIfExists('sensitivity_results');
     }
 };
