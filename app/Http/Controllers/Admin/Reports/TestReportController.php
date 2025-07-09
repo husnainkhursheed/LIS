@@ -17,6 +17,7 @@ use App\Models\SensitivityProfiles;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\SampleDepartmentStatus;
 use App\Models\CytologyGynecologyResults;
 use App\Models\UrinalysisReferenceRanges;
 use App\Models\UrinalysisMicrobiologyResults;
@@ -387,7 +388,7 @@ class TestReportController extends Controller
 
                    // Update or create the result
                     $result->reference = $data['reference'] ?? $result->reference;
-                    $result->note = $data['note'] ?? null;
+                    // $result->note = $data['note'] ?? null;
                     $result->description = $testData['description'] ?? $result->description;
                     $result->test_results = $testData['test_results'] ?? null;
                     $result->flag = $testData['flag'] ?? null;
@@ -395,8 +396,18 @@ class TestReportController extends Controller
                     $result->test_notes = $testData['test_notes'] ?? null;
                     $result->save();
                 // );
+                 SampleDepartmentStatus::updateOrCreate(
+                    [
+                        'sample_id' => $data['sampleid'],
+                        'department' => 1,
+                    ],
+                    [
+                        'note' => $data['note'] ?? null,
+                    ]
+                );
                 $changes = [];
                 // dd($result->id);
+
                 foreach ($result->getChanges() as $field => $newValue) {
                     if (array_key_exists($field, $originalValues)) {
                         $changes[$field] = [
@@ -484,9 +495,19 @@ class TestReportController extends Controller
                 $result->flag = $testData['flag'] ??  null;
                 $result->reference_range = $testData['reference_range'] ?? $result->reference_range;
                 $result->test_notes = $testData['test_notes'] ?? null;
-                $result->note = $data['note'] ?? null;
+                // $result->note = $data['note'] ?? null;
                 $result->save();
                 // );
+
+                SampleDepartmentStatus::updateOrCreate(
+                    [
+                        'sample_id' => $data['sampleid'],
+                        'department' => 3,
+                    ],
+                    [
+                        'note' => $data['note'] ?? null,
+                    ]
+                );
 
                 $changes = [];
                 foreach ($result->getChanges() as $field => $newValue) {
@@ -676,10 +697,20 @@ class TestReportController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Password is incorrect.'], 401);
         }
-
+        $reporttypeis = $request->reporttypeis;
         // Find the test report
         $sample = Sample::findOrFail($request->report_sample_id);
-        $reporttypeis = $request->reporttypeis;
+        SampleDepartmentStatus::updateOrCreate(
+            [
+                'sample_id' => $sample->id,
+                'department' => $reporttypeis,
+            ],
+            [
+                'is_signed' => true,
+                'signed_by' => $user->id,
+                'signed_at' => now(),
+            ]
+        );
         // $tests = $sample->tests()->where('department', $reporttypeis)->pluck('id');
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 

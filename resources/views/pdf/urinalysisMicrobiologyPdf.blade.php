@@ -153,7 +153,7 @@
                         @endphp
                         <tr>
                             <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
-                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} </td>
                         </tr>
                         <tr>
                             <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
@@ -216,6 +216,14 @@
                     <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
                 </th>
             </tr>
+            <tr>
+                @php
+                    $urinalysisStatus = $sample->departmentStatus('3')
+                @endphp
+                <td colspan="4" >
+                    <span style="white-space: nowrap;"><strong>Comments: </strong> {{$urinalysisStatus->note ?? ''}} </span>
+                </td>
+            </tr>
         </thead>
         <tbody>
             {{-- {{dd($tests)}} --}}
@@ -260,7 +268,7 @@
                                 <tr>
                                     <th class="heading" colspan="3" style="text-align: center"> CHEMICAL ANALYSIS</th>
                                 </tr>
-                                <tr class="bg-blue">
+                                <tr class="bg-blue" colspan="2">
                                     <th width="30%">Test</th>
                                     <th>Results</th>
                                     <th>Flag</th>
@@ -270,7 +278,7 @@
                             <tbody>
                                         @foreach ($categorizedTests as $profileId => $profileData)
                                             <tr id="{{ $profileId }}">
-                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                                                <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
                                             </tr>
                                             @php
                                                 $microscopyTests = collect();
@@ -315,7 +323,7 @@
                                                     }
                                                 @endphp
                                                     <tr>
-                                                        <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
+                                                        <td> {{ $urinalysisMicrobiologyResults->description ?? $test->name }}  </td>
                                                         <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
                                                         <td>
                                                             <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
@@ -367,7 +375,7 @@
                                 @endif --}}
                                 @foreach ($categorizedTests as $profileId => $profileData)
                                     <tr id="{{ $profileId }}">
-                                        <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
+                                        <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
                                     </tr>
                                     @php
                                         $microscopyTests = collect();
@@ -412,7 +420,7 @@
                                             }
                                         @endphp
                                             <tr>
-                                                <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
+                                                <td> {{ $urinalysisMicrobiologyResults->description ?? $test->name }} </td>
                                                 <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
                                                 <td>
                                                     <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
@@ -517,6 +525,7 @@
     </table>
     <br>
     <br>
+    @endif
     <table class="table-wrapper">
         <thead>
             <tr>
@@ -544,13 +553,6 @@
             </tr>
         </tbody>
     </table>
-
-
-
-
-
-
-    @endif
 
         <script type="text/php">
             if ( isset($pdf) ) {

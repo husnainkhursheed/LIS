@@ -132,39 +132,39 @@
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            @if ($tests->previousPageUrl())
-                                <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="{{ $tests->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item previousPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
-                                </li>
-                            @endif
+                        @if ($tests->previousPageUrl())
+                            <li class="page-item previousPageUrl">
+                                <a class="page-link" href="{{ $tests->appends(request()->except('page'))->previousPageUrl() }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item previousPageUrl disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                            </li>
+                        @endif
 
-                            @for ($page = 1; $page <= $tests->lastPage(); $page++)
-                                <li class="page-item {{ $tests->currentPage() == $page ? 'active' : '' }}">
-                                    <a class="page-link"
-                                        href="{{ $tests->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
-                                </li>
-                            @endfor
+                        @for ($page = 1; $page <= $tests->lastPage(); $page++)
+                            <li class="page-item {{ $tests->currentPage() == $page ? 'active' : '' }}">
+                                <a class="page-link"
+                                    href="{{ $tests->appends(request()->except('page'))->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                            </li>
+                        @endfor
 
-                            @if ($tests->nextPageUrl())
-                                <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="{{ $tests->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item nextPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
-                                </li>
-                            @endif
-                        </ul>
+                        @if ($tests->nextPageUrl())
+                            <li class="page-item nextPageUrl">
+                                <a class="page-link" href="{{ $tests->appends(request()->except('page'))->nextPageUrl() }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item nextPageUrl disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                            </li>
+                        @endif
+                    </ul>
                     </div>
                 </div>
                 {{-- <div class="card-body">
@@ -315,8 +315,8 @@
                             </div>
                             <div class="col-lg-12">
                                 <div>
-                                    <label for="Calculation-Explanation" class="form-label">Calculation Explanation</label>
-                                    <textarea name="calculation_explanation" id="calculation_explanation" class="form-control" cols="30" rows="3"></textarea>
+                                    <label for="Calculation-Explanation" class="form-label">Methodology</label>
+                                    <textarea name="methodology" id="methodology" class="form-control" cols="30" rows="3"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -691,9 +691,9 @@
                         $('#id-field').val(test.id);
                         $('#name').val(test.name);
                         $('#department').val(test.department);
-                        $('#specimen_type').val(test.specimen_type);
+                        $('#specimen_type').val(test.specimen_type).trigger('change');
                         $('#cost').val(test.cost);
-                        $('#calculation_explanation').val(test.calculation_explanation);
+                        $('#methodology').val(test.methodology);
                         $('#test_notes').val(test.test_notes);
                         $('#reference_range').val(test.reference_range);
                         // $('#is_urine_type').val(test.is_urine_type);
@@ -843,6 +843,7 @@
             $('#department').val('');
             $('#specimen_type ').val('');
             $('#cost').val('');
+            $('#methodology').val('');
             $('#basic_ref').prop('checked', true);
             $('#basicValues').show();
             $('#optionalValues').hide();
@@ -872,6 +873,7 @@
                 $('#urin_test_type_container').hide();
                 $('#urin_test_type').attr('required', false);
                 $('#urin_test_type').val('');
+                $('#specimen_type').val('').trigger('change');
                 // $('#department').closest('.col-lg-6').hide();
                 // $('#cost_container').hide();
                 // $('#profile-tab').trigger('click');

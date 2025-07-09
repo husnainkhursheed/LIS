@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\TestReport;
 use App\Models\Institution;
 use App\Models\SensitivityResults;
+use App\Models\SampleDepartmentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -34,6 +35,16 @@ class Sample extends Model
         'completed_at',
         'notes',
     ];
+
+    public function departmentStatuses()
+    {
+        return $this->hasMany(SampleDepartmentStatus::class, 'sample_id');
+    }
+
+    public function departmentStatus($department)
+    {
+        return $this->departmentStatuses()->where('department', $department)->first();
+    }
 
     public function procedureResults()
     {

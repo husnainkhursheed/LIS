@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->enum('department', ['1', '2', '3'])->nullable();
             // $table->string('specimen_type');
-            $table->foreignId('specimen_type')->constrained('specimen_types')->onDelete('');
+            $table->foreignId('specimen_type')->nullable()->constrained('specimen_types')->onDelete('set null');
             $table->decimal('cost', 8, 2)->nullable();
-            $table->text('calculation_explanation')->nullable();
+            // $table->text('calculation_explanation')->nullable();
+            $table->text('methodology')->nullable();
             $table->text('test_notes')->nullable();
             $table->text('reference_range')->nullable();
             $table->text('basic_low_value_ref_range')->nullable();

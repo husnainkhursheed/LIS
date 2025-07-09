@@ -124,7 +124,7 @@
                                                 @php
                                                     $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
                                                 @endphp
-                                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}> 
+                                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
                                                     {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
@@ -196,7 +196,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" disabled>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" >
                         </div>
                     </div>
                     <div class="x">
@@ -209,28 +209,12 @@
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" >
                         </div>
                     </div>
                 </div>
@@ -241,7 +225,7 @@
                     </div>
                     <div class="col-md-2 p-0">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" disabled>
+                            <input type="text" class="form-control" name="grand_total" id="grand_total" >
                         </div>
                     </div>
                 </div>

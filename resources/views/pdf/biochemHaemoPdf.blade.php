@@ -166,12 +166,16 @@
                                 })->with('tests')->pluck('name')->implode(', ');
 
             @endphp
+
             <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
             </th>
         </tr>
         <tr>
+            @php
+                $hematologyStatus = $sample->departmentStatus('1')
+            @endphp
             <td colspan="4" >
-                <span style="white-space: nowrap;"><strong>Comments: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+                <span style="white-space: nowrap;"><strong>Comments: </strong>{{$hematologyStatus->note ?? ''}} </span>
             </td>
         </tr>
 
@@ -197,9 +201,10 @@
                         ->first();
                     // $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
                     $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                    $description = $biochemHaemoResults->description ?? '';
+                    $description = $biochemHaemoResults->description ?? $test->name;
                     $testResults = $biochemHaemoResults->test_results ?? '';
                     $testNote = $biochemHaemoResults->test_notes ?? '';
+                    $methodology = $test->methodology ?? '';
                     $flag = $biochemHaemoResults->flag ?? '';
                     $background = '';
 
@@ -234,7 +239,12 @@
                         <td>
                             <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
                         </td>
-                        <td style="text-align: left">{!! $referenceRange !!}</td>
+                        <td style="text-align: left">{!! $referenceRange !!}
+                            @if ($methodology)
+                                <br><small>({{ $methodology }})</small>
+                            @endif
+                        </td>
+
                     </tr>
                 {{-- @endif --}}
             @endforeach

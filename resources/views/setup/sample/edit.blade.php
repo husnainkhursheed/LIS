@@ -171,7 +171,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost_profile" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" disabled>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" value="{{ $sample->profiles_total_cost }}" >
                         </div>
                     </div>
                     <div class="col-md-10">
@@ -188,7 +188,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" value="{{ $sample->indvidualtests_total_cost }}" >
                         </div>
                     </div>
                 </div>
@@ -200,7 +200,7 @@
                     </div>
                     <div class="col-md-2 p-0">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" disabled>
+                            <input type="text" class="form-control" name="grand_total" id="grand_total" value="{{ $sample->grand_total_cost }}" >
                         </div>
                     </div>
                 </div>
@@ -534,7 +534,7 @@
                             }
                         });
                         // Refresh the Select2 options
-                        $('#test_profiles').select2();
+                        // $('#test_profiles').select2();
                         $('#test_requested option').each(function() {
                             // Disable the profiles that are in the profilesToHide array
                             if (response.testIdsInSelectedProfiles.includes(parseInt($(this).val()))) {
@@ -544,7 +544,7 @@
                             }
                         });
                         // Refresh the Select2 options
-                        $('#test_requested').select2();
+                        // $('#test_requested').select2();
                     }
                 },
                 error: function(error) {
@@ -568,7 +568,7 @@
             });
 
             // Update the total_cost input field
-            $('#total_cost').val(totalCost.toFixed(2));
+            // $('#total_cost').val(totalCost.toFixed(2));
 
             function calculateGrandTotal() {
                 let totalCost = parseFloat($('#total_cost').val()) || 0;
@@ -578,7 +578,7 @@
                 $('#grand_total').val(grandTotal.toFixed(2));
             }
 
-            $('#total_cost_profile').val(total_cost_profile.toFixed(2));
+            // $('#total_cost_profile').val(total_cost_profile.toFixed(2));
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
 
@@ -603,7 +603,7 @@
                 $('#total_cost_profile').val(totalCost.toFixed(2));
                 calculateGrandTotal();
             });
-            calculateGrandTotal();
+            // calculateGrandTotal();
         });
         document.addEventListener("DOMContentLoaded", function() {
             let doctorSelect = document.getElementById('doctor_id');
@@ -614,18 +614,18 @@
                 }
             }
         });
-        document.querySelector("#lead-image-input").addEventListener("change", function() {
-            var preview = document.querySelector("#lead-img");
-            var file = document.querySelector("#lead-image-input").files[0];
-            console.log(file);
-            var reader = new FileReader();
-            reader.addEventListener("load", function() {
-                preview.src = reader.result;
-            }, false);
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        });
+        // document.querySelector("#lead-image-input").addEventListener("change", function() {
+        //     var preview = document.querySelector("#lead-img");
+        //     var file = document.querySelector("#lead-image-input").files[0];
+        //     console.log(file);
+        //     var reader = new FileReader();
+        //     reader.addEventListener("load", function() {
+        //         preview.src = reader.result;
+        //     }, false);
+        //     if (file) {
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>

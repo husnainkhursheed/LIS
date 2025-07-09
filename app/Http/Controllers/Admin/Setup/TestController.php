@@ -72,7 +72,7 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
-        $test->calculation_explanation  = $request->input('calculation_explanation');
+        $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
         $test->test_notes  = $request->input('test_notes');
@@ -165,7 +165,7 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
-        $test->calculation_explanation  = $request->input('calculation_explanation');
+        $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
         $test->test_notes  = $request->input('test_notes');

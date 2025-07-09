@@ -81,6 +81,9 @@ class SampleController extends Controller
        $sample->doctor_id = $request->doctor_id;
        $sample->institution_id = $request->institution_id;
        $sample->bill_to = $request->bill_to;
+       $sample->profiles_total_cost = $request->total_cost_profile;
+       $sample->indvidualtests_total_cost = $request->total_cost;
+       $sample->grand_total_cost = $request->grand_total;
     //    $sample->notes = $request->notes;
        $sample->save();
        // Attach the tests to the sample
@@ -142,6 +145,10 @@ class SampleController extends Controller
         $sample->doctor_id = $request->doctor_id;
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
+        $sample->profiles_total_cost = $request->total_cost_profile;
+        $sample->indvidualtests_total_cost = $request->total_cost;
+        $sample->grand_total_cost = $request->grand_total;
+
         // $sample->notes = $request->notes;
         $sample->save();
 
