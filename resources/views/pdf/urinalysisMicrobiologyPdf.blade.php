@@ -124,6 +124,9 @@
 </head>
 
 <body>
+    @php
+        $procedureResults = $sample ? $sample->procedureResults : [];
+    @endphp
 
     <table class="order-details">
         <thead>
@@ -246,7 +249,7 @@
             // $procedureResults = $sample->sensitivityResults
             // ? $sample->sensitivityResults[0]->sensitivity_profiles
             // : [];
-            $procedureResults = $sample ? $sample->procedureResults : [];
+
 
 
 
