@@ -164,6 +164,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/changes/{id}', [ReportingandAnalyticsController::class, 'trailchanges']);
 
         Route::get('/processing-time', [ReportingandAnalyticsController::class, 'index'])->name('processingtime.index');
+        Route::get('/master-report', [ReportingandAnalyticsController::class, 'masterReport'])->name('masterreport.index');
 
     });
 
