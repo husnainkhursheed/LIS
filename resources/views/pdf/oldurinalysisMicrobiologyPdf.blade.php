@@ -11,8 +11,6 @@
             box-sizing: border-box
         }
 
-
-
         body {
             font-family: 'Cambria', sans-serif;
             margin: 0;
@@ -132,7 +130,24 @@
             width: 35%;
         }
 
+        .chemical-analysis,
+        .microscopy-analysis {
+            border: 1px solid #3d90ca;
+            width: 100%;
+        }
 
+        .chemical-analysis th,
+        .chemical-analysis td,
+        .microscopy-analysis th,
+        .microscopy-analysis td {
+            border: 1px solid #3d90ca;
+            padding: 4px;
+        }
+
+        .chemical-analysis thead th,
+        .microscopy-analysis thead th {
+            border-bottom: 2px solid #3d90ca;
+        }
     </style>
 </head>
 
@@ -160,7 +175,7 @@
                 </th>
             </tr>
             <tr>
-                <th width="40%" style="vertical-align: top;">
+                <th width="45%" style="vertical-align: top;">
                     <h2>Patient Information</h2>
                     <table>
                         <tr>
@@ -294,22 +309,22 @@
                         URINALYSIS
                     </th>
                 </tr>
-                <td colspan="1"  style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;padding:0px;border-collapse: collapse;">
-                    <table class="chemical-analysis" style="border-collapse: collapse;margin:0px;padding:0px;">
+                <td style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;">
+                    <table class="chemical-analysis" style="border-collapse: collapse;">
                         <!-- Add rows for chemical analysis data -->
                         <thead>
 
                             <tr>
-                                <th class="heading" colspan="7" style="text-align: center"> CHEMICAL ANALYSIS</th>
+                                <th class="heading" colspan="3" style="text-align: center"> CHEMICAL ANALYSIS</th>
                             </tr>
-                            <tr class="bg-blue" colspan="">
+                            <tr class="bg-blue" colspan="2">
                                 <th width="30%">Test</th>
                                 <th width="10%">Results</th>
                                 <th width="10%">Flag</th>
-                                <th width="40%">Normal Range</th>
+                                <th width="30%">Normal Range</th>
                             </tr>
                         </thead>
-                        <tbody >
+                        <tbody>
                             @foreach ($categorizedTests as $profileId => $profileData)
                                 <tr id="{{ $profileId }}">
                                     <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
@@ -376,7 +391,7 @@
                                             <span class="badge badge-pill flag-badge" style="{{ $background }}"
                                                 data-key="t-hot">{{ $flag }}</span>
                                         </td>
-                                        <td >{!! $referenceRange !!}</td>
+                                        <td>{!! $referenceRange !!}</td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -393,11 +408,11 @@
                         </tbody>
                     </table>
                 </td>
-                <td colspan="6" style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;padding:0px;border-collapse: collapse;">
+                <td style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;">
                     <table class="microscopy-analysis" style="border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th class="heading" colspan="7" style="text-align: center">MICROSCOPY</th>
+                                <th class="heading" colspan="3" style="text-align: center">MICROSCOPY</th>
                             </tr>
                             <tr class="bg-blue">
                                 <th width="30%">Test</th>
