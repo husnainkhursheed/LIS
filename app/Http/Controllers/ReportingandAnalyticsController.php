@@ -9,6 +9,7 @@ use App\Models\AuditTrail;
 use App\Models\TestReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\MasterReportExport;
 use App\Models\BiochemHaemoResults;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TimeTakenReportExport;
@@ -146,11 +147,13 @@ class ReportingandAnalyticsController extends Controller
                             'outliers_percentage' => 0,
                             'avg_days' => 0,
                             'total_days' => 0,
+                            'grand_total_days' => 0,
                         ];
                     }
 
 
                 }
+                // dd($sample->unique_departments_status);
                 foreach ($sample->unique_departments_status as $index => $sampl){
                     // dd($sampl['completedat']);
                     $submittedDateTime = Carbon::parse($sample->received_date . ' ' . $sample->received_time);
@@ -172,15 +175,20 @@ class ReportingandAnalyticsController extends Controller
                     } else {
                         $departmentSummary[$index]['total_pending']++;
                     }
+                    $individualtests = $sample->tests()->where('department',$index)->pluck('name')->implode(', ');
+                    $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($index) {
+                        $query->where('department', $index);
+                    })->pluck('name')->implode(', ');
 
 
                     $reportData[] = [
                         'Department' => $index,
-                        'Test ID' => $sample->test_number,
                         'Access # ' => $sample->access_number,
+                        'Patient Name' => $sample->patient->first_name . ' ' . $sample->patient->surname,
+                        'Request' => $sampleprofiles  . ', ' . $individualtests,
                         'Date Received' => $sample->received_date,
-                        'Date Completed' => $sampl['is_completed'] ? $sampl['completedat'] : 'N/A',
-                        'In Progress' => !$sampl['is_completed'] ? 'TRUE' : 'FALSE',
+                        'Date Completed' => $sampl['is_completed'] ? $sampl['completedat'] : '',
+                        'In Progress' => !$sampl['is_completed'] ? 'TRUE' : '',
                         'Number of Days' => $daysTaken
                     ];
                 }
@@ -188,6 +196,7 @@ class ReportingandAnalyticsController extends Controller
                     // Initialize the summary for this department if not already done
                     $departmentSummary[$department]['avg_days'] = $departmentSummary[$department]['total_completed'] ? $departmentSummary[$department]['total_days']  / $departmentSummary[$department]['total_completed'] : 0;
                     $departmentSummary[$department]['outliers_percentage'] = $departmentSummary[$department]['total_completed'] ? ($departmentSummary[$department]['total_outliers'] / $departmentSummary[$department]['total_completed']) * 100 : 0;
+                    $departmentSummary[$department]['grand_total_days'] = $departmentSummary[$department]['total_completed'] + $departmentSummary[$index]['total_pending'];
 
 
 
@@ -250,21 +259,21 @@ class ReportingandAnalyticsController extends Controller
             // $avgDays = $completedCount ? $totalDays / $completedCount : 0;
             // $outliersPercentage = $completedCount ? ($outliersCount / $completedCount) * 100 : 0;
 
-            $summary = [
-                'total_days' => $totalDays,
-                'avg_days' => 0,
-                'total_outliers' => $outliersCount,
-                'outliers_percentage' => 0,
-                'total_completed' => $completedCount,
-                'total_pending' => $pendingCount,
-            ];
+            // $summary = [
+            //     'total_days' => 0,
+            //     'avg_days' => 0,
+            //     'total_outliers' => 0,
+            //     'outliers_percentage' => 0,
+            //     'total_completed' => $completedCount,
+            //     'total_pending' => $pendingCount,
+            // ];
             $processedSamples = $reportData;
 
             if ($request->has('export') && $request->input('export') == 'excel') {
                 return Excel::download(new TimeTakenReportExport($grouped->toArray(), $startDate, $endDate, $departmentSummary), 'time_taken_report.xlsx');
             }
 
-            return view('reports.reporting&analytics.processingtime', compact('processedSamples','reportData', 'startDate', 'endDate', 'summary'));
+            return view('reports.reporting&analytics.processingtime', compact('processedSamples','reportData', 'startDate', 'endDate'));
 
         // $samplesQuery = Sample::query();
 
@@ -292,6 +301,41 @@ class ReportingandAnalyticsController extends Controller
         // });
 
         // return view('reports.reporting&analytics.processingtime', compact('processedSamples', 'date_from', 'date_to'));
+    }
+
+    public function masterReport(Request $request) {
+        $startDate = $request->input('date_from');
+        $endDate = $request->input('date_to');
+        // Fetch the samples within the date range
+        $samples = Sample::whereBetween('received_date', [$startDate, $endDate])->get();
+
+        $reportData = [];
+        $totalDays = 0;
+        $completedCount = 0;
+        $outliersCount = 0;
+        $pendingCount = 0;
+        $departmentSummary = [];
+        foreach ($samples as $sample) {
+                $individualtests = $sample->tests()->pluck('name')->implode(', ');
+                $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+
+                $reportData[] = [
+                    'Date Received' => $sample->received_date,
+                    'Insitution' => $sample->institution->name,
+                    'Doctor' => $sample->doctor->name,
+                    'Access # ' => $sample->access_number,
+                    'Patient Name' => $sample->patient->first_name . ' ' . $sample->patient->surname,
+                    'Test' => $sampleprofiles  . ', ' . $individualtests,
+                    'Total' => $sample->grand_total_cost ? $sample->grand_total_cost : 0,
+                ];
+        }
+        $processedSamples = $reportData;
+
+        if ($request->has('export') && $request->input('export') == 'excel') {
+            return Excel::download(new MasterReportExport($reportData, $startDate, $endDate), 'master_report.xlsx');
+        }
+
+        return view('reports.reporting&analytics.masterreport', compact('processedSamples','reportData', 'startDate', 'endDate'));
     }
 
     public function auditTrails($id , $reporttype){

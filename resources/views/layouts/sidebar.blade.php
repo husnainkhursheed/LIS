@@ -504,6 +504,9 @@
                                 <li class="nav-item">
                                     <a href="{{ url('/reports/processing-time') }}" class="nav-link">Processing Time</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/reports/master-report') }}" class="nav-link">Master Report</a>
+                                </li>
 
                             </ul>
                         </div>

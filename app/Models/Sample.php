@@ -34,6 +34,9 @@ class Sample extends Model
         'completed_by',
         'completed_at',
         'notes',
+        'grand_total_cost',
+        'indvidualtests_total_cost',
+        'profiles_total_cost',
     ];
 
     public function departmentStatuses()
