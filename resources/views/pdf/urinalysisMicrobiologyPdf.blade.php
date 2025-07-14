@@ -8,12 +8,17 @@
     <style>
         @page {
             margin: 10mm 10mm 30mm 10mm;
+            box-sizing: border-box
         }
+
+
 
         body {
             font-family: 'Cambria', sans-serif;
             margin: 0;
             padding: 0;
+            overflow: hidden;
+            width: 100%;
         }
 
         h1,
@@ -32,6 +37,7 @@
             width: 100%;
             border-collapse: collapse;
             page-break-inside: auto;
+            box-sizing: border-box;
         }
 
         thead {
@@ -54,17 +60,22 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 4px;
             font-size: 14px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
+
         .table-wrapper {
-           page-break-inside: avoid;
+            page-break-inside: avoid;
         }
+
         .order-details h2 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #3d90ca;
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
         .text-start {
@@ -74,6 +85,7 @@
         .text-end {
             text-align: right;
         }
+
         .text-center {
             text-align: center;
         }
@@ -119,280 +131,371 @@
             display: inline-block;
             width: 35%;
         }
+
+
     </style>
 </head>
 
 <body>
+    @php
+        $procedureResults = $sample ? $sample->procedureResults : [];
+    @endphp
 
     <table class="order-details">
         <thead>
             <tr>
-                <th width="50%" colspan="2">
-                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" class="logo">
-                    <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
-                    {{-- <h2 class="text-start">Funda Ecommerce</h2> --}}
+                <th width="50%" style="vertical-align: top;">
+                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" style="height: 70px;"><br>
+                    <span style="display: block; font-weight:normal;, font-size: 15px; margin-top: 1px;"><small>ISO:15189
+                            Accredited</small></span>
+                    <span style="margin-top: 8px; display: inline-block;"><small>71 Eastern Main Road Barataria, San
+                            Juan Trinidad and Tobago</small></span>
                 </th>
-                <th width="50%" colspan="5" class="text-end company-data">
+                <th width="50%" class="text-end company-data">
                     <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
-                    <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
-                    <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>TEL: </strong>(868)
+                        229-8643 or 316-1383</span><br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>Mail:
+                        </strong>borderlifemedlab@gmail.com</span><br>
                 </th>
             </tr>
             <tr>
-                <th width="40%" colspan="" style="vertical-align: top;  ">
-                    <h2>Patient Information</h2><br>
-                    <span><strong>Name:</strong>
+                <th width="40%" style="vertical-align: top;">
+                    <h2>Patient Information</h2>
+                    <table>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Name:</strong>
+                                {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
+                        </tr>
+                        @php
+                            $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                            $age = $dob->age;
+                        @endphp
+                        <tr>
+                            <td style="font-weight: normal"><strong>DOB:</strong>
+                                {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Institution:</strong>
+                                {{ $sample->institution->name }}</td>
+                        </tr>
+                    </table>
+                    {{-- <span style="font-weight: normal"><strong>Name:</strong>
                         {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
-                    </span><br><br>
-                    <span><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
-                    <span><strong> &nbsp;&nbsp;&nbsp;&nbsp; DOB:</strong>{{ $sample->patient->dob ?? '' }}</span>
-                    <br><br>
+                    </span><span style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span><br><br>
+
+                    <span style="font-weight: normal"><strong> DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</span>@php
+                        $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                        $age = $dob->age;
+                    @endphp
+                    <span style="font-weight: normal">
+                    <strong>Age:</strong> {{ $age }} yrs</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Institution:</strong> {{ $sample->institution->name }}</span> <br> --}}
+
                 </th>
-                <th width="60%" colspan="6" class="company-data" style="vertical-align: top; ">
+                <th width="60%" colspan="6" class="company-data" style="vertical-align: top;">
                     <h2>Report Information</h2>
                     <table>
                         <tr>
-                            <td><strong>Collection Date:</strong>
+                            <td style="font-weight: normal"><strong>Collection Date:</strong>
                                 {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
-                            <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Lab Ref:</strong>
+                                {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Received Date:</strong>
+                            <td style="font-weight: normal"><strong>Received Date:</strong>
                                 {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
-                            <td><strong>Company:</strong> PRIVATE</td>
+                            <td style="font-weight: normal"><strong>Sample ID:</strong>
+                                {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Report Date:</strong>
+                            <td style="font-weight: normal"><strong>Report Date:</strong>
                                 {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
-                            <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
                         </tr>
                     </table>
                 </th>
 
             </tr>
             <tr>
+                <td colspan="7">
+                    <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                </td>
+            </tr>
+            <tr>
                 <th colspan="7" style="">
                     @php
                         // Assuming $sample->tests is a collection or array of test objects
                         $testNames = $tests->pluck('name')->implode(', ');
-                        $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
+                        $individualtests = $sample
+                            ->tests()
+                            ->where('department', $reporttype)
+                            ->pluck('name')
+                            ->implode(', ');
                         // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
-                        $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                        $sampleprofiles = $sample
+                            ->testProfiles()
+                            ->whereHas('departments', function ($query) use ($reporttype) {
                                 $query->where('department', $reporttype);
-                            })->with('tests')->pluck('name')->implode(', ');
+                            })
+                            ->with('tests')
+                            ->pluck('name')
+                            ->implode(', ');
 
                     @endphp
-                    <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+                    <span style="white-space: nowrap;"><strong>Request:
+                            {{ $sampleprofiles . ', ' . $individualtests }}</strong></span>
                 </th>
+            </tr>
+            <tr>
+                @php
+                    $urinalysisStatus = $sample->departmentStatus('3');
+                @endphp
+                <td colspan="4">
+                    <span style="white-space: nowrap;"><strong>Comments: </strong> {{ $urinalysisStatus->note ?? '' }}
+                    </span>
+                </td>
             </tr>
         </thead>
         <tbody>
             {{-- {{dd($tests)}} --}}
             @foreach ($tests as $index => $test)
-            @php
-            $testReport = $testReports
-            ->where('test_id', $test->id)
-            ->where('sample_id', $sample->id)
-            ->first();
-            if (empty($testReport)) {
-                continue;
-            }
-            if (!empty($testReport) && empty($testReport->urinalysisMicrobiologyResults->first())) {
-                continue;
-            }
-            $urinalysisMicrobiologyResults = $testReport
-            ? $testReport->urinalysisMicrobiologyResults->first()
-            : [];
+                @php
+                    $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
+                    if (empty($testReport)) {
+                        continue;
+                    }
+                    if (!empty($testReport) && empty($testReport->urinalysisMicrobiologyResults->first())) {
+                        continue;
+                    }
+                    $urinalysisMicrobiologyResults = $testReport
+                        ? $testReport->urinalysisMicrobiologyResults->first()
+                        : [];
 
-            $procedureResults = $urinalysisMicrobiologyResults
-            ? $urinalysisMicrobiologyResults->procedureResults
-            : [];
+                    // $procedureResults = $sample->sensitivityResults
+                    // ? $sample->sensitivityResults[0]->sensitivity_profiles
+                    // : [];
 
-
-
-            @endphp
+                @endphp
             @endforeach
             {{-- {{dd($urinalysisMicrobiologyResults)}} --}}
             @if (!empty($urinalysisMicrobiologyResults))
-                <tr style="margin:0px;">
-                    <tr>
-                        <th class="text-start heading" colspan="7" style="border-top: 2px solid #3d90ca; ">
-                            URINALYSIS
-                        </th>
-                    </tr>
-                    <td colspan="2" style="vertical-align: top;  border:1px solid #3d90ca;">
-                        <table class="chemical-analysis">
-                            <!-- Add rows for chemical analysis data -->
-                            <thead>
+                <tr style="margin:0px;" width="100%">
+                <tr>
+                    <th class="text-start heading" colspan="7" style="border-top: 2px solid #3d90ca; ">
+                        URINALYSIS
+                    </th>
+                </tr>
+                <td colspan="1"  style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;padding:0px;border-collapse: collapse;">
+                    <table class="chemical-analysis" style="border-collapse: collapse;margin:0px;padding:0px;">
+                        <!-- Add rows for chemical analysis data -->
+                        <thead>
 
-                                <tr>
-                                    <th class="heading" colspan="3" style="text-align: center"> CHEMICAL ANALYSIS</th>
+                            <tr>
+                                <th class="heading" colspan="7" style="text-align: center"> CHEMICAL ANALYSIS</th>
+                            </tr>
+                            <tr class="bg-blue" colspan="">
+                                <th width="30%">Test</th>
+                                <th width="10%">Results</th>
+                                <th width="10%">Flag</th>
+                                <th width="40%">Normal Range</th>
+                            </tr>
+                        </thead>
+                        <tbody >
+                            @foreach ($categorizedTests as $profileId => $profileData)
+                                <tr id="{{ $profileId }}">
+                                    <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
                                 </tr>
-                                <tr class="bg-blue">
-                                    <th width="30%">Test</th>
-                                    <th>Results</th>
-                                    <th>Flag</th>
-                                    <th>Normal Range</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                        @foreach ($categorizedTests as $profileId => $profileData)
-                                            <tr id="{{ $profileId }}">
-                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
-                                            </tr>
-                                            @php
-                                                $microscopyTests = collect();
-                                                $chemicalAnalysisTests = collect();
-                                                // dd($profileData['tests']);
-                                                foreach ($profileData['tests'] as $test) {
-                                                    // dd($profileData['tests']);
-                                                    if ($test->urin_test_type === '2') {
-                                                        $microscopyTests->push($test);
-                                                    } elseif ($test->urin_test_type === '1') {
-                                                        $chemicalAnalysisTests->push($test);
-                                                    }
-                                                }
-                                                // dd($microscopyTests);
-                                            @endphp
-                                            @foreach ($chemicalAnalysisTests as $index => $test)
-                                                @php
-                                                    $testReport = $testReports
-                                                        ->where('test_id', $test->id)
-                                                        ->where('sample_id', $sample->id)
-                                                        ->first();
-                                                    $urinalysisMicrobiologyResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
-                                                    $flag = $urinalysisMicrobiologyResults->flag ?? '';
-                                                    $background = '';
-
-                                                    if ($flag == 'Normal') {
-                                                        $background = 'color:#40bb82';
-                                                    } elseif ($flag == 'High') {
-                                                        $background = 'color:red';
-                                                    } elseif ($flag == 'Low') {
-                                                        $background = 'color:#ffca5b';
-                                                    }
-
-                                                    $referenceRange = '';
-
-                                                    if ($test->reference_range == 'basic_ref') {
-                                                        $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
-                                                    } elseif ($test->reference_range == 'optional_ref') {
-                                                        $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
-                                                    } elseif ($test->reference_range == 'no_manual_tag') {
-                                                        $referenceRange = ($test->nomanualvalues_ref_range ?? '');
-                                                    }
-                                                @endphp
-                                                    <tr>
-                                                        <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
-                                                        <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
-                                                        <td>
-                                                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
-                                                        </td>
-                                                        <td>{!! $referenceRange !!}</td>
-                                                    </tr>
-                                            @endforeach
-                                        @endforeach
-                                {{-- @if (!$urinalysisMicrobiologyResults->s_gravity && !$urinalysisMicrobiologyResults->ph &&
-                                !$urinalysisMicrobiologyResults->leucocytes && !$urinalysisMicrobiologyResults->nitrite && !$urinalysisMicrobiologyResults->glucose &&
-                                !$urinalysisMicrobiologyResults->ketones && !$urinalysisMicrobiologyResults->proteins && !$urinalysisMicrobiologyResults->urobilinogen
-                                && !$urinalysisMicrobiologyResults->bilirubin && !$urinalysisMicrobiologyResults->blood && !$urinalysisMicrobiologyResults->colour && !$urinalysisMicrobiologyResults->appearance
-                                ) --}}
-                                {{-- <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                @endif --}}
-
-
-
-                            </tbody>
-                        </table>
-                    </td>
-                    <td colspan="5" style="vertical-align: top;  border:1px solid #3d90ca;">
-                        <table class="microscopy-analysis">
-                            <thead>
-                                <tr>
-                                    <th class="heading" colspan="3" style="text-align: center">MICROSCOPY</th>
-                                </tr>
-                                <tr class="bg-blue" >
-                                    <th width="30%">Test</th>
-                                    <th>Results</th>
-                                    <th>Flag</th>
-                                    <th>Normal Range</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- @if (!$urinalysisMicrobiologyResults->white_cells && !$urinalysisMicrobiologyResults->epith_cells &&
-                                !$urinalysisMicrobiologyResults->red_cells && !$urinalysisMicrobiologyResults->casts && !$urinalysisMicrobiologyResults->crystals &&
-                                !$urinalysisMicrobiologyResults->bacteria && !$urinalysisMicrobiologyResults->yeast && !$urinalysisMicrobiologyResults->trichomonas
-                                )
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                @endif --}}
-                                @foreach ($categorizedTests as $profileId => $profileData)
-                                    <tr id="{{ $profileId }}">
-                                        <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
-                                    </tr>
-                                    @php
-                                        $microscopyTests = collect();
-                                        $chemicalAnalysisTests = collect();
+                                @php
+                                    $microscopyTests = collect();
+                                    $chemicalAnalysisTests = collect();
+                                    // dd($profileData['tests']);
+                                    foreach ($profileData['tests'] as $test) {
                                         // dd($profileData['tests']);
-                                        foreach ($profileData['tests'] as $test) {
-                                            // dd($profileData['tests']);
-                                            if ($test->urin_test_type === '2') {
-                                                $microscopyTests->push($test);
-                                            } elseif ($test->urin_test_type === '1') {
-                                                $chemicalAnalysisTests->push($test);
-                                            }
+                                        if ($test->urin_test_type === '2') {
+                                            $microscopyTests->push($test);
+                                        } elseif ($test->urin_test_type === '1') {
+                                            $chemicalAnalysisTests->push($test);
                                         }
-                                        // dd($microscopyTests);
+                                    }
+                                    // dd($microscopyTests);
+                                @endphp
+                                @foreach ($chemicalAnalysisTests as $index => $test)
+                                    @php
+                                        $testReport = $testReports
+                                            ->where('test_id', $test->id)
+                                            ->where('sample_id', $sample->id)
+                                            ->first();
+                                        $urinalysisMicrobiologyResults = $testReport
+                                            ? $testReport->urinalysisMicrobiologyResults->first()
+                                            : [];
+                                        $flag = $urinalysisMicrobiologyResults->flag ?? '';
+                                        $background = '';
+
+                                        if ($flag == 'Normal') {
+                                            $background = 'color:#40bb82';
+                                        } elseif ($flag == 'High') {
+                                            $background = 'color:red';
+                                        } elseif ($flag == 'Low') {
+                                            $background = 'color:#ffca5b';
+                                        }
+
+                                        $referenceRange = '';
+
+                                        if ($test->reference_range == 'basic_ref') {
+                                            $referenceRange =
+                                                ($test->basic_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->basic_high_value_ref_range ?? '');
+                                        } elseif ($test->reference_range == 'optional_ref') {
+                                            $referenceRange =
+                                                'Male: ' .
+                                                ($test->male_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->male_high_value_ref_range ?? '') .
+                                                '<br>Female: ' .
+                                                ($test->female_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->female_high_value_ref_range ?? '');
+                                        } elseif ($test->reference_range == 'no_manual_tag') {
+                                            $referenceRange = $test->nomanualvalues_ref_range ?? '';
+                                        }
                                     @endphp
-                                    @foreach ($microscopyTests as $index => $test)
-                                        @php
-                                            $testReport = $testReports
-                                                ->where('test_id', $test->id)
-                                                ->where('sample_id', $sample->id)
-                                                ->first();
-                                            $urinalysisMicrobiologyResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
-                                            $flag = $urinalysisMicrobiologyResults->flag ?? '';
-                                            $background = '';
-
-                                            if ($flag == 'Normal') {
-                                                $background = 'color:#40bb82';
-                                            } elseif ($flag == 'High') {
-                                                $background = 'color:red';
-                                            } elseif ($flag == 'Low') {
-                                                $background = 'color:#ffca5b';
-                                            }
-
-                                            $referenceRange = '';
-
-                                            if ($test->reference_range == 'basic_ref') {
-                                                $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '');
-                                            } elseif ($test->reference_range == 'optional_ref') {
-                                                $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? '');
-                                            } elseif ($test->reference_range == 'no_manual_tag') {
-                                                $referenceRange = ($test->nomanualvalues_ref_range ?? '');
-                                            }
-                                        @endphp
-                                            <tr>
-                                                <td><strong> {{ $urinalysisMicrobiologyResults->description ?? '' }} </strong> </td>
-                                                <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
-                                                <td>
-                                                    <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
-                                                </td>
-                                                <td>{!! $referenceRange !!}</td>
-                                            </tr>
-                                    @endforeach
+                                    <tr>
+                                        <td> {{ $urinalysisMicrobiologyResults->description ?? $test->name }} </td>
+                                        <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
+                                        <td>
+                                            <span class="badge badge-pill flag-badge" style="{{ $background }}"
+                                                data-key="t-hot">{{ $flag }}</span>
+                                        </td>
+                                        <td >{!! $referenceRange !!}</td>
+                                    </tr>
                                 @endforeach
+                            @endforeach
+                            {{-- @if (!$urinalysisMicrobiologyResults->s_gravity && !$urinalysisMicrobiologyResults->ph && !$urinalysisMicrobiologyResults->leucocytes && !$urinalysisMicrobiologyResults->nitrite && !$urinalysisMicrobiologyResults->glucose && !$urinalysisMicrobiologyResults->ketones && !$urinalysisMicrobiologyResults->proteins && !$urinalysisMicrobiologyResults->urobilinogen && !$urinalysisMicrobiologyResults->bilirubin && !$urinalysisMicrobiologyResults->blood && !$urinalysisMicrobiologyResults->colour && !$urinalysisMicrobiologyResults->appearance) --}}
+                            {{-- <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                @endif --}}
 
-                            </tbody>
-                        </table>
-                    </td>
+
+
+                        </tbody>
+                    </table>
+                </td>
+                <td colspan="6" style="vertical-align: top;  border:1px solid #3d90ca; width: 50%;padding:0px;border-collapse: collapse;">
+                    <table class="microscopy-analysis" style="border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th class="heading" colspan="7" style="text-align: center">MICROSCOPY</th>
+                            </tr>
+                            <tr class="bg-blue">
+                                <th width="30%">Test</th>
+                                <th width="15%">Results</th>
+                                <th width="15%">Flag</th>
+                                <th width="40%">Normal Range</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- @if (!$urinalysisMicrobiologyResults->white_cells && !$urinalysisMicrobiologyResults->epith_cells && !$urinalysisMicrobiologyResults->red_cells && !$urinalysisMicrobiologyResults->casts && !$urinalysisMicrobiologyResults->crystals && !$urinalysisMicrobiologyResults->bacteria && !$urinalysisMicrobiologyResults->yeast && !$urinalysisMicrobiologyResults->trichomonas)
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                @endif --}}
+                            @foreach ($categorizedTests as $profileId => $profileData)
+                                <tr id="{{ $profileId }}">
+                                    <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
+                                </tr>
+                                @php
+                                    $microscopyTests = collect();
+                                    $chemicalAnalysisTests = collect();
+                                    // dd($profileData['tests']);
+                                    foreach ($profileData['tests'] as $test) {
+                                        // dd($profileData['tests']);
+                                        if ($test->urin_test_type === '2') {
+                                            $microscopyTests->push($test);
+                                        } elseif ($test->urin_test_type === '1') {
+                                            $chemicalAnalysisTests->push($test);
+                                        }
+                                    }
+                                    // dd($microscopyTests);
+                                @endphp
+                                @foreach ($microscopyTests as $index => $test)
+                                    @php
+                                        $testReport = $testReports
+                                            ->where('test_id', $test->id)
+                                            ->where('sample_id', $sample->id)
+                                            ->first();
+                                        $urinalysisMicrobiologyResults = $testReport
+                                            ? $testReport->urinalysisMicrobiologyResults->first()
+                                            : [];
+                                        $flag = $urinalysisMicrobiologyResults->flag ?? '';
+                                        $background = '';
+
+                                        if ($flag == 'Normal') {
+                                            $background = 'color:#40bb82';
+                                        } elseif ($flag == 'High') {
+                                            $background = 'color:red';
+                                        } elseif ($flag == 'Low') {
+                                            $background = 'color:#ffca5b';
+                                        }
+
+                                        $referenceRange = '';
+
+                                        if ($test->reference_range == 'basic_ref') {
+                                            $referenceRange =
+                                                ($test->basic_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->basic_high_value_ref_range ?? '') .
+                                                ' ' .
+                                                ($test->basic_unit_value_ref_range ?? '');
+                                        } elseif ($test->reference_range == 'optional_ref') {
+                                            $referenceRange =
+                                                'Male: ' .
+                                                ($test->male_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->male_high_value_ref_range ?? '') .
+                                                ' ' .
+                                                ($test->male_unit_value_ref_range ?? '') .
+                                                '<br>Female: ' .
+                                                ($test->female_low_value_ref_range ?? '') .
+                                                '-' .
+                                                ($test->female_high_value_ref_range ?? '') .
+                                                ' ' .
+                                                ($test->female_unit_value_ref_range ?? '');
+                                        } elseif ($test->reference_range == 'no_manual_tag') {
+                                            $referenceRange = $test->nomanualvalues_ref_range ?? '';
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td style="vertical-align: top;">
+                                            {{ $urinalysisMicrobiologyResults->description ?? $test->name }} </td>
+                                        <td style="vertical-align: top;">
+                                            {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
+                                        <td style="vertical-align: top;">
+                                            <span class="badge badge-pill flag-badge" style="{{ $background }}"
+                                                data-key="t-hot">{{ $flag }}</span>
+                                        </td>
+                                        <td style="vertical-align: top;">{!! $referenceRange !!}</td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+
+                        </tbody>
+                    </table>
+                </td>
                 </tr>
             @endif
 
@@ -400,94 +503,138 @@
     </table>
 
     @php
-    // dd($procedureResults);
-    $filteredResults = collect($procedureResults)->filter(function ($item) {
-    return !empty($item->specimen_note);
-    });
+        // dd($procedureResults);
+        $filteredResults = collect($procedureResults)->filter(function ($item) {
+            return !empty($item->specimen_note);
+        });
     @endphp
 
     @if ($filteredResults->isNotEmpty())
+        <br>
+        <br>
+        <table class="table-wrapper">
+            <thead>
+                <tr>
+                    <th class="text-start heading" colspan="2">
+                        MICROBIOLOGY
+                    </th>
+                </tr>
+                <tr class="bg-blue">
+                    <th width="30%">PROCEDURE</th>
+                    <th>RESULTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($procedureResults as $key => $value)
+                    <tr>
+                        <td width="10%" style="vertical-align: top;"><strong>{{ $value->procedure ?? '' }}</strong>
+                        </td>
+                        <td style="vertical-align: top;">
+                            {!! nl2br(e($value->specimen_note ?? '')) !!}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        {{-- <div class="page-break"></div> --}}
+    @endif
+
+
+    @php
+        $sensitivityResult = $sample->sensitivityResults->first();
+        $data = $sensitivityResult ? json_decode($sensitivityResult->sensitivity, true) : [];
+    @endphp
+    @if ($data)
+        <br>
+        <br>
+        <table class="table-wrapper">
+            <thead>
+                <tr>
+                    <th class=" text-start heading" colspan="2">
+                        SENSITIVITY
+                    </th>
+                </tr>
+                @foreach ($data as $i)
+                    <tr class="bg-blue">
+                        <th width="40%">MICROORGANISM &nbsp; ISOLATED</th>
+                        <th>ANTIBIOTICS </th>
+                        <th>{{ getSensitivityUnitByMicroorganism($i['microorganism']) }}</th>
+                        <th>SENSITIVE</th>
+                        <th>RESISTANT</th>
+                        <th>INTERMEDIATE</th>
+                    </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach ($i['items'] as $index => $item)
+                    <tr style="{{ $index === 0 ? '' : '' }}">
+                        <td>{{ $index === 0 ? $i['microorganism'] : '' }}</td>
+                        <td>{{ $item['antibiotic'] }}</td>
+                        <td class="text-center">{{ $item['mic'] }}</td>
+                        <td class="text-center"><input type="radio"
+                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
+                                {{ $item['sensitivity'] === 'sensitive' ? 'checked' : '' }}></td>
+                        <td class="text-center"><input type="radio"
+                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
+                                {{ $item['sensitivity'] === 'resistant' ? 'checked' : '' }}></td>
+                        <td class="text-center"><input type="radio"
+                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
+                                {{ $item['sensitivity'] === 'intermediate' ? 'checked' : '' }}></td>
+                    </tr>
+                @endforeach
+
+            </tbody>
+    @endforeach
+    </table>
+    <br>
+    <br>
+    @endif
     <table class="table-wrapper">
         <thead>
             <tr>
                 <th class="text-start heading" colspan="2">
-                    MICROBIOLOGY
+                    REVIEW AND RECOMMENDATIONS
                 </th>
-            </tr>
-            <tr class="bg-blue">
-                <th width="30%">PROCEDURE</th>
-                <th>RESULTS</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($procedureResults as $key => $value)
             <tr>
-                <td width="10%"><strong>{{ $value->procedure ?? '' }}</strong></td>
+                <td>{!! nl2br(e($sensitivityResult->review ?? '')) !!}</td>
+            </tr>
+            <br><br><br>
+            <tr>
                 <td>
-                    {{ $value->specimen_note ?? '' }}
+                    <strong>Validated by: </strong>
+                    {{ $validated_by }}
                 </td>
             </tr>
-            @endforeach
-        </tbody>
-    </table>
-    {{-- <div class="page-break"></div> --}}
-    @endif
-
-    @php
-    $data = json_decode($urinalysisMicrobiologyResults->sensitivity ?? '[]', true);
-    @endphp
-    @if ($data)
-
-    <table class="table-wrapper">
-        <thead>
             <tr>
-                <th class=" text-start heading" colspan="2">
-                    SENSITIVITY
-                </th>
+                <td colspan="4">
+                    <strong>Electronically signed by: </strong>
+                    {{ $signed_by }}
+                </td>
             </tr>
-            <tr class="bg-blue">
-                <th width="40%">MICROORGANISM &nbsp; ISOLATED</th>
-                <th>ANTIBIOTICS </th>
-                <th>MIC(ug/mL)</th>
-                <th>SENSITIVE</th>
-                <th>RESISTANT</th>
-                <th>INTERMEDIATE</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach ($data as $i)
-            @foreach ($i['items'] as $index => $item)
-            <tr style="{{ $index === 0 ? '' : '' }}">
-                <td>{{ $index === 0 ? $i['microorganism'] : '' }}</td>
-                <td>{{ $item['antibiotic'] }}</td>
-                <td class="text-center">{{ $item['mic'] }}</td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='sensitive' ? 'checked' : '' }}></td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='resistant' ? 'checked' : '' }}></td>
-                <td class="text-center"><input type="radio"
-                        name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity" {{
-                        $item['sensitivity']==='intermediate' ? 'checked' : '' }}></td>
-            </tr>
-            @endforeach
-            @endforeach
         </tbody>
     </table>
-    @endif
 
-        <script type="text/php">
+    <script type="text/php">
             if ( isset($pdf) ) {
                 $pdf->page_script('
                     if ($PAGE_COUNT > 0) {
                         $font = $fontMetrics->get_font("Cambria, serif", "normal");
                         $size = 9;
-                        $pdf->text(45, 786, "Signed by: {{$signed_by}}", $font, $size);
-                        $pdf->text(440, 786, "Validated by: {{$validated_by}}", $font, $size);
-                        $pdf->text(30, 795, "______________________________________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
+                        // Centered text calculation
+                        $accreditText = "THIS LABORATORY IS ACCREDITED FOR THE TESTS AND PROFILES MARKED *.";
+                        $directorText = "Lab Director: Dr. Christina Pierre";
+                        $width = $pdf->get_width();
+                        $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                        $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
+                        $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
+                        $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
                         $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                        // Director text below the line and page count
+                        $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
                     }
                 ');
             }

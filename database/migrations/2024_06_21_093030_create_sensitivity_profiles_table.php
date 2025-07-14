@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sensitivity_profiles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('unit')->default('MIC (ug/mL)'); // Default unit can be changed as needed
             $table->timestamps();
         });
     }

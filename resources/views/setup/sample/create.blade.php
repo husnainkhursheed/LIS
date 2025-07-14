@@ -72,11 +72,11 @@
                 </h1>
             </header>
             {{-- <div id="liveTime"></div> --}}
-            <form class="tablelist-form" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
+            <form class="" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
             @csrf
 
                 <div class="row">
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" value="{{$test_number}}" class="form-control"
@@ -84,12 +84,14 @@
                                 <input type="text" id="" name="" value="{{$test_number}}" class="form-control"
                                 disabled  />
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  class="form-control"
-                                required />
+                            <input type="text" id="access_number" name="access_number"  value="{{$access_number}}" hi class="form-control"
+                               hidden required />
+                            <input type="text" id="" name="" value="{{$access_number}}" class="form-control"
+                            disabled  />
                         </div>
                     </div>
                 </div>
@@ -99,13 +101,13 @@
                          <div class="form-group">
                             <label for="collected_date" class="form-label">Collected Date</label>
                             <input type="date" id="collected_date" name="collected_date" class="form-control"
-                                required />
+                            value="{{ old('collected_date') }}" required />
                         </div>
                   </div>
                     <div class="col-md-6">
                          <div class="form-group">
                             <label for="received_date" class="form-label">Received Date </label>
-                            <input type="date" class="form-control" id="received_date" name="received_date"/>
+                            <input type="date" class="form-control" id="received_date" name="received_date" value="{{ old('received_date') }}"/>
                         </div>
                      </div>
                 </div>
@@ -117,11 +119,12 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalPatient"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
+                                            <option value=""></option>
                                             @foreach ($patients as $patient)
                                                 @php
                                                     $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
                                                 @endphp
-                                                <option value="{{ $patient->id }}">
+                                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
                                                     {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
@@ -133,8 +136,9 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalDoctor"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="doctor_id" id="doctor_id">
+                                <option value=""></option>
                                 @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}">
+                                    <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
                                         {{ $doctor->name }}</option>
                                 @endforeach
                             </select>
@@ -149,8 +153,9 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalInstitution"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="institution_id" id="institution_id">
+                                <option value=""></option>
                                 @foreach ($institutions as $institution)
-                                <option value="{{ $institution->id }}">
+                                <option value="{{ $institution->id }}" {{ old('institution_id') == $institution->id ? 'selected' : '' }}>
                                     {{ $institution->name }}</option>
                                 @endforeach
                             </select>
@@ -161,29 +166,29 @@
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
                                 {{-- <option selected>Choose Institution</option> --}}
-                                <option value="Patient">Patient</option>
-                                <option value="Doctor">Doctor</option>
-                                <option value="Other">Other</option>
+                                <option value="Patient" {{ old('bill_to') == 'Patient' ? 'selected' : '' }}>Patient</option>
+                                <option value="Doctor" {{ old('bill_to') == 'Doctor' ? 'selected' : '' }}>Doctor</option>
+                                <option value="Other" {{ old('bill_to') == 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="notes" class="form-label">Notes</label>
                             <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control"></textarea>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_profiles" class="form-label">Test Profiles</label>
                             <select  class="js-example-basic-multiple"   name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()" multiple="multiple">
                                 @foreach ($test_profiles as $item)
-                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}">{{$item->name.' '. $item->cost}}</option>
+                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}" {{ (collect(old('test_profiles'))->contains($item->id)) ? 'selected' : '' }}>{{$item->name.' '. $item->cost}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -191,7 +196,7 @@
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" disabled>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" >
                         </div>
                     </div>
                     <div class="x">
@@ -200,32 +205,16 @@
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
                                 {{-- {{dd($tests->where('department'!= null))}} --}}
                                 @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}" data-cost="{{ $test->cost }}">
+                                    <option value="{{ $test->id }}" data-cost="{{ $test->cost }}" {{ (collect(old('test_requested'))->contains($test->id)) ? 'selected' : '' }}>
                                         {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost" id="total_cost" disabled>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" >
                         </div>
                     </div>
                 </div>
@@ -236,7 +225,7 @@
                     </div>
                     <div class="col-md-2 p-0">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" disabled>
+                            <input type="text" class="form-control" name="grand_total" id="grand_total" >
                         </div>
                     </div>
                 </div>
@@ -512,6 +501,26 @@
         </div>
     </div>
     {{-- end model  --}}
+
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="reviewModalLabel">Review Sample Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reviewContent">
+                        <!-- Review content will be filled by JS -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Edit</button>
+                    <button type="button" class="btn btn-success" id="confirmSubmit">Confirm & Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -535,6 +544,45 @@
 
 
     <script>
+
+            // On confirm, submit the form
+            // $('#confirmSubmit').on('click', function() {
+            //     document.forms['leadtype_form'].submit();
+            // });
+        // Set max for received_date to today
+        var today = new Date().toISOString().split('T')[0];
+        $('#received_date').attr('max', today);
+
+        function validateDates(showAlert = true) {
+            var collected = $('#collected_date').val();
+            var received = $('#received_date').val();
+
+            if (collected && received) {
+                if (collected > received) {
+                    if (showAlert) alert('Collected date cannot be later than received date.');
+                    $('#collected_date').val('');
+                    return false;
+                }
+            }
+            if (received && received > today) {
+                if (showAlert) alert('Received date cannot be in the future.');
+                $('#received_date').val('');
+                return false;
+            }
+            return true;
+        }
+
+        $('#collected_date, #received_date').on('change', function() {
+            validateDates(true);
+        });
+
+        // $('#leadtype_form').on('submit', function(e) {
+        //     if (!validateDates(true)) {
+        //         e.preventDefault();
+        //         return false;
+        //     }
+        // });
+
         function checkTestProfiles() {
             $('#test_requested').val('').trigger('change');
             // Get selected profile IDs
@@ -589,6 +637,47 @@
             });
         }
        $(document).ready(function() {
+
+            $('#submit').on('click', function(e) {
+                e.preventDefault();
+
+                // Gather form data for review
+                let patient = $('#patient_id option:selected').text();
+                let doctor = $('#doctor_id option:selected').text();
+                let institution = $('#institution_id option:selected').text();
+                let billTo = $('#bill_to').val();
+                let collected = $('#collected_date').val();
+                let received = $('#received_date').val();
+                // let notes = $('#notes').val();
+                let profiles = $('#test_profiles option:selected').map(function(){return $(this).text();}).get().join(', ');
+                let tests = $('#test_requested option:selected').map(function(){return $(this).text();}).get().join(', ');
+                let totalProfile = $('#total_cost_profile').val();
+                let totalTest = $('#total_cost').val();
+                let grandTotal = $('#grand_total').val();
+
+                let html = `
+                    <strong>Patient:</strong> ${patient}<br>
+                    <strong>Doctor:</strong> ${doctor}<br>
+                    <strong>Institution:</strong> ${institution}<br>
+                    <strong>Bill To:</strong> ${billTo}<br>
+                    <strong>Collected Date:</strong> ${collected}<br>
+                    <strong>Received Date:</strong> ${received}<br>
+                    <strong>Test Profiles:</strong> ${profiles}<br>
+                    <strong>Individual Tests:</strong> ${tests}<br>
+                    <strong>Total Profile Cost:</strong> ${totalProfile}<br>
+                    <strong>Total Test Cost:</strong> ${totalTest}<br>
+                    <strong>Grand Total:</strong> ${grandTotal}<br>
+                `;
+                $('#reviewContent').html(html);
+                $('#reviewModal').modal('show');
+            });
+            document.getElementById('confirmSubmit').addEventListener('click', function () {
+                console.log(document.getElementById('leadtype_form'));
+                document.getElementById('leadtype_form').requestSubmit();
+            });
+
+            // Intercept submit button
+
             function calculateGrandTotal() {
                 let totalCost = parseFloat($('#total_cost').val()) || 0;
                 let totalProfileCost = parseFloat($('#total_cost_profile').val()) || 0;
@@ -721,18 +810,18 @@
                 });
             });
         });
-        document.querySelector("#lead-image-input").addEventListener("change", function() {
-            var preview = document.querySelector("#lead-img");
-            var file = document.querySelector("#lead-image-input").files[0];
-            console.log(file);
-            var reader = new FileReader();
-            reader.addEventListener("load", function() {
-                preview.src = reader.result;
-            }, false);
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        });
+        // document.querySelector("#lead-image-input").addEventListener("change", function() {
+        //     var preview = document.querySelector("#lead-img");
+        //     var file = document.querySelector("#lead-image-input").files[0];
+        //     console.log(file);
+        //     var reader = new FileReader();
+        //     reader.addEventListener("load", function() {
+        //         preview.src = reader.result;
+        //     }, false);
+        //     if (file) {
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {

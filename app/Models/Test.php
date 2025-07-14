@@ -18,6 +18,7 @@ class Test extends Model
         'cost',
         'test_profile_id',
         'reference_range',
+        'test_notes',
         'is_active',
     ];
 

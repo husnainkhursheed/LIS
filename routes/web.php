@@ -15,6 +15,7 @@ use App\Http\Controllers\ReportingandAnalyticsController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
 use App\Http\Controllers\Admin\Setup\TestProfileController;
 use App\Http\Controllers\Admin\Reports\TestReportController;
+use App\Http\Controllers\Admin\Setup\SpecimenTypeController;
 use App\Http\Controllers\Admin\Setup\CustomDropdownController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
 use App\Http\Controllers\Admin\UserManagement\UsersController;
@@ -90,6 +91,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/patient/{id}', [PatientController::class, 'update'])->name('patient.update');
     Route::delete('/patient/{id}', [PatientController::class, 'destroy'])->name('patient.destroy');
 
+    Route::get('/patient/suggestions', [PatientController::class, 'getSuggestions']);
+    Route::get('/patient/check-duplicates', [PatientController::class, 'checkDuplicates']);
+    Route::post('/patient', [PatientController::class, 'store']);
+
+
     Route::get('/test', [TestController::class, 'index'])->name('test.index');
     Route::post('/test', [TestController::class, 'store'])->name('test.store');
     Route::get('/test/{id}/edit', [TestController::class, 'edit'])->name('test.edit');
@@ -119,6 +125,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/{id}', [SenstivityItemsController::class, 'destroy'])->name('profile.destroy');
     Route::post('/check-tests-in-profiles', [SampleController::class, 'checkTestsInProfiles'])->name('checkTestsInProfiles');
     Route::resource('/sample', SampleController::class);
+
+    Route::prefix('specimen-types')->group(function () {
+        Route::get('/', [SpecimenTypeController::class, 'index'])->name('specimen-types.index');
+        Route::post('/', [SpecimenTypeController::class, 'store'])->name('specimen-types.store');
+        Route::get('/{id}/edit', [SpecimenTypeController::class, 'edit'])->name('specimen-types.edit');
+        Route::post('/{id}', [SpecimenTypeController::class, 'update'])->name('specimen-types.update');
+        Route::delete('/{id}', [SpecimenTypeController::class, 'destroy'])->name('specimen-types.destroy');
+    });
 
 
 
@@ -151,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/changes/{id}', [ReportingandAnalyticsController::class, 'trailchanges']);
 
         Route::get('/processing-time', [ReportingandAnalyticsController::class, 'index'])->name('processingtime.index');
+        Route::get('/master-report', [ReportingandAnalyticsController::class, 'masterReport'])->name('masterreport.index');
 
     });
 
@@ -170,9 +185,7 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    Route::get('verify/{token}', [UsersController::class, 'verify']);
-    // Route::view('verify-view', 'emails.verify');
-    Route::post('set-password', [UsersController::class, 'setPassword']);
+
 
     ////////////       end routes       /////////////////////
 
@@ -188,3 +201,9 @@ Route::middleware(['auth'])->group(function () {
 
 
 });
+
+
+
+Route::get('verify/{token}', [UsersController::class, 'verify']);
+// Route::view('verify-view', 'emails.verify');
+Route::post('set-password', [UsersController::class, 'setPassword']);

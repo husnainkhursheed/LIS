@@ -44,9 +44,9 @@ class SampleController extends Controller
         $patients = Patient::where('is_active', 1)->get();
         $tests = Test::where('is_active', 1)->get();
         $test_profiles = TestProfile::all();
-        $test_number = strtoupper(substr(md5(time()), 0, 6));
+        $access_number = strtoupper(substr(md5(time()), 0, 6));
 
-        return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','test_number'));
+        return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','access_number'));
     }
 
     /**
@@ -56,8 +56,8 @@ class SampleController extends Controller
     {
 
         $request->validate([
-            'test_number' => 'required',
-            'access_number' => 'required',
+            // 'test_number' => 'required',
+            'access_number' => 'required|unique:samples,access_number,except,id',
             'collected_date' => 'required',
             'received_date' => 'required',
             // 'received_time' => 'required',
@@ -66,13 +66,13 @@ class SampleController extends Controller
             'doctor_id' => 'required',
             'bill_to' => 'required',
             // 'test_requested' => 'required',
-            'test_profiles' => 'required',
+            // 'test_profiles' => 'required',
        ]);
         //    dd($request->all());
 
 
        $sample = new Sample();
-        //    $sample->test_number =$request->test_number;
+       //$sample->test_number =$request->test_number;
        $sample->access_number = $request->access_number;
        $sample->collected_date = $request->collected_date;
        $sample->received_date = $request->received_date;
@@ -81,7 +81,10 @@ class SampleController extends Controller
        $sample->doctor_id = $request->doctor_id;
        $sample->institution_id = $request->institution_id;
        $sample->bill_to = $request->bill_to;
-       $sample->notes = $request->notes;
+       $sample->profiles_total_cost = $request->total_cost_profile;
+       $sample->indvidualtests_total_cost = $request->total_cost;
+       $sample->grand_total_cost = $request->grand_total;
+    //    $sample->notes = $request->notes;
        $sample->save();
        // Attach the tests to the sample
        $sample->tests()->attach($request->test_requested);
@@ -122,7 +125,7 @@ class SampleController extends Controller
     {
         $request->validate([
             // 'test_number' => 'required',
-            'access_number' => 'required',
+            // 'access_number' => 'required',
             'collected_date' => 'required',
             'received_date' => 'required',
             'patient_id' => 'required',
@@ -134,7 +137,7 @@ class SampleController extends Controller
 
         $sample = Sample::findOrFail($id);
         // $sample->test_number =$request->test_number;
-        $sample->access_number = $request->access_number;
+        // $sample->access_number = $request->access_number;
         $sample->collected_date = $request->collected_date;
         $sample->received_date = $request->received_date;
         $sample->received_time = now()->format('H:i:s'); // Store the current system time
@@ -142,7 +145,11 @@ class SampleController extends Controller
         $sample->doctor_id = $request->doctor_id;
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
-        $sample->notes = $request->notes;
+        $sample->profiles_total_cost = $request->total_cost_profile;
+        $sample->indvidualtests_total_cost = $request->total_cost;
+        $sample->grand_total_cost = $request->grand_total;
+
+        // $sample->notes = $request->notes;
         $sample->save();
 
          // Get the list of test IDs from the request

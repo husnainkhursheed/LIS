@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Setup;
 use App\Models\Test;
 use App\Models\Sample;
 use App\Models\TestProfile;
+use App\Models\SpecimenType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -50,8 +51,9 @@ class TestController extends Controller
         $tests = $query->paginate(10);
 
         $test_profiles = TestProfile::all();
+        $specimen_types = SpecimenType::all();
 
-        return view('setup.tests',compact('tests','test_profiles'));
+        return view('setup.tests',compact('tests','test_profiles','specimen_types'));
     }
 
     public function store(Request $request)
@@ -70,35 +72,45 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
-        $test->calculation_explanation  = $request->input('calculation_explanation');
+        $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
+        $test->test_notes  = $request->input('test_notes');
         // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->basic_unit_value_ref_range  = $request->input('basic_unit_value_ref_range');
             $test->male_low_value_ref_range  = null;
             $test->male_high_value_ref_range  = null;
+            $test->male_unit_value_ref_range  = null;
             $test->female_low_value_ref_range  = null;
             $test->female_high_value_ref_range  = null;
+            $test->female_unit_value_ref_range  = null;
             $test->nomanualvalues_ref_range = null;
         }else if($reference_range == 'optional_ref'){
             $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
             $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->male_unit_value_ref_range  = $request->input('male_unit_value_ref_range');
             $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
             $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->female_unit_value_ref_range  = $request->input('female_unit_value_ref_range');
             $test->basic_low_value_ref_range  = null;
             $test->basic_high_value_ref_range  = null;
+            $test->basic_unit_value_ref_range  = null;
             $test->nomanualvalues_ref_range = null;
         }elseif ($reference_range == 'no_manual_tag') {
             $test->nomanualvalues_ref_range = $request->input('nomanualvalues_ref_range');
             $test->basic_low_value_ref_range  = null;
             $test->basic_high_value_ref_range  = null;
+            $test->basic_unit_value_ref_range  = null;
             $test->male_low_value_ref_range  = null;
             $test->male_high_value_ref_range  = null;
+            $test->male_unit_value_ref_range  = null;
             $test->female_low_value_ref_range  = null;
             $test->female_high_value_ref_range  = null;
+            $test->female_unit_value_ref_range  = null;
         }
         $test->is_active  = $request->has('is_active') ? 1 : 0;
         $test->save();
@@ -153,9 +165,10 @@ class TestController extends Controller
         $test->department  = $request->input('department');
         $test->specimen_type  = $request->input('specimen_type');
         $test->cost  = $request->input('cost');
-        $test->calculation_explanation  = $request->input('calculation_explanation');
+        $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
+        $test->test_notes  = $request->input('test_notes');
         // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){

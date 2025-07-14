@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('procedure_results', function (Blueprint $table) {
             $table->id();
             // $table->foreignId('urinalysis_microbiology_result_id')->constrained('urinalysis_microbiology_results')->onDelete('cascade');
-            $table->unsignedBigInteger('urinalysis_microbiology_result_id')->nullable();
-            $table->foreign('urinalysis_microbiology_result_id')
+            $table->unsignedBigInteger('sample_id')->nullable();
+            $table->foreign('sample_id')
                   ->references('id')
-                  ->on('urinalysis_microbiology_results')
+                  ->on('samples')
                   ->onDelete('cascade');
             $table->string('procedure')->nullable();
             $table->text('specimen_note')->nullable();

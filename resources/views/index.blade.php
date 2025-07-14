@@ -45,7 +45,7 @@ use \Carbon\Carbon;
                                     <input type="hidden" name="search" value="{{ request('search') }}"> --}}
                                     <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
                                         <option selected disabled>Sort By</option>
-                                        <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option>
+                                        {{-- <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option> --}}
                                         <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
                                         <option value="first_name" {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Patient Name</option>
                                         <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
@@ -64,8 +64,8 @@ use \Carbon\Carbon;
                 <table id="" class="table table-striped display table-responsive rounded">
                     <thead>
                         <tr>
-                            <th class="rounded-start-3 ">Test #</th>
-                            <th>Access #</th>
+                            {{-- <th>Test #</th> --}}
+                            <th class="rounded-start-3 ">Access #</th>
                             <th>Patient Name</th>
                             <th>Date Received</th>
                             <th class="rounded-end-3 ">Action</th>
@@ -75,7 +75,7 @@ use \Carbon\Carbon;
                         @foreach ($samples as $sample)
                             @if (!$sample->all_departments_completed) <!-- Only show incomplete samples -->
                                 <tr>
-                                    <td>{{ $sample->test_number }}</td>
+                                    {{-- <td>{{ $sample->test_number }}</td> --}}
                                     <td>{{ $sample->access_number }}</td>
                                     <td>{{ "{$sample->patient->first_name} {$sample->patient->surname}" }}</td>
                                     <td>{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}</td>

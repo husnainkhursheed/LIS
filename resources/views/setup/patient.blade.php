@@ -8,6 +8,26 @@
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .autocomplete-suggestions {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            width: calc(100% - 2px); /* Match input width */
+        }
+
+        .autocomplete-suggestions div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestions div:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
 @endsection
 @section('content')
     {{-- @component('components.breadcrumb')
@@ -75,7 +95,7 @@
                             <tbody>
                                 @foreach ($patients as $patient)
                                     <tr>
-                                        <td>{{ $patient->first_name }}</td>
+                                        <td>{{ $patient->first_name.' '.$patient->surname }}</td>
                                         <td>{{ $patient->contact_number }}</td>
                                         <td>{{ $patient->sex }}</td>
                                         <td>{{ $patient->is_active == 1 ? 'Active' : 'InActive' }}</td>
@@ -201,87 +221,85 @@
         </div>
     </div>
 
-    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Patient</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/patient") }}" method="Post" autocomplete="off">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="id-field" />
-                        <div class="row g-3">
-                            <div class="col-lg-12">
-                                <div>
-                                    <label for="companyname-field"
-                                        class="form-label">First Name</label>
-                                    <input type="text" id="first_name" name="first_name"
-                                        class="form-control"
-                                        placeholder="Enter First Name" required />
-                                </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="surname" class="form-label">Surname</label>
-                                    <input type="text" id="surname" name="surname" class="form-control"
-                                    placeholder="Enter surname" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="contact_number" class="form-label">Contact Number</label>
-                                    <input type="text" id="contact_number" class="form-control" name="contact_number"
-                                        placeholder="Enter Contact Number" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="dob" class="form-label">DOB</label>
-                                    <input type="date" id="dob" name="dob" class="form-control"
-                                        placeholder="Enter Dob" required />
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6">
-                                <label for="Sex" class="form-label">Sex</label>
-                                <div class="pt-2">
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-check form-check-dark mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active"
-                                        id="is_active" checked>
-                                    <label class="form-check-label" for="is_active">
-                                        Active
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light"
-                                data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Add Patient</button>
-                        </div>
-                    </div>
-                </form>
+    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-primary-subtle p-3">
+                <h5 class="modal-title" id="exampleModalLabel">Add Patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
             </div>
+            <form class="tablelist-form" id="leadtype_form" action="{{ url("/patient") }}" method="Post" autocomplete="off">
+                @csrf
+                <div class="modal-body">
+                    <input type="hidden" id="id-field" />
+                    <div class="row g-3">
+                        <div class="col-lg-12">
+                            <div>
+                                <label for="companyname-field" class="form-label">First Name</label>
+                                <input type="text" id="first_name" name="first_name" class="form-control"
+                                    placeholder="Enter First Name" required autocomplete="off" />
+                                <div id="first_name_suggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div>
+                                <label for="surname" class="form-label">Surname</label>
+                                <input type="text" id="surname" name="surname" class="form-control"
+                                placeholder="Enter surname" required autocomplete="off" />
+                                <div id="surname_suggestions" class="autocomplete-suggestions"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div>
+                                <label for="contact_number" class="form-label">Contact Number</label>
+                                <input type="text" id="contact_number" class="form-control" name="contact_number"
+                                    placeholder="Enter Contact Number" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div>
+                                <label for="dob" class="form-label">DOB</label>
+                                <input type="date" id="dob" name="dob" class="form-control"
+                                    placeholder="Enter Dob" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="Sex" class="form-label">Sex</label>
+                            <div class="pt-2">
+                                <input type="radio" id="male" name="sex"
+                                    placeholder="Enter Email" required  value="male"/>
+                                    <label for="male" class="form-label">Male</label>
+                                <input type="radio" id="female" name="sex"
+                                    placeholder="Enter Email" required value="female" />
+                                <label for="female" class="form-label">Female</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-check form-check-dark mb-3">
+                                <input class="form-check-input" type="checkbox" name="is_active"
+                                    id="is_active" checked>
+                                <label class="form-check-label" for="is_active">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <div id="duplicate_warning" class="alert alert-warning d-none">
+                            <p>Potential duplicate patients found:</p>
+                            <ul id="duplicate_list"></ul>
+                            <p>Do you want to proceed with creating a new patient?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" id="add-btn">Add Patient</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
 
 <!--end modal-->
@@ -467,6 +485,143 @@
         // Function to reset modal when clicking the "Close" button
         $('#close-modal').on('click', function() {
             resetModal();
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstNameInput = document.getElementById('first_name');
+        const surnameInput = document.getElementById('surname');
+        const firstNameSuggestions = document.getElementById('first_name_suggestions');
+        const surnameSuggestions = document.getElementById('surname_suggestions');
+        const dobInput = document.getElementById('dob');
+        const duplicateWarning = document.getElementById('duplicate_warning');
+        const duplicateList = document.getElementById('duplicate_list');
+        const form = document.getElementById('leadtype_form');
+
+        // Debounce function to limit API calls
+        function debounce(func, timeout = 300) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
+        // Fetch suggestions
+        async function fetchSuggestions(field, value, suggestionElement) {
+            if (value.length < 2) {
+                suggestionElement.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/patient/suggestions?${field}=${encodeURIComponent(value)}`);
+                const data = await response.json();
+
+                suggestionElement.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(patient => {
+                        const div = document.createElement('div');
+                        div.textContent = `${patient.first_name} ${patient.surname} (${patient.dob || 'No DOB'})`;
+                        div.addEventListener('click', () => {
+                            firstNameInput.value = patient.first_name;
+                            surnameInput.value = patient.surname;
+                            if (patient.dob) dobInput.value = patient.dob.split(' ')[0];
+                            suggestionElement.innerHTML = '';
+                            checkForDuplicates();
+                        });
+                        suggestionElement.appendChild(div);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching suggestions:', error);
+            }
+        }
+
+        // Check for duplicate patients
+        async function checkForDuplicates() {
+            const firstName = firstNameInput.value.trim();
+            const surname = surnameInput.value.trim();
+            const dob = dobInput.value;
+
+            if (firstName.length < 2 || surname.length < 2) {
+                duplicateWarning.classList.add('d-none');
+                return;
+            }
+
+            try {
+                let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+                if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+
+                const response = await fetch(url);
+                const duplicates = await response.json();
+
+                if (duplicates.length > 0) {
+                    duplicateList.innerHTML = '';
+                    duplicates.forEach(patient => {
+                        const li = document.createElement('li');
+                        li.textContent = `${patient.first_name} ${patient.surname} (DOB: ${patient.dob || 'N/A'}, Contact: ${patient.contact_number || 'N/A'})`;
+                        duplicateList.appendChild(li);
+                    });
+                    duplicateWarning.classList.remove('d-none');
+                } else {
+                    duplicateWarning.classList.add('d-none');
+                }
+            } catch (error) {
+                console.error('Error checking for duplicates:', error);
+            }
+        }
+
+        // Event listeners with debounce
+        firstNameInput.addEventListener('input', debounce(() => {
+            fetchSuggestions('first_name', firstNameInput.value.trim(), firstNameSuggestions);
+            checkForDuplicates();
+        }));
+
+        surnameInput.addEventListener('input', debounce(() => {
+            fetchSuggestions('surname', surnameInput.value.trim(), surnameSuggestions);
+            checkForDuplicates();
+        }));
+
+        dobInput.addEventListener('change', debounce(checkForDuplicates));
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target !== firstNameInput && e.target !== surnameInput) {
+                firstNameSuggestions.innerHTML = '';
+                surnameSuggestions.innerHTML = '';
+            }
+        });
+
+        // Form submission handler
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const firstName = firstNameInput.value.trim();
+            const surname = surnameInput.value.trim();
+            const dob = dobInput.value;
+
+            // Final duplicate check before submission
+            try {
+                let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+                if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+
+                const response = await fetch(url);
+                const duplicates = await response.json();
+
+                if (duplicates.length > 0) {
+                    if (!confirm('Potential duplicates found. Are you sure you want to create a new patient?')) {
+                        return;
+                    }
+                }
+
+                // Proceed with form submission
+                form.submit();
+            } catch (error) {
+                console.error('Error during final duplicate check:', error);
+                form.submit();
+            }
         });
     });
 

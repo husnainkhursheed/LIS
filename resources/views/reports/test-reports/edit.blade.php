@@ -125,11 +125,13 @@
 
                                 {{-- Based on reporttype, determine which results to show --}}
                                 @if ($reporttype == 1) {{-- Biochem/Haematology --}}
-                                    @if ($testReports[0]->biochemHaemoResults->isNotEmpty())
-                                        @php
-                                            $biochemResult = $testReports[0]->biochemHaemoResults->first();
-                                        @endphp
-                                        @if ($biochemResult->signed_by ?? false)
+                                    @php
+                                        // $biochemResult = $testReports[0]->biochemHaemoResults->first();
+                                        $hematologyStatus = $sample->departmentStatus('1')
+                                    @endphp
+                                    {{-- @if ($hematologyStatus->isNotEmpty()) --}}
+
+                                        @if ($hematologyStatus->signed_by ?? false)
                                             <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
                                                 <a class="nav-link sub-link " href="#">Signed</a>
                                             </li>
@@ -138,13 +140,13 @@
                                                 <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
                                             </li>
                                         @endif
-                                    @endif
+                                    {{-- @endif --}}
                                 @elseif ($reporttype == 2) {{-- Cytology/Gynecology --}}
-                                    @if ($testReports[0]->cytologyGynecologyResults->isNotEmpty())
-                                        @php
-                                            $cytologyResult = $testReports[0]->cytologyGynecologyResults->first();
-                                        @endphp
-                                        @if ($cytologyResult->signed_by ?? false)
+                                    @php
+                                        $cytologyStatus = $sample->departmentStatus('2')
+                                    @endphp
+                                    {{-- @if ($cytologyStatus->isNotEmpty()) --}}
+                                        @if ($cytologyStatus->signed_by ?? false)
                                             <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
                                                 <a class="nav-link sub-link " href="#">Signed</a>
                                             </li>
@@ -153,13 +155,14 @@
                                                 <a class="nav-link sub-link" href="#" id="sign-link">Sign</a>
                                             </li>
                                         @endif
-                                    @endif
+                                    {{-- @endif --}}
                                 @elseif ($reporttype == 3) {{-- Urinalysis/Microbiology --}}
-                                    @if ($testReports[0]->urinalysisMicrobiologyResults->isNotEmpty())
-                                        @php
-                                            $urinalysisResult = $testReports[0]->urinalysisMicrobiologyResults->first();
-                                        @endphp
-                                        @if ($urinalysisResult->signed_by ?? false)
+                                    @php
+                                        $urineStatus = $sample->departmentStatus('3')
+                                    @endphp
+                                    {{-- {{dd($urineStatus)}} --}}
+                                    {{-- @if ($urineStatus->isNotEmpty()) --}}
+                                        @if ($urineStatus->signed_by ?? false)
                                             <li class="nav-item border-nav rounded flex-grow-1" id="allreadyassign">
                                                 <a class="nav-link sub-link " href="#">Signed</a>
                                             </li>
@@ -169,7 +172,7 @@
                                             </li>
                                         @endif
 
-                                    @endif
+                                    {{-- @endif --}}
 
                                 @endif
 
@@ -218,53 +221,54 @@
 
                     {{-- Based on reporttype, determine which results to show --}}
                     @if ($reporttype == 1) {{-- Biochem/Haematology --}}
-                        @if ($testReports[0]->biochemHaemoResults->isNotEmpty())
-                            @php
-                                $biochemResult = $testReports[0]->biochemHaemoResults->first();
-                            @endphp
-                            @if ($biochemResult->signed_by ?? false)
+                        @php
+                            $hematologyStatus = $sample->departmentStatus('1')
+                        @endphp
+                        {{-- @if ($hematologyStatus->isNotEmpty()) --}}
+                            @if ($hematologyStatus->signed_by ?? false)
                                 <div class="col-md-6" id="report_signed_input">
                                     <div class="form-group">
                                         <label for="access_number" class="form-label">Report Signed By</label>
                                         <input type="text" class="form-control" id="report_signed"
-                                            value="{{ 'Report signed by ' . $biochemResult->signedBy->first_name . ' on ' . $biochemResult->signed_at }}"
+                                            value="{{ 'Report signed by ' . $hematologyStatus->signedBy->first_name . ' on ' . $hematologyStatus->signed_at }}"
                                             disabled />
                                     </div>
                                 </div>
                             @endif
-                        @endif
+                        {{-- @endif --}}
                     @elseif ($reporttype == 2) {{-- Cytology/Gynecology --}}
-                        @if ($testReports[0]->cytologyGynecologyResults->isNotEmpty())
-                            @php
-                                $cytologyResult = $testReports[0]->cytologyGynecologyResults->first();
-                            @endphp
-                            @if ($cytologyResult->signed_by ?? false)
+                        @php
+                            $cytologyStatus = $sample->departmentStatus('2')
+                        @endphp
+
+                        {{-- @if ($cytologyStatus->isNotEmpty()) --}}
+                            @if ($cytologyStatus->signed_by ?? false)
                                 <div class="col-md-6" id="report_signed_input">
                                     <div class="form-group">
                                         <label for="access_number" class="form-label">Report Signed By</label>
                                         <input type="text" class="form-control" id="report_signed"
-                                            value="{{ 'Report signed by ' . $cytologyResult->signedBy->first_name . ' on ' . $cytologyResult->signed_at }}"
+                                            value="{{ 'Report signed by ' . $cytologyStatus->signedBy->first_name . ' on ' . $cytologyStatus->signed_at }}"
                                             disabled />
                                     </div>
                                 </div>
                             @endif
-                        @endif
+                        {{-- @endif --}}
                     @elseif ($reporttype == 3) {{-- Urinalysis/Microbiology --}}
-                        @if ($testReports[0]->urinalysisMicrobiologyResults->isNotEmpty())
-                            @php
-                                $urinalysisResult = $testReports[0]->urinalysisMicrobiologyResults->first();
-                            @endphp
-                            @if ($urinalysisResult->signed_by ?? false)
+                        @php
+                            $urinalysisStatus = $sample->departmentStatus('3')
+                        @endphp
+                        {{-- @if ($urinalysisStatus->isNotEmpty()) --}}
+                            @if ($urinalysisStatus->signed_by ?? false)
                                 <div class="col-md-6" id="report_signed_input">
                                     <div class="form-group">
                                         <label for="access_number" class="form-label">Report Signed By</label>
                                         <input type="text" class="form-control" id="report_signed"
-                                            value="{{ 'Report signed by ' . $urinalysisResult->signedBy->first_name . ' on ' . $urinalysisResult->signed_at }}"
+                                            value="{{ 'Report signed by ' . $urinalysisStatus->signedBy->first_name.' '. $urinalysisStatus->signedBy->surname . ' on ' . $urinalysisStatus->signed_at }}"
                                             disabled />
                                     </div>
                                 </div>
                             @endif
-                        @endif
+                        {{-- @endif --}}
                     @endif
 
                 @endif
@@ -294,13 +298,13 @@
                             value="{{ $sample->patient->surname }} {{ $sample->patient->first_name }}" disabled />
                     </div>
                 </div>
-                <div class="col-md-4">
+                {{-- <div class="col-md-4">
                     <div class="form-group">
                         <label for="test_number" class="form-label">Test Number</label>
                         <input type="text" id="test_number" name="test_number" class="form-control form-control-sm"
                             value="{{ $sample->test_number }}" disabled />
                     </div>
-                </div>
+                </div> --}}
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="access_number" class="form-label">Access Number</label>
@@ -352,7 +356,7 @@
                         <label for="test_number" class="form-label">Tests Requested</label>
                         @php
                             // Assuming $sample->tests is a collection or array of test objects
-                            $testNames = $tests->pluck('name')->implode(', ');
+                            // $testNames = $tests->pluck('name')->implode(', ');
                             $individualtests = $sample->tests()->where('department',$reporttype)->pluck('name')->implode(', ');
                             // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
                             $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
@@ -371,22 +375,24 @@
             {{-- <input type="hidden" id="testReport" name="testReport" value="{{$testReport}}"> --}}
             {{-- BioChemistry / Haematology Test Results --}}
             @if ($reporttype == 1)
+                @php
+                    $hematologyStatus = $sample->departmentStatus('1')
+                @endphp
                 {{-- {{dd($testReports[0]->BiochemHaemoResults[0]->reference)}} --}}
                 <div class="card-header py-1">
                     <h4 class="text-dark">BioChemistry / Haematology Test Results </h4>
                 </div>
                 <div class="row pt-3">
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="form-group">
                             <label for="reference" class="form-label">Reference</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
                             <textarea name="reference" id="reference" cols="30" rows="5" class="form-control">{{ $testReports[0]->BiochemHaemoResults[0]->reference ?? '' }}</textarea>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="note" class="form-label">Note</label>
-                            <textarea name="note" id="note" cols="30" rows="5" class="form-control">{{ $testReports[0]->BiochemHaemoResults[0]->note ?? '' }}</textarea>
+                            <textarea name="note" id="note" cols="30" rows="5" class="form-control">{{ $hematologyStatus->note ?? '' }}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
                     </div>
@@ -407,9 +413,9 @@
                             <th>Flag </th>
                             <th>Reference Range </th>
                             <th>Test Notes </th>
-                            <th></th>
-                            <th class="rounded-end-3">Calc</th>
-                        </tr> --}}
+                            <th class="rounded-end-3"></th>
+                            {{-- <th class="rounded-end-3">Calc</th> --}}
+                        </tr>
                     </thead>
                     <tbody>
                         @if ($reporttype == '1')
@@ -661,6 +667,18 @@
                                                 data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
                                         </td>
                                         <td>
+                                            {{-- <input type="text"  data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                value="{{ in_array($biochemHaemoResults->flag ?? '', ['High', 'Low']) ? $biochemHaemoResults->flag : '' }}" style="width: 80px;"/>
+                                            @php
+                                                $background = '';
+                                                if (!empty($biochemHaemoResults) && in_array($biochemHaemoResults->flag, ['High', 'Low'])) {
+                                                    $background = 'bg-danger';
+                                                }
+                                            @endphp
+                                            <span class="badge badge-pill flag-badge {{ $background }} {{ !empty($biochemHaemoResults) && in_array($biochemHaemoResults->flag, ['High', 'Low']) ? '' : 'd-none' }}"
+                                                data-key="t-hot">{{ in_array($biochemHaemoResults->flag ?? '', ['High', 'Low']) ? $biochemHaemoResults->flag : '' }}</span> --}}
+
                                             <input type="text"  data-test-id="{{ $test->id }}"
                                                 name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
                                                 value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
@@ -680,11 +698,11 @@
                                         <td>
                                             <p class="reference-range">
                                                 @if ($test->reference_range == 'basic_ref')
-                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range.' '.$test->basic_unit_value_ref_range }}
                                                 @elseif ($test->reference_range == 'optional_ref')
-                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range.' '.$test->male_unit_value_ref_range }}
                                                     <br>
-                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range.' '.$test->female_unit_value_ref_range }}
                                                 @elseif ($test->reference_range == 'no_manual_tag')
                                                     {{ $test->nomanualvalues_ref_range }}
                                                 @endif
@@ -705,13 +723,13 @@
                                                 </li>
                                             @endif
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             @if ($test->calculation_explanation)
                                                 <a href="" class="getcalc" data-bs-toggle="modal"
                                                 data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                                 class="badge bg-info text-white">show</span> </a>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                     </tr>
                                 @endforeach
                             @endforeach --}}
@@ -791,13 +809,13 @@
                                             </li>
                                         @endif
                                     </td>
-                                    <td>
+                                    {{-- <td>
                                         @if ($test->calculation_explanation)
                                             <a href="" class="getcalc" data-bs-toggle="modal"
                                             data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                             class="badge bg-info text-white">show</span> </a>
                                         @endif
-                                    </td>
+                                    </td> --}}
                                 </tr>
                             @endforeach --}}
                         @endif
@@ -830,15 +848,8 @@
                 <div class="row pt-3">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="history" class="form-label">History</label>
-                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
-                            <textarea name="history" id="history" cols="30" rows="" class="form-control" value="">{{ $cytologyGynecologyResults->history ?? '' }}</textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
                             <label for="last_period" class="form-label">Last Period </label>
-                            <input type="date" id="last_period" name="last_period"
+                            <input type="text" id="last_period" name="last_period"
                                 class="form-control form-control-sm"
                                 value="{{ $cytologyGynecologyResults->last_period ?? '' }}" />
                         </div>
@@ -864,12 +875,19 @@
 
                         </div>
                     </div>
+                     <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="history" class="form-label">History</label>
+                            {{-- <input type="text" id="access_number" name="access_number" class="form-control" value="ABC123" readonly /> --}}
+                            <textarea name="history" id="history" cols="30" rows="" class="form-control" value="">{{ $cytologyGynecologyResults->history ?? '' }}</textarea>
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="previous_pap" class="form-label">Previous Pap </label>
-                            <input type="date" id="previous_pap" name="previous_pap" class="form-control"
+                            <input type="text" id="previous_pap" name="previous_pap" class="form-control"
                                 value="{{ $cytologyGynecologyResults->previous_pap ?? '' }}" />
                         </div>
                     </div>
@@ -880,7 +898,7 @@
                                 value="{{ $cytologyGynecologyResults->result ?? '' }}" />
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label for="cervix_examination" class="form-label">Cervix Examination </label>
                             <textarea type="text" id="cervix_examination" name="cervix_examination" class="form-control" value="">{{ $cytologyGynecologyResults->cervix_examination ?? '' }}</textarea>
@@ -936,33 +954,26 @@
             @endif
             {{-- Urinalysis / Microbiology Test Results  --}}
             @if ($reporttype == 3)
+                {{-- @foreach ($tests as $test) --}}
+                @php
+                    $procedureResults = $sample ? $sample->procedureResults : [];
+                    $department3Status = $sample->departmentStatus('3');
+                @endphp
+                {{-- @endforeach --}}
 
-                @foreach ($tests as $test)
-                    @php
-                        $testReport = $testReports
-                            ->where('test_id', $test->id)
-                            ->where('sample_id', $sample->id)
-                            ->first();
-                        // if (empty($testReport)) {
-                        //     continue;
-                        // }
-                        // dd($testReport);
-                        $urinalysisMicrobiologyResults = $testReport
-                            ? $testReport->urinalysisMicrobiologyResults->first()
-                            : [];
-                            // dd($urinalysisMicrobiologyResults->procedureResults);
-                        $procedureResults = $urinalysisMicrobiologyResults ? $urinalysisMicrobiologyResults->procedureResults : [];
-
-
-                        $testIds = $tests->pluck('id')->implode(',');
-
-                    @endphp
-                @endforeach
-                {{-- {{dd($urinalysisMicrobiologyResults)}} --}}
-                <input type="hidden" id="urinalysis_test_id" name="urinalysis_test_id[]" value="{{ $testIds }}"
-                    hidden>
+                {{-- <input type="hidden" id="urinalysis_test_id" name="urinalysis_test_id[]" value="{{ $testIds }}" --}}
                 <div class="card-header py-1">
                     <h4 class="text-dark">Urinalysis / Microbiology Test Results </h4>
+                </div>
+                <div class="row pt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="note" class="form-label">Report Notes</label>
+                            {{-- {{dd($testReports)}} --}}
+                            <textarea name="urinalysis_note" id="urinalysis_note" cols="30" rows="5" class="form-control">{{ $department3Status->note ?? '' }}</textarea>
+                            {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
+                        </div>
+                    </div>
                 </div>
                 <div class="">
                     <!-- Nav tabs -->
@@ -1000,8 +1011,8 @@
                                         <th>Flag </th>
                                         <th colspan="1">Reference Range </th>
                                         <th>Test Notes </th>
-                                        <th></th>
-                                        <th class="rounded-end-3">Calc</th>
+                                        <th class="rounded-end-3"></th>
+                                        {{-- <th >Calc</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1098,13 +1109,13 @@
                                                             </li>
                                                         @endif
                                                     </td>
-                                                    <td>
+                                                    {{-- <td>
                                                         @if ($test->calculation_explanation)
                                                             <a href="" class="getcalc" data-bs-toggle="modal"
                                                             data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                                             class="badge bg-info text-white">show</span> </a>
                                                         @endif
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                             @endforeach
                                         @endforeach
@@ -1184,13 +1195,13 @@
                                                         </li>
                                                     @endif
                                                 </td>
-                                                <td>
+                                                {{-- <td>
                                                     @if ($test->calculation_explanation)
                                                         <a href="" class="getcalc" data-bs-toggle="modal"
                                                         data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                                         class="badge bg-info text-white">show</span> </a>
                                                     @endif
-                                                </td>
+                                                </td> --}}
                                             </tr>
                                         @endforeach
                                     @endif
@@ -1208,8 +1219,8 @@
                                         <th>Flag </th>
                                         <th>Reference Range </th>
                                         <th>Test Notes </th>
-                                        <th></th>
-                                        <th class="rounded-end-3">Calc</th>
+                                        <th class="rounded-end-3"></th>
+                                        {{-- <th >Calc</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1306,13 +1317,13 @@
                                                             </li>
                                                         @endif
                                                     </td>
-                                                    <td>
+                                                    {{-- <td>
                                                         @if ($test->calculation_explanation)
                                                             <a href="" class="getcalc" data-bs-toggle="modal"
                                                             data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                                             class="badge bg-info text-white">show</span> </a>
                                                         @endif
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                             @endforeach
                                         @endforeach
@@ -1392,13 +1403,13 @@
                                                         </li>
                                                     @endif
                                                 </td>
-                                                <td>
+                                                {{-- <td>
                                                     @if ($test->calculation_explanation)
                                                         <a href="" class="getcalc" data-bs-toggle="modal"
                                                         data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
                                                                         class="badge bg-info text-white">show</span> </a>
                                                     @endif
-                                                </td>
+                                                </td> --}}
                                             </tr>
                                         @endforeach
                                     @endif
@@ -1474,12 +1485,13 @@
                                                     <div class="procedure-group">
                                                         <div class="form-group">
                                                             <label for="procedure" class="form-label">Procedure</label>
-                                                            <select class="js-example-basic-multiple procedure" name="procedure[]">
+                                                            <input type="text" class="form-control procedure" name="procedure" id="" value="{{ $procedure->procedure }}" >
+                                                            {{-- <select class="js-example-basic-multiple procedure" name="procedure[]">
                                                                 <option value="wet_prep" {{ $procedure->procedure == 'wet_prep' ? 'selected' : '' }}>Wet Prep</option>
                                                                 <option value="gram_stain" {{ $procedure->procedure == 'gram_stain' ? 'selected' : '' }}>Gram Stain</option>
                                                                 <option value="culture" {{ $procedure->procedure == 'culture' ? 'selected' : '' }}>Culture</option>
                                                                 <option value="stool" {{ $procedure->procedure == 'stool' ? 'selected' : '' }}>Stool</option>
-                                                            </select>
+                                                            </select> --}}
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="specimen_note" class="form-label">Note</label>
@@ -1513,15 +1525,10 @@
                                                             class="badge bg-info text-white"> All Items</span> </a></label>
                                                     <select name="profiles[]" id="profiles"
                                                         class="js-example-basic-multiple form-control" multiple>
+                                                        {{-- {{dd($sample->sensitivityResults);}} --}}
                                                         @php
-                                                            $sensitivityProfilesArray = !empty(
-                                                                $urinalysisMicrobiologyResults->sensitivity_profiles
-                                                            )
-                                                                ? json_decode(
-                                                                    $urinalysisMicrobiologyResults->sensitivity_profiles,
-                                                                    true,
-                                                                )
-                                                                : [];
+                                                            $sensitivityResult = $sample->sensitivityResults->first();
+                                                            $sensitivityProfilesArray = $sensitivityResult ? json_decode($sensitivityResult->sensitivity_profiles) : [];
                                                         @endphp
                                                         @foreach ($senstivityprofiles as $profile)
                                                             <option value="{{ $profile->id }}"
@@ -1537,11 +1544,18 @@
                                         @endif
 
                                         <div id="reportContainer" class="mt-3">
-                                            @php
-                                                $sensitivityData = !empty($urinalysisMicrobiologyResults->sensitivity)
-                                                    ? json_decode($urinalysisMicrobiologyResults->sensitivity)
+                                            {{-- {{dd($sample->sensitivityResults)}} --}}
+                                            {{-- @php
+                                                $sensitivityData = !empty($sample->sensitivityResults)
+                                                    ? json_decode($sample->sensitivityResults[0]->sensitivity)
                                                     : [];
+                                                // dd(json_decode($sample->sensitivityResults[0]->sensitivity));
+                                            @endphp --}}
+                                            @php
+                                                $sensitivityResult = $sample->sensitivityResults->first();
+                                                $sensitivityData = $sensitivityResult ? json_decode($sensitivityResult->sensitivity) : [];
                                             @endphp
+                                            {{-- {{dd($sensitivityData)}} --}}
 
                                             @if (!empty($sensitivityData))
                                                 @foreach ($sensitivityData as $profile)
@@ -1555,7 +1569,7 @@
                                                         <thead>
                                                             <tr>
                                                                 <th>Antibiotics</th>
-                                                                <th>MIC (ug/mL)</th>
+                                                                <th>{{ getSensitivityUnitByMicroorganism($profile->microorganism) }}</th>
                                                                 <th>Sensitive</th>
                                                                 <th>Resistant</th>
                                                                 <th>Intermediate</th>
@@ -1608,7 +1622,7 @@
                                                     <span class="badge bg-info text-white add-urine-note" data-target="#review"> Add Note</span>
                                                     @endif
                                                 </label>
-                                                <textarea name="review" id="review" cols="30" rows="5" class="form-control">{{ $cytologyGynecologyResults->review ?? '' }}</textarea>
+                                                <textarea name="review" id="review" cols="30" rows="5" class="form-control">{{ $sensitivityResult->review ?? '' }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -2233,6 +2247,16 @@
                                 </div>
                             </div>
 
+                            <div class="row mb-2">
+                                <div class="col-md-4">
+                                    <label for="unit" class="form-label">Units</label>
+                                    <select class="form-select" id="unit" name="unit" required>
+                                        <option value="Zone (mm)">Zone (mm)</option>
+                                        <option value="MIC (ug/mL)">MIC (ug/mL)</option>
+                                    </select>
+                                </div>
+                            </div>
+
 
 
                             <!-- Row 2 -->
@@ -2509,7 +2533,7 @@
                         } else if (testValue > high) {
                             flag = 'High';
                         }else if(testValue >= low && testValue <= high){
-                            flag = 'Normal';
+                            flag = '';
                         }
                     }
 
@@ -2592,12 +2616,8 @@
                     <div class="procedure-group">
                         <div class="form-group">
                             <label for="procedure" class="form-label">Procedure</label>
-                            <select class="js-example-basic-multiple procedure" name="procedure[]">
-                                <option value="wet_prep">Wet Prep</option>
-                                <option value="gram_stain">Gram Stain</option>
-                                <option value="culture">Culture</option>
-                                <option value="stool">Stool</option>
-                            </select>
+                            <input type="text" class="form-control procedure" name="procedure" id="" value="" >
+
                         </div>
                         <div class="form-group">
                             <label for="specimen_note" class="form-label">Note</label>
@@ -3171,7 +3191,7 @@
                             items.push({
                                 antibiotic: antibiotic,
                                 mic: mic,
-                                sensitivity: sensitivity
+                                sensitivity: sensitivity || null
                             });
                         });
 
@@ -3206,12 +3226,13 @@
                         // testReport: $('#testReport').val(),
                         reporttype: reporttypeis,
                         // reference: $('#reference').val(),
-                        // note: $('#note').val(),
+                        note: $('#urinalysis_note').val(),
                         testsData: testsData,
                         procedure: procedures,
                         specimen_note: specimenNotes,
                         sensitivity_profiles: $('#profiles').val(),
-                        sensitivity: JSON.stringify(reportData)
+                        sensitivity: JSON.stringify(reportData),
+                        review: $('#review').val(),
                     };
 
                     // console.log(reportData);
@@ -3398,7 +3419,7 @@
                         } else if (testValue > high) {
                             flag = 'High';
                         }else if(testValue >= low && testValue <= high){
-                            flag = 'Normal';
+                            flag = '';
                         }
                     }
 
@@ -3816,7 +3837,7 @@
                                 <thead>
                                     <tr>
                                         <th>Antibiotics</th>
-                                        <th>MIC (ug/mL)</th>
+                                        <th>${profile.unit}</th>
                                         <th>Sensitive</th>
                                         <th>Resistant</th>
                                         <th>Intermediate</th>

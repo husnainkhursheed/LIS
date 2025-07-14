@@ -29,6 +29,9 @@ return new class extends Migration
             $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->date('completed_at')->nullable();
             $table->text('notes')->nullable();
+            $table->decimal('profiles_total_cost', 8, 2)->nullable();
+            $table->decimal('indvidualtests_total_cost', 8, 2)->nullable();
+            $table->decimal('grand_total_cost', 8, 2)->nullable();
             $table->timestamps();
         });
     }

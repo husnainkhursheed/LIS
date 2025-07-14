@@ -44,11 +44,11 @@ class InstitutionController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            // 'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $institution = new Institution();
@@ -82,11 +82,11 @@ class InstitutionController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            // 'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $institution = Institution::find($id);

@@ -1,5 +1,8 @@
 <?php
 
+
+use App\Models\SensitivityProfiles;
+
 function getAllProfileIds($profiles)
 {
     $ids = [];
@@ -20,4 +23,12 @@ function getSubProfilesRecursive($profile)
         $subProfiles = array_merge($subProfiles, getSubProfilesRecursive($sub));
     }
     return $subProfiles;
+}
+
+if (!function_exists('getSensitivityUnitByMicroorganism')) {
+    function getSensitivityUnitByMicroorganism($microorganism)
+    {
+        $profile = SensitivityProfiles::where('name', $microorganism)->first();
+        return $profile ? $profile->unit : 'MIC (ug/mL)';
+    }
 }

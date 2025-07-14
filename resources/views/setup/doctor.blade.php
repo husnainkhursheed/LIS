@@ -214,7 +214,7 @@
                                 <div>
                                     <label for="email" class="form-label">Email address</label>
                                     <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email" required />
+                                        placeholder="Enter Email"  />
                                 </div>
                             </div>
 
@@ -222,28 +222,28 @@
                                 <div>
                                     <label for="address" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number" required />
+                                    placeholder="Enter Contact Number"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="town" class="form-label">Street name</label>
                                     <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town" required />
+                                        placeholder="Enter Town"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address" required />
+                                        placeholder="Enter Address"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="country" class="form-label">Area</label>
                                     <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area" required />
+                                        placeholder="Enter Area"  />
                                 </div>
                             </div>
                             <div class="col-lg-12">

@@ -73,10 +73,11 @@ class PDFController extends Controller
                     // Determine the completed status based on the report type
                     switch ($reporttype) {
                         case 1: // Biochemistry/Haematology Results
+                            $hematologyStatus = $sample->departmentStatus('1');
+                            $signed_by = $hematologyStatus->signed_by ?? null;
                             foreach ($testReport->biochemHaemoResults as $result) {
                                 $completedBy = $result->completed_by ?? null;
                                 $completedat = $result->completed_at ?? null;
-                                $signed_by = $result->signed_by ?? null;
                                 if (!$result->is_completed) {
                                     $allTestsCompleted = false; // Set flag to false if any result is not completed
                                 }
@@ -84,6 +85,8 @@ class PDFController extends Controller
                             break;
 
                         case 2: // Cytology/Gynecology Results
+                            $cytologyStatus = $sample->departmentStatus('2');
+                            $signed_by = $cytologyStatus->signed_by ?? null;
                             foreach ($testReport->cytologyGynecologyResults as $result) {
                                 $completedBy = $result->completed_by ?? null;
                                 $completedat = $result->completed_at ?? null;
@@ -94,6 +97,8 @@ class PDFController extends Controller
                             break;
 
                         case 3: // Urinalysis/Microbiology Results
+                            $urinalysisStatus = $sample->departmentStatus('3');
+                            $signed_by = $urinalysisStatus->signed_by ?? null;
                             foreach ($testReport->urinalysisMicrobiologyResults as $result) {
                                 $completedBy = $result->completed_by ?? null;
                                 $completedat = $result->completed_at ?? null;

@@ -32,7 +32,7 @@
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="menu-title"><span>@lang('translation.menu')</span></li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="/">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="/?search=&sort_by=access_number">
                         <span class="">
                             <img src="{{ URL::asset('build/icons/dashboard.png') }}" alt="" height="18">
                         </span>
@@ -498,11 +498,14 @@
                             <ul class="nav nav-sm flex-column">
                                 @canany('Manage TestReports')
                                     <li class="nav-item">
-                                        <a href="{{ url('/reports/test-reports') }}" class="nav-link">Test Reports</a>
+                                        <a href="{{ url('/reports/test-reports?sort_by=access_number') }}" class="nav-link">Test Reports</a>
                                     </li>
                                 @endcanany
                                 <li class="nav-item">
                                     <a href="{{ url('/reports/processing-time') }}" class="nav-link">Processing Time</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url('/reports/master-report') }}" class="nav-link">Master Report</a>
                                 </li>
 
                             </ul>

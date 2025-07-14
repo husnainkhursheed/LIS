@@ -19,9 +19,10 @@ return new class extends Migration
             $table->text('flag')->nullable();
             $table->text('reference_range')->nullable();
             $table->text('test_notes')->nullable();
+            // $table->text('note')->nullable();
             $table->text('sensitivity_profiles')->nullable();
             $table->text('sensitivity')->nullable();
-            $table->text('review')->nullable();
+            // $table->text('review')->nullable();
             $table->boolean('is_signed')->default(false);
             $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamp('signed_at')->nullable();

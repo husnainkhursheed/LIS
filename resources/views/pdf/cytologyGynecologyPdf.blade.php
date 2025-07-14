@@ -41,15 +41,16 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 4px;
             font-size: 14px;
+            line-height: 1.2;
         }
 
         .order-details h2 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #3d90ca;
-            padding-bottom: 5px;
+            padding-bottom: 3px;
         }
 
         .text-start {
@@ -98,46 +99,77 @@
     <table class="order-details">
         <thead>
             <tr>
-                <th width="50%" colspan="2">
-                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo">
-                    <p><strong>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</strong></p>
+                <th width="50%" colspan="2" style="vertical-align: top;">
+                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" style="height: 70px;"><br>
+                    <span style="display: block; font-weight:normal;, font-size: 15px; margin-top: 1px;"><small>ISO:15189 Accredited</small></span>
+                    <p style="margin-top: 8px;"><small>71 Eastern Main Road Barataria, San Juan Trinidad and Tobago</small></p>
                 </th>
                 <th width="50%" colspan="2" class="text-end company-data">
                     <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
-                    <span><strong>TEL: </strong>(868) 229-8643 or 316-1383</span> <br>
-                    <span><strong>Mail: </strong>borderlifemedlab@gmail.com</span> <br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>TEL: </strong>(868) 229-8643 or 316-1383</span><br>
+                    <span style="display: inline-block; text-align: left; width: 100%;"><strong>Mail: </strong>borderlifemedlab@gmail.com</span><br>
                 </th>
             </tr>
             <tr>
-                <th width="40%" style="vertical-align: top;">
-                    <h2>Patient Information</h2><br>
-                    <span><strong>Name:</strong>
+                <th width="45%" style="vertical-align: top;">
+                    <h2>Patient Information</h2>
+                    <table>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
+                        </tr>
+                        @php
+                            $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                            $age = $dob->age;
+                        @endphp
+                        <tr>
+                            <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal"><strong>Institution:</strong> {{ $sample->institution->name }}</td>
+                        </tr>
+                    </table>
+                    {{-- <span style="font-weight: normal"><strong>Name:</strong>
                         {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
-                    </span><br><br>
-                    <span><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span>
-                    <span><strong> &nbsp;&nbsp;&nbsp;&nbsp; DOB:</strong>{{ $sample->patient->dob ?? '' }}</span>
-                    <br><br>
+                    </span><span style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span><br><br>
+
+                    <span style="font-weight: normal"><strong> DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</span>@php
+                        $dob = \Carbon\Carbon::parse($sample->patient->dob);
+                        $age = $dob->age;
+                    @endphp
+                    <span style="font-weight: normal">
+                    <strong>Age:</strong> {{ $age }} yrs</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</span> <br><br>
+                    <span style="font-weight: normal">
+                    <strong>Institution:</strong> {{ $sample->institution->name }}</span> <br> --}}
+
                 </th>
                 <th width="60%" colspan="3" class="company-data" style="vertical-align: top;">
                     <h2>Report Information</h2>
                     <table>
                         <tr>
-                            <td><strong>Collection Date:</strong> {{
-                                \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
-                            <td><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Collection Date:</strong> {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Lab Ref:</strong> {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Received Date:</strong> {{
-                                \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
-                            <td><strong>Company:</strong> PRIVATE</td>
+                            <td style="font-weight: normal"><strong>Received Date:</strong> {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
+                            <td style="font-weight: normal"><strong>Sample ID:</strong> {{ $sample->access_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Report Date:</strong> {{
-                                \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
-                            <td><strong>Sample ID:</strong> {{ $sample->test_number ?? '' }}</td>
+                            <td style="font-weight: normal"><strong>Report Date:</strong> {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
                         </tr>
                     </table>
                 </th>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                </td>
             </tr>
             <tr>
                 <th colspan="4">
@@ -155,7 +187,7 @@
                 </th>
             </tr>
             <tr class="bg-blue">
-                <th width="50%" colspan="4">CLINICAL HISTORY</th>
+                <th width="50%" colspan="4">CLINICAL INFORMATION</th>
             </tr>
         </thead>
         <tbody>
@@ -182,10 +214,12 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2"> <span> <strong> CERVIX EXAMINATION: </strong></span>
-                    {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
-                <td colspan="2"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}
+                <td colspan="4"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}
                 </td>
+            </tr>
+            <tr>
+                <td colspan="4"> <span> <strong> CERVIX EXAMINATION: </strong></span>
+                    {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
             </tr>
             @endforeach
         </tbody>
@@ -203,7 +237,7 @@
     $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
     // dd($cytologyGynecologyResults);
     @endphp
-    @if ($cytologyGynecologyResults->specimen_adequacy)
+    {{-- @if ($cytologyGynecologyResults->specimen_adequacy) --}}
 
     <table>
         <thead>
@@ -213,11 +247,11 @@
         </thead>
         <tbody>
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->specimen_adequacy ?? ''}}</td>
+                <td colspan="4">{!! nl2br(e($cytologyGynecologyResults->specimen_adequacy ?? '')) !!}</td>
             </tr>
         </tbody>
     </table>
-    @endif
+    {{-- @endif --}}
     @endforeach
 
     {{-- loop for $cytologyGynecologyResults->diagnostic_interpretation / DIAGNOSTIC INTERPRETATION --}}
@@ -232,7 +266,7 @@
     $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
 
     @endphp
-    @if ($cytologyGynecologyResults->diagnostic_interpretation)
+    {{-- @if ($cytologyGynecologyResults->diagnostic_interpretation) --}}
 
     <table>
         <thead>
@@ -242,11 +276,11 @@
         </thead>
         <tbody>
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->diagnostic_interpretation ?? ''}}</td>
+                <td colspan="4">{!! nl2br(e($cytologyGynecologyResults->diagnostic_interpretation ?? '')) !!}</td>
             </tr>
         </tbody>
     </table>
-    @endif
+    {{-- @endif --}}
     @endforeach
 
     {{-- loop for $cytologyGynecologyResults->recommend / RECOMMENDATION --}}
@@ -261,7 +295,7 @@
     $cytologyGynecologyResults = $testReport ? $testReport->cytologyGynecologyResults->first() : [];
 
     @endphp
-    @if ($cytologyGynecologyResults->recommend)
+    {{-- @if ($cytologyGynecologyResults->recommend) --}}
 
     <table>
         <thead>
@@ -271,27 +305,35 @@
         </thead>
         <tbody>
             <tr>
-                <td colspan="4">{{$cytologyGynecologyResults->recommend ?? ''}}</td>
+                <td colspan="4">{!! nl2br(e($cytologyGynecologyResults->recommend ?? '')) !!}</td>
             </tr>
         </tbody>
     </table>
-    @endif
+    {{-- @endif --}}
     @endforeach
 
-        <script type="text/php">
-            if ( isset($pdf) ) {
-                $pdf->page_script('
-                    if ($PAGE_COUNT > 0) {
-                        $font = $fontMetrics->get_font("Cambria, serif", "normal");
-                        $size = 9;
-                        $pdf->text(45, 786, "Signed by: {{$signed_by}}", $font, $size);
-                        $pdf->text(448, 786, "Validated by: {{$validated_by}}", $font, $size);
-                        $pdf->text(30, 795, "___________________________________________________________________________________________________________", $font, $size,array(61/255, 144/255, 202/255));
-                        $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
-                    }
-                ');
-            }
-        </script>
+    <script type="text/php">
+        if ( isset($pdf) ) {
+            $signedBy = '{{ $signed_by }}';
+            $validatedBy = '{{ $validated_by }}';
+            $pdf->page_script('
+                if ($PAGE_COUNT > 0) {
+                    $font = $fontMetrics->get_font("Cambria", "normal");
+                    $size = 9;
+                    // Left aligned
+                    $pdf->text(45, 786, "CYTOTECHNOLOGIST:  PETAL JULIEN, BSc. MLT", $font, $size);
+                    // Right aligned (move left to fit page)
+                    $pdf->text(350, 786, "PATHOLOGIST: MELANIE JOHNCILLA, MD", $font, $size);
+                    // Line
+                    $pdf->text(30, 795, "___________________________________________________________________________________________________________", $font, $size, array(61/255, 144/255, 202/255));
+                    // Page number (centered)
+                    $pdf->text(150, 810, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                    // Lab Director (right)
+                    $pdf->text(350, 810, "Lab Director: Dr. Christina Pierre", $font, $size);
+                }
+            ');
+        }
+    </script>
 </body>
 
 </html>

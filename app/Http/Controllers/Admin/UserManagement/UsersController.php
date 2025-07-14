@@ -199,7 +199,9 @@ class UsersController extends Controller
 
     public function verify($token)
     {
+        // dd('abc');
         $user = User::where('remember_token', $token)->firstOrFail();
+        // dd('123');
         return view('auth.set_password', ['user' => $user]);
     }
 

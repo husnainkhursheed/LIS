@@ -10,7 +10,7 @@ File: select2 init js
 $(document).ready(function() {
     $('.js-example-basic-single').select2();
 
-    $('.js-example-basic-multiple').select2();
+    // $('.js-example-basic-multiple').select2();
 
     var data = [
         {
@@ -39,7 +39,13 @@ $(document).ready(function() {
     data: data
     })
 
-    
+    $('.js-example-basic-multiple').select2({
+        // Add this to maintain original order
+          tags: true,
+          sorter: data => data // preserve order
+    });
+
+
 });
 
 function formatState (state) {
