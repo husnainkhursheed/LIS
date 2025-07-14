@@ -153,7 +153,7 @@
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
 
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
                                 <div>
                                     <label for="name" class="form-label">Name</label>
                                     <input type="text" id="name" name="name"
@@ -171,20 +171,55 @@
                             <div class="form-group">
                                 <label for="test_requested" class="form-label">Departments</label>
                                 <select class="js-example-basic-multiple" name="department[]" id="department" multiple="multiple">
-                                    <option value="">Select Department</option>
+                                    {{-- <option value="">Select Department</option> --}}
                                     <option value="1">Biochemistry / Haematology</option>
                                     <option value="2">Cytology / Gynecology</option>
                                     <option value="3">Urinalysis / Microbiology</option>
                                 </select>
                             </div>
+
+
+
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <label for="sub_profiles" class="form-label">Include Sub-Profiles</label>
+                                    <select class="js-example-basic-multiple" name="sub_profiles[]" id="sub_profiles" onchange="checkTestProfiles()" multiple="multiple">
+                                        @foreach($profiles as $profile)
+                                            {{-- Prevent selecting self as sub-profile --}}
+                                            <option value="{{ $profile->id }}">{{ $profile->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                {{-- <label id="toggle-load-profiles" style="cursor:pointer; user-select:none;">
+                                    Load Tests from Profiles
+                                    <span id="arrow-icon" style="transition: transform 0.2s;"><i class="ri-arrow-down-s-line"></i></span>
+                                </label>
+                                <div id="load-profiles-group" style="display:none; margin-top:10px;">
+                                    <select class="form-select js-example-basic-multiple" id="load_profiles" multiple="multiple">
+                                        @foreach($profiles as $profile)
+                                            <option value="{{ $profile->id }}">{{ $profile->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button" class="btn btn-info mt-2" id="fetch-profile-tests">Load Selected Profiles' Tests</button>
+                                </div> --}}
+                            </div>
+
                             <div class="form-group">
                                 <label for="tests" class="form-label">Tests</label>
                                 <select class="js-example-basic-multiple" name="tests[]" id="tests" multiple="multiple">
                                     {{-- <option value="">Select Department</option> --}}
+                                    {{-- {{dd($tests)}} --}}
                                     @foreach ($tests as $test)
                                         <option value="{{$test->id}}"> {{$test->name}}</option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="ordered_tests" id="ordered_tests" />
+                            </div>
+                            <label for="" class="form-label d-none">Arranged selected tests</label>
+                            <div id="ordered-tests" class="d-flex flex-wrap gap-2 mb-3 d-none">
+                                {{-- This will be populated with selected tests --}}
+
+                                <span class="badge bg-primary-subtle text-white "></span>
                             </div>
                         </div>
                     </div>
@@ -255,7 +290,201 @@
 
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
+        function checkTestProfiles() {
+            $('#tests').val('').trigger('change');
+            // Get selected profile IDs
+            let selectedProfiles = $('#sub_profiles').val();
+            if (selectedProfiles === null || selectedProfiles.length === 0) {
+                console.log('No profiles selected, enabling all options');
+                // Re-enable all options if no profiles are selected
+                $('#sub_profiles option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+                $('#tests option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+            }
+
+            // Send AJAX request to the server
+            $.ajax({
+                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    profiles: selectedProfiles
+                },
+                success: function(response) {
+                    // Assuming the response contains the IDs of test profiles to hide
+                    if (response.profilesToHide) {
+                        $('#sub_profiles option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.profilesToHide.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        $('#sub_profiles').select2();
+                        $('#tests option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.testIdsInSelectedProfiles.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        $('#tests').select2();
+                    }
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
+
+
         jQuery(document).ready(function($) {
+
+            let selectedTestsOrder = [];
+
+            $('#tests').select2({
+                closeOnSelect: false
+            });
+
+            // Helper to get current ordered_tests as array (handles empty string)
+            function getOrderedTestsArray() {
+                const val = $('#ordered_tests').val();
+                if (!val) return [];
+                return val.split(',').filter(Boolean);
+            }
+            $('#sub_profiles').select2({
+                closeOnSelect: false
+            });
+
+            // $('#mySelect').on('select2:select', function (e) {
+            //     var selectedId = e.params.data.id;
+            //     var $option = $(this).find('option[value="' + selectedId + '"]');
+            //     $option.detach();
+            //     $(this).append($option);
+            //     $(this).trigger('change.select2');
+            // });
+
+            $('#sub_profiles').on('select2:select', function(e) {
+                const selectedValue = e.params.data.id;
+
+                var $option = $(this).find('option[value="' + selectedValue + '"]');
+                $option.detach();
+                $(this).append($option);
+                $(this).trigger('change.select2');
+
+            });
+
+            $('#tests').on('select2:select', function(e) {
+                const selectedValue = e.params.data.id;
+
+                var $option = $(this).find('option[value="' + selectedValue + '"]');
+                $option.detach();
+                $(this).append($option);
+                $(this).trigger('change.select2');
+                //
+                selectedTestsOrder = getOrderedTestsArray();
+                // Add to order array if not already present
+                if (!selectedTestsOrder.includes(selectedValue)) {
+                    selectedTestsOrder.push(selectedValue);
+                }
+
+                // Update hidden input and badges
+                updateOrderedTestsDisplay();
+            });
+
+            $('#tests').on('select2:unselect', function(e) {
+                const unselectedValue = e.params.data.id;
+
+                selectedTestsOrder = getOrderedTestsArray();
+                // Remove from order array
+                selectedTestsOrder = selectedTestsOrder.filter(id => id !== unselectedValue);
+
+                // Update hidden input and badges
+                updateOrderedTestsDisplay();
+            });
+
+            function updateOrderedTestsDisplay() {
+                // Update hidden input with ordered values
+                $('#ordered_tests').val(selectedTestsOrder.join(','));
+
+                // Clear and rebuild badges in order
+                $('#ordered-tests').empty();
+
+                selectedTestsOrder.forEach(function(testId) {
+                    const testName = $('#tests option[value="' + testId + '"]').text();
+                    if (testName) {
+                        $('#ordered-tests').append(
+                            `<span class="badge bg-primary-subtle text-white" data-test-id="${testId}">
+                                ${testName}
+                                <button type="button" class="btn-close btn-close-white ms-1 remove-test" data-test-id="${testId}" style="font-size: 0.7em;"></button>
+                            </span>`
+                        );
+                    }
+                });
+            }
+
+            // Remove test when clicking the badge close button
+            $('#ordered-tests').on('click', '.remove-test', function() {
+                const testId = $(this).data('test-id').toString();
+                // Remove from selectedTestsOrder
+                selectedTestsOrder = selectedTestsOrder.filter(id => id !== testId);
+                // Unselect from select2
+                let selected = $('#tests').val() || [];
+                selected = selected.filter(id => id !== testId);
+                $('#tests').val(selected).trigger('change');
+                // Update display
+                updateOrderedTestsDisplay();
+            });
+
+
+
+        $('#fetch-profile-tests').on('click', function() {
+            var profileIds = $('#load_profiles').val();
+            if (!profileIds || profileIds.length === 0) return;
+
+            $.ajax({
+                url: '/TestProfile/fetch-tests-from-profiles',
+                type: 'POST',
+                data: {
+                    profile_ids: profileIds,
+                    _token: $('input[name="_token"]').val()
+                },
+                success: function(response) {
+                    let $select = $('#tests');
+                    response.test_ids.forEach(function(id) {
+                        let $option = $select.find('option[value="' + id + '"]');
+                        $option.detach();
+                        $select.append($option);
+                    });
+
+                    // Set Select2 selected values in order
+                    $select.val(response.test_ids).trigger('change');
+                    // $('#tests').val(response.test_ids).trigger('change');
+                    $('#ordered_tests').val(response.test_ids.join(','));
+                    selectedTestsOrder = getOrderedTestsArray();
+                    updateOrderedTestsDisplay();
+                },
+                error: function(xhr) {
+                    alert('Could not load tests for the selected profiles.');
+                }
+            });
+        });
+
+        $('#toggle-load-profiles').on('click', function() {
+            $('#load-profiles-group').slideToggle(150);
+            $('#arrow-icon').toggleClass('rotated');
+        });
+
+        // Optional: rotate arrow when open
+        $('<style>.rotated { transform: rotate(180deg); }</style>').appendTo('head');
+
         // When the document is ready, attach a click event to the "Edit" button
         $('.edit-item-btn').on('click', function() {
             // Get the ID from the data attribute
@@ -276,38 +505,50 @@
                         $('#code').val(note.code);
                         $('#name').val(note.name);
                         $('#cost').val(note.cost);
-                        // $('#area').val(patient.area);
-                        // $('#email').val(patient.email);
 
                         var profiledepartment = response.profiledepartment.map(function(surgery) {
-                                return surgery.department;
-                            });
-
+                            return surgery.department;
+                        });
                         $('#department').val(profiledepartment).trigger('change');
-                        
-                        var profiletests = response.profiletests.map(function(surgery) {
-                                return surgery.id;
+
+                        if (response.note && response.note.sub_profiles) {
+                            // $('#sub_profiles').val(response.note.sub_profiles.map(String)).trigger('change');
+                            let $sub_profiles_select = $('#sub_profiles');
+                            response.note.sub_profiles.forEach(function(id) {
+                                let $option = $sub_profiles_select.find('option[value="' + id + '"]');
+                                $option.detach();
+                                $sub_profiles_select.append($option);
                             });
 
-                        $('#tests').val(profiletests).trigger('change');
+                            // Set Select2 selected values in order
+                            $sub_profiles_select.val(response.note.sub_profiles).trigger('change');
+                        }
 
-                        // Update modal title
+                        var profiletests = response.profiletests; // Array of {id, name} in correct order
+                        let testIds = profiletests.map(function(test) { return test.id.toString(); });
+
+                        // Move options in DOM to match saved order
+                        let $select = $('#tests');
+                        testIds.forEach(function(id) {
+                            let $option = $select.find('option[value="' + id + '"]');
+                            $option.detach();
+                            $select.append($option);
+                        });
+
+                        // Set Select2 selected values in order
+                        $select.val(testIds).trigger('change');
+
+                        // Set the order array and update badges/hidden input
+                        selectedTestsOrder = testIds;
+                        updateOrderedTestsDisplay();
+
+                        $('#ordered_tests').val(testIds.join(','));
+
+                        // Update modal title, button, etc...
                         $('#exampleModalLabel').html("Edit Profile");
-
-                        // Display the modal footer
                         $('#showModal .modal-footer').css('display', 'block');
-
-                        // Change the button text
                         $('#add-btn').html("Update");
-                        var form = $('#leadtype_form');
-
-                        // Update the form action (assuming the form has an ID of 'your-form-id')
-                        $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + itemId);
-
-
-
-                        // $('#showModal').modal('show');
-
+                        $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + note.id);
                     },
                     error: function(xhr, status, error) {
                         console.error(xhr, status, error);
@@ -333,8 +574,21 @@
             $('#code').val('');
             $('#name').val('');
             $('#cost ').val('');
+            $('#tests ').val('');
             // $('#surgeries').val("");
             $('#surgeries').val("").trigger('change');
+            $('#tests').val("").trigger('change');
+            $('#department').val("").trigger('change');
+            $('#tests').val('').trigger('change');
+            $('#sub_profiles').val('').trigger('change');
+            $('#ordered-tests').empty();
+            $('#ordered_tests').val('');
+            $('#sub_profiles option').each(function() {
+                $(this).prop('disabled', false);
+            });
+            $('#tests option').each(function() {
+                $(this).prop('disabled', false);
+            });
 
         }
 

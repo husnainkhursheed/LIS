@@ -13,6 +13,15 @@ class TestProfile extends Model
 
     protected $fillable = ['name', 'cost'];
 
+    public function subProfiles()
+    {
+        return $this->belongsToMany(TestProfile::class, 'profile_profiles', 'parent_profile_id', 'child_profile_id');
+    }
+
+    public function parentProfiles()
+    {
+        return $this->belongsToMany(TestProfile::class, 'profile_profiles', 'child_profile_id', 'parent_profile_id');
+    }
 
     // Many-to-Many relationship with Tests
     public function tests()

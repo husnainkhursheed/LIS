@@ -52,9 +52,9 @@
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
-                                hidden required />
+                                hidden  />
                                 <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
-                                disabled required />
+                                disabled  />
                         </div>
                     </div> --}}
                     <div class="col-md-6">
