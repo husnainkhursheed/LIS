@@ -401,7 +401,7 @@
                 </div>
                 <table id="tests-table" class="table table-striped display table-responsive rounded">
                     <thead>
-                        <tr>
+                        {{-- <tr>
                             <th class="rounded-start-3 ">Description</th>
                             <th>Test Results </th>
                             <th>Flag </th>
@@ -409,11 +409,223 @@
                             <th>Test Notes </th>
                             <th></th>
                             <th class="rounded-end-3">Calc</th>
-                        </tr>
+                        </tr> --}}
                     </thead>
                     <tbody>
                         @if ($reporttype == '1')
-                            @foreach ($categorizedTests as $profileId => $profileData)
+                            @foreach($categorizedTests as $profileId => $mainProfile)
+                                <tr>
+                                    <td class="text-dark">{{ $mainProfile['name'] }}</td>
+                                </tr>
+
+                                @foreach($mainProfile['subprofiles'] as $subprofile)
+                                    <tr><td class="text-dark">{{ $subprofile['name'] }}</td></tr>
+                                    <thead>
+                                        <tr>
+                                            <th class="rounded-start-3 ">Description</th>
+                                            <th>Test Results </th>
+                                            <th>Flag </th>
+                                            <th>Reference Range </th>
+                                            <th>Test Notes </th>
+                                            <th></th>
+                                            <th class="rounded-end-3">Calc</th>
+                                        </tr>
+                                    </thead>
+                                    @foreach($subprofile['tests'] as $index => $test)
+                                        @php
+                                            $testReport = $testReports
+                                                ->where('test_id', $test->id)
+                                                ->where('sample_id', $sample->id)
+                                                ->first();
+                                            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                        @endphp
+
+
+                                    <tr>
+                                        <td>
+                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][id]" class="form-control"
+                                                value="{{ $test->id }}" hidden disabled />
+                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][description]" class="form-control"
+                                                value="{{ $test->name }}" disabled />
+                                        </td>
+                                        <td>
+                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                        </td>
+                                        <td>
+                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                            @php
+                                                $background = '';
+                                                if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                    $background = 'bg-success';
+                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                    $background = 'bg-danger';
+                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                    $background = 'bg-warning';
+                                                }
+                                            @endphp
+                                            <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                        </td>
+                                        <td>
+                                            <p class="reference-range">
+                                                @if ($test->reference_range == 'basic_ref')
+                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                @elseif ($test->reference_range == 'optional_ref')
+                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                    <br>
+                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                @elseif ($test->reference_range == 'no_manual_tag')
+                                                    {{ $test->nomanualvalues_ref_range }}
+                                                @endif
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                        </td>
+                                        <td>
+                                            @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                    data-bs-placement="top" title="Delete">
+                                                    <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                        data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                        href="#deleteRecordModal">
+                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($test->calculation_explanation)
+                                                <a href="" class="getcalc" data-bs-toggle="modal"
+                                                data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                class="badge bg-info text-white">show</span> </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @endforeach
+                                @if(!empty($mainProfile['tests']))
+                                    <thead>
+                                        <tr>
+                                            <th class="rounded-start-3 ">Description</th>
+                                            <th>Test Results </th>
+                                            <th>Flag </th>
+                                            <th>Reference Range </th>
+                                            <th>Test Notes </th>
+                                            <th></th>
+                                            <th class="rounded-end-3">Calc</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach($mainProfile['tests'] as $index => $test)
+                                        @php
+                                            $testReport = $testReports
+                                                ->where('test_id', $test->id)
+                                                ->where('sample_id', $sample->id)
+                                                ->first();
+                                            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <input type="text" data-test-id="{{ $test->id }}"
+                                                    name="tests[{{ $test->id }}][id]" class="form-control"
+                                                    value="{{ $test->id }}" hidden disabled />
+                                                <input type="text" data-test-id="{{ $test->id }}"
+                                                    name="tests[{{ $test->id }}][description]" class="form-control"
+                                                    value="{{ $test->name }}" disabled />
+                                            </td>
+                                            <td>
+                                                <input type="text"  data-test-id="{{ $test->id }}"
+                                                    name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                    value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                    data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                    data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                    data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                    data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                    data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                    data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                    data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                            </td>
+                                            <td>
+                                                <input type="text"  data-test-id="{{ $test->id }}"
+                                                    name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                    value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                @php
+                                                    $background = '';
+                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                        $background = 'bg-success';
+                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                        $background = 'bg-danger';
+                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                        $background = 'bg-warning';
+                                                    }
+                                                @endphp
+                                                <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                    data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                            </td>
+                                            <td>
+                                                <p class="reference-range">
+                                                    @if ($test->reference_range == 'basic_ref')
+                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                    @elseif ($test->reference_range == 'optional_ref')
+                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                        <br>
+                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                    @elseif ($test->reference_range == 'no_manual_tag')
+                                                        {{ $test->nomanualvalues_ref_range }}
+                                                    @endif
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                            </td>
+                                            <td>
+                                                @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                        data-bs-placement="top" title="Delete">
+                                                        <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                            data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                            href="#deleteRecordModal">
+                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($test->calculation_explanation)
+                                                    <a href="" class="getcalc" data-bs-toggle="modal"
+                                                    data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                    class="badge bg-info text-white">show</span> </a>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+
+                            @endforeach
+                            {{-- @if(isset($categorizedTests['no-profile']))
+                                <h3>{{ $categorizedTests['no-profile']['name'] }}</h3>
+                                <ul>
+                                    @foreach($categorizedTests['no-profile']['tests'] as $test)
+                                        <li>{{ $test->name }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif --}}
+                            {{-- @foreach ($categorizedTests as $profileId => $profileData)
+
                                 <tr id="{{ $profileId }}">
                                     <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
                                 </tr>
@@ -502,10 +714,10 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                            @endforeach
+                            @endforeach --}}
 
                         @else
-                            @foreach ($tests as $index => $test)
+                            {{-- @foreach ($tests as $index => $test)
                                 @php
                                     $testReport = $testReports
                                         ->where('test_id', $test->id)
@@ -587,7 +799,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @endforeach
+                            @endforeach --}}
                         @endif
                     </tbody>
                 </table>

@@ -45,6 +45,7 @@ class TestProfileController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->tests);
         // dd($request->all());
         $request->validate([
             // 'code' => 'required',
@@ -65,6 +66,11 @@ class TestProfileController extends Controller
                     'department' => $department,
                 ]);
             }
+
+            // Attach sub-profiles
+            if ($request->has('sub_profiles')) {
+                $testprofile->subProfiles()->sync($request->input('sub_profiles'));
+            }
         }
 
         // Attach tests with order preservation
@@ -75,9 +81,11 @@ class TestProfileController extends Controller
         // }
 
         // dd($testOrder);
-        $orderedTests = explode(',', $request->input('ordered_tests'));
+        // $orderedTests = explode(',', $request->input('ordered_tests'));
         // dd($orderedTests);
-        $testprofile->tests()->attach($orderedTests);
+        if ($request->has('tests')) {
+            $testprofile->tests()->attach($request->input('tests'));
+        }
         // dd($testprofile->tests);
 
         Session::flash('message', 'Created successfully!');
@@ -94,7 +102,9 @@ class TestProfileController extends Controller
 
 
         return response()->json([
-            'note' => $note,
+            'note' => array_merge($note->toArray(), [
+                'sub_profiles' => $note->subProfiles->pluck('id')->toArray()
+            ]),
             'profiledepartment' => $profiledepartment,
             'profiletests' => $profiletests,
         ]);
@@ -117,6 +127,7 @@ class TestProfileController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->input('tests'));
         $request->validate([
             // 'code' => 'required',
             'name' => 'required',
@@ -138,12 +149,15 @@ class TestProfileController extends Controller
                     'department' => $department,
                 ]);
             }
+
+            $testprofile->subProfiles()->sync($request->input('sub_profiles', []));
         }
 
         $testprofile->tests()->detach();
-        $orderedTests = explode(',', $request->input('ordered_tests'));
-        $testprofile->tests()->attach($orderedTests);
-
+        if ($request->has('tests')) {
+            $testprofile->tests()->attach($request->input('tests'));
+        }
+        // dd($testprofile->tests);
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');
         return redirect()->back();
