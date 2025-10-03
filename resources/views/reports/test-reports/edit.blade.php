@@ -391,7 +391,7 @@
                     </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="note" class="form-label">Note</label>
+                            <label for="note" class="form-label">Notes</label>
                             <textarea name="note" id="note" cols="30" rows="5" class="form-control">{{ $hematologyStatus->note ?? '' }}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
@@ -431,7 +431,7 @@
                                             <th class="rounded-start-3 ">Description</th>
                                             <th>Test Results </th>
                                             <th>Flag </th>
-                                            <th>Reference Range </th>
+                                            <th class="col-md-4">Reference Range </th>
                                             <th>Test Notes </th>
                                             <th></th>
                                             <th class="rounded-end-3">Calc</th>
@@ -529,7 +529,7 @@
                                             <th class="rounded-start-3 ">Description</th>
                                             <th>Test Results </th>
                                             <th>Flag </th>
-                                            <th>Reference Range </th>
+                                            <th class="col-md-4">Reference Range </th>
                                             <th>Test Notes </th>
                                             <th></th>
                                             <th class="rounded-end-3">Calc</th>
@@ -679,7 +679,7 @@
                                             <span class="badge badge-pill flag-badge {{ $background }} {{ !empty($biochemHaemoResults) && in_array($biochemHaemoResults->flag, ['High', 'Low']) ? '' : 'd-none' }}"
                                                 data-key="t-hot">{{ in_array($biochemHaemoResults->flag ?? '', ['High', 'Low']) ? $biochemHaemoResults->flag : '' }}</span> --}}
 
-                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                            {{-- <input type="text"  data-test-id="{{ $test->id }}"
                                                 name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
                                                 value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
                                             @php
@@ -722,7 +722,7 @@
                                                     </a>
                                                 </li>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                         {{-- <td>
                                             @if ($test->calculation_explanation)
                                                 <a href="" class="getcalc" data-bs-toggle="modal"
@@ -730,7 +730,7 @@
                                                                 class="badge bg-info text-white">show</span> </a>
                                             @endif
                                         </td> --}}
-                                    </tr>
+                                    {{-- </tr>
                                 @endforeach
                             @endforeach --}}
 
@@ -816,8 +816,8 @@
                                                             class="badge bg-info text-white">show</span> </a>
                                         @endif
                                     </td> --}}
-                                </tr>
-                            @endforeach --}}
+                                {{-- </tr>
+                            @endforeach  --}}
                         @endif
                     </tbody>
                 </table>

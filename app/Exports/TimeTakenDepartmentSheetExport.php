@@ -57,19 +57,19 @@ class TimeTakenDepartmentSheetExport implements FromCollection, WithTitle, WithH
         ];
         return $names[$this->department] ?? 'Department ' . $this->department;
     }
+
     public function styles(Worksheet $sheet)
     {
         $lastRow = $sheet->getHighestRow();
 
         $boldLabels = [
-            'Department',
             'Access #',
             'Patient Name',
             'Request',
             'Date Received',
             'Date Completed',
             'In Progress',
-            'Number of Days',
+            'TAT',
             'Avg Turnaround Time',
             'Total Outside TAT',
             'Total (%) Outside TAT',
@@ -95,26 +95,72 @@ class TimeTakenDepartmentSheetExport implements FromCollection, WithTitle, WithH
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
                 $summary = $this->summary ?? [];
 
-                // Find the next empty row after the data
-                $rowCount = count($this->rows) + 2; // +1 for headings, +1 for 1-based index
+                // 👉 Bold the heading row (Row 1)
+                $sheet->getStyle('A1:H1')->applyFromArray([
+                    'font' => ['bold' => true],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        ]
+                    ]
+                ]);
+
+                // 👉 Add borders to the full data range
+                $rowCount = count($this->rows) + 1;
+                $sheet->getStyle("A1:H{$rowCount}")->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        ]
+                    ]
+                ]);
+
+                // Start row for summary section
+                $rowCount += 2;
 
                 $summaryRows = [
-                    [''],
-                    ['', 'Avg Turnaround Time', '', '', '', '', '', $summary['avg_tat'] ?? ''],
-                    ['', 'Total Outside TAT', '', '', '', '', '', $summary['total_outside_tat'] ?? ''],
-                    ['', 'Total (%) Outside TAT', '', '', '', '', '', $summary['percent_outside_tat'] ?? ''],
-                    ['', 'Total Inside TAT', '', '', '', '', '', $summary['total_inside_tat'] ?? ''],
-                    ['', 'Total (%) Inside TAT', '', '', '', '', '', $summary['percent_inside_tat'] ?? ''],
-                    ['', 'Total Tests: Completed', '', '', '', '', '', $summary['total_completed'] ?? ''],
-                    ['', 'Total Tests: Pending', '', '', '', '', '', $summary['total_pending'] ?? ''],
-                    ['', 'Grand Total (Pending and Completed)', '', '', '', '', '', $summary['grand_total_days'] ?? ''],
+                    ['Avg Turnaround Time', '', $summary['avg_tat'] ?? '', '', '', '', '', ''],
+                    ['Total Outside TAT', '', $summary['total_outside_tat'] ?? '', '', '', '', '', ''],
+                    ['Total (%) Outside TAT', '', $summary['percent_outside_tat'] ?? '', '', '', '', '', ''],
+                    ['Total Inside TAT', '', $summary['total_inside_tat'] ?? '', '', '', '', '', ''],
+                    ['Total (%) Inside TAT', '', $summary['percent_inside_tat'] ?? '', '', '', '', '', ''],
+                    ['Total Tests: Completed', '', $summary['total_completed'] ?? '', '', '', '', '', ''],
+                    ['Total Tests: Pending', '', $summary['total_pending'] ?? '', '', '', '', '', ''],
+                    ['Grand Total (Pending and Completed)', '', $summary['grand_total_days'] ?? '', '', '', '', '', ''],
                 ];
 
-                foreach ($summaryRows as $row) {
-                    $event->sheet->getDelegate()->fromArray($row, null, 'A' . $rowCount++);
+                // 👉 Insert each summary row and style
+                foreach ($summaryRows as $summaryRow) {
+                    $sheet->fromArray($summaryRow, null, "A{$rowCount}");
+
+                    // Make label bold + yellow background
+                    $sheet->getStyle("A{$rowCount}:B{$rowCount}")->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'FFFF00'], // Yellow
+                        ],
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            ]
+                        ]
+                    ]);
+
+                    // Right-align the value
+                    $sheet->getStyle("C{$rowCount}")->getAlignment()->setHorizontal('right');
+
+                    $rowCount++;
+                }
+
+                // 👉 Set column widths for neatness (optional)
+                $columns = ['A' => 18, 'B' => 20, 'C' => 18, 'D' => 20, 'E' => 20, 'F' => 20, 'G' => 12, 'H' => 8];
+                foreach ($columns as $col => $width) {
+                    $sheet->getColumnDimension($col)->setWidth($width);
                 }
             }
         ];

@@ -46,6 +46,59 @@ class MasterReportExport implements FromCollection, WithTitle, WithHeadings, Wit
 
     public function registerEvents(): array
     {
-        return [];
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // 👉 Bold the header row and apply background color
+                $sheet->getStyle('A1:G1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => '000000'],
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => [
+                            'rgb' => 'D1EDF1', // Light cyan background
+                        ],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
+                    ],
+                ]);
+
+                // 👉 Apply border to entire data range
+                $rowCount = count($this->rows) + 1;
+                $sheet->getStyle("A1:G{$rowCount}")->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                // 👉 Format 'Total' column as currency
+                for ($i = 2; $i <= $rowCount; $i++) {
+                    $sheet->getStyle("G{$i}")
+                        ->getNumberFormat()
+                        ->setFormatCode('"$"#,##0.00');
+                }
+
+                // 👉 Set column widths for better readability
+                $columns = ['A' => 15, 'B' => 20, 'C' => 18, 'D' => 15, 'E' => 20, 'F' => 50, 'G' => 12];
+                foreach ($columns as $column => $width) {
+                    $sheet->getColumnDimension($column)->setWidth($width);
+                }
+            }
+        ];
     }
 }

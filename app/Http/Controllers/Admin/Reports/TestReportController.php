@@ -65,7 +65,14 @@ class TestReportController extends Controller
                     $query->orderBy('access_number', 'asc');
                     break;
                 case 'received_date':
-                    $query->orderBy('received_date', 'asc');
+                    $query->orderBy('received_date', 'desc'); // Most recent first
+                    break;
+                case 'patient_name':
+                    // Join with patients table and sort by surname, then first_name
+                    $query->join('patients', 'samples.patient_id', '=', 'patients.id')
+                        ->orderBy('patients.surname', 'asc')
+                        ->orderBy('patients.first_name', 'asc')
+                        ->select('samples.*'); // Ensure only Sample columns are selected
                     break;
                 default:
                     // Default sorting can be applied here if needed
