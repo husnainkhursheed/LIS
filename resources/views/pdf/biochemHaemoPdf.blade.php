@@ -229,17 +229,17 @@
 
                 {{-- @if ($testResults) --}}
                     <tr>
-                        <td>{{ $description }}
+                        <td><small>{{ $description }}</small>
                             @if ($testNote)
                                 <br><small>({{ $testNote }})</small>
                             @endif
                         </td>
 
-                        <td >{{ $testResults }}</td>
+                        <td ><small>{{ $testResults }}</small></td>
                         <td>
-                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot"><small>{{ $flag }}</small></span>
                         </td>
-                        <td style="text-align: left">{!! $referenceRange !!}
+                        <td style="text-align: left"><small>{!! $referenceRange !!}</small>
                             @if ($methodology)
                                 <br><small>({{ $methodology }})</small>
                             @endif

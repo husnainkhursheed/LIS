@@ -341,7 +341,7 @@
                                         <div>
                                             <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
                                             <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
-                                                placeholder="Enter Low Value" required />
+                                                placeholder="Enter Low Value"  />
                                         </div>
                                     </div>
                                         {{-- <label for="male" class="form-label">High Value</label> --}}
@@ -349,14 +349,14 @@
                                         <div>
                                             <label for="basic_high_value_ref_range" class="form-label">High Value</label>
                                             <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
-                                                placeholder="Enter High Value" required />
+                                                placeholder="Enter High Value"  />
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
                                         <div>
                                             <label for="basic_unit_value_ref_range" class="form-label">Unit</label>
                                             <input type="text" id="basic_unit_value_ref_range" class="form-control" name="basic_unit_value_ref_range"
-                                                placeholder="Enter unit" required />
+                                                placeholder="Enter unit"  />
                                         </div>
                                     </div>
                                     {{-- <label for="female" class="form-label">Low value</label> --}}
@@ -383,7 +383,7 @@
                                     <div>
                                         <label for="male_unit_value_ref_range" class="form-label">Unit</label>
                                         <input type="text" id="male_unit_value_ref_range" class="form-control" name="male_unit_value_ref_range"
-                                            placeholder="Enter unit" required />
+                                            placeholder="Enter unit"  />
                                     </div>
                                 </div>
                                 <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
@@ -406,19 +406,19 @@
                                     <div>
                                         <label for="female_unit_value_ref_range" class="form-label">Unit</label>
                                         <input type="text" id="female_unit_value_ref_range" class="form-control" name="female_unit_value_ref_range"
-                                            placeholder="Enter unit" required />
+                                            placeholder="Enter unit"  />
                                     </div>
                                 </div>
                             </div>
                             <div class="row" id="noManualValues">
                                 <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
                             </div>
-                            <div class="col-lg-12">
+                            {{-- <div class="col-lg-12">
                                 <div>
                                     <label for="test_notes" class="form-label">Test Notes</label>
                                     <textarea name="test_notes" id="test_notes" class="form-control" cols="30" rows="3"></textarea>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
@@ -694,7 +694,7 @@
                         $('#specimen_type').val(test.specimen_type).trigger('change');
                         $('#cost').val(test.cost);
                         $('#methodology').val(test.methodology);
-                        $('#test_notes').val(test.test_notes);
+                        // $('#test_notes').val(test.test_notes);
                         $('#reference_range').val(test.reference_range);
                         // $('#is_urine_type').val(test.is_urine_type);
                         if (response.testProfiles) {

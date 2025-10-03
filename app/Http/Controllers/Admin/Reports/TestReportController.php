@@ -65,7 +65,14 @@ class TestReportController extends Controller
                     $query->orderBy('access_number', 'asc');
                     break;
                 case 'received_date':
-                    $query->orderBy('received_date', 'asc');
+                    $query->orderBy('received_date', 'desc'); // Most recent first
+                    break;
+                case 'patient_name':
+                    // Join with patients table and sort by surname, then first_name
+                    $query->join('patients', 'samples.patient_id', '=', 'patients.id')
+                        ->orderBy('patients.surname', 'asc')
+                        ->orderBy('patients.first_name', 'asc')
+                        ->select('samples.*'); // Ensure only Sample columns are selected
                     break;
                 default:
                     // Default sorting can be applied here if needed
@@ -96,14 +103,6 @@ class TestReportController extends Controller
                         $profile->departments->pluck('department')
                     );
                 }
-                // Handle subprofiles recursively
-                $allSubProfiles = getSubProfilesRecursive($profile);
-                foreach ($allSubProfiles as $subProfile) {
-                    $profileTests = $profileTests->merge($subProfile->tests()->get());
-                    if ($subProfile->departments) {
-                        $profileDepartments = $profileDepartments->merge($subProfile->departments->pluck('department'));
-                    }
-                }
             }
 
             // Merge individual and profile-related departments
@@ -121,7 +120,6 @@ class TestReportController extends Controller
                             return $testProfile->departments->contains('department', $department);
                         });
                 });
-                // dd($departmentTests);
                 $departmentTestsReports = TestReport::where('sample_id', $sample->id)
                 ->whereIn('test_id', $departmentTests->pluck('id'))
                 ->get();
@@ -188,40 +186,24 @@ class TestReportController extends Controller
         $individualTests = $sample->tests()->where('department', $reporttype)->get();
         // dd($individualTests);
 
-        // Get all test profiles associated with the sample, regardless of department
-        $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
+        // Get the profiles associated with the sample
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+            $query->where('department', $reporttype);
+        })->with('tests')->get();
         // dd($profiles);
 
+        // Collect all the tests from the profiles that match the department
         $profileTests = collect();
-
         foreach ($profiles as $profile) {
-            // If profile has subprofiles, ignore department check
-            $hasSubProfiles = $profile->subProfiles && $profile->subProfiles->isNotEmpty();
-
-            if ($hasSubProfiles ) {
-
-                // Add profile's tests
-                 $profileTests = $profileTests->merge($profile->tests);
-                //  dd($profileTests);
-
-                // Add all subprofile tests recursively
-                $allSubProfiles = getSubProfilesRecursive($profile);
-                foreach ($allSubProfiles as $subProfile) {
-                     if ($subProfile->departments->contains('department', $reporttype)) {
-                         $profileTests = $profileTests->merge($subProfile->tests);
-                        //  dd($profileTests);
-                    }
-                }
-            }else{
-                // If no subprofiles, check if the profile's departments match the report type
-                if ($profile->departments->contains('department', $reporttype)) {
-                    // Add profile's tests directly
-                    $profileTests = $profileTests->merge($profile->tests);
-                }
-            }
+            // Add tests from each profile that match the department
+            // dd($profile->tests->where('department', $reporttype));
+            $profileTests = $profileTests->merge(
+                $profile->tests,
+            );
         }
+        // dd($profileTests);
 
-        // Combine individual tests and all profile/subprofile tests
+        // Combine individual tests and profile tests
         $tests = $individualTests->merge($profileTests);
 
         // dd($tests);
@@ -322,64 +304,34 @@ class TestReportController extends Controller
         // If the department is 1, categorize the tests by their profiles
         $categorizedTests = [];
 
+        $sampleProfiles = $sample->testProfiles->pluck('id')->toArray(); // Get profile IDs assigned to the sample
+
         if ($reporttype == '1' || $reporttype == '3') {
-            // Get all sample profiles with subprofiles
-            // $sampleProfiles = $sample->testProfiles()->with('subProfiles.tests')->get();
-            // dd($sampleProfiles);
-            foreach ($profiles as $mainProfile) {
-                $mainProfileId = $mainProfile->id;
-                $mainProfileName = $mainProfile->name;
-
-                // Add main profile heading
-                $categorizedTests[$mainProfileId] = [
-                    'name' => $mainProfileName,
-                    'subprofiles' => [],
-                    'tests' => [],
-                ];
-
-                // Get tests directly under main profile
-                foreach ($tests as $test) {
-
-                    // dd($test->testProfiles);
-                    if ($test->testProfiles->contains('id', $mainProfileId)) {
-                        $categorizedTests[$mainProfileId]['tests'][] = $test;
+            foreach ($tests as $test) {
+                // Check if there are any test profiles assigned to the test
+                $testIncludedInProfile = false;
+                foreach ($sample->testProfiles as $profile) {
+                    if ($profile->tests->contains('id', $test->id)) {
+                        $profileId = $profile->id;
+                        $profileName = $profile->name;
+                        $categorizedTests[$profileId]['name'] = $profileName;
+                        $categorizedTests[$profileId]['tests'][] = $test;
+                        $testIncludedInProfile = true;
                     }
                 }
-
-                // Handle subprofiles
-                $allSubProfiles = getSubProfilesRecursive($mainProfile);
-                // dd($allSubProfiles);
-                foreach ($allSubProfiles as $subProfile) {
-                    if ($subProfile->departments->contains('department', $reporttype)) {
-
-                        $subProfileId = $subProfile->id;
-                        $subProfileName = $subProfile->name;
-                        $categorizedTests[$mainProfileId]['subprofiles'][$subProfileId] = [
-                            'name' => $subProfileName,
-                            'tests' => [],
-                        ];
-
-                        foreach ($tests as $test) {
-                            if ($test->testProfiles->contains('id', $subProfileId)) {
-                                $categorizedTests[$mainProfileId]['subprofiles'][$subProfileId]['tests'][] = $test;
-                            }
-                         }
-                    }
+                if (!$testIncludedInProfile) {
+                    // Handle the case where the test is not included in any sample profile
+                    $profileId = 'no-profile';
+                    $profileName = 'Individual Tests';
+                    $categorizedTests[$profileId]['name'] = $profileName;
+                    $categorizedTests[$profileId]['tests'][] = $test;
                 }
-
-            }
-
-            // Handle tests with no profile
-            foreach ($individualTests as $test) {
-                // if ($test->testProfiles->isEmpty()) {
-                    $categorizedTests['no-profile']['name'] = 'Individual Tests';
-                    $categorizedTests['no-profile']['subprofiles'] = [];
-                    $categorizedTests['no-profile']['tests'][] = $test;
-                // }
             }
         }
 
         // dd($categorizedTests);
+        // sensitivityResults
+
 
         $test_profiles = TestProfile::all();
 
@@ -881,39 +833,22 @@ class TestReportController extends Controller
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 
         // Get the profiles associated with the sample
-        $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
+        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
+            $query->where('department', $reporttypeis);
+        })->with('tests')->get();
+
         // dd($profiles);
 
+        // Collect all the tests from the profiles that match the department
         $profileTests = collect();
-
         foreach ($profiles as $profile) {
-            // If profile has subprofiles, ignore department check
-            $hasSubProfiles = $profile->subProfiles && $profile->subProfiles->isNotEmpty();
-
-            if ($hasSubProfiles ) {
-
-                // Add profile's tests
-                 $profileTests = $profileTests->merge($profile->tests);
-                //  dd($profileTests);
-
-                // Add all subprofile tests recursively
-                $allSubProfiles = getSubProfilesRecursive($profile);
-                foreach ($allSubProfiles as $subProfile) {
-                     if ($subProfile->departments->contains('department', $reporttypeis)) {
-                         $profileTests = $profileTests->merge($subProfile->tests);
-                        //  dd($profileTests);
-                    }
-                }
-            }else{
-                // If no subprofiles, check if the profile's departments match the report type
-                if ($profile->departments->contains('department', $reporttypeis)) {
-                    // Add profile's tests directly
-                    $profileTests = $profileTests->merge($profile->tests);
-                }
-            }
+            // Add tests from each profile that match the department
+            $profileTests = $profileTests->merge(
+                $profile->tests()->get()
+            );
         }
 
-        // Combine individual tests and all profile/subprofile tests
+        // Combine individual tests and profile tests
         $tests = $individualTests->merge($profileTests);
         // dd($tests);
 

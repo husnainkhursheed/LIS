@@ -36,17 +36,14 @@ class TestProfileController extends Controller
             $query->orderBy($request->input('sort_by'), $sortOrder);
         }
         $tests = Test::where('is_active', true)->get();
-        $profiles = \App\Models\TestProfile::all();
         // dd($tests);
 
         $notes = $query->paginate(10);
-        return view('setup.testProfiles',compact('notes','tests','profiles'));
+        return view('setup.testProfiles',compact('notes','tests'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->tests);
-        // dd($request->all());
         $request->validate([
             // 'code' => 'required',
             'name' => 'required',
@@ -66,27 +63,8 @@ class TestProfileController extends Controller
                     'department' => $department,
                 ]);
             }
-
-            // Attach sub-profiles
-            if ($request->has('sub_profiles')) {
-                $testprofile->subProfiles()->sync($request->input('sub_profiles'));
-            }
         }
-
-        // Attach tests with order preservation
-        // $order = 1;
-        // $testOrder = [];
-        // foreach ($request->tests as $testId) {
-        //     $testOrder[$testId] = ['order' => $order++];
-        // }
-
-        // dd($testOrder);
-        // $orderedTests = explode(',', $request->input('ordered_tests'));
-        // dd($orderedTests);
-        if ($request->has('tests')) {
-            $testprofile->tests()->attach($request->input('tests'));
-        }
-        // dd($testprofile->tests);
+        $testprofile->tests()->attach($request->tests);
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -100,34 +78,15 @@ class TestProfileController extends Controller
         $profiletests = $note->tests;
         // dd($profiletests);
 
-
         return response()->json([
-            'note' => array_merge($note->toArray(), [
-                'sub_profiles' => $note->subProfiles->pluck('id')->toArray()
-            ]),
+            'note' => $note,
             'profiledepartment' => $profiledepartment,
             'profiletests' => $profiletests,
         ]);
     }
 
-    public function fetchTestsFromProfiles(Request $request)
-    {
-        $profileIds = $request->input('profile_ids', []);
-        $testIds = \App\Models\TestProfile::whereIn('id', $profileIds)
-            ->with('tests')
-            ->get()
-            ->flatMap(function($profile) {
-                return $profile->tests->pluck('id');
-            })
-            ->unique()
-            ->values();
-
-        return response()->json(['test_ids' => $testIds]);
-    }
-
     public function update(Request $request, $id)
     {
-        // dd($request->input('tests'));
         $request->validate([
             // 'code' => 'required',
             'name' => 'required',
@@ -149,15 +108,11 @@ class TestProfileController extends Controller
                     'department' => $department,
                 ]);
             }
-
-            $testprofile->subProfiles()->sync($request->input('sub_profiles', []));
         }
 
         $testprofile->tests()->detach();
-        if ($request->has('tests')) {
-            $testprofile->tests()->attach($request->input('tests'));
-        }
-        // dd($testprofile->tests);
+        $testprofile->tests()->attach($request->tests);
+
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');
         return redirect()->back();

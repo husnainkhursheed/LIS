@@ -109,7 +109,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
     Route::post('/TestProfile/fetch-tests-from-profiles', [TestProfileController::class, 'fetchTestsFromProfiles']);
-
     // test profile crud  working
     Route::get('/TestProfile', [TestProfileController::class, 'index'])->name('TestProfile.index');
     Route::post('/TestProfile', [TestProfileController::class, 'store'])->name('TestProfile.store');
@@ -165,7 +164,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/changes/{id}', [ReportingandAnalyticsController::class, 'trailchanges']);
 
         Route::get('/processing-time', [ReportingandAnalyticsController::class, 'index'])->name('processingtime.index');
-        Route::get('/master-report', [ReportingandAnalyticsController::class, 'masterReport'])->name('masterreport.index');
+    	Route::get('/master-report', [ReportingandAnalyticsController::class, 'masterReport'])->name('masterreport.index');
 
     });
 

@@ -370,13 +370,13 @@
                                         }
                                     @endphp
                                     <tr>
-                                        <td> {{ $urinalysisMicrobiologyResults->description ?? $test->name }} </td>
-                                        <td> {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
+                                        <td> <small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }} </small></td>
+                                        <td> <small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }}</small></td>
                                         <td>
                                             <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                                                data-key="t-hot">{{ $flag }}</span>
+                                                data-key="t-hot"><small>{{ $flag }}</small></span>
                                         </td>
-                                        <td >{!! $referenceRange !!}</td>
+                                        <td ><small>{!! $referenceRange !!}</small></td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -481,14 +481,14 @@
                                     @endphp
                                     <tr>
                                         <td style="vertical-align: top;">
-                                            {{ $urinalysisMicrobiologyResults->description ?? $test->name }} </td>
+                                             <small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }} </small> </td>
                                         <td style="vertical-align: top;">
-                                            {{ $urinalysisMicrobiologyResults->test_results ?? '' }}</td>
+                                             <small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }} </small></td>
                                         <td style="vertical-align: top;">
                                             <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                                                data-key="t-hot">{{ $flag }}</span>
+                                                data-key="t-hot"> <small>{{ $flag }} </small></span>
                                         </td>
-                                        <td style="vertical-align: top;">{!! $referenceRange !!}</td>
+                                        <td style="vertical-align: top;"> <small>{!! $referenceRange !!} </small></td>
                                     </tr>
                                 @endforeach
                             @endforeach
