@@ -284,7 +284,7 @@
                             });
 
                         $('#department').val(profiledepartment).trigger('change');
-                        
+
                         var profiletests = response.profiletests.map(function(surgery) {
                                 return surgery.id;
                             });
@@ -316,6 +316,87 @@
                 });
 
         });
+
+            $('#tests').select2({
+                closeOnSelect: false
+            });
+
+            // Helper to get current ordered_tests as array (handles empty string)
+            function getOrderedTestsArray() {
+                const val = $('#ordered_tests').val();
+                if (!val) return [];
+                return val.split(',').filter(Boolean);
+            }
+            $('#sub_profiles').select2({
+                closeOnSelect: false
+            });
+
+            // $('#mySelect').on('select2:select', function (e) {
+            //     var selectedId = e.params.data.id;
+            //     var $option = $(this).find('option[value="' + selectedId + '"]');
+            //     $option.detach();
+            //     $(this).append($option);
+            //     $(this).trigger('change.select2');
+            // });
+
+            $('#sub_profiles').on('select2:select', function(e) {
+                const selectedValue = e.params.data.id;
+
+                var $option = $(this).find('option[value="' + selectedValue + '"]');
+                $option.detach();
+                $(this).append($option);
+                $(this).trigger('change.select2');
+
+            });
+
+            $('#tests').on('select2:select', function(e) {
+                const selectedValue = e.params.data.id;
+
+                var $option = $(this).find('option[value="' + selectedValue + '"]');
+                $option.detach();
+                $(this).append($option);
+                $(this).trigger('change.select2');
+                //
+                selectedTestsOrder = getOrderedTestsArray();
+                // Add to order array if not already present
+                if (!selectedTestsOrder.includes(selectedValue)) {
+                    selectedTestsOrder.push(selectedValue);
+                }
+
+                // Update hidden input and badges
+                updateOrderedTestsDisplay();
+            });
+
+            $('#tests').on('select2:unselect', function(e) {
+                const unselectedValue = e.params.data.id;
+
+                selectedTestsOrder = getOrderedTestsArray();
+                // Remove from order array
+                selectedTestsOrder = selectedTestsOrder.filter(id => id !== unselectedValue);
+
+                // Update hidden input and badges
+                updateOrderedTestsDisplay();
+            });
+
+            function updateOrderedTestsDisplay() {
+                // Update hidden input with ordered values
+                $('#ordered_tests').val(selectedTestsOrder.join(','));
+
+                // Clear and rebuild badges in order
+                $('#ordered-tests').empty();
+
+                selectedTestsOrder.forEach(function(testId) {
+                    const testName = $('#tests option[value="' + testId + '"]').text();
+                    if (testName) {
+                        $('#ordered-tests').append(
+                            `<span class="badge bg-primary-subtle text-white" data-test-id="${testId}">
+                                ${testName}
+                                <button type="button" class="btn-close btn-close-white ms-1 remove-test" data-test-id="${testId}" style="font-size: 0.7em;"></button>
+                            </span>`
+                        );
+                    }
+                });
+            }
 
         function resetModal() {
             // Reset modal titleq

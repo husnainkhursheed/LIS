@@ -44,8 +44,18 @@ class SampleController extends Controller
         $patients = Patient::where('is_active', 1)->get();
         $tests = Test::where('is_active', 1)->get();
         $test_profiles = TestProfile::all();
-        $access_number = strtoupper(substr(md5(time()), 0, 6));
+        // Generate access number in format B25-001, B25-002, ...
+        $prefix = 'B25-';
+        $latestSample = Sample::where('access_number', 'like', $prefix . '%')
+            ->orderBy('id', 'desc')
+            ->first();
 
+        if ($latestSample && preg_match('/^B25-(\d{4})$/', $latestSample->access_number, $matches)) {
+            $nextNumber = str_pad((int)$matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+        $access_number = $prefix . $nextNumber;
         return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','access_number'));
     }
 

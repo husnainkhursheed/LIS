@@ -611,13 +611,12 @@
                 const duplicates = await response.json();
 
                 if (duplicates.length > 0) {
-                    if (!confirm('Potential duplicates found. Are you sure you want to create a new patient?')) {
-                        return;
-                    }
+                    $('#duplicate_warning').removeClass('d-none');
+                    alert('Duplicate patient exists. Please select the existing patient or change the details.');
+                    return; // Do NOT submit
                 }
-
+ 
                 // Proceed with form submission
-                form.submit();
             } catch (error) {
                 console.error('Error during final duplicate check:', error);
                 form.submit();

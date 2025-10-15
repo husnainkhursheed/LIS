@@ -266,7 +266,10 @@
                                     <input type="text" id="first_name" name="first_name"
                                         class="form-control"
                                         placeholder="Enter First Name" required />
+                                    <div id="first_name_suggestions" class="autocomplete-suggestions"></div>
+
                                 </div>
+
                                 {{-- @error('v_name')
                                     <div class="text-danger">{{$message}}</div>
                                 @enderror --}}
@@ -276,20 +279,21 @@
                                     <label for="surname" class="form-label">Surname</label>
                                     <input type="text" id="surname" name="surname" class="form-control"
                                     placeholder="Enter surname" required />
+                                    <div id="surname_suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="contact_number" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" class="form-control" name="contact_number"
-                                        placeholder="Enter Contact Number" required />
+                                        placeholder="Enter Contact Number"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="dob" class="form-label">DOB</label>
                                     <input type="date" id="dob" name="dob" class="form-control"
-                                        placeholder="Enter Dob" required />
+                                        placeholder="Enter Dob"  />
                                 </div>
                             </div>
 
@@ -312,6 +316,11 @@
                                         Active
                                     </label>
                                 </div>
+                            </div>
+                            <div id="duplicate_warning" class="alert alert-warning d-none">
+                                <p>Potential duplicate patients found:</p>
+                                <ul id="duplicate_list"></ul>
+                                <p>Do you want to proceed with creating a new patient?</p>
                             </div>
                         </div>
                     </div>
@@ -359,7 +368,7 @@
                                 <div>
                                     <label for="email" class="form-label">Email address</label>
                                     <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email" required />
+                                        placeholder="Enter Email"  />
                                 </div>
                             </div>
 
@@ -367,28 +376,28 @@
                                 <div>
                                     <label for="address" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number" required />
+                                    placeholder="Enter Contact Number"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="town" class="form-label">Street name</label>
                                     <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town" required />
+                                        placeholder="Enter Town"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address" required />
+                                        placeholder="Enter Address"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="country" class="form-label">Area</label>
                                     <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area" required />
+                                        placeholder="Enter Area"  />
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -446,35 +455,35 @@
                                 <div>
                                     <label for="email" class="form-label">Email address</label>
                                     <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email" required />
+                                        placeholder="Enter Email"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="address" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number" required />
+                                    placeholder="Enter Contact Number"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="town" class="form-label">Street name</label>
                                     <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town" required />
+                                        placeholder="Enter Town"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address" required />
+                                        placeholder="Enter Address"  />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="country" class="form-label">Area</label>
                                     <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area" required />
+                                        placeholder="Enter Area"  />
                                 </div>
                             </div>
 
@@ -685,6 +694,9 @@
 
                 $('#grand_total').val(grandTotal.toFixed(2));
             }
+            $('#total_cost, #total_cost_profile').on('input', function() {
+                calculateGrandTotal();
+            });
             calculateGrandTotal();
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
@@ -727,23 +739,41 @@
                 $('#patient_id').select2();
 
                 // Handle form submission via AJAX
-                $('#patient_form').on('submit', function(e) {
+               $('#patient_form').on('submit', async function(e) {
                     e.preventDefault();
 
+                    // Get values
+                    const firstName = $('#first_name').val().trim();
+                    const surname = $('#surname').val().trim();
+                    const dob = $('#dob').val();
+
+                    // Check for duplicates via AJAX
+                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+                    try {
+                        const response = await fetch(url);
+                        const duplicates = await response.json();
+                        if (duplicates.length > 0) {
+                            $('#duplicate_warning').removeClass('d-none');
+                            alert('Duplicate patient exists. Please select the existing patient or change the details.');
+                            return; // Do NOT submit
+                        }
+                    } catch (error) {
+                        console.error('Error checking for duplicates:', error);
+                        alert('Error checking for duplicates.');
+                        return;
+                    }
+
+                    // If no duplicates, proceed with AJAX submit
                     $.ajax({
                         url: '{{ url("/patient") }}',
                         method: 'POST',
                         data: $(this).serialize(),
                         success: function(response) {
                             if (response.success) {
-                                // Append the new patient to the dropdown
                                 var newOption = new Option(response.patient.first_name, response.patient.id, true, true);
                                 $('#patient_id').append(newOption).trigger('change');
-
-                                // Close the modal
                                 $('#showModalPatient').modal('hide');
-
-                                // Optionally, clear the form inputs
                                 $('#patient_form')[0].reset();
                             } else {
                                 alert('An error occurred while adding the patient.');
@@ -837,6 +867,124 @@
             // Update the time immediately and then every second
             updateTime();
             setInterval(updateTime, 1000);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstNameInput = document.getElementById('first_name');
+            const surnameInput = document.getElementById('surname');
+            const firstNameSuggestions = document.getElementById('first_name_suggestions');
+            const surnameSuggestions = document.getElementById('surname_suggestions');
+            const dobInput = document.getElementById('dob');
+            const duplicateWarning = document.getElementById('duplicate_warning');
+            const duplicateList = document.getElementById('duplicate_list');
+            const form = document.getElementById('patient_form');
+
+            function debounce(func, timeout = 300) {
+                let timer;
+                return (...args) => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+                };
+            }
+
+            async function fetchSuggestions(field, value, suggestionElement) {
+                if (value.length < 2) {
+                    suggestionElement.innerHTML = '';
+                    return;
+                }
+                try {
+                    const response = await fetch(`/patient/suggestions?${field}=${encodeURIComponent(value)}`);
+                    const data = await response.json();
+                    suggestionElement.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(patient => {
+                            const div = document.createElement('div');
+                            div.textContent = `${patient.first_name} ${patient.surname} (${patient.dob || 'No DOB'})`;
+                            div.addEventListener('click', () => {
+                                firstNameInput.value = patient.first_name;
+                                surnameInput.value = patient.surname;
+                                if (patient.dob) dobInput.value = patient.dob.split(' ')[0];
+                                suggestionElement.innerHTML = '';
+                                checkForDuplicates();
+                            });
+                            suggestionElement.appendChild(div);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            }
+
+            async function checkForDuplicates() {
+                const firstName = firstNameInput.value.trim();
+                const surname = surnameInput.value.trim();
+                const dob = dobInput.value;
+                if (firstName.length < 2 || surname.length < 2) {
+                    duplicateWarning.classList.add('d-none');
+                    return;
+                }
+                try {
+                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+                    const response = await fetch(url);
+                    const duplicates = await response.json();
+                    if (duplicates.length > 0) {
+                        duplicateList.innerHTML = '';
+                        duplicates.forEach(patient => {
+                            const li = document.createElement('li');
+                            li.textContent = `${patient.first_name} ${patient.surname} (DOB: ${patient.dob || 'N/A'}, Contact: ${patient.contact_number || 'N/A'})`;
+                            duplicateList.appendChild(li);
+                        });
+                        duplicateWarning.classList.remove('d-none');
+                    } else {
+                        duplicateWarning.classList.add('d-none');
+                    }
+                } catch (error) {
+                    console.error('Error checking for duplicates:', error);
+                }
+            }
+
+            firstNameInput.addEventListener('input', debounce(() => {
+                fetchSuggestions('first_name', firstNameInput.value.trim(), firstNameSuggestions);
+                checkForDuplicates();
+            }));
+
+            surnameInput.addEventListener('input', debounce(() => {
+                fetchSuggestions('surname', surnameInput.value.trim(), surnameSuggestions);
+                checkForDuplicates();
+            }));
+
+            dobInput.addEventListener('change', debounce(checkForDuplicates));
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== firstNameInput && e.target !== surnameInput) {
+                    firstNameSuggestions.innerHTML = '';
+                    surnameSuggestions.innerHTML = '';
+                }
+            });
+
+            // form.addEventListener('submit', async function(e) {
+            //     e.preventDefault();
+            //     const firstName = firstNameInput.value.trim();
+            //     const surname = surnameInput.value.trim();
+            //     const dob = dobInput.value;
+            //     try {
+            //         let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+            //         if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+            //         const response = await fetch(url);
+            //         const duplicates = await response.json();
+            //         if (duplicates.length > 0) {
+            //             duplicateWarning.classList.remove('d-none');
+            //             alert('Duplicate patient exists. Please select the existing patient or change the details.');
+            //             return; // Do NOT submit
+            //         }
+            //         form.submit();
+            //     } catch (error) {
+            //         console.error('Error during final duplicate check:', error);
+            //         form.submit();
+            //     }
+            // });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

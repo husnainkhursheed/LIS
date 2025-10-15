@@ -391,7 +391,7 @@
                     </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="note" class="form-label">Notes</label>
+                            <label for="note" class="form-label">Report Notes</label>
                             <textarea name="note" id="note" cols="30" rows="5" class="form-control">{{ $hematologyStatus->note ?? '' }}</textarea>
                             {{-- <input type="text" id="test_number" name="test_number" class="form-control form-control-sm" value="ABC123" readonly /> --}}
                         </div>
@@ -1312,15 +1312,16 @@
                                                         href="{{ route('profile.index') }}" target="blank"> <span
                                                             class="badge bg-info text-white"> All Items</span> </a></label>
                                                     <select name="profiles[]" id="profiles"
-                                                        class="js-example-basic-multiple form-control" multiple>
+                                                        class="js-example-basic form-control" >
                                                         {{-- {{dd($sample->sensitivityResults);}} --}}
-                                                        @php
+                                                        {{-- @php
                                                             $sensitivityResult = $sample->sensitivityResults->first();
                                                             $sensitivityProfilesArray = $sensitivityResult ? json_decode($sensitivityResult->sensitivity_profiles) : [];
-                                                        @endphp
+                                                        @endphp --}}
                                                         @foreach ($senstivityprofiles as $profile)
                                                             <option value="{{ $profile->id }}"
-                                                                {{ in_array($profile->id, $sensitivityProfilesArray) ? 'selected' : '' }}>
+                                                                {{-- {{ in_array($profile->id, $sensitivityProfilesArray) ? 'selected' : '' }} --}}
+                                                                >
                                                                 {{ $profile->name }}</option>
                                                         @endforeach
                                                     </select>
@@ -1346,52 +1347,55 @@
                                             {{-- {{dd($sensitivityData)}} --}}
 
                                             @if (!empty($sensitivityData))
-                                                @foreach ($sensitivityData as $profile)
-                                                    <div class="form-group">
-                                                        <label for="microorganism">Microorganism:</label>
-                                                        <input type="text" name="microorganism" class="form-control"
-                                                            value="{{ $profile->microorganism }}">
-                                                    </div>
-
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Antibiotics</th>
-                                                                <th>{{ getSensitivityUnitByMicroorganism($profile->microorganism) }}</th>
-                                                                <th>Sensitive</th>
-                                                                <th>Resistant</th>
-                                                                <th>Intermediate</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($profile->items as $item)
+                                                @foreach ($sensitivityData as $profileIndex => $profile)
+                                                    <div class="sensitivity-group">
+                                                        <button type="button" class="remove-sensitivity-group btn btn-danger btn-sm mb-2 float-end">Remove</button>
+                                                        <div class="form-group">
+                                                            <label for="microorganism_{{ $profileIndex }}">Microorganism:</label>
+                                                            <input type="text" name="microorganism[{{ $profileIndex }}]" class="form-control"
+                                                                value="{{ $profile->microorganism }}">
+                                                        </div>
+                                                        <table class="table table-bordered">
+                                                            <thead>
                                                                 <tr>
-                                                                    <td>{{ $item->antibiotic }}</td>
-                                                                    <td><input type="text" name="mic"
-                                                                            class="form-control"
-                                                                            value="{{ $item->mic }}"></td>
-                                                                    <td>
-                                                                        <input type="radio"
-                                                                            name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}"
-                                                                            value="sensitive"
-                                                                            {{ $item->sensitivity === 'sensitive' ? 'checked' : '' }}>
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="radio"
-                                                                            name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}"
-                                                                            value="resistant"
-                                                                            {{ $item->sensitivity === 'resistant' ? 'checked' : '' }}>
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="radio"
-                                                                            name="sensitivity_{{ $profile->microorganism }}_{{ $item->antibiotic }}"
-                                                                            value="intermediate"
-                                                                            {{ $item->sensitivity === 'intermediate' ? 'checked' : '' }}>
-                                                                    </td>
+                                                                    <th>Antibiotics</th>
+                                                                    <th>{{ getSensitivityUnitByMicroorganism($profile->microorganism) }}</th>
+                                                                    <th>Sensitive</th>
+                                                                    <th>Resistant</th>
+                                                                    <th>Intermediate</th>
                                                                 </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($profile->items as $itemIndex => $item)
+                                                                    <tr>
+                                                                        <td>{{ $item->antibiotic }}</td>
+                                                                        <td>
+                                                                            <input type="text" name="mic[{{ $profileIndex }}][{{ $itemIndex }}]"
+                                                                                class="form-control" value="{{ $item->mic }}">
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="radio"
+                                                                                name="sensitivity[{{ $profileIndex }}][{{ $itemIndex }}]"
+                                                                                value="sensitive"
+                                                                                {{ $item->sensitivity === 'sensitive' ? 'checked' : '' }}>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="radio"
+                                                                                name="sensitivity[{{ $profileIndex }}][{{ $itemIndex }}]"
+                                                                                value="resistant"
+                                                                                {{ $item->sensitivity === 'resistant' ? 'checked' : '' }}>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="radio"
+                                                                                name="sensitivity[{{ $profileIndex }}][{{ $itemIndex }}]"
+                                                                                value="intermediate"
+                                                                                {{ $item->sensitivity === 'intermediate' ? 'checked' : '' }}>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 @endforeach
                                             @endif
                                         </div>
@@ -2962,20 +2966,17 @@
                     console.log('Please select report type');
 
                     var reportData = [];
-                    $('#reportContainer .form-group').each(function() {
+                    $('#reportContainer .sensitivity-group').each(function() {
 
                         var microorganism = $(this).find('input[type="text"]').val();
                         console.log(microorganism);
                         // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
                         var items = [];
 
-                        $(this).next('table').find('tbody tr').each(function() {
-                            // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];
+                         $(this).find('table tbody tr').each(function() {
                             var antibiotic = $(this).find('td:first').text();
                             var mic = $(this).find('input[type="text"]').val();
-                            var sensitivity = $(this).find('input[type="radio"]:checked')
-                                .val();
-
+                            var sensitivity = $(this).find('input[type="radio"]:checked').val();
                             items.push({
                                 antibiotic: antibiotic,
                                 mic: mic,
@@ -3612,44 +3613,47 @@
                         profile_ids: selectedProfiles
                     },
                     success: function(data) {
+                        let sensitivityIndex = $('#reportContainer .sensitivity-group').length;
                         var reportHtml = '';
                         data.forEach(function(profile) {
                             reportHtml += `
-                            <div class="form-group">
-                                <label for="microorganism_${profile.id}">Microorganism:</label>
-                                <input type="text" name="microorganism[${profile.id}]" class="form-control" value="${profile.name}">
-                            </div>
-                        `;
-                            reportHtml += `
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Antibiotics</th>
-                                        <th>${profile.unit}</th>
-                                        <th>Sensitive</th>
-                                        <th>Resistant</th>
-                                        <th>Intermediate</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                        `;
+                            <div class="sensitivity-group">
+                                <button type="button" class="remove-sensitivity-group btn btn-danger btn-sm mb-2 float-end">Remove</button>
+                                <div class="form-group">
+                                    <label for="microorganism_${sensitivityIndex}">Microorganism:</label>
+                                    <input type="text" name="microorganism[${sensitivityIndex}]" class="form-control" value="${profile.name}">
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Antibiotics</th>
+                                            <th>${profile.unit}</th>
+                                            <th>Sensitive</th>
+                                            <th>Resistant</th>
+                                            <th>Intermediate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
                             profile.sensitivity_values.forEach(function(item) {
                                 reportHtml += `
                                 <tr>
                                     <td>${item.antibiotic}</td>
-                                    <td><input type="text" name="mic[${item.id}]" class="form-control"></td>
-                                    <td><input type="radio" name="sensitivity[${item.id}]" value="sensitive"></td>
-                                    <td><input type="radio" name="sensitivity[${item.id}]" value="resistant"></td>
-                                    <td><input type="radio" name="sensitivity[${item.id}]" value="intermediate"></td>
+                                    <td><input type="text" name="mic[${sensitivityIndex}][${item.id}]" class="form-control"></td>
+                                    <td><input type="radio" name="sensitivity[${sensitivityIndex}][${item.id}]" value="sensitive"></td>
+                                    <td><input type="radio" name="sensitivity[${sensitivityIndex}][${item.id}]" value="resistant"></td>
+                                    <td><input type="radio" name="sensitivity[${sensitivityIndex}][${item.id}]" value="intermediate"></td>
                                 </tr>
-                            `;
+                                `;
                             });
                             reportHtml += `
-                                </tbody>
-                            </table>
-                        `;
+                                    </tbody>
+                                </table>
+                            </div>
+                            `;
+                            sensitivityIndex++;
                         });
-                        $('#reportContainer').html(reportHtml);
+                        $('#reportContainer').append(reportHtml);
                     }
                 });
             } else {
@@ -3660,7 +3664,7 @@
         $(document).on('click', '#saveReportButton', function() {
             // $('#saveReportButton').click(function() {
             var reportData = [];
-            $('#reportContainer .form-group').each(function() {
+            $('#reportContainer .sensitivity-group').each(function() {
 
                 var microorganism = $(this).find('input[type="text"]').val();
                 console.log(microorganism);
@@ -3668,7 +3672,7 @@
                 var items = [];
 
                 $(this).next('table').find('tbody tr').each(function() {
-                    // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];
+                    // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];3
                     var antibiotic = $(this).find('td:first').text();
                     var mic = $(this).find('input[type="text"]').val();
                     var sensitivity = $(this).find('input[type="radio"]:checked').val();
@@ -3700,6 +3704,11 @@
             //         alert('Report saved successfully');
             //     }
             // });
+        });
+
+        // Remove sensitivity group on button click
+        $(document).on('click', '.remove-sensitivity-group', function() {
+            $(this).closest('.sensitivity-group').remove();
         });
 
 
