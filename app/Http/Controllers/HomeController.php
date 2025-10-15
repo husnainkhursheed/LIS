@@ -112,8 +112,6 @@ class HomeController extends Controller
             $profileTests = collect();
             $profileDepartments = collect();
 
-            // dd($sample->testProfiles[0]->tests);
-
             // Fetch profile tests and their departments
             foreach ($sample->testProfiles as $profile) {
                 $profileTests = $profileTests->merge($profile->tests()->get());
@@ -123,6 +121,14 @@ class HomeController extends Controller
                     $profileDepartments = $profileDepartments->merge(
                         $profile->departments->pluck('department')
                     );
+                }
+                // Handle subprofiles recursively
+                $allSubProfiles = getSubProfilesRecursive($profile);
+                foreach ($allSubProfiles as $subProfile) {
+                    $profileTests = $profileTests->merge($subProfile->tests()->get());
+                    if ($subProfile->departments) {
+                        $profileDepartments = $profileDepartments->merge($subProfile->departments->pluck('department'));
+                    }
                 }
             }
 

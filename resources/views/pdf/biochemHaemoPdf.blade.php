@@ -157,17 +157,17 @@
         <tr>
             <th colspan="4">
                 @php
-                // Assuming $sample->tests is a collection or array of test objects
-                $testNames = $tests->pluck('name')->implode(', ');
-                $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
-                // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
-                $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
-                                    $query->where('department', $reporttype);
-                                })->with('tests')->pluck('name')->implode(', ');
+                    // Assuming $sample->tests is a collection or array of test objects
+                    $testNames = $tests->pluck('name')->implode(', ');
+                    $individualtests = $sample->tests()->where('department', $reporttype)->pluck('name')->implode(', ');
+                    // $sampleprofiles = $sample->testProfiles()->pluck('name')->implode(', ');
+                    $sampleprofiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttype) {
+                                        $query->where('department', $reporttype);
+                                    })->with('tests')->pluck('name')->implode(', ');
 
-            @endphp
+                @endphp
 
-            <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+                <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
             </th>
         </tr>
         <tr>
@@ -178,20 +178,161 @@
                 <span style="white-space: nowrap;"><strong>Comments: </strong>{{$hematologyStatus->note ?? ''}} </span>
             </td>
         </tr>
+        <tr>
+            <td colspan="4">
+                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+            </td>
+        </tr>
 
 
-        <tr class="bg-blue">
+        {{-- <tr class="bg-blue">
             <th>NAME OF TEST</th>
             <th>RESULTS</th>
             <th>FLAG</th>
             <th>REFERENCE RANGE</th>
-        </tr>
+        </tr> --}}
     </thead>
     <tbody>
-        @foreach ($categorizedTests as $profileId => $profileData)
+         @foreach($categorizedTests as $profileId => $mainProfile)
+            <tr id="{{ $profileId }}">
+                <td colspan="4"><strong>{{ $mainProfile['name'] }}</strong></td>
+            </tr>
+
+            @foreach($mainProfile['subprofiles'] as $subprofile)
+                <tr><td colspan="4"><strong>{{ $subprofile['name'] }}</strong></td></tr>
+                <tr colspan="4" class="bg-blue">
+                    <td>NAME OF TEST</td>
+                    <td>RESULTS</td>
+                    <td>FLAG</td>
+                    <td>REFERENCE RANGE</td>
+                </tr>
+                @foreach($subprofile['tests'] as $index => $test)
+                    @php
+                        $testReport = $testReports
+                            ->where('test_id', $test->id)
+                            ->where('sample_id', $sample->id)
+                            ->first();
+                        $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                        $description = $biochemHaemoResults->description ?? $test->name;
+                        $testResults = $biochemHaemoResults->test_results ?? '';
+                        $testNote = $biochemHaemoResults->test_notes ?? '';
+                        $methodology = $test->methodology ?? '';
+                        $flag = $biochemHaemoResults->flag ?? '';
+                        $background = '';
+
+                        if ($flag == 'Normal') {
+                            $background = 'color:#40bb82';
+                        } elseif ($flag == 'High') {
+                            $background = 'color:red';
+                        } elseif ($flag == 'Low') {
+                            $background = 'color:red';
+                        }
+
+                        $referenceRange = '';
+
+                        if ($test->reference_range == 'basic_ref') {
+                            $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '') . ' ' . ($test->basic_unit_value_ref_range ?? '');
+                        } elseif ($test->reference_range == 'optional_ref') {
+                            $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . ' '. ($test->male_unit_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? ''). ' '. ($test->female_unit_value_ref_range ?? '');
+                        } elseif ($test->reference_range == 'no_manual_tag') {
+                            $referenceRange = ($test->nomanualvalues_ref_range ?? '');
+                        }
+                    @endphp
+
+
+                    <tr>
+                        <td><small>{{ $description }}</small>
+                            @if ($testNote)
+                                <br><small>({{ $testNote }})</small>
+                            @endif
+                        </td>
+
+                        <td ><small>{{ $testResults }}</td></small>
+                        <td>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot"><small>{{ $flag }}</small></span>
+                        </td>
+                        <td style="text-align: left"><small>{!! $referenceRange !!}</small>
+                            @if ($methodology)
+                                <br><small>({{ $methodology }})</small>
+                            @endif
+                        </td>
+
+                    </tr>
+
+                @endforeach
+                {{-- <tr>
+                    <td colspan="4">
+                        <hr style="border: 0.5px solid #caced1; margin: 10px 0;">
+                    </td>
+                </tr> --}}
+            @endforeach
+            @if(!empty($mainProfile['tests']))
+                <tr colspan="4" class="bg-blue">
+                    <td>NAME OF TEST</td>
+                    <td>RESULTS</td>
+                    <td>FLAG</td>
+                    <td>REFERENCE RANGE</td>
+                </tr>
+
+                @foreach($mainProfile['tests'] as $index => $test)
+                    @php
+                        $testReport = $testReports
+                            ->where('test_id', $test->id)
+                            ->where('sample_id', $sample->id)
+                            ->first();
+                        $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                        $description = $biochemHaemoResults->description ?? $test->name;
+                        $testResults = $biochemHaemoResults->test_results ?? '';
+                        $testNote = $biochemHaemoResults->test_notes ?? '';
+                        $methodology = $test->methodology ?? '';
+                        $flag = $biochemHaemoResults->flag ?? '';
+                        $background = '';
+
+                        if ($flag == 'Normal') {
+                            $background = 'color:#40bb82';
+                        } elseif ($flag == 'High') {
+                            $background = 'color:red';
+                        } elseif ($flag == 'Low') {
+                            $background = 'color:red';
+                        }
+
+                        $referenceRange = '';
+
+                        if ($test->reference_range == 'basic_ref') {
+                            $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '') . ' ' . ($test->basic_unit_value_ref_range ?? '');
+                        } elseif ($test->reference_range == 'optional_ref') {
+                            $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . ' '. ($test->male_unit_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? ''). ' '. ($test->female_unit_value_ref_range ?? '');
+                        } elseif ($test->reference_range == 'no_manual_tag') {
+                            $referenceRange = ($test->nomanualvalues_ref_range ?? '');
+                        }
+                    @endphp
+
+
+                    <tr>
+                        <td>{{ $description }}
+                            @if ($testNote)
+                                <br><small>({{ $testNote }})</small>
+                            @endif
+                        </td>
+
+                        <td >{{ $testResults }}</td>
+                        <td>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
+                        </td>
+                        <td style="text-align: left">{!! $referenceRange !!}
+                            @if ($methodology)
+                                <br><small>({{ $methodology }})</small>
+                            @endif
+                        </td>
+
+                    </tr>
+                @endforeach
+            @endif
+
+        @endforeach
+        {{-- @foreach ($categorizedTests as $profileId => $profileData)
             <tr id="{{ $profileId }}">
                 <td colspan="4"><strong>{{ $profileData['name'] }}</strong></td>
-                {{-- <small>{{ $profileData['test_note'] }}</small> --}}
             </tr>
             @foreach ($profileData['tests'] as $index => $test)
                 @php
@@ -254,7 +395,7 @@
                 </td>
             </tr>
 
-        @endforeach
+        @endforeach --}}
         <br><br><br>
         <tr>
             <td>

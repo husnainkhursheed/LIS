@@ -50,7 +50,9 @@ class MasterReportExport implements FromCollection, WithTitle, WithHeadings, Wit
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
+
                 // ? Bold the header row and apply background color
+
                 $sheet->getStyle('A1:G1')->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -75,7 +77,9 @@ class MasterReportExport implements FromCollection, WithTitle, WithHeadings, Wit
                     ],
                 ]);
 
+
                 // ? Apply border to entire data range
+
                 $rowCount = count($this->rows) + 1;
                 $sheet->getStyle("A1:G{$rowCount}")->applyFromArray([
                     'borders' => [
@@ -86,14 +90,14 @@ class MasterReportExport implements FromCollection, WithTitle, WithHeadings, Wit
                     ],
                 ]);
 
-                // ? Format 'Total' column as currency
+                // 👉 Format 'Total' column as currency
                 for ($i = 2; $i <= $rowCount; $i++) {
                     $sheet->getStyle("G{$i}")
                         ->getNumberFormat()
                         ->setFormatCode('"$"#,##0.00');
                 }
 
-                // ? Set column widths for better readability
+                // 👉 Set column widths for better readability
                 $columns = ['A' => 15, 'B' => 20, 'C' => 18, 'D' => 15, 'E' => 20, 'F' => 50, 'G' => 12];
                 foreach ($columns as $column => $width) {
                     $sheet->getColumnDimension($column)->setWidth($width);

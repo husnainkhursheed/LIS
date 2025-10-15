@@ -205,6 +205,49 @@ class SampleController extends Controller
          $sample->tests()->attach($request->test_requested);
          $sample->testProfiles()->attach($request->test_profiles);
 
+         // Get the list of test IDs from the request
+         $newTestIds = $request->test_requested ?? [];
+         $newProfileIds = $request->test_profiles ?? [];
+
+         // Find the current test IDs attached to the sample
+         $currentTestIds = $sample->tests()->pluck('tests.id')->toArray();
+         $currentProfileIds = $sample->testProfiles()->pluck('test_profiles.id')->toArray();
+
+         // Identify the test IDs that are being removed
+         $removedTestIds = array_diff($currentTestIds, $newTestIds);
+         $removedProfileIds = array_diff($currentProfileIds, $newProfileIds);
+        //  dd($removedProfileIds);
+
+        //  dd($getProfileTestsforremove[0]->tests());
+        //  dd($getProfileTestsforremove);
+
+         // Delete the `test_reports` associated with the removed tests
+         if (!empty($removedTestIds)) {
+             TestReport::where('sample_id', $sample->id)
+                 ->whereIn('test_id', $removedTestIds)
+                 ->delete();
+         }
+         if (!empty($removedProfileIds)) {
+            foreach ($removedProfileIds as $key => $value) {
+                $getProfileTestsforremove = TestProfile::find($value);
+                // dd($getProfileTestsforremove);
+                $getProfileTestsforremove = $getProfileTestsforremove->tests()->pluck('tests.id')->toArray();
+
+                 TestReport::where('sample_id', $sample->id)
+                     ->whereIn('test_id', $getProfileTestsforremove)
+                     ->delete();
+            }
+
+         }
+
+         // Detach the existing tests and profiles from the sample
+         $sample->tests()->detach();
+         $sample->testProfiles()->detach();
+
+         // Attach the updated tests to the sample
+         $sample->tests()->attach($request->test_requested);
+         $sample->testProfiles()->attach($request->test_profiles);
+
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');
         return redirect()->back();
@@ -226,19 +269,42 @@ class SampleController extends Controller
         // Get the selected profile IDs from the request
         $selectedProfileIds = $request->input('profiles');
 
-        // Retrieve all the tests that belong to the selected profiles
-        $selectedProfiles = TestProfile::with('tests')->whereIn('id', $selectedProfileIds)->get();
-        $testIdsInSelectedProfiles = $selectedProfiles->pluck('tests.*.id')->flatten()->unique();
+        // Helper function to recursively get all tests from a profile and its subprofiles
+        $getAllProfileTests = function ($profile) use (&$getAllProfileTests) {
+            $tests = $profile->tests()->pluck('tests.id');
+            foreach ($profile->subProfiles as $subProfile) {
+                $tests = $tests->merge($getAllProfileTests($subProfile));
+            }
+            return $tests;
+        };
 
-        // Find other profiles that also contain these tests
-        $otherProfilesWithSameTests = TestProfile::whereHas('tests', function($query) use ($testIdsInSelectedProfiles) {
-            $query->whereIn('tests.id', $testIdsInSelectedProfiles); // Fully qualify the 'id' here
-        })->whereNotIn('test_profiles.id', $selectedProfileIds)->get();
+        // Retrieve all the tests that belong to the selected profiles and their subprofiles
+        $selectedProfiles = TestProfile::with('tests', 'subProfiles.tests')->whereIn('id', $selectedProfileIds)->get();
+        $testIdsInSelectedProfiles = collect();
+        foreach ($selectedProfiles as $profile) {
+            $testIdsInSelectedProfiles = $testIdsInSelectedProfiles->merge($getAllProfileTests($profile));
+        }
+        $testIdsInSelectedProfiles = $testIdsInSelectedProfiles->flatten()->unique();
 
-        // Return the IDs of the profiles to hide
-        $profilesToHide = $otherProfilesWithSameTests->pluck('id')->toArray();
+        // Find other profiles (and their subprofiles) that also contain these tests
+        $otherProfiles = TestProfile::with('tests', 'subProfiles.tests')
+            ->whereNotIn('id', $selectedProfileIds)
+            ->get();
 
-        return response()->json(['profilesToHide' => $profilesToHide ,'testIdsInSelectedProfiles' => $testIdsInSelectedProfiles]);
+        $profilesToHide = [];
+        foreach ($otherProfiles as $profile) {
+            // Get all tests for this profile and its subprofiles
+            $profileTestIds = $getAllProfileTests($profile)->flatten()->unique();
+            // If there is any overlap, add to hide list
+            if ($profileTestIds->intersect($testIdsInSelectedProfiles)->isNotEmpty()) {
+                $profilesToHide[] = $profile->id;
+            }
+        }
+
+        return response()->json([
+            'profilesToHide' => $profilesToHide,
+            'testIdsInSelectedProfiles' => $testIdsInSelectedProfiles->values()
+        ]);
     }
 
 }

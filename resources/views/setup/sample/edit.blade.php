@@ -52,9 +52,9 @@
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
-                                hidden required />
+                                hidden  />
                                 <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
-                                disabled required />
+                                disabled  />
                         </div>
                     </div> --}}
                     <div class="col-md-6">
@@ -757,6 +757,18 @@
             //     }
             // });
         });
+        // document.querySelector("#lead-image-input").addEventListener("change", function() {
+        //     var preview = document.querySelector("#lead-img");
+        //     var file = document.querySelector("#lead-image-input").files[0];
+        //     console.log(file);
+        //     var reader = new FileReader();
+        //     reader.addEventListener("load", function() {
+        //         preview.src = reader.result;
+        //     }, false);
+        //     if (file) {
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
