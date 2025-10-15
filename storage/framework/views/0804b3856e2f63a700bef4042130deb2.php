@@ -1,8 +1,8 @@
-@extends('layouts.master')
-@section('title')
+
+<?php $__env->startSection('title'); ?>
         Patient
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css" rel="stylesheet"
         type="text/css" />
@@ -28,23 +28,16 @@
             background-color: #f5f5f5;
         }
     </style>
-@endsection
-@section('content')
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Assets
-        @endslot
-        @slot('title')
-            Patient
-        @endslot
-    @endcomponent --}}
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    
     <div class="row">
 
-        @include('layouts.notification')
+        <?php echo $__env->make('layouts.notification', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
         <div class="col-lg-12">
 
-            {{-- <div class="card "> --}}
+            
 
                 <div class="col">
                     <div class="card p-3 bg-white">
@@ -58,23 +51,23 @@
                         <div class="col my-2">
                             <nav class="navbar">
                                 <div class="container-fluid p-0">
-                                    <form class="d-flex" method="GET" action="{{ route('patient.index') }}">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
                                         <input class="form-control me-2 main-search" type="search" placeholder="Search"
-                                            aria-label="Search" name="search" value="{{ request('search') }}">
+                                            aria-label="Search" name="search" value="<?php echo e(request('search')); ?>">
                                         <button class="btn search-btn" type="submit">Search</button>
                                     </form>
-                                    <form class="d-flex" method="GET" action="{{ route('patient.index') }}">
-                                        <input type="hidden" name="search" value="{{ request('search') }}">
+                                    <form class="d-flex" method="GET" action="<?php echo e(route('patient.index')); ?>">
+                                        <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
                                             <option value="first_name"
-                                                {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Name</option>
+                                                <?php echo e(request('sort_by') == 'first_name' ? 'selected' : ''); ?>>Name</option>
                                             <option value="contact_number"
-                                                {{ request('sort_by') == 'contact_number' ? 'selected' : '' }}>Contact Number
+                                                <?php echo e(request('sort_by') == 'contact_number' ? 'selected' : ''); ?>>Contact Number
                                             </option>
                                             <option value="sex"
-                                                {{ request('sort_by') == 'sex' ? 'selected' : '' }}>Sex
+                                                <?php echo e(request('sort_by') == 'sex' ? 'selected' : ''); ?>>Sex
                                             </option>
                                         </select>
                                     </form>
@@ -93,44 +86,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($patients as $patient)
+                                <?php $__currentLoopData = $patients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $patient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td>{{ $patient->first_name.' '.$patient->surname }}</td>
-                                        <td>{{ $patient->contact_number }}</td>
-                                        <td>{{ $patient->sex }}</td>
-                                        <td>{{ $patient->is_active == 1 ? 'Active' : 'InActive' }}</td>
+                                        <td><?php echo e($patient->first_name.' '.$patient->surname); ?></td>
+                                        <td><?php echo e($patient->contact_number); ?></td>
+                                        <td><?php echo e($patient->sex); ?></td>
+                                        <td><?php echo e($patient->is_active == 1 ? 'Active' : 'InActive'); ?></td>
 
 
-                                        {{-- <td>
-                                            <a href="#showModal" data-bs-toggle="modal">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/report.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                            <a href="">
-                                                <span class="logo-sm">
-                                                    <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                        height="20">
-                                                </span>
-                                            </a>
-                                        </td> --}}
+                                        
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="edit-item-btn" data-id="{{ $patient->id }}"  href="#showModal" data-bs-toggle="modal"><i
+                                                    <a class="edit-item-btn" data-id="<?php echo e($patient->id); ?>"  href="#showModal" data-bs-toggle="modal"><i
                                                             class="ri-pencil-fill align-bottom text-muted"></i></a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                    <a class="remove-item-btn" data-id="{{ $patient->id }}"  data-bs-toggle="modal"
+                                                    <a class="remove-item-btn" data-id="<?php echo e($patient->id); ?>"  data-bs-toggle="modal"
                                                         href="#deleteRecordModal">
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
@@ -138,86 +112,48 @@
                                             </ul>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            @if ($patients->previousPageUrl())
+                            <?php if($patients->previousPageUrl()): ?>
                                 <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="{{ $patients->previousPageUrl() }}" aria-label="Previous">
+                                    <a class="page-link" href="<?php echo e($patients->previousPageUrl()); ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                         <span class="sr-only">Previous</span>
                                     </a>
                                 </li>
-                            @else
+                            <?php else: ?>
                                 <li class="page-item previousPageUrl disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
                                 </li>
-                            @endif
+                            <?php endif; ?>
 
-                            @for ($page = 1; $page <= $patients->lastPage(); $page++)
-                                <li class="page-item {{ $patients->currentPage() == $page ? 'active' : '' }}">
+                            <?php for($page = 1; $page <= $patients->lastPage(); $page++): ?>
+                                <li class="page-item <?php echo e($patients->currentPage() == $page ? 'active' : ''); ?>">
                                     <a class="page-link"
-                                        href="{{ $patients->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                                        href="<?php echo e($patients->url($page)); ?>"><?php echo e(str_pad($page, 2, '0', STR_PAD_LEFT)); ?></a>
                                 </li>
-                            @endfor
+                            <?php endfor; ?>
 
-                            @if ($patients->nextPageUrl())
+                            <?php if($patients->nextPageUrl()): ?>
                                 <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="{{ $patients->nextPageUrl() }}" aria-label="Next">
+                                    <a class="page-link" href="<?php echo e($patients->nextPageUrl()); ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                         <span class="sr-only">Next</span>
                                     </a>
                                 </li>
-                            @else
+                            <?php else: ?>
                                 <li class="page-item nextPageUrl disabled">
                                     <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
                                 </li>
-                            @endif
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>
 
-                {{-- <div class="card-body">
-                    <table id="buttons-datatables" class="display table table-bordered" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Telephone</th>
-                                <th>Sex</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($patients as $patient)
-                                <tr>
-                                    <td>{{ $patient->first_name }}</td>
-                                    <td>{{ $patient->contact_number }}</td>
-                                    <td>{{ $patient->sex }}</td>
-                                    <td>{{ $patient->is_active == 1 ? 'Active' : 'InActive' }}</td>
-
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $patient->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $patient->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            @endforeach
-                    </table>
-                </div> --}}
-            {{-- </div> --}}
+                
+            
         </div>
     </div>
 
@@ -228,8 +164,8 @@
                 <h5 class="modal-title" id="exampleModalLabel">Add Patient</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
             </div>
-            <form class="tablelist-form" id="leadtype_form" action="{{ url("/patient") }}" method="Post" autocomplete="off">
-                @csrf
+            <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <input type="hidden" id="id-field" />
                     <div class="row g-3">
@@ -335,8 +271,8 @@
             </div>
         </div>
     </div>
-@endsection
-@section('script')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('script'); ?>
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -352,9 +288,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
     <script>
         jQuery(document).ready(function($) {
         // When the document is ready, attach a click event to the "Edit" button
@@ -362,7 +298,7 @@
             // Get the ID from the data attribute
 
             var itemId = $(this).data('id');
-            var url = '{{ url("/patient") }}' + '/' + itemId + '/edit';
+            var url = '<?php echo e(url("/patient")); ?>' + '/' + itemId + '/edit';
 
             $.ajax({
                     url: url, // Adjust the route as needed
@@ -409,7 +345,7 @@
                         var form = $('#leadtype_form');
 
                         // Update the form action (assuming the form has an ID of 'your-form-id')
-                        $('#leadtype_form').attr('action', '{{ url("/patient") }}/' + itemId);
+                        $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>/' + itemId);
 
 
 
@@ -433,7 +369,7 @@
 
             // Change the button text
             $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '{{ url("/patient") }}');
+            $('#leadtype_form').attr('action', '<?php echo e(url("/patient")); ?>');
             // if ( $('#patch').length) {
             //     $('#patch').remove();
             // }
@@ -611,13 +547,13 @@
                 const duplicates = await response.json();
 
                 if (duplicates.length > 0) {
-                    $('#duplicate_warning').removeClass('d-none');
-                    alert('Duplicate patient exists. Please select the existing patient or change the details.');
-                    return; // Do NOT submit
+                    if (!confirm('Potential duplicates found. Are you sure you want to create a new patient?')) {
+                        return;
+                    }
                 }
 
                 // Proceed with form submission
-                // form.submit();
+                form.submit();
             } catch (error) {
                 console.error('Error during final duplicate check:', error);
                 form.submit();
@@ -627,5 +563,7 @@
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/two0/public_html/resources/views/setup/patient.blade.php ENDPATH**/ ?>

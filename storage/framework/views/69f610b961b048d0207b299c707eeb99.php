@@ -1,8 +1,7 @@
-@extends('layouts.master')
-@section('title')
+<?php $__env->startSection('title'); ?>
     Edit Sample
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <!--datatable css-->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <!--datatable responsive css-->
@@ -10,8 +9,8 @@
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 <style>
     /* #liveTime {
         font-size: 24px;
@@ -24,44 +23,29 @@
         background-color: #eff2f7;
     }
 </style>
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Dashboard
-        @endslot
-        @slot('title')
-            Add Sample
-        @endslot
-    @endcomponent --}}
-    @include('layouts.notification')
+    
+    <?php echo $__env->make('layouts.notification', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <div class="row">
 
 
     </div>
-    {{-- start here  --}}
+    
 
     <div class="container m-auto">
         <div class="form-wrap">
             <header class="header">
                 <h1 id="title" class="text-center">Edit Sample</h1>
             </header>
-            <form class="tablelist-form" id="leadtype_form" action="{{ url('/sample/' . $sample->id) }}" method="Post" autocomplete="off" >
-            @csrf
-            @method('PUT')
+            <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url('/sample/' . $sample->id)); ?>" method="Post" autocomplete="off" >
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
                 <div class="row">
-                    {{-- <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="test_number" class="form-label">Test Number</label>
-                                <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
-                                hidden  />
-                                <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
-                                disabled  />
-                        </div>
-                    </div> --}}
+                    
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
                             <input type="text" id="access_number" name="access_number" disabled  class="form-control"
-                                required value="{{ $sample->access_number }}" />
+                                required value="<?php echo e($sample->access_number); ?>" />
                         </div>
                     </div>
                 </div>
@@ -71,19 +55,19 @@
                          <div class="form-group">
                             <label for="collected_date" class="form-label">Collected Date</label>
                             <input type="date" id="collected_date" name="collected_date" class="form-control"
-                                required value="{{ $sample->collected_date }}" />
+                                required value="<?php echo e($sample->collected_date); ?>" />
                         </div>
                   </div>
                     <div class="col-md-6">
                          <div class="form-group">
                             <label for="received_date" class="form-label">Received Date </label>
-                            <input type="date" class="form-control" id="received_date" name="received_date" value="{{ $sample->received_date }}"/>
+                            <input type="date" class="form-control" id="received_date" name="received_date" value="<?php echo e($sample->received_date); ?>"/>
                         </div>
                      </div>
                     <div class="col-md-6">
                          <div class="form-group">
                             <label for="received_date" class="form-label">Time </label>
-                            <input type="text" class="form-control"  value="{{ $sample->received_time }}"/>
+                            <input type="text" class="form-control"  value="<?php echo e($sample->received_time); ?>"/>
                         </div>
                      </div>
                 </div>
@@ -95,13 +79,13 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalPatient"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
-                                            @foreach ($patients as $patient)
-                                            @php
+                                            <?php $__currentLoopData = $patients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $patient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
                                                 $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
-                                            @endphp
-                                                <option value="{{ $patient->id }}" {{ $sample->patient_id == $patient->id ? 'selected' : ''}}>
-                                                    {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
-                                            @endforeach
+                                            ?>
+                                                <option value="<?php echo e($patient->id); ?>" <?php echo e($sample->patient_id == $patient->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($patient->first_name .' '. $patient->surname .' '. $dateOfBirth); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                         </div>
                     </div>
@@ -111,10 +95,10 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalDoctor"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="doctor_id" id="doctor_id">
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}" {{ $sample->doctor_id == $doctor->id ? 'selected' : ''}}>
-                                        {{ $doctor->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $doctors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doctor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($doctor->id); ?>" <?php echo e($sample->doctor_id == $doctor->id ? 'selected' : ''); ?>>
+                                        <?php echo e($doctor->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -127,10 +111,10 @@
                                 data-bs-toggle="modal" data-bs-target="#showModalInstitution"
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="institution_id" id="institution_id">
-                                @foreach ($institutions as $institution)
-                                <option value="{{ $institution->id }}" {{ $sample->institution_id == $institution->id ? 'selected' : ''}}>
-                                    {{ $institution->name }}</option>
-                            @endforeach
+                                <?php $__currentLoopData = $institutions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $institution): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($institution->id); ?>" <?php echo e($sample->institution_id == $institution->id ? 'selected' : ''); ?>>
+                                    <?php echo e($institution->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -138,57 +122,50 @@
                         <div class="form-group">
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
-                                {{-- <option selected>Choose Institution</option> --}}
-                                <option value="Patient" {{ $sample->bill_to == 'Patient' ? 'selected' : ''}}>Patient</option>
-                                <option value="Doctor"  {{ $sample->bill_to == 'Doctor' ? 'selected' : ''}}>Doctor</option>
-                                <option value="Other"   {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
+                                
+                                <option value="Patient" <?php echo e($sample->bill_to == 'Patient' ? 'selected' : ''); ?>>Patient</option>
+                                <option value="Doctor"  <?php echo e($sample->bill_to == 'Doctor' ? 'selected' : ''); ?>>Doctor</option>
+                                <option value="Other"   <?php echo e($sample->bill_to == 'Other' ? 'selected' : ''); ?>>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                {{-- <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control">{{ $sample->notes }}</textarea>
-                        </div>
-                    </div>
-                </div> --}}
+                
 
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_profiles" class="form-label">Test Profiles</label>
                             <select class="js-example-basic-multiple" name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()"  multiple="multiple">
-                                @foreach ($test_profiles as $test)
-                                    <option value="{{ $test->id }}"  @foreach ($sample->testProfiles as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
-                                        {{ $test->name .' '. $test->cost }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $test_profiles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($test->id); ?>"  <?php $__currentLoopData = $sample->testProfiles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stest): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php echo e($stest->id == $test->id ? 'selected' : ''); ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> data-cost="<?php echo e($test->cost); ?>">
+                                        <?php echo e($test->name .' '. $test->cost); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost_profile" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" value="{{ $sample->profiles_total_cost }}" >
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" value="<?php echo e($sample->profiles_total_cost); ?>" >
                         </div>
                     </div>
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Test Requested</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
-                                @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
-                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($test->id); ?>"  <?php $__currentLoopData = $sample->tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stest): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php echo e($stest->id == $test->id ? 'selected' : ''); ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> data-cost="<?php echo e($test->cost); ?>">
+                                        <?php echo e($test->name .' '. $test->specimen_type .' '. $test->cost); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="total_cost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost" id="total_cost" value="{{ $sample->indvidualtests_total_cost }}" >
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" value="<?php echo e($sample->indvidualtests_total_cost); ?>" >
                         </div>
                     </div>
                 </div>
@@ -200,7 +177,7 @@
                     </div>
                     <div class="col-md-2 p-0">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" value="{{ $sample->grand_total_cost }}" >
+                            <input type="text" class="form-control" name="grand_total" id="grand_total" value="<?php echo e($sample->grand_total_cost); ?>" >
                         </div>
                     </div>
                 </div>
@@ -217,7 +194,7 @@
     </div>
 
 
-    {{-- end  --}}
+    
 
     <!--patient-modal-->
     <div class="modal fade" id="showModalPatient" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -229,8 +206,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/patient") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -241,19 +218,14 @@
                                     <input type="text" id="first_name" name="first_name"
                                         class="form-control"
                                         placeholder="Enter First Name" required />
-                                    <div id="first_name_suggestions" class="autocomplete-suggestions"></div>
-
                                 </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="surname" class="form-label">Surname</label>
                                     <input type="text" id="surname" name="surname" class="form-control"
                                     placeholder="Enter surname" required />
-                                    <div id="surname_suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -291,11 +263,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <div id="duplicate_warning" class="alert alert-warning d-none">
-                                <p>Potential duplicate patients found:</p>
-                                <ul id="duplicate_list"></ul>
-                                <p>Do you want to proceed with creating a new patient?</p>
-                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -311,7 +278,7 @@
     </div>
     <!-- end Modal -->
 
-    {{-- DOCTOR MODEL --}}
+    
     <div class="modal fade" id="showModalDoctor" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -321,8 +288,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/doctor") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/doctor")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -334,9 +301,7 @@
                                         class="form-control"
                                         placeholder="Enter Doctor’s Name" required />
                                 </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
@@ -396,9 +361,9 @@
             </div>
         </div>
     </div>
-    {{-- end model  --}}
+    
 
-    {{-- insitution model  --}}
+    
     <div class="modal fade" id="showModalInstitution" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -408,8 +373,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/institution") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="leadtype_form" action="<?php echo e(url("/institution")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -421,9 +386,7 @@
                                         class="form-control"
                                         placeholder="Enter Institution Name" required />
                                 </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
@@ -483,11 +446,11 @@
             </div>
         </div>
     </div>
-    {{-- end model  --}}
-@endsection
+    
+<?php $__env->stopSection(); ?>
 
-@section('script')
-    {{-- <script src="{{ URL::asset('build/js/app.js') }}"></script> --}}
+<?php $__env->startSection('script'); ?>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
@@ -501,9 +464,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
 
 
     <script>
@@ -524,10 +487,10 @@
 
             // Send AJAX request to the server
             $.ajax({
-                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                url: '<?php echo e(route("checkTestsInProfiles")); ?>', // Your route here
                 type: 'POST',
                 data: {
-                    _token: '{{ csrf_token() }}',
+                    _token: '<?php echo e(csrf_token()); ?>',
                     profiles: selectedProfiles
                 },
                 success: function(response) {
@@ -586,11 +549,6 @@
                 $('#grand_total').val(grandTotal.toFixed(2));
             }
 
-            // Recalculate grand total whenever either field changes
-            $('#total_cost, #total_cost_profile').on('input', function() {
-                calculateGrandTotal();
-            });
-
             // $('#total_cost_profile').val(total_cost_profile.toFixed(2));
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
@@ -640,136 +598,8 @@
         //     }
         // });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const firstNameInput = document.getElementById('first_name');
-            const surnameInput = document.getElementById('surname');
-            const firstNameSuggestions = document.getElementById('first_name_suggestions');
-            const surnameSuggestions = document.getElementById('surname_suggestions');
-            const dobInput = document.getElementById('dob');
-            const duplicateWarning = document.getElementById('duplicate_warning');
-            const duplicateList = document.getElementById('duplicate_list');
-            const form = document.getElementById('patient_form');
-
-            function debounce(func, timeout = 300) {
-                let timer;
-                return (...args) => {
-                    clearTimeout(timer);
-                    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-                };
-            }
-
-            async function fetchSuggestions(field, value, suggestionElement) {
-                if (value.length < 2) {
-                    suggestionElement.innerHTML = '';
-                    return;
-                }
-                try {
-                    const response = await fetch(`/patient/suggestions?${field}=${encodeURIComponent(value)}`);
-                    const data = await response.json();
-                    suggestionElement.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(patient => {
-                            const div = document.createElement('div');
-                            div.textContent = `${patient.first_name} ${patient.surname} (${patient.dob || 'No DOB'})`;
-                            div.addEventListener('click', () => {
-                                firstNameInput.value = patient.first_name;
-                                surnameInput.value = patient.surname;
-                                if (patient.dob) dobInput.value = patient.dob.split(' ')[0];
-                                suggestionElement.innerHTML = '';
-                                checkForDuplicates();
-                            });
-                            suggestionElement.appendChild(div);
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error fetching suggestions:', error);
-                }
-            }
-
-            async function checkForDuplicates() {
-                const firstName = firstNameInput.value.trim();
-                const surname = surnameInput.value.trim();
-                const dob = dobInput.value;
-                if (firstName.length < 2 || surname.length < 2) {
-                    duplicateWarning.classList.add('d-none');
-                    return;
-                }
-                try {
-                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
-                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
-                    const response = await fetch(url);
-                    const duplicates = await response.json();
-                    if (duplicates.length > 0) {
-                        duplicateList.innerHTML = '';
-                        duplicates.forEach(patient => {
-                            const li = document.createElement('li');
-                            li.textContent = `${patient.first_name} ${patient.surname} (DOB: ${patient.dob || 'N/A'}, Contact: ${patient.contact_number || 'N/A'})`;
-                            duplicateList.appendChild(li);
-                        });
-                        duplicateWarning.classList.remove('d-none');
-                    } else {
-                        duplicateWarning.classList.add('d-none');
-                    }
-                } catch (error) {
-                    console.error('Error checking for duplicates:', error);
-                }
-            }
-
-            firstNameInput.addEventListener('input', debounce(() => {
-                fetchSuggestions('first_name', firstNameInput.value.trim(), firstNameSuggestions);
-                checkForDuplicates();
-            }));
-
-            surnameInput.addEventListener('input', debounce(() => {
-                fetchSuggestions('surname', surnameInput.value.trim(), surnameSuggestions);
-                checkForDuplicates();
-            }));
-
-            dobInput.addEventListener('change', debounce(checkForDuplicates));
-
-            document.addEventListener('click', (e) => {
-                if (e.target !== firstNameInput && e.target !== surnameInput) {
-                    firstNameSuggestions.innerHTML = '';
-                    surnameSuggestions.innerHTML = '';
-                }
-            });
-
-            // form.addEventListener('submit', async function(e) {
-            //     e.preventDefault();
-            //     const firstName = firstNameInput.value.trim();
-            //     const surname = surnameInput.value.trim();
-            //     const dob = dobInput.value;
-            //     try {
-            //         let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
-            //         if (dob) url += `&dob=${encodeURIComponent(dob)}`;
-            //         const response = await fetch(url);
-            //         const duplicates = await response.json();
-            //         if (duplicates.length > 0) {
-            //             duplicateWarning.classList.remove('d-none');
-            //             alert('Duplicate patient exists. Please select the existing patient or change the details.');
-            //             return; // Do NOT submit
-            //         }
-            //         form.submit();
-            //     } catch (error) {
-            //         console.error('Error during final duplicate check:', error);
-            //         form.submit();
-            //     }
-            // });
-        });
-        // document.querySelector("#lead-image-input").addEventListener("change", function() {
-        //     var preview = document.querySelector("#lead-img");
-        //     var file = document.querySelector("#lead-image-input").files[0];
-        //     console.log(file);
-        //     var reader = new FileReader();
-        //     reader.addEventListener("load", function() {
-        //         preview.src = reader.result;
-        //     }, false);
-        //     if (file) {
-        //         reader.readAsDataURL(file);
-        //     }
-        // });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/two0/public_html/resources/views/setup/sample/edit.blade.php ENDPATH**/ ?>

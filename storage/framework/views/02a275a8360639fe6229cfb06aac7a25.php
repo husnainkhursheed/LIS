@@ -137,22 +137,22 @@
 </head>
 
 <body>
-    @php
+    <?php
         $procedureResults = $sample ? $sample->procedureResults : [];
-    @endphp
+    ?>
 
     <table class="order-details">
         <thead>
             <tr>
                 <th width="50%" style="vertical-align: top;">
-                    <img src="{{ public_path('build/images/logo-lis.png') }}" alt="Logo" style="height: 70px;"><br>
+                    <img src="<?php echo e(public_path('build/images/logo-lis.png')); ?>" alt="Logo" style="height: 70px;"><br>
                     <span style="display: block; font-weight:normal;, font-size: 15px; margin-top: 1px;"><small>ISO:15189
                             Accredited</small></span>
                     <span style="margin-top: 8px; display: inline-block;"><small>71 Eastern Main Road Barataria, San
                             Juan Trinidad and Tobago</small></span>
                 </th>
                 <th width="50%" class="text-end company-data">
-                    <img height="50" src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code"><br><br>
+                    <img height="50" src="data:image/png;base64,<?php echo e(base64_encode($qrCode)); ?>" alt="QR Code"><br><br>
                     <span style="display: inline-block; text-align: left; width: 100%;"><strong>TEL: </strong>(868)
                         229-8643 or 316-1383</span><br>
                     <span style="display: inline-block; text-align: left; width: 100%;"><strong>Mail:
@@ -165,41 +165,29 @@
                     <table>
                         <tr>
                             <td style="font-weight: normal"><strong>Name:</strong>
-                                {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
-                            <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
+                                <?php echo e($sample->patient->first_name ?? ''); ?> <?php echo e($sample->patient->surname ?? ''); ?></td>
+                            <td style="font-weight: normal"><strong>Sex:</strong> <?php echo e($sample->patient->sex ?? ''); ?></td>
                         </tr>
-                        @php
+                        <?php
                             $dob = \Carbon\Carbon::parse($sample->patient->dob);
                             $age = $dob->age;
-                        @endphp
+                        ?>
                         <tr>
                             <td style="font-weight: normal"><strong>DOB:</strong>
-                                {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
-                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} </td>
+                                <?php echo e(\Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y')); ?></td>
+                            <td style="font-weight: normal"><strong>Age:</strong> <?php echo e($age); ?> </td>
                         </tr>
                         <tr>
-                            <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}
+                            <td style="font-weight: normal"><strong>Ordering Dr:</strong> <?php echo e($sample->doctor->name); ?>
+
                             </td>
                         </tr>
                         <tr>
                             <td style="font-weight: normal"><strong>Institution:</strong>
-                                {{ $sample->institution->name }}</td>
+                                <?php echo e($sample->institution->name); ?></td>
                         </tr>
                     </table>
-                    {{-- <span style="font-weight: normal"><strong>Name:</strong>
-                        {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}
-                    </span><span style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</span><br><br>
-
-                    <span style="font-weight: normal"><strong> DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</span>@php
-                        $dob = \Carbon\Carbon::parse($sample->patient->dob);
-                        $age = $dob->age;
-                    @endphp
-                    <span style="font-weight: normal">
-                    <strong>Age:</strong> {{ $age }} yrs</span> <br><br>
-                    <span style="font-weight: normal">
-                    <strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</span> <br><br>
-                    <span style="font-weight: normal">
-                    <strong>Institution:</strong> {{ $sample->institution->name }}</span> <br> --}}
+                    
 
                 </th>
                 <th width="60%" colspan="6" class="company-data" style="vertical-align: top;">
@@ -207,19 +195,19 @@
                     <table>
                         <tr>
                             <td style="font-weight: normal"><strong>Collection Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y') }}</td>
+                                <?php echo e(\Carbon\Carbon::parse($sample->collected_date)->format('d-M-Y')); ?></td>
                             <td style="font-weight: normal"><strong>Lab Ref:</strong>
-                                {{ $sample->access_number ?? '' }}</td>
+                                <?php echo e($sample->access_number ?? ''); ?></td>
                         </tr>
                         <tr>
                             <td style="font-weight: normal"><strong>Received Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->received_date)->format('d-M-Y') }}</td>
+                                <?php echo e(\Carbon\Carbon::parse($sample->received_date)->format('d-M-Y')); ?></td>
                             <td style="font-weight: normal"><strong>Sample ID:</strong>
-                                {{ $sample->access_number ?? '' }}</td>
+                                <?php echo e($sample->access_number ?? ''); ?></td>
                         </tr>
                         <tr>
                             <td style="font-weight: normal"><strong>Report Date:</strong>
-                                {{ \Carbon\Carbon::parse($sample->created_at)->format('d-M-Y') }}</td>
+                                <?php echo e(\Carbon\Carbon::parse($sample->created_at)->format('d-M-Y')); ?></td>
                         </tr>
                     </table>
                 </th>
@@ -232,7 +220,7 @@
             </tr>
             <tr>
                 <th colspan="7" style="">
-                    @php
+                    <?php
                         // Assuming $sample->tests is a collection or array of test objects
                         $testNames = $tests->pluck('name')->implode(', ');
                         $individualtests = $sample
@@ -250,25 +238,26 @@
                             ->pluck('name')
                             ->implode(', ');
 
-                    @endphp
+                    ?>
                     <span style="white-space: nowrap;"><strong>Request:
-                            {{ $sampleprofiles . ', ' . $individualtests }}</strong></span>
+                            <?php echo e($sampleprofiles . ', ' . $individualtests); ?></strong></span>
                 </th>
             </tr>
             <tr>
-                @php
+                <?php
                     $urinalysisStatus = $sample->departmentStatus('3');
-                @endphp
+                ?>
                 <td colspan="4">
-                    <span style="white-space: nowrap;"><strong>Comments: </strong> {{ $urinalysisStatus->note ?? '' }}
+                    <span style="white-space: nowrap;"><strong>Comments: </strong> <?php echo e($urinalysisStatus->note ?? ''); ?>
+
                     </span>
                 </td>
             </tr>
         </thead>
         <tbody>
-            {{-- {{dd($tests)}} --}}
-            @foreach ($tests as $index => $test)
-                @php
+            
+            <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php
                     $testReport = $testReports->where('test_id', $test->id)->where('sample_id', $sample->id)->first();
                     if (empty($testReport)) {
                         continue;
@@ -284,10 +273,10 @@
                     // ? $sample->sensitivityResults[0]->sensitivity_profiles
                     // : [];
 
-                @endphp
-            @endforeach
-            {{-- {{dd($urinalysisMicrobiologyResults)}} --}}
-            @if (!empty($urinalysisMicrobiologyResults))
+                ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            
+            <?php if(!empty($urinalysisMicrobiologyResults)): ?>
                 <tr style="margin:0px;" width="100%">
                 <tr>
                     <th class="text-start heading" colspan="7" style="border-top: 2px solid #3d90ca; ">
@@ -310,11 +299,11 @@
                             </tr>
                         </thead>
                         <tbody >
-                            @foreach ($categorizedTests as $profileId => $profileData)
-                                <tr id="{{ $profileId }}">
-                                    <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
+                            <?php $__currentLoopData = $categorizedTests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $profileId => $profileData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr id="<?php echo e($profileId); ?>">
+                                    <td colspan="7"><strong>* <?php echo e($profileData['name']); ?></strong></td>
                                 </tr>
-                                @php
+                                <?php
                                     $microscopyTests = collect();
                                     $chemicalAnalysisTests = collect();
                                     // dd($profileData['tests']);
@@ -327,9 +316,9 @@
                                         }
                                     }
                                     // dd($microscopyTests);
-                                @endphp
-                                @foreach ($chemicalAnalysisTests as $index => $test)
-                                    @php
+                                ?>
+                                <?php $__currentLoopData = $chemicalAnalysisTests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $testReport = $testReports
                                             ->where('test_id', $test->id)
                                             ->where('sample_id', $sample->id)
@@ -368,25 +357,20 @@
                                         } elseif ($test->reference_range == 'no_manual_tag') {
                                             $referenceRange = $test->nomanualvalues_ref_range ?? '';
                                         }
-                                    @endphp
+                                    ?>
                                     <tr>
-                                        <td> <small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }} </small></td>
-                                        <td> <small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }}</small></td>
+                                        <td> <small><?php echo e($urinalysisMicrobiologyResults->description ?? $test->name); ?> </small></td>
+                                        <td> <small><?php echo e($urinalysisMicrobiologyResults->test_results ?? ''); ?></small></td>
                                         <td>
-                                            <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                                                data-key="t-hot"><small>{{ $flag }}</small></span>
+                                            <span class="badge badge-pill flag-badge" style="<?php echo e($background); ?>"
+                                                data-key="t-hot"><small><?php echo e($flag); ?></small></span>
                                         </td>
-                                        <td ><small>{!! $referenceRange !!}</small></td>
+                                        <td ><small><?php echo $referenceRange; ?></small></td>
                                     </tr>
-                                @endforeach
-                            @endforeach
-                            {{-- @if (!$urinalysisMicrobiologyResults->s_gravity && !$urinalysisMicrobiologyResults->ph && !$urinalysisMicrobiologyResults->leucocytes && !$urinalysisMicrobiologyResults->nitrite && !$urinalysisMicrobiologyResults->glucose && !$urinalysisMicrobiologyResults->ketones && !$urinalysisMicrobiologyResults->proteins && !$urinalysisMicrobiologyResults->urobilinogen && !$urinalysisMicrobiologyResults->bilirubin && !$urinalysisMicrobiologyResults->blood && !$urinalysisMicrobiologyResults->colour && !$urinalysisMicrobiologyResults->appearance) --}}
-                            {{-- <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                @endif --}}
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            
+                            
 
 
 
@@ -407,18 +391,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @if (!$urinalysisMicrobiologyResults->white_cells && !$urinalysisMicrobiologyResults->epith_cells && !$urinalysisMicrobiologyResults->red_cells && !$urinalysisMicrobiologyResults->casts && !$urinalysisMicrobiologyResults->crystals && !$urinalysisMicrobiologyResults->bacteria && !$urinalysisMicrobiologyResults->yeast && !$urinalysisMicrobiologyResults->trichomonas)
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                            
+                            <?php $__currentLoopData = $categorizedTests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $profileId => $profileData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr id="<?php echo e($profileId); ?>">
+                                    <td colspan="7"><strong>* <?php echo e($profileData['name']); ?></strong></td>
                                 </tr>
-                                @endif --}}
-                            @foreach ($categorizedTests as $profileId => $profileData)
-                                <tr id="{{ $profileId }}">
-                                    <td colspan="7"><strong>* {{ $profileData['name'] }}</strong></td>
-                                </tr>
-                                @php
+                                <?php
                                     $microscopyTests = collect();
                                     $chemicalAnalysisTests = collect();
                                     // dd($profileData['tests']);
@@ -431,9 +409,9 @@
                                         }
                                     }
                                     // dd($microscopyTests);
-                                @endphp
-                                @foreach ($microscopyTests as $index => $test)
-                                    @php
+                                ?>
+                                <?php $__currentLoopData = $microscopyTests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $testReport = $testReports
                                             ->where('test_id', $test->id)
                                             ->where('sample_id', $sample->id)
@@ -478,38 +456,38 @@
                                         } elseif ($test->reference_range == 'no_manual_tag') {
                                             $referenceRange = $test->nomanualvalues_ref_range ?? '';
                                         }
-                                    @endphp
+                                    ?>
                                     <tr>
                                         <td style="vertical-align: top;">
-                                             <small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }} </small> </td>
+                                             <small><?php echo e($urinalysisMicrobiologyResults->description ?? $test->name); ?> </small> </td>
                                         <td style="vertical-align: top;">
-                                             <small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }} </small></td>
+                                             <small><?php echo e($urinalysisMicrobiologyResults->test_results ?? ''); ?> </small></td>
                                         <td style="vertical-align: top;">
-                                            <span class="badge badge-pill flag-badge" style="{{ $background }}"
-                                                data-key="t-hot"> <small>{{ $flag }} </small></span>
+                                            <span class="badge badge-pill flag-badge" style="<?php echo e($background); ?>"
+                                                data-key="t-hot"> <small><?php echo e($flag); ?> </small></span>
                                         </td>
-                                        <td style="vertical-align: top;"> <small>{!! $referenceRange !!} </small></td>
+                                        <td style="vertical-align: top;"> <small><?php echo $referenceRange; ?> </small></td>
                                     </tr>
-                                @endforeach
-                            @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </tbody>
                     </table>
                 </td>
                 </tr>
-            @endif
+            <?php endif; ?>
 
         </tbody>
     </table>
 
-    @php
+    <?php
         // dd($procedureResults);
         $filteredResults = collect($procedureResults)->filter(function ($item) {
             return !empty($item->specimen_note);
         });
-    @endphp
+    ?>
 
-    @if ($filteredResults->isNotEmpty())
+    <?php if($filteredResults->isNotEmpty()): ?>
         <br>
         <br>
         <table class="table-wrapper">
@@ -525,26 +503,27 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($procedureResults as $key => $value)
+                <?php $__currentLoopData = $procedureResults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
-                        <td width="10%" style="vertical-align: top;"><strong>{{ $value->procedure ?? '' }}</strong>
+                        <td width="10%" style="vertical-align: top;"><strong><?php echo e($value->procedure ?? ''); ?></strong>
                         </td>
                         <td style="vertical-align: top;">
-                            {!! nl2br(e($value->specimen_note ?? '')) !!}
+                            <?php echo nl2br(e($value->specimen_note ?? '')); ?>
+
                         </td>
                     </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-        {{-- <div class="page-break"></div> --}}
-    @endif
+        
+    <?php endif; ?>
 
 
-    @php
+    <?php
         $sensitivityResult = $sample->sensitivityResults->first();
         $data = $sensitivityResult ? json_decode($sensitivityResult->sensitivity, true) : [];
-    @endphp
-    @if ($data)
+    ?>
+    <?php if($data): ?>
         <br>
         <br>
         <table class="table-wrapper">
@@ -554,11 +533,11 @@
                         SENSITIVITY
                     </th>
                 </tr>
-                @foreach ($data as $i)
+                <?php $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr class="bg-blue">
                         <th width="40%">MICROORGANISM &nbsp; ISOLATED</th>
                         <th>ANTIBIOTICS </th>
-                        <th>{{ getSensitivityUnitByMicroorganism($i['microorganism']) }}</th>
+                        <th><?php echo e(getSensitivityUnitByMicroorganism($i['microorganism'])); ?></th>
                         <th>SENSITIVE</th>
                         <th>RESISTANT</th>
                         <th>INTERMEDIATE</th>
@@ -567,29 +546,29 @@
 
             <tbody>
 
-                @foreach ($i['items'] as $index => $item)
-                    <tr style="{{ $index === 0 ? '' : '' }}">
-                        <td>{{ $index === 0 ? $i['microorganism'] : '' }}</td>
-                        <td>{{ $item['antibiotic'] }}</td>
-                        <td class="text-center">{{ $item['mic'] }}</td>
+                <?php $__currentLoopData = $i['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <tr style="<?php echo e($index === 0 ? '' : ''); ?>">
+                        <td><?php echo e($index === 0 ? $i['microorganism'] : ''); ?></td>
+                        <td><?php echo e($item['antibiotic']); ?></td>
+                        <td class="text-center"><?php echo e($item['mic']); ?></td>
                         <td class="text-center"><input type="radio"
-                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
-                                {{ $item['sensitivity'] === 'sensitive' ? 'checked' : '' }}></td>
+                                name="<?php echo e($i['microorganism']); ?>-<?php echo e($item['antibiotic']); ?>-sensitivity"
+                                <?php echo e($item['sensitivity'] === 'sensitive' ? 'checked' : ''); ?>></td>
                         <td class="text-center"><input type="radio"
-                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
-                                {{ $item['sensitivity'] === 'resistant' ? 'checked' : '' }}></td>
+                                name="<?php echo e($i['microorganism']); ?>-<?php echo e($item['antibiotic']); ?>-sensitivity"
+                                <?php echo e($item['sensitivity'] === 'resistant' ? 'checked' : ''); ?>></td>
                         <td class="text-center"><input type="radio"
-                                name="{{ $i['microorganism'] }}-{{ $item['antibiotic'] }}-sensitivity"
-                                {{ $item['sensitivity'] === 'intermediate' ? 'checked' : '' }}></td>
+                                name="<?php echo e($i['microorganism']); ?>-<?php echo e($item['antibiotic']); ?>-sensitivity"
+                                <?php echo e($item['sensitivity'] === 'intermediate' ? 'checked' : ''); ?>></td>
                     </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
             </tbody>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </table>
     <br>
     <br>
-    @endif
+    <?php endif; ?>
     <table class="table-wrapper">
         <thead>
             <tr>
@@ -600,19 +579,21 @@
         </thead>
         <tbody>
             <tr>
-                <td>{!! nl2br(e($sensitivityResult->review ?? '')) !!}</td>
+                <td><?php echo nl2br(e($sensitivityResult->review ?? '')); ?></td>
             </tr>
             <br><br><br>
             <tr>
                 <td>
                     <strong>Validated by: </strong>
-                    {{ $validated_by }}
+                    <?php echo e($validated_by); ?>
+
                 </td>
             </tr>
             <tr>
                 <td colspan="4">
                     <strong>Electronically signed by: </strong>
-                    {{ $signed_by }}
+                    <?php echo e($signed_by); ?>
+
                 </td>
             </tr>
         </tbody>
@@ -645,3 +626,4 @@
 </body>
 
 </html>
+<?php /**PATH /home/two0/public_html/resources/views/pdf/urinalysisMicrobiologyPdf.blade.php ENDPATH**/ ?>

@@ -1,8 +1,7 @@
-@extends('layouts.master')
-@section('title')
+<?php $__env->startSection('title'); ?>
     Add Sample
-@endsection
-@section('css')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('css'); ?>
     <!--datatable css-->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <!--datatable responsive css-->
@@ -10,8 +9,8 @@
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
     <style>
         .time {
             font-size: 18px;
@@ -24,43 +23,10 @@
             background-color: #eff2f7;
         }
     </style>
-    {{-- @component('components.breadcrumb')
-        @slot('li_1')
-            Dashboard
-        @endslot
-        @slot('title')
-            Add Sample
-        @endslot
-    @endcomponent --}}
-    @include('layouts.notification')
-    {{-- <div class="row">
-        @if (Session::has('message'))
-            <div class="alert {{ Session::get('alert-class', 'alert-info') }}" id="alert-message">
-                {{ Session::get('message') }}
-            </div>
-
-            <script>
-                // Add a timer to automatically dismiss the alert after 5 seconds (adjust as needed)
-                setTimeout(function() {
-                    document.getElementById('alert-message').style.display = 'none';
-                }, 5000); // 5000 milliseconds = 5 seconds
-            </script>
-        @endif
-        @error('name')
-            <div class="alert alert-danger" id="alert-message">
-                {{ $message }}
-            </div>
-
-            <script>
-                // Add a timer to automatically dismiss the alert after 5 seconds (adjust as needed)
-                setTimeout(function() {
-                    document.getElementById('alert-message').style.display = 'none';
-                }, 5000); //
-            </script>
-        @enderror
-
-    </div> --}}
-    {{-- start here  --}}
+    
+    <?php echo $__env->make('layouts.notification', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    
+    
 
     <div class="container m-auto">
         <div class="form-wrap">
@@ -71,26 +37,18 @@
                 <h1 id="title" class="text-center">New Sample
                 </h1>
             </header>
-            {{-- <div id="liveTime"></div> --}}
-            <form class="" id="leadtype_form" action="{{ url('/sample') }}" method="Post" autocomplete="off" >
-            @csrf
+            
+            <form class="" id="leadtype_form" action="<?php echo e(url('/sample')); ?>" method="Post" autocomplete="off" >
+            <?php echo csrf_field(); ?>
 
                 <div class="row">
-                    {{-- <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="test_number" class="form-label">Test Number</label>
-                                <input type="text" id="test_number" name="test_number" value="{{$test_number}}" class="form-control"
-                                hidden required />
-                                <input type="text" id="" name="" value="{{$test_number}}" class="form-control"
-                                disabled  />
-                        </div>
-                    </div> --}}
+                    
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  value="{{$access_number}}" hi class="form-control"
+                            <input type="text" id="access_number" name="access_number"  value="<?php echo e($access_number); ?>" hi class="form-control"
                                hidden required />
-                            <input type="text" id="" name="" value="{{$access_number}}" class="form-control"
+                            <input type="text" id="" name="" value="<?php echo e($access_number); ?>" class="form-control"
                             disabled  />
                         </div>
                     </div>
@@ -101,13 +59,13 @@
                          <div class="form-group">
                             <label for="collected_date" class="form-label">Collected Date</label>
                             <input type="date" id="collected_date" name="collected_date" class="form-control"
-                            value="{{ old('collected_date') }}" required />
+                            value="<?php echo e(old('collected_date')); ?>" required />
                         </div>
                   </div>
                     <div class="col-md-6">
                          <div class="form-group">
                             <label for="received_date" class="form-label">Received Date </label>
-                            <input type="date" class="form-control" id="received_date" name="received_date" value="{{ old('received_date') }}"/>
+                            <input type="date" class="form-control" id="received_date" name="received_date" value="<?php echo e(old('received_date')); ?>"/>
                         </div>
                      </div>
                 </div>
@@ -120,13 +78,13 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
                                             <option value=""></option>
-                                            @foreach ($patients as $patient)
-                                                @php
+                                            <?php $__currentLoopData = $patients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $patient): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
                                                     $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
-                                                @endphp
-                                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
-                                                    {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
-                                            @endforeach
+                                                ?>
+                                                <option value="<?php echo e($patient->id); ?>" <?php echo e(old('patient_id') == $patient->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($patient->first_name .' '. $patient->surname .' '. $dateOfBirth); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                         </div>
                     </div>
@@ -137,10 +95,10 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="doctor_id" id="doctor_id">
                                 <option value=""></option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                                        {{ $doctor->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $doctors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doctor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($doctor->id); ?>" <?php echo e(old('doctor_id') == $doctor->id ? 'selected' : ''); ?>>
+                                        <?php echo e($doctor->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -154,10 +112,10 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                             <select class="js-example-basic-multiple form-control" name="institution_id" id="institution_id">
                                 <option value=""></option>
-                                @foreach ($institutions as $institution)
-                                <option value="{{ $institution->id }}" {{ old('institution_id') == $institution->id ? 'selected' : '' }}>
-                                    {{ $institution->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $institutions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $institution): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($institution->id); ?>" <?php echo e(old('institution_id') == $institution->id ? 'selected' : ''); ?>>
+                                    <?php echo e($institution->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -165,31 +123,24 @@
                         <div class="form-group">
                             <label for="institution" class="form-label">Bill</label>
                             <select class="js-example-basic-multiple form-control" name="bill_to" id="bill_to">
-                                {{-- <option selected>Choose Institution</option> --}}
-                                <option value="Patient" {{ old('bill_to') == 'Patient' ? 'selected' : '' }}>Patient</option>
-                                <option value="Doctor" {{ old('bill_to') == 'Doctor' ? 'selected' : '' }}>Doctor</option>
-                                <option value="Other" {{ old('bill_to') == 'Other' ? 'selected' : '' }}>Other</option>
+                                
+                                <option value="Patient" <?php echo e(old('bill_to') == 'Patient' ? 'selected' : ''); ?>>Patient</option>
+                                <option value="Doctor" <?php echo e(old('bill_to') == 'Doctor' ? 'selected' : ''); ?>>Doctor</option>
+                                <option value="Other" <?php echo e(old('bill_to') == 'Other' ? 'selected' : ''); ?>>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                {{-- <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control"></textarea>
-                        </div>
-                    </div>
-                </div> --}}
+                
                 <div class="row">
                     <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_profiles" class="form-label">Test Profiles</label>
                             <select  class="js-example-basic-multiple"   name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()" multiple="multiple">
-                                @foreach ($test_profiles as $item)
-                                            <option value="{{$item->id}}" data-cost="{{ $item->cost }}" {{ (collect(old('test_profiles'))->contains($item->id)) ? 'selected' : '' }}>{{$item->name.' '. $item->cost}}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $test_profiles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($item->id); ?>" data-cost="<?php echo e($item->cost); ?>" <?php echo e((collect(old('test_profiles'))->contains($item->id)) ? 'selected' : ''); ?>><?php echo e($item->name.' '. $item->cost); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -203,11 +154,11 @@
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Individual Tests</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
-                                {{-- {{dd($tests->where('department'!= null))}} --}}
-                                @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}" data-cost="{{ $test->cost }}" {{ (collect(old('test_requested'))->contains($test->id)) ? 'selected' : '' }}>
-                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
-                                @endforeach
+                                
+                                <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($test->id); ?>" data-cost="<?php echo e($test->cost); ?>" <?php echo e((collect(old('test_requested'))->contains($test->id)) ? 'selected' : ''); ?>>
+                                        <?php echo e($test->name .' '. $test->specimen_type .' '. $test->cost); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -229,18 +180,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Row for Grand Total -->
-                <div class="row align-items-center p-0" style="text-align: right">
-                    <div class="col-md-10 form-group mt-2">
-                        <label for="grand_total" class="form-label">Grand Total:</label>
-                    </div>
-                    <div class="col-md-2 p-0">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" >
-                        </div>
-                    </div>
-                </div>
-
 
 
                 <div class="row">
@@ -254,7 +193,7 @@
     </div>
 
 
-    {{-- end  --}}
+    
 
     <!--patient-modal-->
     <div class="modal fade" id="showModalPatient" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -266,8 +205,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="patient_form" action="{{ url("/patient") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="patient_form" action="<?php echo e(url("/patient")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -278,34 +217,28 @@
                                     <input type="text" id="first_name" name="first_name"
                                         class="form-control"
                                         placeholder="Enter First Name" required />
-                                    <div id="first_name_suggestions" class="autocomplete-suggestions"></div>
-
                                 </div>
-
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="surname" class="form-label">Surname</label>
                                     <input type="text" id="surname" name="surname" class="form-control"
                                     placeholder="Enter surname" required />
-                                    <div id="surname_suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="contact_number" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" class="form-control" name="contact_number"
-                                        placeholder="Enter Contact Number"  />
+                                        placeholder="Enter Contact Number" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="dob" class="form-label">DOB</label>
                                     <input type="date" id="dob" name="dob" class="form-control"
-                                        placeholder="Enter Dob"  />
+                                        placeholder="Enter Dob" required />
                                 </div>
                             </div>
 
@@ -329,11 +262,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <div id="duplicate_warning" class="alert alert-warning d-none">
-                                <p>Potential duplicate patients found:</p>
-                                <ul id="duplicate_list"></ul>
-                                <p>Do you want to proceed with creating a new patient?</p>
-                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -349,7 +277,7 @@
     </div>
     <!-- end Modal -->
 
-    {{-- DOCTOR MODEL --}}
+    
     <div class="modal fade" id="showModalDoctor" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -359,8 +287,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="doctor_form" action="{{ url("/doctor") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="doctor_form" action="<?php echo e(url("/doctor")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -372,15 +300,13 @@
                                         class="form-control"
                                         placeholder="Enter Doctor’s Name" required />
                                 </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="email" class="form-label">Email address</label>
                                     <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email"  />
+                                        placeholder="Enter Email" required />
                                 </div>
                             </div>
 
@@ -388,28 +314,28 @@
                                 <div>
                                     <label for="address" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number"  />
+                                    placeholder="Enter Contact Number" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="town" class="form-label">Street name</label>
                                     <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town"  />
+                                        placeholder="Enter Town" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address"  />
+                                        placeholder="Enter Address" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="country" class="form-label">Area</label>
                                     <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area"  />
+                                        placeholder="Enter Area" required />
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -434,9 +360,9 @@
             </div>
         </div>
     </div>
-    {{-- end model  --}}
+    
 
-    {{-- insitution model  --}}
+    
     <div class="modal fade" id="showModalInstitution" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -446,8 +372,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         id="close-modal"></button>
                 </div>
-                <form class="tablelist-form" id="institution_form" action="{{ url("/institution") }}" method="Post" autocomplete="off">
-                    @csrf
+                <form class="tablelist-form" id="institution_form" action="<?php echo e(url("/institution")); ?>" method="Post" autocomplete="off">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
@@ -459,43 +385,41 @@
                                         class="form-control"
                                         placeholder="Enter Institution Name" required />
                                 </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
+                                
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="email" class="form-label">Email address</label>
                                     <input type="email" id="email" name="email" class="form-control"
-                                        placeholder="Enter Email"  />
+                                        placeholder="Enter Email" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="address" class="form-label">Contact Number</label>
                                     <input type="text" id="contact_number" name="contact_number" class="form-control"
-                                    placeholder="Enter Contact Number"  />
+                                    placeholder="Enter Contact Number" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="town" class="form-label">Street name</label>
                                     <input type="text" id="street_name" class="form-control" name="street_name"
-                                        placeholder="Enter Town"  />
+                                        placeholder="Enter Town" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="zip" class="form-label">Second line in address</label>
                                     <input type="text" id="address_line_2" name="address_line_2" class="form-control"
-                                        placeholder="Enter Address"  />
+                                        placeholder="Enter Address" required />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div>
                                     <label for="country" class="form-label">Area</label>
                                     <input type="text" id="area" name="area" class="form-control"
-                                        placeholder="Enter Area"  />
+                                        placeholder="Enter Area" required />
                                 </div>
                             </div>
 
@@ -521,7 +445,7 @@
             </div>
         </div>
     </div>
-    {{-- end model  --}}
+    
 
     <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -542,10 +466,10 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-    {{-- <script src="{{ URL::asset('build/js/app.js') }}"></script> --}}
+<?php $__env->startSection('script'); ?>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
@@ -559,9 +483,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/pages/datatables.init.js')); ?>"></script>
 
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
 
 
     <script>
@@ -621,10 +545,10 @@
 
             // Send AJAX request to the server
             $.ajax({
-                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                url: '<?php echo e(route("checkTestsInProfiles")); ?>', // Your route here
                 type: 'POST',
                 data: {
-                    _token: '{{ csrf_token() }}',
+                    _token: '<?php echo e(csrf_token()); ?>',
                     profiles: selectedProfiles
                 },
                 success: function(response) {
@@ -706,9 +630,6 @@
 
                 $('#grand_total').val(grandTotal.toFixed(2));
             }
-            $('#total_cost, #total_cost_profile').on('input', function() {
-                calculateGrandTotal();
-            });
             calculateGrandTotal();
             $('#test_requested').on('change', function() {
                 let totalCost = 0;
@@ -751,41 +672,23 @@
                 $('#patient_id').select2();
 
                 // Handle form submission via AJAX
-               $('#patient_form').on('submit', async function(e) {
+                $('#patient_form').on('submit', function(e) {
                     e.preventDefault();
 
-                    // Get values
-                    const firstName = $('#first_name').val().trim();
-                    const surname = $('#surname').val().trim();
-                    const dob = $('#dob').val();
-
-                    // Check for duplicates via AJAX
-                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
-                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
-                    try {
-                        const response = await fetch(url);
-                        const duplicates = await response.json();
-                        if (duplicates.length > 0) {
-                            $('#duplicate_warning').removeClass('d-none');
-                            alert('Duplicate patient exists. Please select the existing patient or change the details.');
-                            return; // Do NOT submit
-                        }
-                    } catch (error) {
-                        console.error('Error checking for duplicates:', error);
-                        alert('Error checking for duplicates.');
-                        return;
-                    }
-
-                    // If no duplicates, proceed with AJAX submit
                     $.ajax({
-                        url: '{{ url("/patient") }}',
+                        url: '<?php echo e(url("/patient")); ?>',
                         method: 'POST',
                         data: $(this).serialize(),
                         success: function(response) {
                             if (response.success) {
+                                // Append the new patient to the dropdown
                                 var newOption = new Option(response.patient.first_name, response.patient.id, true, true);
                                 $('#patient_id').append(newOption).trigger('change');
+
+                                // Close the modal
                                 $('#showModalPatient').modal('hide');
+
+                                // Optionally, clear the form inputs
                                 $('#patient_form')[0].reset();
                             } else {
                                 alert('An error occurred while adding the patient.');
@@ -800,7 +703,7 @@
                     e.preventDefault();
 
                     $.ajax({
-                        url: '{{ url("/doctor") }}',
+                        url: '<?php echo e(url("/doctor")); ?>',
                         method: 'POST',
                         data: $(this).serialize(),
                         success: function(response) {
@@ -827,7 +730,7 @@
                     e.preventDefault();
 
                     $.ajax({
-                        url: '{{ url("/institution") }}',
+                        url: '<?php echo e(url("/institution")); ?>',
                         method: 'POST',
                         data: $(this).serialize(),
                         success: function(response) {
@@ -881,124 +784,8 @@
             setInterval(updateTime, 1000);
         });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const firstNameInput = document.getElementById('first_name');
-            const surnameInput = document.getElementById('surname');
-            const firstNameSuggestions = document.getElementById('first_name_suggestions');
-            const surnameSuggestions = document.getElementById('surname_suggestions');
-            const dobInput = document.getElementById('dob');
-            const duplicateWarning = document.getElementById('duplicate_warning');
-            const duplicateList = document.getElementById('duplicate_list');
-            const form = document.getElementById('patient_form');
-
-            function debounce(func, timeout = 300) {
-                let timer;
-                return (...args) => {
-                    clearTimeout(timer);
-                    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-                };
-            }
-
-            async function fetchSuggestions(field, value, suggestionElement) {
-                if (value.length < 2) {
-                    suggestionElement.innerHTML = '';
-                    return;
-                }
-                try {
-                    const response = await fetch(`/patient/suggestions?${field}=${encodeURIComponent(value)}`);
-                    const data = await response.json();
-                    suggestionElement.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(patient => {
-                            const div = document.createElement('div');
-                            div.textContent = `${patient.first_name} ${patient.surname} (${patient.dob || 'No DOB'})`;
-                            div.addEventListener('click', () => {
-                                firstNameInput.value = patient.first_name;
-                                surnameInput.value = patient.surname;
-                                if (patient.dob) dobInput.value = patient.dob.split(' ')[0];
-                                suggestionElement.innerHTML = '';
-                                checkForDuplicates();
-                            });
-                            suggestionElement.appendChild(div);
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error fetching suggestions:', error);
-                }
-            }
-
-            async function checkForDuplicates() {
-                const firstName = firstNameInput.value.trim();
-                const surname = surnameInput.value.trim();
-                const dob = dobInput.value;
-                if (firstName.length < 2 || surname.length < 2) {
-                    duplicateWarning.classList.add('d-none');
-                    return;
-                }
-                try {
-                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
-                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
-                    const response = await fetch(url);
-                    const duplicates = await response.json();
-                    if (duplicates.length > 0) {
-                        duplicateList.innerHTML = '';
-                        duplicates.forEach(patient => {
-                            const li = document.createElement('li');
-                            li.textContent = `${patient.first_name} ${patient.surname} (DOB: ${patient.dob || 'N/A'}, Contact: ${patient.contact_number || 'N/A'})`;
-                            duplicateList.appendChild(li);
-                        });
-                        duplicateWarning.classList.remove('d-none');
-                    } else {
-                        duplicateWarning.classList.add('d-none');
-                    }
-                } catch (error) {
-                    console.error('Error checking for duplicates:', error);
-                }
-            }
-
-            firstNameInput.addEventListener('input', debounce(() => {
-                fetchSuggestions('first_name', firstNameInput.value.trim(), firstNameSuggestions);
-                checkForDuplicates();
-            }));
-
-            surnameInput.addEventListener('input', debounce(() => {
-                fetchSuggestions('surname', surnameInput.value.trim(), surnameSuggestions);
-                checkForDuplicates();
-            }));
-
-            dobInput.addEventListener('change', debounce(checkForDuplicates));
-
-            document.addEventListener('click', (e) => {
-                if (e.target !== firstNameInput && e.target !== surnameInput) {
-                    firstNameSuggestions.innerHTML = '';
-                    surnameSuggestions.innerHTML = '';
-                }
-            });
-
-            // form.addEventListener('submit', async function(e) {
-            //     e.preventDefault();
-            //     const firstName = firstNameInput.value.trim();
-            //     const surname = surnameInput.value.trim();
-            //     const dob = dobInput.value;
-            //     try {
-            //         let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
-            //         if (dob) url += `&dob=${encodeURIComponent(dob)}`;
-            //         const response = await fetch(url);
-            //         const duplicates = await response.json();
-            //         if (duplicates.length > 0) {
-            //             duplicateWarning.classList.remove('d-none');
-            //             alert('Duplicate patient exists. Please select the existing patient or change the details.');
-            //             return; // Do NOT submit
-            //         }
-            //         form.submit();
-            //     } catch (error) {
-            //         console.error('Error during final duplicate check:', error);
-            //         form.submit();
-            //     }
-            // });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
-@endsection
+    <script src="<?php echo e(URL::asset('build/js/pages/select2.init.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/two0/public_html/resources/views/setup/sample/create.blade.php ENDPATH**/ ?>

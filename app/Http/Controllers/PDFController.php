@@ -267,7 +267,7 @@ class PDFController extends Controller
             }
 
             $view = $viewMapping[$reporttype];
-            $qrCode = $this->generateQRCode('https://20.dev.webberz.com/');
+            $qrCode = $this->generateQRCode('https://borderlifemedlab.com/');
             $data['qrCode'] = $qrCode;
             // Generate PDF using Dompdf
             $pdf = PDF::loadView($view, $data);
