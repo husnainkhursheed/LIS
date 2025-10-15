@@ -67,6 +67,7 @@
                                     <th class="rounded-start-3 ">Name</th>
                                     <th>Department</th>
                                     <th>Cost</th>
+                                    <th>Status</th>
                                     <th class="rounded-end-3 ">Action</th>
                                 </tr>
                             </thead>
@@ -83,10 +84,12 @@
                                             @elseif($test->department == 3)
                                                 Urinalysis / Microbiology
                                             @else
-                                                Unknown Department
+                                                Profile Test
                                             @endif
                                         </td>
                                         <td>{{ $test->cost  }}</td>
+                                        <td>{{ $test->is_active == 1 ? 'Active' : 'InActive' }}</td>
+
 
                                         {{-- <td>
                                             <a href="#showModal" data-bs-toggle="modal">
@@ -129,39 +132,39 @@
                             </tbody>
                         </table>
                         <ul class="pagination justify-content-center">
-                            @if ($tests->previousPageUrl())
-                                <li class="page-item previousPageUrl">
-                                    <a class="page-link" href="{{ $tests->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item previousPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
-                                </li>
-                            @endif
+                        @if ($tests->previousPageUrl())
+                            <li class="page-item previousPageUrl">
+                                <a class="page-link" href="{{ $tests->appends(request()->except('page'))->previousPageUrl() }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item previousPageUrl disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                            </li>
+                        @endif
 
-                            @for ($page = 1; $page <= $tests->lastPage(); $page++)
-                                <li class="page-item {{ $tests->currentPage() == $page ? 'active' : '' }}">
-                                    <a class="page-link"
-                                        href="{{ $tests->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
-                                </li>
-                            @endfor
+                        @for ($page = 1; $page <= $tests->lastPage(); $page++)
+                            <li class="page-item {{ $tests->currentPage() == $page ? 'active' : '' }}">
+                                <a class="page-link"
+                                    href="{{ $tests->appends(request()->except('page'))->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                            </li>
+                        @endfor
 
-                            @if ($tests->nextPageUrl())
-                                <li class="page-item nextPageUrl">
-                                    <a class="page-link" href="{{ $tests->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                </li>
-                            @else
-                                <li class="page-item nextPageUrl disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
-                                </li>
-                            @endif
-                        </ul>
+                        @if ($tests->nextPageUrl())
+                            <li class="page-item nextPageUrl">
+                                <a class="page-link" href="{{ $tests->appends(request()->except('page'))->nextPageUrl() }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item nextPageUrl disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                            </li>
+                        @endif
+                    </ul>
                     </div>
                 </div>
                 {{-- <div class="card-body">
@@ -218,10 +221,25 @@
                 </div>
                 <form class="tablelist-form" id="leadtype_form" action="{{ url("/test") }}" method="Post" autocomplete="off">
                     @csrf
+                    {{-- <div class="text-center mb-4">
+                        <h4 class="fw-semibold fs-22">Plans & Pricing</h4>
+                        <p class="text-muted mb-4 fs-15">Simple pricing. No hidden fees. Advanced features for you business.</p>
+
+                        <div class="d-inline-flex">
+                            <ul class="nav nav-pills arrow-navtabs plan-nav rounded mb-3 p-1" id="pills-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold active" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab" aria-selected="true">Profile Test</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-semibold" id="individual-tab" data-bs-toggle="pill" data-bs-target="#individual" type="button" role="tab" aria-selected="false">Individual Test</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> --}}
                     <div class="modal-body">
                         <input type="hidden" id="id-field" />
                         <div class="row g-3">
-                            <div class="col-lg-12">
+                            <div class="col-lg-6">
                                 <div>
                                     <label for="companyname-field"
                                         class="form-label">Name of charge item</label>
@@ -233,6 +251,12 @@
                                     <div class="text-danger">{{$message}}</div>
                                 @enderror --}}
                             </div>
+                            {{-- <div class="col-lg-6" id="is_urine_type_container">
+                                <div>
+                                    <input type="checkbox" id="is_urine_type" name="is_urine_type">
+                                    <label for="is_urine_type" class="form-label">For Urinalysis</label>
+                                </div>
+                            </div> --}}
                             <div class="col-lg-6">
                                 <div>
                                     <label for="department" class="form-label">Department</label>
@@ -244,47 +268,164 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-6" id="urin_test_type_container">
                                 <div>
-                                    <label for="specimen_type" class="form-label">Specimen Type</label>
-                                    <input type="text" id="specimen_type" class="form-control" name="specimen_type"
-                                        placeholder="Enter Specimen Type" required />
+                                    <label for="urin_test_type" class="form-label">Urinalysis Category</label>
+                                    <select class="form-control" name="urin_test_type" id="urin_test_type">
+                                        <option value="">Select</option>
+                                        <option value="1">Chemical Analysis</option>
+                                        <option value="2">Microscopy</option>
+                                        {{-- <option value="3">Urinalysis / Microbiology</option> --}}
+                                    </select>
                                 </div>
                             </div>
+                            {{-- <div class="col-lg-6" id="test_profiles_container">
+                                <div>
+                                    <label for="test_profiles" class="form-label">Profiles</label>
+                                    <select class="form-control" name="test_profiles" id="test_profiles">
+                                        <option value="">Select Profiles</option>
+                                        @foreach ($test_profiles as $item)
+                                            <option value="{{$item->id}}">{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div> --}}
                             <div class="col-lg-6">
+                                <div>
+                                    <label for="specimen_type" class="form-label">Specimen Type<a href=""
+                                data-bs-toggle="modal" data-bs-target="#showModalSpecimenType"
+                                > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                    {{-- <input type="text" id="specimen_type" class="form-control" name="specimen_type"
+                                        placeholder="Enter Specimen Type" required /> --}}
+                                    <select class="js-example-basic-multiple form-control" name="specimen_type" id="specimen_type">
+                                        @foreach ($specimen_types as $specimen_type)
+
+                                            <option value="{{ $specimen_type->id }}">
+                                                {{ $specimen_type->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" id="cost_container">
                                 <div>
                                     <label for="cost" class="form-label">Cost</label>
                                     <input type="number" id="cost" name="cost" class="form-control"
                                         placeholder="Enter Cost" required />
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
                                 <div>
-                                    <label for="reference_range" class="form-label">Reference range</label>
-                                    <input type="text" id="reference_range" name="reference_range" class="form-control"
-                                        placeholder="Enter Reference Range" required />
+                                    <label for="Calculation-Explanation" class="form-label">Methodology</label>
+                                    <textarea name="methodology" id="methodology" class="form-control" cols="30" rows="3"></textarea>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label for="" class="form-label">High value with optional sex</label>
+                            <div class="col-lg-12">
+                                <label for="reference_range" class="form-label">Reference range</label>
                                 <div>
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
+
+                                    <input type="radio" id="basic_ref" name="reference_range"
+                                         required  value="basic_ref" checked/>
+                                        <label for="basic_ref" class="form-label">Basic Reference range</label>
+                                    <input type="radio" id="optional_ref" class="ms-4" name="reference_range"
+                                         required value="optional_ref" />
+                                    <label for="optional_ref" class="form-label">Reference range with optional sex</label>
+                                    <input type="radio" id="no_manual_tag" class="ms-4" name="reference_range"
+                                         required value="no_manual_tag" />
+                                    <label for="no_manual_tag" class="form-label">No / Manual Tag</label>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label for="" class="form-label">Low value with optional sex </label>
+                            <div class="row" id="basicValues">
+                                {{-- <label for="" class="form-label">High value with optional sex</label> --}}
+                                {{-- <div> --}}
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
+                                            <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
+                                                placeholder="Enter Low Value"  />
+                                        </div>
+                                    </div>
+                                        {{-- <label for="male" class="form-label">High Value</label> --}}
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="basic_high_value_ref_range" class="form-label">High Value</label>
+                                            <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
+                                                placeholder="Enter High Value"  />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="basic_unit_value_ref_range" class="form-label">Unit</label>
+                                            <input type="text" id="basic_unit_value_ref_range" class="form-control" name="basic_unit_value_ref_range"
+                                                placeholder="Enter unit"  />
+                                        </div>
+                                    </div>
+                                    {{-- <label for="female" class="form-label">Low value</label> --}}
+                                {{-- </div> --}}
+                            </div>
+                            <div class="row" id="optionalValues">
+                                <h5 for="" class="form-label text-black fw-bolder">Male </h5>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="male_low_value_ref_range" class="form-label">Low Value</label>
+                                        <input type="text" id="male_low_value_ref_range" class="form-control" name="male_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
+                                    </div>
+                                </div>
+                                    {{-- <label for="male" class="form-label">High Value</label> --}}
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="male_high_value_ref_range" class="form-label">High Value</label>
+                                        <input type="text" id="male_high_value_ref_range" class="form-control" name="male_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="male_unit_value_ref_range" class="form-label">Unit</label>
+                                        <input type="text" id="male_unit_value_ref_range" class="form-control" name="male_unit_value_ref_range"
+                                            placeholder="Enter unit"  />
+                                    </div>
+                                </div>
+                                <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="female_low_value_ref_range" class="form-label">Low Value</label>
+                                        <input type="text" id="female_low_value_ref_range" class="form-control" name="female_low_value_ref_range"
+                                            placeholder="Enter Low Value"  />
+                                    </div>
+                                </div>
+                                    {{-- <label for="female" class="form-label">High Value</label> --}}
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="female_high_value_ref_range" class="form-label">High Value</label>
+                                        <input type="text" id="female_high_value_ref_range" class="form-control" name="female_high_value_ref_range"
+                                            placeholder="Enter High Value"  />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div>
+                                        <label for="female_unit_value_ref_range" class="form-label">Unit</label>
+                                        <input type="text" id="female_unit_value_ref_range" class="form-control" name="female_unit_value_ref_range"
+                                            placeholder="Enter unit"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="noManualValues">
+                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
+                            </div>
+                            {{-- <div class="col-lg-12">
                                 <div>
-                                    <input type="radio" id="male" name="sex"
-                                        placeholder="Enter Email" required  value="male"/>
-                                        <label for="male" class="form-label">Male</label>
-                                    <input type="radio" id="female" name="sex"
-                                        placeholder="Enter Email" required value="female" />
-                                    <label for="female" class="form-label">Female</label>
+                                    <label for="test_notes" class="form-label">Test Notes</label>
+                                    <textarea name="test_notes" id="test_notes" class="form-control" cols="30" rows="3"></textarea>
+                                </div>
+                            </div> --}}
+                            <div class="col-lg-12">
+                                <div class="form-check form-check-dark mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">
+                                        Active
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -294,6 +435,44 @@
                             <button type="button" class="btn btn-light"
                                 data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-success" id="add-btn">Add Test</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="showModalSpecimenType" tabindex="-1" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-primary-subtle p-3">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Specimen Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                </div>
+                <form class="tablelist-form" id="specimen_type_form" action="{{ url('/specimen-types') }}" method="POST" autocomplete="off">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="id-field" />
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="name" class="form-label">Specimen Type Name</label>
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Specimen Type Name" required />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div>
+                                    <label for="priority" class="form-label">Priority</label>
+                                    <input type="number" id="priority" name="priority" class="form-control" placeholder="Enter Priority" required />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success" id="add-btn">Add Specimen Type</button>
                         </div>
                     </div>
                 </form>
@@ -335,6 +514,7 @@
             </div>
         </div>
     </div>
+    {{-- {{dd(Auth::user()->departments)}} --}}
 @endsection
 @section('script')
 
@@ -344,7 +524,7 @@
 
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsTestsCompletedive.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
@@ -356,6 +536,141 @@
 
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
+        $(document).ready(function() {
+            // Hide optionalValues by default
+            $('#urin_test_type_container').hide();
+            $('#optionalValues').hide();
+            $('#noManualValues').hide();
+            $('#basicValues').show();
+            $('#department').on('change', function(){
+                // console.log('Department');
+                if (this.value == '3') {
+                    $('#urin_test_type_container').show();
+                    $('#urin_test_type').prop('required', true);
+                }else{
+                    $('#urin_test_type_container').hide();
+                    $('#urin_test_type').prop('required', false);
+                    $('#urin_test_type').val('');
+                }
+            });
+            // Show/hide fields based on selected reference range
+            $('input[name="reference_range"]').on('change', function() {
+                if (this.value === 'basic_ref') {
+                    $('#basicValues').show();
+                    $('#optionalValues').hide();
+                    $('#noManualValues').hide();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', true);
+                    $('#basic_high_value_ref_range').prop('required', true);
+                    $('#basic_unit_value_ref_range').prop('required', true);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#male_unit_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
+                    $('#female_unit_value_ref_range').prop('required', false);
+                } else if (this.value === 'optional_ref') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').show();
+                    $('#noManualValues').hide();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#basic_unit_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', true);
+                    $('#male_high_value_ref_range').prop('required', true);
+                    $('#male_unit_value_ref_range').prop('required', true);
+                    $('#female_low_value_ref_range').prop('required', true);
+                    $('#female_high_value_ref_range').prop('required', true);
+                    $('#female_unit_value_ref_range').prop('required', true);
+                }else if (this.value === 'no_manual_tag') {
+                    $('#basicValues').hide();
+                    $('#optionalValues').hide();
+                    $('#noManualValues').show();
+                    // Make fields required
+                    $('#basic_low_value_ref_range').prop('required', false);
+                    $('#basic_high_value_ref_range').prop('required', false);
+                    $('#basic_unit_value_ref_range').prop('required', false);
+                    $('#male_low_value_ref_range').prop('required', false);
+                    $('#male_high_value_ref_range').prop('required', false);
+                    $('#male_unit_value_ref_range').prop('required', false);
+                    $('#female_low_value_ref_range').prop('required', false);
+                    $('#female_high_value_ref_range').prop('required', false);
+                    $('#female_unit_value_ref_range').prop('required', false);
+                }
+            });
+
+            // $('#profile-tab').on('click', function () {
+            //     // Show Profile Test fields
+            //     $('#department').closest('.col-lg-6').hide();
+            //     $('#test_profiles_container').show();
+            //     $('#is_urine_type_container').show();
+            //     $('#cost_container').hide();
+            //     $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
+            //     $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
+
+
+            //     // Handle checkbox 'Is urine type'
+            //     $('#is_urine_type').on('change', function () {
+            //         if ($(this).is(':checked')) {
+            //             $('#urin_test_type_container').show();
+            //             $('#urin_test_type').attr('required', true); // Make urine type required
+            //         } else {
+            //             $('#urin_test_type_container').hide();
+            //             $('#urin_test_type').removeAttr('required'); // Remove urine type required
+            //             $('#urin_test_type').val('');
+            //         }
+            //     });
+
+            //     // Set required attributes for Profile Test fields
+            //     $('#department, #cost').attr('required', false);
+            //     $('#department').val('');
+            //     $('#cost').val('');
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
+            //     // $('#nomanualvalues_ref_range').removeAttr('required');
+            // });
+
+            // $('#individual-tab').on('click', function () {
+            //     // Show Individual Test fields
+            //     $('#department').closest('.col-lg-6').show();
+            //     $('#test_profiles_container').hide();
+            //     $('#is_urine_type_container').hide();
+            //     $('#cost_container').show();
+            //     $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
+            //     $('#urin_test_type_container').hide();
+            //     $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
+
+            //     // Set required attributes for Individual Test fields
+            //     $('#test_profiles').attr('required', false);
+            //     $('#test_profiles').val('');
+            //     $('#is_urine_type').prop('checked', false);
+            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
+            //     // $('#nomanualvalues_ref_range').attr('required', true);
+            // });
+
+            // Default selection to Profile Test on page load
+            // $('#profile-tab').trigger('click');
+        });
+        // $(document).ready(function() {
+        //     var currentUser = "{{ Auth::user()->getRoleNames()->first() }}"; // Get the current user's ID from the server-side
+
+        //     // Check if the current user is in the "Lab" role
+        //     if (currentUser === 'Lab') {
+        //         console.log('clicked');
+        //         var labDepartments = {!! json_encode(Auth::user()->departments) !!}; // Get the department IDs associated with the user
+
+        //         // Loop through each option in the select element
+        //         $('#department option').each(function() {
+        //             var departmentId = $(this).val(); // Get the value of the option
+
+        //             // Check if the department ID is not in the user's associated departments
+        //             if (!labDepartments.includes(departmentId)) {
+        //                 $(this).hide(); // Hide the option
+        //             }
+        //         });
+        //     }
+        // });
+
         jQuery(document).ready(function($) {
         // When the document is ready, attach a click event to the "Edit" button
         $('.edit-item-btn').on('click', function() {
@@ -376,9 +691,87 @@
                         $('#id-field').val(test.id);
                         $('#name').val(test.name);
                         $('#department').val(test.department);
-                        $('#specimen_type').val(test.specimen_type);
+                        $('#specimen_type').val(test.specimen_type).trigger('change');
                         $('#cost').val(test.cost);
+                        $('#methodology').val(test.methodology);
+                        // $('#test_notes').val(test.test_notes);
                         $('#reference_range').val(test.reference_range);
+                        // $('#is_urine_type').val(test.is_urine_type);
+                        if (response.testProfiles) {
+                            $('#test_profiles_container').show();
+                            $('#test_profiles').prop('required', true);
+                            $('#test_profiles').val(response.testProfiles.id);
+                        }
+                        if (test.reference_range === 'basic_ref') {
+                            $('#basic_ref').prop('checked', true);
+                            $('#optional_ref').prop('checked', false);
+                            $('#no_manual_tag').prop('checked', false);
+                            $('#basicValues').show();
+                            $('#optionalValues').hide();
+                            $('#noManualValues').hide();
+                            // Make fields required
+                            $('#basic_low_value_ref_range').prop('required', true);
+                            $('#basic_high_value_ref_range').prop('required', true);
+                            $('#basic_unit_value_ref_range').prop('required', true);
+                            $('#male_low_value_ref_range').prop('required', false);
+                            $('#male_high_value_ref_range').prop('required', false);
+                            $('#male_unit_value_ref_range').prop('required', false);
+                            $('#female_low_value_ref_range').prop('required', false);
+                            $('#female_high_value_ref_range').prop('required', false);
+                            $('#female_unit_value_ref_range').prop('required', false);
+                            $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
+                            $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#basic_unit_value_ref_range').val(test.basic_unit_value_ref_range);
+                            $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
+                            $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#male_unit_value_ref_range').val(test.male_unit_value_ref_range);
+                            $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
+                            $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                            $('#female_unit_value_ref_range').val(test.female_unit_value_ref_range);
+                        } else if (test.reference_range === 'optional_ref') {
+                            $('#basic_ref').prop('checked', false);
+                            $('#optional_ref').prop('checked', true);
+                            $('#no_manual_tag').prop('checked', false);
+                            $('#basicValues').hide();
+                            $('#optionalValues').show();
+                            $('#noManualValues').hide();
+                            // Make fields required
+                            $('#basic_low_value_ref_range').prop('required', false);
+                            $('#basic_high_value_ref_range').prop('required', false);
+                            $('#basic_unit_value_ref_range').prop('required', false);
+                            $('#male_low_value_ref_range').prop('required', true);
+                            $('#male_high_value_ref_range').prop('required', true);
+                            $('#male_unit_value_ref_range').prop('required', true);
+                            $('#female_low_value_ref_range').prop('required', true);
+                            $('#female_high_value_ref_range').prop('required', true);
+                            $('#female_unit_value_ref_range').prop('required', false);
+                            $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
+                            $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
+                            $('#basic_unit_value_ref_range').val(test.basic_unit_value_ref_range);
+                            $('#male_low_value_ref_range').val(test.male_low_value_ref_range);
+                            $('#male_high_value_ref_range').val(test.male_high_value_ref_range);
+                            $('#male_unit_value_ref_range').val(test.male_unit_value_ref_range);
+                            $('#female_low_value_ref_range').val(test.female_low_value_ref_range);
+                            $('#female_high_value_ref_range').val(test.female_high_value_ref_range);
+                            $('#female_unit_value_ref_range').val(test.female_unit_value_ref_range);
+                        }else if (test.reference_range === 'no_manual_tag') {
+                            $('#basic_ref').prop('checked', false);
+                            $('#optional_ref').prop('checked', false);
+                            $('#no_manual_tag').prop('checked', true);
+                            $('#basicValues').hide();
+                            $('#optionalValues').hide();
+                            $('#noManualValues').show();
+                            $('#basic_low_value_ref_range').prop('required', false);
+                            $('#basic_high_value_ref_range').prop('required', false);
+                            $('#basic_unit_value_ref_range').prop('required', true);
+                            $('#male_low_value_ref_range').prop('required', false);
+                            $('#male_high_value_ref_range').prop('required', false);
+                            $('#male_unit_value_ref_range').prop('required', false);
+                            $('#female_low_value_ref_range').prop('required', false);
+                            $('#female_high_value_ref_range').prop('required', false);
+                            $('#female_unit_value_ref_range').prop('required', false);
+                            $('#nomanualvalues_ref_range').val(test.nomanualvalues_ref_range);
+                        }
                         // $('#area').val(test.area);
                         // $('#email').val(test.email);
 
@@ -388,9 +781,32 @@
 
                         // $('#surgeries').val(surgeries).trigger('change');
 
+                        // if (test.department == null) {
+                        //     // console.log('Please select');
+                        //     $('#profile-tab').trigger('click');
+                        // }else{
+                        //     $('#individual-tab').trigger('click');
+                        // }
 
                         // Set the checkbox town for is_active
-
+                        $('#is_active').prop('checked', test.is_active);
+                        // $('#is_urine_type').prop('checked', test.is_urine_type);
+                        // if (test.is_urine_type == 1) {
+                        //     // console.log('Please select');
+                        //     $('#urin_test_type_container').show();
+                        //     $('#urin_test_type').attr('required', true);
+                        //     $('#urin_test_type').val(test.urin_test_type);
+                        // }
+                        if (test.department !== null && test.department == 3) {
+                            $('#urin_test_type_container').show();
+                            $('#urin_test_type').prop('required', true);
+                            $('#urin_test_type').val(test.urin_test_type);
+                        }
+                        // if (test.department == null) {
+                        //     $('#profile-tab').trigger('click');
+                        // }else{
+                        //     $('#individual-tab').trigger('click');
+                        // }
 
                         // Update modal title
                         $('#exampleModalLabel').html("Edit test");
@@ -419,26 +835,48 @@
         });
 
         function resetModal() {
-            // Reset modal titleq
             $('#exampleModalLabel').html("Add Test");
-
-            // Display the modal footer
             $('#showModal .modal-footer').css('display', 'block');
-
-            // Change the button text
             $('#add-btn').html("Add");
             $('#leadtype_form').attr('action', '{{ url("/test") }}');
-            // if ( $('#patch').length) {
-            //     $('#patch').remove();
-            // }
             $('#name').val('');
             $('#department').val('');
             $('#specimen_type ').val('');
             $('#cost').val('');
-            $('#reference_range').val('');
-            // $('#surgeries').val("");
-            // $('#surgeries').val("").trigger('change');
-
+            $('#methodology').val('');
+            $('#basic_ref').prop('checked', true);
+            $('#basicValues').show();
+            $('#optionalValues').hide();
+            $('#noManualValues').hide();
+            // $('#test_profiles_container').hide();
+            $('#test_profiles').prop('required', false);
+            $('#basic_low_value_ref_range').prop('required', true);
+            $('#basic_high_value_ref_range').prop('required', true);
+            $('#basic_unit_value_ref_range').prop('required', true);
+            $('#male_low_value_ref_range').prop('required', false);
+            $('#male_high_value_ref_range').prop('required', false);
+            $('#male_unit_value_ref_range').prop('required', false);
+            $('#female_low_value_ref_range').prop('required', false);
+            $('#female_high_value_ref_range').prop('required', false);
+            $('#female_unit_value_ref_range').prop('required', false);
+            $('#basic_low_value_ref_range').val('');
+            $('#basic_high_value_ref_range').val('');
+            $('#basic_unit_value_ref_range').val('');
+            $('#male_low_value_ref_range').val('');
+            $('#male_high_value_ref_range').val('');
+            $('#male_unit_value_ref_range').val('');
+            $('#female_low_value_ref_range').val('');
+            $('#female_high_value_ref_range').val('');
+            $('#female_unit_value_ref_range').val('');
+            $('#nomanualvalues_ref_range').val('');
+            // $('#is_urine_type').prop('checked', false);
+                $('#urin_test_type_container').hide();
+                $('#urin_test_type').attr('required', false);
+                $('#urin_test_type').val('');
+                $('#specimen_type').val('').trigger('change');
+                // $('#department').closest('.col-lg-6').hide();
+                // $('#cost_container').hide();
+                // $('#profile-tab').trigger('click');
         }
 
         // Event listener for modal close event
@@ -478,6 +916,34 @@
         // Function to reset modal when clicking the "Close" button
         $('#close-modal').on('click', function() {
             resetModal();
+        });
+
+        $('#specimen_type_form').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '{{ url("/specimen-types") }}',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Append the new patient to the dropdown
+                        var newOption = new Option(response.specimenType.name, response.specimenType.id, true, true);
+                        $('#specimen_type').append(newOption).trigger('change');
+
+                        // Close the modal
+                        $('#showModalSpecimenType').modal('hide');
+
+                        // Optionally, clear the form inputs
+                        $('#specimen_type_form')[0].reset();
+                    } else {
+                        alert('An error occurred while adding the patient.');
+                    }
+                },
+                error: function(response) {
+                    alert('An error occurred. Please check the input data.');
+                }
+            });
         });
     });
 

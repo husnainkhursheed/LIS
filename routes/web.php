@@ -2,17 +2,25 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// use App\Http\Controllers\CustomDropdownController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\Setup\NoteController;
 use App\Http\Controllers\Admin\Setup\TestController;
 use App\Http\Controllers\Admin\Setup\DoctorController;
 use App\Http\Controllers\Admin\Setup\SampleController;
 use App\Http\Controllers\Admin\Setup\PatientController;
 use App\Http\Controllers\Admin\Setup\PracticeController;
+use App\Http\Controllers\ReportingandAnalyticsController;
 use App\Http\Controllers\Admin\Setup\InstitutionController;
+use App\Http\Controllers\Admin\Setup\TestProfileController;
+use App\Http\Controllers\Admin\Reports\TestReportController;
+use App\Http\Controllers\Admin\Setup\SpecimenTypeController;
+use App\Http\Controllers\Admin\Setup\CustomDropdownController;
 use App\Http\Controllers\Admin\UserManagement\RolesController;
 use App\Http\Controllers\Admin\UserManagement\UsersController;
+use App\Http\Controllers\Admin\Setup\SenstivityItemsController;
 use App\Http\Controllers\Admin\UserManagement\PermissionController;
-use App\Http\Controllers\Admin\Reports\TestReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,6 +46,12 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/settings', [SettingsController::class, 'change_password_index']);
+    Route::post('/change_password', [SettingsController::class, 'change_password']);
+    Route::post('/social_config', [SettingsController::class, 'change_socialconfig']);
+    // Route::post('/summary_prompt', [SettingsController::class, 'change_summary_prompt']);
+
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permission.index');
 
     Route::get('/roles', [RolesController::class, 'index'])->name('roles.index');
@@ -77,6 +91,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/patient/{id}', [PatientController::class, 'update'])->name('patient.update');
     Route::delete('/patient/{id}', [PatientController::class, 'destroy'])->name('patient.destroy');
 
+    Route::get('/patient/suggestions', [PatientController::class, 'getSuggestions']);
+    Route::get('/patient/check-duplicates', [PatientController::class, 'checkDuplicates']);
+    Route::post('/patient', [PatientController::class, 'store']);
+
+
     Route::get('/test', [TestController::class, 'index'])->name('test.index');
     Route::post('/test', [TestController::class, 'store'])->name('test.store');
     Route::get('/test/{id}/edit', [TestController::class, 'edit'])->name('test.edit');
@@ -89,7 +108,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/note/{id}', [NoteController::class, 'update'])->name('note.update');
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
+    Route::post('/TestProfile/fetch-tests-from-profiles', [TestProfileController::class, 'fetchTestsFromProfiles']);
+    // test profile crud  working
+    Route::get('/TestProfile', [TestProfileController::class, 'index'])->name('TestProfile.index');
+    Route::post('/TestProfile', [TestProfileController::class, 'store'])->name('TestProfile.store');
+    Route::get('/TestProfile/{id}/edit', [TestProfileController::class, 'edit'])->name('TestProfile.edit');
+    Route::post('/TestProfile/{id}', [TestProfileController::class, 'update'])->name('TestProfile.update');
+    Route::delete('/TestProfile/{id}', [TestProfileController::class, 'destroy'])->name('TestProfile.destroy');
+
+
+    Route::get('/profile', [SenstivityItemsController::class, 'index'])->name('profile.index');
+    Route::post('/profile', [SenstivityItemsController::class, 'store'])->name('profile.store');
+    Route::get('/profile/{id}/edit', [SenstivityItemsController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/{id}', [SenstivityItemsController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/{id}', [SenstivityItemsController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/check-tests-in-profiles', [SampleController::class, 'checkTestsInProfiles'])->name('checkTestsInProfiles');
     Route::resource('/sample', SampleController::class);
+
+    Route::prefix('specimen-types')->group(function () {
+        Route::get('/', [SpecimenTypeController::class, 'index'])->name('specimen-types.index');
+        Route::post('/', [SpecimenTypeController::class, 'store'])->name('specimen-types.store');
+        Route::get('/{id}/edit', [SpecimenTypeController::class, 'edit'])->name('specimen-types.edit');
+        Route::post('/{id}', [SpecimenTypeController::class, 'update'])->name('specimen-types.update');
+        Route::delete('/{id}', [SpecimenTypeController::class, 'destroy'])->name('specimen-types.destroy');
+    });
+
+
+
 
     Route::prefix('reports')->group(function () {
         Route::get('/test-reports', [TestReportController::class, 'index'])->name('test-reports.index');
@@ -99,19 +144,65 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/test-reports/{id}/edit', [TestReportController::class, 'edit'])->name('test-reports.edit');
         Route::post('/save-reports', [TestReportController::class, 'saveReports'])->name('test-reports.saveReports');
         Route::delete('/test-reports/{id}', [TestReportController::class, 'destroy'])->name('test-reports.destroy');
+        Route::post('/delink-test/{id}', [TestReportController::class, 'delinktest'])->name('test-reports.delinktest');
+        Route::post('/complete-test', [TestReportController::class, 'completetest'])->name('test-reports.completetest');
+        Route::post('/uncomplete-test', [TestReportController::class, 'uncompletetest'])->name('test-reports.uncompletetest');
+
+        Route::post('/sensitivity/report', [TestReportController::class, 'getsensitivityitems'])->name('test-reports.getsensitivityitems');
+        Route::get('/partials/procedure/{procedure}', [TestReportController::class, 'getProcedurePartial'])->name('test-reports.getProcedurePartial');
+
+
+        // sign report
+        Route::post('/sign-report', [TestReportController::class, 'signReport'])->name('test-reports.signReport');
+        // report notes
+        Route::get('/fetch-notes-cytology', [TestReportController::class, 'fetchNotesCytology'])->name('fetch-notes-cytology');
+        Route::get('/fetch-notes-urinalysis', [TestReportController::class, 'fetchNotesUrinalysis'])->name('fetch-notes-urinalysis');
+
+        // Route::get('/audit-traits', [TestReportController::class, 'auditTraits'])->name('audit-traits.index');
+
+        Route::get('/audit-trails/{id}/{reporttype}', [ReportingandAnalyticsController::class, 'auditTrails']);
+        Route::get('/changes/{id}', [ReportingandAnalyticsController::class, 'trailchanges']);
+
+        Route::get('/processing-time', [ReportingandAnalyticsController::class, 'index'])->name('processingtime.index');
+    	Route::get('/master-report', [ReportingandAnalyticsController::class, 'masterReport'])->name('masterreport.index');
+
     });
+
+    Route::post('/custom-dropdown/store', [CustomDropdownController::class, 'store'])->name('custom-dropdown.store');
+    Route::get('custom-dropdown/names/{id}', [CustomDropdownController::class, 'getDropdownNames'])->name('custom-dropdown.getDropdownNames');
+    Route::get('custom-dropdown/getvalues/{id}/edit', [CustomDropdownController::class, 'getvalues'])->name('custom-dropdown.getvalues');
+
+    Route::post('/uriRefRanges/store', [CustomDropdownController::class, 'uriRefRangesstore'])->name('uriRefRanges.store');
+    Route::get('uriRefRanges/getvalues/{id}/edit', [CustomDropdownController::class, 'uriRefRangesgetvalues'])->name('uriRefRanges.getvalues');
+
+    Route::get('getcalc/{id}/edit', [TestController::class, 'calcvalues'])->name('getcalc.get');
+
+
+    // generate pdf route
+    Route::get('generate-pdf/{id}/{type}', [App\Http\Controllers\PDFController::class, 'generatePDF']);
+    Route::get('generate-pdf/{id}', [App\Http\Controllers\PDFController::class, 'generatePDF1']);
+
+
+
+
 
     ////////////       end routes       /////////////////////
 
     // Route::view('/profile' , 'employee.profile');
-    Route::get('/profile', function () {
-        $employee = \App\Models\MainEmployee::find(1);
-        // dd($employee);
-        // $practices = SetupPractice::where('is_active', 1)->get();
-        // $genders = SetupGender::all();
-        return view('employee.profile',compact('employee'));
-    });
+    // Route::get('/profile', function () {
+    //     $employee = \App\Models\MainEmployee::find(1);
+    //     // dd($employee);
+    //     // $practices = SetupPractice::where('is_active', 1)->get();
+    //     // $genders = SetupGender::all();
+    //     return view('employee.profile',compact('employee'));
+    // });
 
 
 
 });
+
+
+
+Route::get('verify/{token}', [UsersController::class, 'verify']);
+// Route::view('verify-view', 'emails.verify');
+Route::post('set-password', [UsersController::class, 'setPassword']);

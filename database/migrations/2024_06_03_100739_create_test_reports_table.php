@@ -17,9 +17,12 @@ return new class extends Migration
             $table->foreignId('test_id')->constrained('tests')->onDelete('cascade');
             $table->text('results')->nullable();
             $table->text('notes')->nullable();
-            $table->boolean('is_completed')->default(false);
             $table->boolean('is_signed')->default(false);
             $table->foreignId('signed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('signed_at')->nullable();
+            $table->boolean('is_completed')->default(false);
+            $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
         });
     }

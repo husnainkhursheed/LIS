@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
   let table = new DataTable('#buttons-datatables', {
         dom: 'Bfrtip',
+        "paging": false,
 
     });
 });

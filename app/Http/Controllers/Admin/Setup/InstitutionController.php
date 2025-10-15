@@ -44,11 +44,11 @@ class InstitutionController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $institution = new Institution();
@@ -58,7 +58,12 @@ class InstitutionController extends Controller
         $institution->address_line_2  = $request->input('address_line_2');
         $institution->area  = $request->input('area');
         $institution->email  = $request->input('email');
+        $institution->is_active  = $request->has('is_active') ? 1 : 0;
         $institution->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'institution' => $institution]);
+        }
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -77,11 +82,11 @@ class InstitutionController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'contact_number' => 'required',
-            'street_name' => 'required',
-            'address_line_2' => 'required',
-            'area' => 'required',
-            'email' => 'required',
+            // 'contact_number' => 'required',
+            // 'street_name' => 'required',
+            // // 'address_line_2' => 'required',
+            // 'area' => 'required',
+            // 'email' => 'required',
        ]);
 
         $institution = Institution::find($id);
@@ -91,6 +96,7 @@ class InstitutionController extends Controller
         $institution->address_line_2  = $request->input('address_line_2');
         $institution->area  = $request->input('area');
         $institution->email  = $request->input('email');
+        $institution->is_active  = $request->has('is_active') ? 1 : 0;
         $institution->update();
 
 

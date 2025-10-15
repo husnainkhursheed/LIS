@@ -48,7 +48,7 @@
             @csrf
             @method('PUT')
                 <div class="row">
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <div class="form-group">
                             <label for="test_number" class="form-label">Test Number</label>
                                 <input type="text" id="test_number" name="test_number" class="form-control" value="{{ $sample->test_number }}"
@@ -56,11 +56,11 @@
                                 <input type="text" id="" name="" class="form-control" value="{{ $sample->test_number }}"
                                 disabled required />
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  class="form-control"
+                            <input type="text" id="access_number" name="access_number" disabled  class="form-control"
                                 required value="{{ $sample->access_number }}" />
                         </div>
                     </div>
@@ -96,8 +96,11 @@
                                 > <span class="badge bg-info text-white"> Add New</span> </a></label>
                                         <select class="js-example-basic-multiple form-control" name="patient_id" id="patient_id">
                                             @foreach ($patients as $patient)
+                                            @php
+                                                $dateOfBirth = \Carbon\Carbon::parse($patient->dob)->format('d/m/Y');
+                                            @endphp
                                                 <option value="{{ $patient->id }}" {{ $sample->patient_id == $patient->id ? 'selected' : ''}}>
-                                                    {{ $patient->first_name }}</option>
+                                                    {{ $patient->first_name .' '. $patient->surname .' '. $dateOfBirth }}</option>
                                             @endforeach
                                         </select>
                         </div>
@@ -138,25 +141,70 @@
                                 {{-- <option selected>Choose Institution</option> --}}
                                 <option value="Patient" {{ $sample->bill_to == 'Patient' ? 'selected' : ''}}>Patient</option>
                                 <option value="Doctor"  {{ $sample->bill_to == 'Doctor' ? 'selected' : ''}}>Doctor</option>
-                                <option value="Other"  {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
+                                <option value="Other"   {{ $sample->bill_to == 'Other' ? 'selected' : ''}}>Other</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
+                {{-- <div class="row">
+                    <div class="col-md-12">
                         <div class="form-group">
-                            <label for="test_requested" class="form-label">Test Requested</label>
-                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
-                                @foreach ($tests as $test)
-                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach>
-                                        {{ $test->name }}</option>
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea name="notes" id="notes" name="notes" cols="30" rows="5" class="form-control">{{ $sample->notes }}</textarea>
+                        </div>
+                    </div>
+                </div> --}}
+
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="form-group">
+                            <label for="test_profiles" class="form-label">Test Profiles</label>
+                            <select class="js-example-basic-multiple" name="test_profiles[]" id="test_profiles" onchange="checkTestProfiles()"  multiple="multiple">
+                                @foreach ($test_profiles as $test)
+                                    <option value="{{ $test->id }}"  @foreach ($sample->testProfiles as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
+                                        {{ $test->name .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost_profile" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" value="{{ $sample->profiles_total_cost }}" >
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="form-group">
+                            <label for="test_requested" class="form-label">Test Requested</label>
+                            <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
+                                @foreach ($tests as $test)
+                                    <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
+                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="total_cost" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost" id="total_cost" value="{{ $sample->indvidualtests_total_cost }}" >
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Row for Grand Total -->
+                <div class="row align-items-center p-0" style="text-align: right">
+                    <div class="col-md-10 form-group mt-2">
+                        <label for="grand_total" class="form-label">Grand Total:</label>
+                    </div>
+                    <div class="col-md-2 p-0">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="grand_total" id="grand_total" value="{{ $sample->grand_total_cost }}" >
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="row">
                     <div class="col-md-12 d-flex justify-content-center">
@@ -193,6 +241,8 @@
                                     <input type="text" id="first_name" name="first_name"
                                         class="form-control"
                                         placeholder="Enter First Name" required />
+                                    <div id="first_name_suggestions" class="autocomplete-suggestions"></div>
+
                                 </div>
                                 {{-- @error('v_name')
                                     <div class="text-danger">{{$message}}</div>
@@ -203,6 +253,7 @@
                                     <label for="surname" class="form-label">Surname</label>
                                     <input type="text" id="surname" name="surname" class="form-control"
                                     placeholder="Enter surname" required />
+                                    <div id="surname_suggestions" class="autocomplete-suggestions"></div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -231,7 +282,7 @@
                                     <label for="female" class="form-label">Female</label>
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -239,7 +290,12 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
+                            <div id="duplicate_warning" class="alert alert-warning d-none">
+                                <p>Potential duplicate patients found:</p>
+                                <ul id="duplicate_list"></ul>
+                                <p>Do you want to proceed with creating a new patient?</p>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -318,7 +374,7 @@
                                         placeholder="Enter Area" required />
                                 </div>
                             </div>
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -326,7 +382,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -405,7 +461,7 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="form-check form-check-dark mb-3">
                                     <input class="form-check-input" type="checkbox" name="is_active"
                                         id="is_active" checked>
@@ -413,7 +469,7 @@
                                         Active
                                     </label>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -451,17 +507,255 @@
 
 
     <script>
-        document.querySelector("#lead-image-input").addEventListener("change", function() {
-            var preview = document.querySelector("#lead-img");
-            var file = document.querySelector("#lead-image-input").files[0];
-            console.log(file);
-            var reader = new FileReader();
-            reader.addEventListener("load", function() {
-                preview.src = reader.result;
-            }, false);
-            if (file) {
-                reader.readAsDataURL(file);
+        function checkTestProfiles() {
+            // $('#test_requested').val('').trigger('change');
+            // Get selected profile IDs
+            let selectedProfiles = $('#test_profiles').val();
+            if (selectedProfiles === null || selectedProfiles.length === 0) {
+                console.log('No profiles selected, enabling all options');
+                // Re-enable all options if no profiles are selected
+                $('#test_profiles option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+                $('#test_requested option').each(function() {
+                    $(this).prop('disabled', false);
+                });
             }
+
+            // Send AJAX request to the server
+            $.ajax({
+                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    profiles: selectedProfiles
+                },
+                success: function(response) {
+                    // Assuming the response contains the IDs of test profiles to hide
+                    if (response.profilesToHide) {
+                        $('#test_profiles option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.profilesToHide.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        // $('#test_profiles').select2();
+                        $('#test_requested option').each(function() {
+                            // Disable the profiles that are in the profilesToHide array
+                            if (response.testIdsInSelectedProfiles.includes(parseInt($(this).val()))) {
+                                $(this).prop('disabled', true);  // Disable the option
+                            } else {
+                                $(this).prop('disabled', false); // Enable the option
+                            }
+                        });
+                        // Refresh the Select2 options
+                        // $('#test_requested').select2();
+                    }
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
+        checkTestProfiles();
+        $(document).ready(function() {
+            $('#test_profiles').on('change', function() {
+                $('#test_requested').val('').trigger('change');
+            });
+
+            let totalCost = 0;
+            let total_cost_profile = 0;
+            $('#test_requested').find('option:selected').each(function() {
+                totalCost += parseFloat($(this).data('cost'));
+            });
+            $('#test_profiles').find('option:selected').each(function() {
+                total_cost_profile += parseFloat($(this).data('cost'));
+            });
+
+            // Update the total_cost input field
+            // $('#total_cost').val(totalCost.toFixed(2));
+
+            function calculateGrandTotal() {
+                let totalCost = parseFloat($('#total_cost').val()) || 0;
+                let totalProfileCost = parseFloat($('#total_cost_profile').val()) || 0;
+                let grandTotal = totalCost + totalProfileCost;
+
+                $('#grand_total').val(grandTotal.toFixed(2));
+            }
+
+            // Recalculate grand total whenever either field changes
+            $('#total_cost, #total_cost_profile').on('input', function() {
+                calculateGrandTotal();
+            });
+
+            // $('#total_cost_profile').val(total_cost_profile.toFixed(2));
+            $('#test_requested').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost').val(totalCost.toFixed(2));
+                calculateGrandTotal();
+            });
+            $('#test_profiles').on('change', function() {
+                let totalCost = 0;
+
+                // Iterate through each selected option
+                $(this).find('option:selected').each(function() {
+                    totalCost += parseFloat($(this).data('cost'));
+                });
+
+                // Update the total_cost input field
+                $('#total_cost_profile').val(totalCost.toFixed(2));
+                calculateGrandTotal();
+            });
+            // calculateGrandTotal();
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            let doctorSelect = document.getElementById('doctor_id');
+            if (doctorSelect) {
+                let lastOption = doctorSelect.options[doctorSelect.options.length - 1];
+                if (!Array.from(doctorSelect.options).some(option => option.selected)) {
+                    lastOption.selected = true;
+                }
+            }
+        });
+        // document.querySelector("#lead-image-input").addEventListener("change", function() {
+        //     var preview = document.querySelector("#lead-img");
+        //     var file = document.querySelector("#lead-image-input").files[0];
+        //     console.log(file);
+        //     var reader = new FileReader();
+        //     reader.addEventListener("load", function() {
+        //         preview.src = reader.result;
+        //     }, false);
+        //     if (file) {
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstNameInput = document.getElementById('first_name');
+            const surnameInput = document.getElementById('surname');
+            const firstNameSuggestions = document.getElementById('first_name_suggestions');
+            const surnameSuggestions = document.getElementById('surname_suggestions');
+            const dobInput = document.getElementById('dob');
+            const duplicateWarning = document.getElementById('duplicate_warning');
+            const duplicateList = document.getElementById('duplicate_list');
+            const form = document.getElementById('patient_form');
+
+            function debounce(func, timeout = 300) {
+                let timer;
+                return (...args) => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+                };
+            }
+
+            async function fetchSuggestions(field, value, suggestionElement) {
+                if (value.length < 2) {
+                    suggestionElement.innerHTML = '';
+                    return;
+                }
+                try {
+                    const response = await fetch(`/patient/suggestions?${field}=${encodeURIComponent(value)}`);
+                    const data = await response.json();
+                    suggestionElement.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(patient => {
+                            const div = document.createElement('div');
+                            div.textContent = `${patient.first_name} ${patient.surname} (${patient.dob || 'No DOB'})`;
+                            div.addEventListener('click', () => {
+                                firstNameInput.value = patient.first_name;
+                                surnameInput.value = patient.surname;
+                                if (patient.dob) dobInput.value = patient.dob.split(' ')[0];
+                                suggestionElement.innerHTML = '';
+                                checkForDuplicates();
+                            });
+                            suggestionElement.appendChild(div);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            }
+
+            async function checkForDuplicates() {
+                const firstName = firstNameInput.value.trim();
+                const surname = surnameInput.value.trim();
+                const dob = dobInput.value;
+                if (firstName.length < 2 || surname.length < 2) {
+                    duplicateWarning.classList.add('d-none');
+                    return;
+                }
+                try {
+                    let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+                    if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+                    const response = await fetch(url);
+                    const duplicates = await response.json();
+                    if (duplicates.length > 0) {
+                        duplicateList.innerHTML = '';
+                        duplicates.forEach(patient => {
+                            const li = document.createElement('li');
+                            li.textContent = `${patient.first_name} ${patient.surname} (DOB: ${patient.dob || 'N/A'}, Contact: ${patient.contact_number || 'N/A'})`;
+                            duplicateList.appendChild(li);
+                        });
+                        duplicateWarning.classList.remove('d-none');
+                    } else {
+                        duplicateWarning.classList.add('d-none');
+                    }
+                } catch (error) {
+                    console.error('Error checking for duplicates:', error);
+                }
+            }
+
+            firstNameInput.addEventListener('input', debounce(() => {
+                fetchSuggestions('first_name', firstNameInput.value.trim(), firstNameSuggestions);
+                checkForDuplicates();
+            }));
+
+            surnameInput.addEventListener('input', debounce(() => {
+                fetchSuggestions('surname', surnameInput.value.trim(), surnameSuggestions);
+                checkForDuplicates();
+            }));
+
+            dobInput.addEventListener('change', debounce(checkForDuplicates));
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== firstNameInput && e.target !== surnameInput) {
+                    firstNameSuggestions.innerHTML = '';
+                    surnameSuggestions.innerHTML = '';
+                }
+            });
+
+            // form.addEventListener('submit', async function(e) {
+            //     e.preventDefault();
+            //     const firstName = firstNameInput.value.trim();
+            //     const surname = surnameInput.value.trim();
+            //     const dob = dobInput.value;
+            //     try {
+            //         let url = `/patient/check-duplicates?first_name=${encodeURIComponent(firstName)}&surname=${encodeURIComponent(surname)}`;
+            //         if (dob) url += `&dob=${encodeURIComponent(dob)}`;
+            //         const response = await fetch(url);
+            //         const duplicates = await response.json();
+            //         if (duplicates.length > 0) {
+            //             duplicateWarning.classList.remove('d-none');
+            //             alert('Duplicate patient exists. Please select the existing patient or change the details.');
+            //             return; // Do NOT submit
+            //         }
+            //         form.submit();
+            //     } catch (error) {
+            //         console.error('Error during final duplicate check:', error);
+            //         form.submit();
+            //     }
+            // });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

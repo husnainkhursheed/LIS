@@ -13,5 +13,6 @@ class Note extends Model
         'note_code',
         'department',
         'comment',
+        'is_active',
     ];
 }

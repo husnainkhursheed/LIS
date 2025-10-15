@@ -6,10 +6,13 @@ use App\Models\Test;
 use App\Models\Doctor;
 use App\Models\Sample;
 use App\Models\Patient;
+use App\Models\TestReport;
 use App\Models\Institution;
+use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
+
 
 class SampleController extends Controller
 {
@@ -36,13 +39,24 @@ class SampleController extends Controller
     public function create()
     {
         //
-        $doctors = Doctor::all();
-        $institutions = Institution::all();
-        $patients = Patient::all();
-        $tests = Test::all();
-        $test_number = strtoupper(substr(md5(time()), 0, 6));
+        $doctors = Doctor::where('is_active', 1)->get();
+        $institutions = Institution::where('is_active', 1)->get();
+        $patients = Patient::where('is_active', 1)->get();
+        $tests = Test::where('is_active', 1)->get();
+        $test_profiles = TestProfile::all();
+        $prefix = 'B25-';
+        $latestSample = Sample::where('access_number', 'like', $prefix . '%')
+            ->orderBy('id', 'desc')
+            ->first();
 
-        return view('setup.sample.create' ,compact('doctors', 'institutions', 'patients','tests','test_number'));
+        if ($latestSample && preg_match('/^B25-(\d{4})$/', $latestSample->access_number, $matches)) {
+            $nextNumber = str_pad((int)$matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+        $access_number = $prefix . $nextNumber;
+
+        return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','access_number'));
     }
 
     /**
@@ -52,8 +66,8 @@ class SampleController extends Controller
     {
 
         $request->validate([
-            'test_number' => 'required',
-            'access_number' => 'required',
+            // 'test_number' => 'required',
+            'access_number' => 'required|unique:samples,access_number,except,id',
             'collected_date' => 'required',
             'received_date' => 'required',
             // 'received_time' => 'required',
@@ -61,13 +75,14 @@ class SampleController extends Controller
             'institution_id' => 'required',
             'doctor_id' => 'required',
             'bill_to' => 'required',
-            'test_requested' => 'required',
+            // 'test_requested' => 'required',
+            // 'test_profiles' => 'required',
        ]);
-    //    dd($request->all());
+        //    dd($request->all());
 
 
        $sample = new Sample();
-       $sample->test_number =$request->test_number;
+       // $sample->test_number =$request->test_number;
        $sample->access_number = $request->access_number;
        $sample->collected_date = $request->collected_date;
        $sample->received_date = $request->received_date;
@@ -76,9 +91,14 @@ class SampleController extends Controller
        $sample->doctor_id = $request->doctor_id;
        $sample->institution_id = $request->institution_id;
        $sample->bill_to = $request->bill_to;
+       $sample->profiles_total_cost = $request->total_cost_profile;
+       $sample->indvidualtests_total_cost = $request->total_cost;
+       $sample->grand_total_cost = $request->grand_total;
+    //    $sample->notes = $request->notes;
        $sample->save();
        // Attach the tests to the sample
        $sample->tests()->attach($request->test_requested);
+       $sample->testProfiles()->attach($request->test_profiles);
 
         Session::flash('message', 'Created successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -98,14 +118,14 @@ class SampleController extends Controller
      */
     public function edit(string $id)
     {
-        $doctors = Doctor::all();
-        $institutions = Institution::all();
-        $patients = Patient::all();
-        $tests = Test::all();
-
+        $doctors = Doctor::where('is_active', 1)->get();
+        $institutions = Institution::where('is_active', 1)->get();
+        $patients = Patient::where('is_active', 1)->get();
+        $tests = Test::where('is_active', 1)->get();
+        $test_profiles = TestProfile::all();
         $sample = Sample::find($id);
 
-        return view('setup.sample.edit' ,compact('doctors', 'institutions', 'patients','tests','sample'));
+        return view('setup.sample.edit' , compact('test_profiles','doctors', 'institutions', 'patients','tests','sample'));
     }
 
     /**
@@ -114,20 +134,20 @@ class SampleController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'test_number' => 'required',
-            'access_number' => 'required',
+            // 'test_number' => 'required',
+            // 'access_number' => 'required',
             'collected_date' => 'required',
             'received_date' => 'required',
             'patient_id' => 'required',
             'institution_id' => 'required',
             'doctor_id' => 'required',
             'bill_to' => 'required',
-            'test_requested' => 'required',
+            // 'test_requested' => 'required',
        ]);
 
         $sample = Sample::findOrFail($id);
-        $sample->test_number =$request->test_number;
-        $sample->access_number = $request->access_number;
+        // $sample->test_number =$request->test_number;
+        // $sample->access_number = $request->access_number;
         $sample->collected_date = $request->collected_date;
         $sample->received_date = $request->received_date;
         $sample->received_time = now()->format('H:i:s'); // Store the current system time
@@ -135,14 +155,55 @@ class SampleController extends Controller
         $sample->doctor_id = $request->doctor_id;
         $sample->institution_id = $request->institution_id;
         $sample->bill_to = $request->bill_to;
+        $sample->profiles_total_cost = $request->total_cost_profile;
+        $sample->indvidualtests_total_cost = $request->total_cost;
+        $sample->grand_total_cost = $request->grand_total;
 
-        // Detach the existing tests from the sample
-        $sample->tests()->detach();
-
-        // Attach the updated tests to the sample
-        $sample->tests()->attach($request->test_requested);
-
+        // $sample->notes = $request->notes;
         $sample->save();
+
+         // Get the list of test IDs from the request
+         $newTestIds = $request->test_requested ?? [];
+         $newProfileIds = $request->test_profiles ?? [];
+
+         // Find the current test IDs attached to the sample
+         $currentTestIds = $sample->tests()->pluck('tests.id')->toArray();
+         $currentProfileIds = $sample->testProfiles()->pluck('test_profiles.id')->toArray();
+
+         // Identify the test IDs that are being removed
+         $removedTestIds = array_diff($currentTestIds, $newTestIds);
+         $removedProfileIds = array_diff($currentProfileIds, $newProfileIds);
+        //  dd($removedProfileIds);
+
+        //  dd($getProfileTestsforremove[0]->tests());
+        //  dd($getProfileTestsforremove);
+
+         // Delete the `test_reports` associated with the removed tests
+         if (!empty($removedTestIds)) {
+             TestReport::where('sample_id', $sample->id)
+                 ->whereIn('test_id', $removedTestIds)
+                 ->delete();
+         }
+         if (!empty($removedProfileIds)) {
+            foreach ($removedProfileIds as $key => $value) {
+                $getProfileTestsforremove = TestProfile::find($value);
+                // dd($getProfileTestsforremove);
+                $getProfileTestsforremove = $getProfileTestsforremove->tests()->pluck('tests.id')->toArray();
+
+                 TestReport::where('sample_id', $sample->id)
+                     ->whereIn('test_id', $getProfileTestsforremove)
+                     ->delete();
+            }
+
+         }
+
+         // Detach the existing tests and profiles from the sample
+         $sample->tests()->detach();
+         $sample->testProfiles()->detach();
+
+         // Attach the updated tests to the sample
+         $sample->tests()->attach($request->test_requested);
+         $sample->testProfiles()->attach($request->test_profiles);
 
         Session::flash('message', 'Updated successfully!');
         Session::flash('alert-class', 'alert-success');
@@ -159,4 +220,25 @@ class SampleController extends Controller
         Session::flash('message', 'Deleted successfully!');
         Session::flash('alert-class', 'alert-success');
     }
+
+    public function checkTestsInProfiles(Request $request)
+    {
+        // Get the selected profile IDs from the request
+        $selectedProfileIds = $request->input('profiles');
+
+        // Retrieve all the tests that belong to the selected profiles
+        $selectedProfiles = TestProfile::with('tests')->whereIn('id', $selectedProfileIds)->get();
+        $testIdsInSelectedProfiles = $selectedProfiles->pluck('tests.*.id')->flatten()->unique();
+
+        // Find other profiles that also contain these tests
+        $otherProfilesWithSameTests = TestProfile::whereHas('tests', function($query) use ($testIdsInSelectedProfiles) {
+            $query->whereIn('tests.id', $testIdsInSelectedProfiles); // Fully qualify the 'id' here
+        })->whereNotIn('test_profiles.id', $selectedProfileIds)->get();
+
+        // Return the IDs of the profiles to hide
+        $profilesToHide = $otherProfilesWithSameTests->pluck('id')->toArray();
+
+        return response()->json(['profilesToHide' => $profilesToHide ,'testIdsInSelectedProfiles' => $testIdsInSelectedProfiles]);
+    }
+
 }

@@ -3686,13 +3686,13 @@ fieldset:disabled .btn {
     text-align: center;
 }
 .nav-justified > .nav-link,
-.nav-justified .nav-item {
+.nav-justified .nav-item, .nav-item1 {
     flex-basis: 0;
     flex-grow: 1;
     text-align: center;
 }
 .nav-fill .nav-item .nav-link,
-.nav-justified .nav-item .nav-link {
+.nav-justified .nav-item .nav-link, .nav-item1 .nav-link {
     width: 100%;
 }
 .tab-content > .tab-pane {

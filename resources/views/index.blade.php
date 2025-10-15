@@ -31,20 +31,32 @@ use \Carbon\Carbon;
                                 <input class="form-control me-2 main-search" type="search" placeholder="Search" aria-label="Search" name="search" value="{{ request('search') }}">
                                 <button class="btn search-btn" type="submit">Search</button>
                             </form>
-                            <form class="d-flex" method="GET" action="{{ route('root') }}">
-                                <input type="hidden" name="search" value="{{ request('search') }}">
-                                <select class="form-select sort-dropdown" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
-                                    <option selected disabled>Sort By</option>
-                                    <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option>
-                                    <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
-                                    <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
-                                </select>
+                            {{-- <div class="d-flex gap-2"> --}}
+                                <form class="d-flex gap-2" method="GET" action="{{ route('root') }}">
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
+                                    <select class="form-select sort-dropdown" aria-label="Default select example" name="entries_shown" onchange="this.form.submit()">
+                                        <option selected disabled>Entries to be shown</option>
+                                        <option value="last_20_days" {{ request('entries_shown') == 'last_20_days' ? 'selected' : '' }}>Last 20 days</option>
+                                        <option value="last_3_years" {{ request('entries_shown') == 'last_3_years' ? 'selected' : '' }}>Last 3 years</option>
+                                        <option value="all" {{ request('entries_shown') == 'all' ? 'selected' : '' }}>All</option>
+                                    </select>
+                                {{-- </form>
+                                <form class="" method="GET" action="{{ route('root') }}">
+                                    <input type="hidden" name="search" value="{{ request('search') }}"> --}}
+                                    <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
+                                        <option selected disabled>Sort By</option>
+                                        {{-- <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option> --}}
+                                        <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
+                                        <option value="first_name" {{ request('sort_by') == 'first_name' ? 'selected' : '' }}>Patient Name</option>
+                                        <option value="received_date" {{ request('sort_by') == 'received_date' ? 'selected' : '' }}>Received date</option>
+                                    </select>
 
-                                {{-- <select class="form-select sort-order-dropdown" aria-label="Default select example" name="sort_order" onchange="this.form.submit()">
-                                    <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending</option>
-                                    <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending</option>
-                                </select> --}}
-                            </form>
+                                    {{-- <select class="form-select sort-order-dropdown" aria-label="Default select example" name="sort_order" onchange="this.form.submit()">
+                                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                        <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending</option>
+                                    </select> --}}
+                                </form>
+                            {{-- </div> --}}
                         </div>
                     </nav>
 
@@ -52,8 +64,8 @@ use \Carbon\Carbon;
                 <table id="" class="table table-striped display table-responsive rounded">
                     <thead>
                         <tr>
-                            <th class="rounded-start-3 ">Test #</th>
-                            <th>Access #</th>
+                            {{-- <th>Test #</th> --}}
+                            <th class="rounded-start-3 ">Access #</th>
                             <th>Patient Name</th>
                             <th>Date Received</th>
                             <th class="rounded-end-3 ">Action</th>
@@ -61,71 +73,35 @@ use \Carbon\Carbon;
                     </thead>
                     <tbody>
                         @foreach ($samples as $sample)
-                            <tr>
-                                <td>{{ $sample->test_number }}</td>
-                                <td>{{ $sample->access_number }}</td>
-                                <td>{{ "{$sample->patient->first_name} {$sample->patient->surname}" }}</td>
-                                <td>{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}</td>
-
-
-
-                                <td>
-                                    <a href="#showModal" data-bs-toggle="modal">
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/report.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a>
-
-                                    @can('Sample edit')
-                                        <li class="list-inline-item" data-bs-toggle="tooltip"
-                                            data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                            <a  id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                height="20"></a>
-                                        </li>
-                                    @endcan
-                                    @can('Sample delete')
-                                        <li class="list-inline-item" data-bs-toggle="tooltip"
-                                            data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                            <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                                href="#deleteRecordModal">
-                                                <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                    height="20">
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    {{-- <a href="">
-
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/Vector.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a>
-                                    <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                        href="#deleteRecordModal">
-                                        <span class="logo-sm">
-                                            <img src="{{ URL::asset('build/images/delete.png') }}" alt=""
-                                                height="20">
-                                        </span>
-                                    </a> --}}
-                                </td>
-                                {{-- <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a class="edit-item-btn" data-id="{{ $sample->id }}"  href="#showModal" data-bs-toggle="modal"><i
-                                                        class="ri-pencil-fill align-bottom text-muted"></i></a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip"
-                                                data-bs-trigger="hover" data-bs-placement="top" title="Delete">
-                                                <a class="remove-item-btn" data-id="{{ $sample->id }}"  data-bs-toggle="modal"
-                                                    href="#deleteRecordModal">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                            @if (!$sample->all_departments_completed) <!-- Only show incomplete samples -->
+                                <tr>
+                                    {{-- <td>{{ $sample->test_number }}</td> --}}
+                                    <td>{{ $sample->access_number }}</td>
+                                    <td>{{ "{$sample->patient->first_name} {$sample->patient->surname}" }}</td>
+                                    <td>{{ Carbon::parse($sample->received_date)->format('d-m-Y') }}</td>
+                                    <td>
+                                        <a href="#showModal" data-bs-toggle="modal">
+                                            <span class="logo-sm">
+                                                <img src="{{ URL::asset('build/images/report.png') }}" alt="" height="20">
+                                            </span>
+                                        </a>
+                                        @can('Sample edit')
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                <a id="edit-btn" class="edit-item-btn fs-5" data-id="{{ $sample->id }}" href="#showModal" data-bs-toggle="modal">
+                                                    <img src="{{ URL::asset('build/images/Vector.png') }}" alt="" height="20">
                                                 </a>
                                             </li>
-                                        </ul>
-                                    </td> --}}
-                            </tr>
+                                        @endcan
+                                        @can('Sample delete')
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete">
+                                                <a class="remove-item-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal" href="#deleteRecordModal">
+                                                    <img src="{{ URL::asset('build/images/delete.png') }}" alt="" height="20">
+                                                </a>
+                                            </li>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

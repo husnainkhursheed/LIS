@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Models\Test;
+use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\TestReport;
 use App\Models\Institution;
+use App\Models\SensitivityResults;
+use App\Models\SampleDepartmentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -23,8 +26,37 @@ class Sample extends Model
         'patient_id',
         'institution_id',
         'doctor_id',
-        'bill_to'
+        'bill_to',
+        'is_completed',
+        'is_signed',
+        'signed_by',
+        'signed_at',
+        'completed_by',
+        'completed_at',
+        'notes',
+    	'grand_total_cost',
+        'indvidualtests_total_cost',
+        'profiles_total_cost',
     ];
+
+    public function departmentStatuses()
+    {
+        return $this->hasMany(SampleDepartmentStatus::class, 'sample_id');
+    }
+
+    public function departmentStatus($department)
+    {
+        return $this->departmentStatuses()->where('department', $department)->first();
+    }
+
+    public function procedureResults()
+    {
+        return $this->hasMany(ProcedureResults::class);
+    }
+    public function sensitivityResults()
+    {
+        return $this->hasMany(SensitivityResults::class);
+    }
 
     public function tests()
     {
@@ -51,6 +83,21 @@ class Sample extends Model
         return $this->hasMany(TestReport::class);
     }
 
+    public function signedBy()
+    {
+        return $this->belongsTo(User::class, 'signed_by');
+    }
+
+    public function validateBy()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
+
+        // Many-to-Many relationship with TestProfile
+    public function testProfiles()
+    {
+        return $this->belongsToMany(TestProfile::class, 'sample_profiles');
+    }
 
 
 

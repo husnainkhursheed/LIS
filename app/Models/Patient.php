@@ -16,6 +16,7 @@ class Patient extends Model
         'contact_number',
         'dob',
         'sex',
+        'is_active',
     ];
 
     public function samples()
