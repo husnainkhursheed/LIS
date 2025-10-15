@@ -75,7 +75,7 @@ class TestController extends Controller
         $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
-        $test->test_notes  = $request->input('test_notes');
+        // $test->test_notes  = $request->input('test_notes');
         // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
@@ -168,7 +168,7 @@ class TestController extends Controller
         $test->methodology  = $request->input('methodology');
         $test->reference_range  = $request->input('reference_range');
         $test->urin_test_type  = $request->input('urin_test_type');
-        $test->test_notes  = $request->input('test_notes');
+        // $test->test_notes  = $request->input('test_notes');
         // $test->is_urine_type  = $request->has('is_urine_type') ? 1 : 0;
         // $test->test_profile_id  = $request->input('test_profiles');
         if($reference_range == 'basic_ref'){
