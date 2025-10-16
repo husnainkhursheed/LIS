@@ -45,6 +45,8 @@ class TestProfileController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->tests);
+        // dd($request->all());
         $request->validate([
             // 'code' => 'required',
             'name' => 'required',

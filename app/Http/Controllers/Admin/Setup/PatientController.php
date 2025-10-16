@@ -153,14 +153,14 @@ class PatientController extends Controller
 
     private function findPotentialDuplicates($firstName, $surname, $dob = null)
     {
-          $query = Patient::whereRaw('LOWER(TRIM(first_name)) = ?', [strtolower(trim($firstName))])
-                        ->whereRaw('LOWER(TRIM(surname)) = ?', [strtolower(trim($surname))]);
+        $query = Patient::where('first_name', 'like', $firstName . '%')
+                       ->where('surname', 'like', $surname . '%');
 
         if ($dob) {
             $query->where('dob', $dob);
         }
 
         return $query->limit(5)
-                    ->get(['id', 'first_name', 'surname', 'dob', 'contact_number']);
+                     ->get(['id', 'first_name', 'surname', 'dob', 'contact_number']);
     }
 }

@@ -368,26 +368,24 @@
                     }
                 @endphp
 
-                {{-- @if ($testResults) --}}
                     <tr>
-                        <td><small>{{ $description }}</small>
+                        <td>{{ $description }}
                             @if ($testNote)
                                 <br><small>({{ $testNote }})</small>
                             @endif
                         </td>
 
-                        <td ><small>{{ $testResults }}</small></td>
+                        <td >{{ $testResults }}</td>
                         <td>
-                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot"><small>{{ $flag }}</small></span>
+                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
                         </td>
-                        <td style="text-align: left"><small>{!! $referenceRange !!}</small>
+                        <td style="text-align: left">{!! $referenceRange !!}
                             @if ($methodology)
                                 <br><small>({{ $methodology }})</small>
                             @endif
                         </td>
 
                     </tr>
-                {{-- @endif --}}
             @endforeach
             <tr>
                 <td colspan="4">

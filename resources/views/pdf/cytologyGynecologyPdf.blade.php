@@ -313,31 +313,26 @@
     @endforeach
 
     <script type="text/php">
-        $pdf->page_script('
-        if ($PAGE_COUNT > 0) {
-                $font = $fontMetrics->get_font("Cambria, serif", "normal");
-                $size = 9;
-                $width = $pdf->get_width();
-
-                // Centered PATHOLOGIST
-                $pathologistText = "PATHOLOGIST: MELANIE JOHNCILLA, MD";
-                $pathologistWidth = $fontMetrics->get_text_width($pathologistText, $font, $size);
-                $pdf->text(($width - $pathologistWidth) / 2, 786, $pathologistText, $font, $size);
-
-                // Line
-                $pdf->line(40, 798, $width - 40, 798, [61/255, 144/255, 202/255], 0.5);
-
-                // Centered Page number (below PATHOLOGIST)
-                $pageText = "Page $PAGE_NUM of $PAGE_COUNT";
-                $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
-                $pdf->text(($width - $pageWidth) / 2, 805, $pageText, $font, $size);
-
-                // Centered Lab Director (below page number)
-                $directorText = "Lab Director: Dr. Christina Pierre";
-                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
-                $pdf->text(($width - $directorWidth) / 2, 820, $directorText, $font, $size);
-            }
-        ');
+        if ( isset($pdf) ) {
+            $signedBy = '{{ $signed_by }}';
+            $validatedBy = '{{ $validated_by }}';
+            $pdf->page_script('
+                if ($PAGE_COUNT > 0) {
+                    $font = $fontMetrics->get_font("Cambria", "normal");
+                    $size = 9;
+                    // Left aligned
+                    $pdf->text(45, 786, "CYTOTECHNOLOGIST:  PETAL JULIEN, BSc. MLT", $font, $size);
+                    // Right aligned (move left to fit page)
+                    $pdf->text(350, 786, "PATHOLOGIST: MELANIE JOHNCILLA, MD", $font, $size);
+                    // Line
+                    $pdf->text(30, 795, "___________________________________________________________________________________________________________", $font, $size, array(61/255, 144/255, 202/255));
+                    // Page number (centered)
+                    $pdf->text(150, 810, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
+                    // Lab Director (right)
+                    $pdf->text(350, 810, "Lab Director: Dr. Christina Pierre", $font, $size);
+                }
+            ');
+        }
     </script>
 </body>
 

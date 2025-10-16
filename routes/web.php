@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
     Route::post('/TestProfile/fetch-tests-from-profiles', [TestProfileController::class, 'fetchTestsFromProfiles']);
+
     // test profile crud  working
     Route::get('/TestProfile', [TestProfileController::class, 'index'])->name('TestProfile.index');
     Route::post('/TestProfile', [TestProfileController::class, 'store'])->name('TestProfile.store');

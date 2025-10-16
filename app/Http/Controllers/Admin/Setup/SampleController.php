@@ -44,17 +44,7 @@ class SampleController extends Controller
         $patients = Patient::where('is_active', 1)->get();
         $tests = Test::where('is_active', 1)->get();
         $test_profiles = TestProfile::all();
-        $prefix = 'B25-';
-        $latestSample = Sample::where('access_number', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if ($latestSample && preg_match('/^B25-(\d{4})$/', $latestSample->access_number, $matches)) {
-            $nextNumber = str_pad((int)$matches[1] + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $nextNumber = '0001';
-        }
-        $access_number = $prefix . $nextNumber;
+        $access_number = strtoupper(substr(md5(time()), 0, 6));
 
         return view('setup.sample.create' ,compact('test_profiles','doctors', 'institutions', 'patients','tests','access_number'));
     }
@@ -82,7 +72,7 @@ class SampleController extends Controller
 
 
        $sample = new Sample();
-       // $sample->test_number =$request->test_number;
+       //$sample->test_number =$request->test_number;
        $sample->access_number = $request->access_number;
        $sample->collected_date = $request->collected_date;
        $sample->received_date = $request->received_date;
@@ -161,49 +151,6 @@ class SampleController extends Controller
 
         // $sample->notes = $request->notes;
         $sample->save();
-
-         // Get the list of test IDs from the request
-         $newTestIds = $request->test_requested ?? [];
-         $newProfileIds = $request->test_profiles ?? [];
-
-         // Find the current test IDs attached to the sample
-         $currentTestIds = $sample->tests()->pluck('tests.id')->toArray();
-         $currentProfileIds = $sample->testProfiles()->pluck('test_profiles.id')->toArray();
-
-         // Identify the test IDs that are being removed
-         $removedTestIds = array_diff($currentTestIds, $newTestIds);
-         $removedProfileIds = array_diff($currentProfileIds, $newProfileIds);
-        //  dd($removedProfileIds);
-
-        //  dd($getProfileTestsforremove[0]->tests());
-        //  dd($getProfileTestsforremove);
-
-         // Delete the `test_reports` associated with the removed tests
-         if (!empty($removedTestIds)) {
-             TestReport::where('sample_id', $sample->id)
-                 ->whereIn('test_id', $removedTestIds)
-                 ->delete();
-         }
-         if (!empty($removedProfileIds)) {
-            foreach ($removedProfileIds as $key => $value) {
-                $getProfileTestsforremove = TestProfile::find($value);
-                // dd($getProfileTestsforremove);
-                $getProfileTestsforremove = $getProfileTestsforremove->tests()->pluck('tests.id')->toArray();
-
-                 TestReport::where('sample_id', $sample->id)
-                     ->whereIn('test_id', $getProfileTestsforremove)
-                     ->delete();
-            }
-
-         }
-
-         // Detach the existing tests and profiles from the sample
-         $sample->tests()->detach();
-         $sample->testProfiles()->detach();
-
-         // Attach the updated tests to the sample
-         $sample->tests()->attach($request->test_requested);
-         $sample->testProfiles()->attach($request->test_profiles);
 
          // Get the list of test IDs from the request
          $newTestIds = $request->test_requested ?? [];

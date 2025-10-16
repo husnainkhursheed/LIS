@@ -403,7 +403,7 @@ class TestReportController extends Controller
     {
         $profileIds = $request->input('profile_ids');
         $profiles = SensitivityProfiles::with('sensitivityValues')
-            ->where('id', $profileIds)
+            ->whereIn('id', $profileIds)
             ->get();
 
         return response()->json($profiles);
