@@ -229,18 +229,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Row for Grand Total -->
-                <div class="row align-items-center p-0" style="text-align: right">
-                    <div class="col-md-10 form-group mt-2">
-                        <label for="grand_total" class="form-label">Grand Total:</label>
-                    </div>
-                    <div class="col-md-2 p-0">
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="grand_total" id="grand_total" >
-                        </div>
-                    </div>
-                </div>
-
 
 
                 <div class="row">

@@ -369,7 +369,7 @@
                 @endphp
 
                 {{-- @if ($testResults) --}}
-                    <tr>
+                    {{-- <tr>
                         <td><small>{{ $description }}</small>
                             @if ($testNote)
                                 <br><small>({{ $testNote }})</small>
@@ -386,16 +386,16 @@
                             @endif
                         </td>
 
-                    </tr>
+                    </tr> --}}
                 {{-- @endif --}}
-            @endforeach
+            {{-- @endforeach
             <tr>
                 <td colspan="4">
                     <hr style="border: 0.5px solid #caced1; margin: 10px 0;">
                 </td>
-            </tr>
+            </tr> --}}
 
-        @endforeach --}}
+        {{-- @endforeach --}}
         <br><br><br>
         <tr>
             <td>

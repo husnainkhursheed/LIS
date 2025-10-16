@@ -1018,106 +1018,108 @@
                                 <tbody>
                                     @if ($reporttype == '3')
                                         @foreach ($categorizedTests as $profileId => $profileData)
-                                            <tr id="{{ $profileId }}">
-                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
-                                            </tr>
-                                            @php
-                                                $microscopyTests = collect();
-                                                $chemicalAnalysisTests = collect();
-                                                // dd($profileData['tests']);
-                                                foreach ($profileData['tests'] as $test) {
-                                                    // dd($profileData['tests']);
-                                                    if ($test->urin_test_type === '2') {
-                                                        $microscopyTests->push($test);
-                                                    } elseif ($test->urin_test_type === '1') {
-                                                        $chemicalAnalysisTests->push($test);
-                                                    }
-                                                }
-                                                // dd($microscopyTests);
-                                            @endphp
-                                            @foreach ($chemicalAnalysisTests as $index => $test)
-                                                @php
-                                                    $testReport = $testReports
-                                                        ->where('test_id', $test->id)
-                                                        ->where('sample_id', $sample->id)
-                                                        ->first();
-                                                    $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
-                                                @endphp
-                                                <tr>
-                                                    <td colspan="2">
-                                                        <input type="text" data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][id]" class="form-control"
-                                                            value="{{ $test->id }}" hidden disabled />
-                                                        <input type="text" data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][description]" class="form-control"
-                                                            value="{{ $test->name }}" disabled />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"  data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
-                                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
-                                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
-                                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
-                                                            data-male-low="{{ $test->male_low_value_ref_range }}"
-                                                            data-male-high="{{ $test->male_high_value_ref_range }}"
-                                                            data-female-low="{{ $test->female_low_value_ref_range }}"
-                                                            data-female-high="{{ $test->female_high_value_ref_range }}"
-                                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"  data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
-                                                        @php
-                                                            $background = '';
-                                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                                $background = 'bg-success';
-                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
-                                                                $background = 'bg-danger';
-                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                                $background = 'bg-warning';
-                                                            }
-                                                        @endphp
-                                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
-                                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
-                                                    </td>
-                                                    <td colspan="1">
-                                                        <p class="reference-range">
-                                                            @if ($test->reference_range == 'basic_ref')
-                                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                                            @elseif ($test->reference_range == 'optional_ref')
-                                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                                <br>
-                                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                                                            @elseif ($test->reference_range == 'no_manual_tag')
-                                                                {{ $test->nomanualvalues_ref_range }}
-                                                            @endif
-                                                        </p>
-                                                    </td>
-                                                    <td>
-                                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
-                                                    </td>
-                                                    <td>
-                                                        @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
-                                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                                                data-bs-placement="top" title="Delete">
-                                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
-                                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
-                                                                    href="#deleteRecordModal">
-                                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                                </a>
-                                                            </li>
-                                                        @endif
-                                                    </td>
-                                                    {{-- <td>
-                                                        @if ($test->calculation_explanation)
-                                                            <a href="" class="getcalc" data-bs-toggle="modal"
-                                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
-                                                                            class="badge bg-info text-white">show</span> </a>
-                                                        @endif
-                                                    </td> --}}
+                                            @if(!empty($profileData['tests']))
+                                                <tr id="{{ $profileId }}">
+                                                    <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
                                                 </tr>
-                                            @endforeach
+                                                @php
+                                                    $microscopyTests = collect();
+                                                    $chemicalAnalysisTests = collect();
+                                                    // dd($profileData['tests']);
+                                                    foreach ($profileData['tests'] as $test) {
+                                                        // dd($profileData['tests']);
+                                                        if ($test->urin_test_type === '2') {
+                                                            $microscopyTests->push($test);
+                                                        } elseif ($test->urin_test_type === '1') {
+                                                            $chemicalAnalysisTests->push($test);
+                                                        }
+                                                    }
+                                                    // dd($microscopyTests);
+                                                @endphp
+                                                @foreach ($chemicalAnalysisTests as $index => $test)
+                                                    @php
+                                                        $testReport = $testReports
+                                                            ->where('test_id', $test->id)
+                                                            ->where('sample_id', $sample->id)
+                                                            ->first();
+                                                        $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
+                                                    @endphp
+                                                    <tr>
+                                                        <td colspan="2">
+                                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][id]" class="form-control"
+                                                                value="{{ $test->id }}" hidden disabled />
+                                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][description]" class="form-control"
+                                                                value="{{ $test->name }}" disabled />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                                value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                                data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                                data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                                data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                                data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                                data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                                data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                                data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                                value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                            @php
+                                                                $background = '';
+                                                                if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                                    $background = 'bg-success';
+                                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                                    $background = 'bg-danger';
+                                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                                    $background = 'bg-warning';
+                                                                }
+                                                            @endphp
+                                                            <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                                data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                        </td>
+                                                        <td colspan="1">
+                                                            <p class="reference-range">
+                                                                @if ($test->reference_range == 'basic_ref')
+                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                                @elseif ($test->reference_range == 'optional_ref')
+                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                    <br>
+                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                                @elseif ($test->reference_range == 'no_manual_tag')
+                                                                    {{ $test->nomanualvalues_ref_range }}
+                                                                @endif
+                                                            </p>
+                                                        </td>
+                                                        <td>
+                                                            <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                        </td>
+                                                        <td>
+                                                            @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                                    data-bs-placement="top" title="Delete">
+                                                                    <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                        data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                        href="#deleteRecordModal">
+                                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                                    </a>
+                                                                </li>
+                                                            @endif
+                                                        </td>
+                                                        {{-- <td>
+                                                            @if ($test->calculation_explanation)
+                                                                <a href="" class="getcalc" data-bs-toggle="modal"
+                                                                data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                                class="badge bg-info text-white">show</span> </a>
+                                                            @endif
+                                                        </td> --}}
+                                                    </tr>
+                                                @endforeach
+                                            @endif
                                         @endforeach
 
                                     @else
@@ -1226,106 +1228,108 @@
                                 <tbody>
                                     @if ($reporttype == '3')
                                         @foreach ($categorizedTests as $profileId => $profileData)
-                                            <tr id="{{ $profileId }}">
-                                                <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
-                                            </tr>
-                                            @php
-                                                $microscopyTests = collect();
-                                                $chemicalAnalysisTests = collect();
-                                                // dd($profileData['tests']);
-                                                foreach ($profileData['tests'] as $test) {
-                                                    // dd($profileData['tests']);
-                                                    if ($test->urin_test_type === '2') {
-                                                        $microscopyTests->push($test);
-                                                    } elseif ($test->urin_test_type === '1') {
-                                                        $chemicalAnalysisTests->push($test);
-                                                    }
-                                                }
-                                                // dd($microscopyTests);
-                                            @endphp
-                                            @foreach ($microscopyTests as $index => $test)
-                                                @php
-                                                    $testReport = $testReports
-                                                        ->where('test_id', $test->id)
-                                                        ->where('sample_id', $sample->id)
-                                                        ->first();
-                                                    $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
-                                                @endphp
-                                                <tr>
-                                                    <td>
-                                                        <input type="text" data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][id]" class="form-control"
-                                                            value="{{ $test->id }}" hidden disabled />
-                                                        <input type="text" data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][description]" class="form-control"
-                                                            value="{{ $test->name }}" disabled />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"  data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
-                                                            value="{{ $biochemHaemoResults->test_results ?? '' }}"
-                                                            data-basic-low="{{ $test->basic_low_value_ref_range }}"
-                                                            data-basic-high="{{ $test->basic_high_value_ref_range }}"
-                                                            data-male-low="{{ $test->male_low_value_ref_range }}"
-                                                            data-male-high="{{ $test->male_high_value_ref_range }}"
-                                                            data-female-low="{{ $test->female_low_value_ref_range }}"
-                                                            data-female-high="{{ $test->female_high_value_ref_range }}"
-                                                            data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
-                                                    </td>
-                                                    <td>
-                                                        <input type="text"  data-test-id="{{ $test->id }}"
-                                                            name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                                            value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
-                                                        @php
-                                                            $background = '';
-                                                            if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                                $background = 'bg-success';
-                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
-                                                                $background = 'bg-danger';
-                                                            } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                                $background = 'bg-warning';
-                                                            }
-                                                        @endphp
-                                                        <span class="badge badge-pill flag-badge {{ $background }} d-none"
-                                                            data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
-                                                    </td>
-                                                    <td>
-                                                        <p class="reference-range">
-                                                            @if ($test->reference_range == 'basic_ref')
-                                                                {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                                            @elseif ($test->reference_range == 'optional_ref')
-                                                                Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                                <br>
-                                                                Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                                                            @elseif ($test->reference_range == 'no_manual_tag')
-                                                                {{ $test->nomanualvalues_ref_range }}
-                                                            @endif
-                                                        </p>
-                                                    </td>
-                                                    <td>
-                                                        <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
-                                                    </td>
-                                                    <td>
-                                                        @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
-                                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                                                data-bs-placement="top" title="Delete">
-                                                                <a class="remove-item-btn" data-id="{{ $test->id }}"
-                                                                    data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
-                                                                    href="#deleteRecordModal">
-                                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                                </a>
-                                                            </li>
-                                                        @endif
-                                                    </td>
-                                                    {{-- <td>
-                                                        @if ($test->calculation_explanation)
-                                                            <a href="" class="getcalc" data-bs-toggle="modal"
-                                                            data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
-                                                                            class="badge bg-info text-white">show</span> </a>
-                                                        @endif
-                                                    </td> --}}
+                                            @if(!empty($profileData['tests']))
+                                                <tr id="{{ $profileId }}">
+                                                    <td colspan="7"><strong>{{ $profileData['name'] }}</strong></td>
                                                 </tr>
-                                            @endforeach
+                                                @php
+                                                    $microscopyTests = collect();
+                                                    $chemicalAnalysisTests = collect();
+                                                    // dd($profileData['tests']);
+                                                    foreach ($profileData['tests'] as $test) {
+                                                        // dd($profileData['tests']);
+                                                        if ($test->urin_test_type === '2') {
+                                                            $microscopyTests->push($test);
+                                                        } elseif ($test->urin_test_type === '1') {
+                                                            $chemicalAnalysisTests->push($test);
+                                                        }
+                                                    }
+                                                    // dd($microscopyTests);
+                                                @endphp
+                                                @foreach ($microscopyTests as $index => $test)
+                                                    @php
+                                                        $testReport = $testReports
+                                                            ->where('test_id', $test->id)
+                                                            ->where('sample_id', $sample->id)
+                                                            ->first();
+                                                        $biochemHaemoResults = $testReport ? $testReport->urinalysisMicrobiologyResults->first() : [];
+                                                    @endphp
+                                                    <tr>
+                                                        <td>
+                                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][id]" class="form-control"
+                                                                value="{{ $test->id }}" hidden disabled />
+                                                            <input type="text" data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][description]" class="form-control"
+                                                                value="{{ $test->name }}" disabled />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                                value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                                data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                                data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                                data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                                data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                                data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                                data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                                data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"  data-test-id="{{ $test->id }}"
+                                                                name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                                value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                            @php
+                                                                $background = '';
+                                                                if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                                    $background = 'bg-success';
+                                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                                    $background = 'bg-danger';
+                                                                } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                                    $background = 'bg-warning';
+                                                                }
+                                                            @endphp
+                                                            <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                                data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <p class="reference-range">
+                                                                @if ($test->reference_range == 'basic_ref')
+                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                                @elseif ($test->reference_range == 'optional_ref')
+                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                    <br>
+                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                                @elseif ($test->reference_range == 'no_manual_tag')
+                                                                    {{ $test->nomanualvalues_ref_range }}
+                                                                @endif
+                                                            </p>
+                                                        </td>
+                                                        <td>
+                                                            <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                        </td>
+                                                        <td>
+                                                            @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                                    data-bs-placement="top" title="Delete">
+                                                                    <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                        data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                        href="#deleteRecordModal">
+                                                                        <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                                    </a>
+                                                                </li>
+                                                            @endif
+                                                        </td>
+                                                        {{-- <td>
+                                                            @if ($test->calculation_explanation)
+                                                                <a href="" class="getcalc" data-bs-toggle="modal"
+                                                                data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                                class="badge bg-info text-white">show</span> </a>
+                                                            @endif
+                                                        </td> --}}
+                                                    </tr>
+                                                @endforeach
+                                            @endif
                                         @endforeach
 
                                     @else
@@ -2475,1146 +2479,7 @@
     </script>
 
 @endsection
-@section('script')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-
-    <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
-
-    <script src="{{ URL::asset('build/js/app.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const testResultInputs = document.querySelectorAll('.test-result');
-            testResultInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    // console.log(input.value);
-                    const testId = this.dataset.testId;
-                    const testValue = parseFloat(this.value);
-
-                    const flagInput = document.querySelector(
-                    `input[name="tests[${testId}][flag]"]`);
-                    const flagBadge = this.closest('tr').querySelector('.flag-badge');
-                    const referenceRange = this.closest('tr').querySelector('.reference-range')
-                        .innerText;
-
-                    let low, high;
-                    let sex = document.getElementById('gender').value
-                    // console.log(sex);
-                    if (referenceRange.includes('Male') && referenceRange.includes('Female')) {
-                        // Assuming gender is available
-                        const gender = sex; // Replace with actual gender logic
-                        if (gender === 'Male') {
-                            low = parseFloat(this.dataset.maleLow);
-                            high = parseFloat(this.dataset.maleHigh);
-                        } else {
-                            low = parseFloat(this.dataset.femaleLow);
-                            high = parseFloat(this.dataset.femaleHigh);
-                        }
-                    } else {
-                        low = parseFloat(this.dataset.basicLow);
-                        high = parseFloat(this.dataset.basicHigh);
-                    }
-                    // data-nomanual-set
-                    let noManualSet = this.dataset.nomanualSet;
-                    // console.log(noManualSet);
-
-
-                    let flag = '';
-                    if (!noManualSet) {
-                        // flag = '';
-                        if (testValue < low) {
-                            flag = 'Low';
-                        } else if (testValue > high) {
-                            flag = 'High';
-                        }else if(testValue >= low && testValue <= high){
-                            flag = '';
-                        }
-                    }
-
-
-                    flagInput.value = flag;
-                    flagBadge.innerText = flag;
-                    flagBadge.classList.remove('bg-danger', 'bg-warning', 'bg-success');
-                    // if (flag === 'Low') {
-                    //     flagBadge.classList.add('bg-warning');
-                    // } else if (flag === 'High') {
-                    //     flagBadge.classList.add('bg-danger');
-                    // } else {
-                    //     flagBadge.classList.add('bg-success');
-                    // }
-                    // if (flag === 'Low') {
-                    //     flagInput.style.color = '#c2c22c';
-                    // } else if (flag === 'High') {
-                    //     flagInput.style.color = 'red';
-                    // } else {
-                    //     flagInput.style.color = 'green';
-                    // }
-                });
-            });
-        });
-
-    </script>
-    <script>
-         $(document).ready(function() {
-
-            // Function to add a new input field and delete button
-
-            function newInput() {
-
-                var newItem =
-
-                    // '<label for="attribute_values" class="form-label">Attribute Value</label>' +
-
-                    '<div class="row input-group">' +
-
-                        '<div class="col-md-10">' +
-
-                        '<input type="hidden" class="form-control mt-1 " style="" id="senstivityItems_ids"  name="senstivityItems_ids[]" required />' +
-
-                        '<input type="text" class="form-control antibiotic-value mt-1 " style="" id="antibiotic"  name="antibiotic[]" required />' +
-
-                        '</div>'+
-
-                        '<div class="col-md-2 mt-3 text-left">' +
-
-                        '<span type="button" class="delete-item fs-5 "  style="margin-left: 4px;"><i class="ri-delete-bin-fill align-bottom text-danger"></i></span>' +
-
-                        '</div>' ;
-
-                    '</div>';
-
-                $('#attribute-item').append(newItem);
-
-            }
-
-            // Function to remove the parent element (item) when delete button is clicked
-
-            $('#attribute-item').on('click', '.delete-item', function() {
-
-                $(this).closest('.input-group').remove();
-
-            });
-
-            // Event handler for the "Add Item" link
-
-            $('#add-item').on('click', function() {
-                newInput();
-            });
-
-        });
-        jQuery(document).ready(function($) {
-            $('.js-example-basic-multiple').select2();
-
-            $('#add-procedure').click(function() {
-                let newProcedureGroup = `
-                    <div class="procedure-group">
-                        <div class="form-group">
-                            <label for="procedure" class="form-label">Procedure</label>
-                            <input type="text" class="form-control procedure" name="procedure" id="" value="" >
-
-                        </div>
-                        <div class="form-group">
-                            <label for="specimen_note" class="form-label">Note</label>
-                            <textarea type="text" name="specimen_note[]" rows="5" class="form-control"></textarea>
-                        </div>
-                        <button type="button" class="remove-procedure btn btn-danger float-end">Remove</button>
-                    </div>
-                `;
-                $('#procedures-container').append(newProcedureGroup);
-                $('.js-example-basic-multiple').select2();
-            });
-
-            $(document).on('click', '.remove-procedure', function() {
-                $(this).closest('.procedure-group').remove();
-            });
-
-            // generate pdf
-            $('.generate-pdf-link').click(function(e) {
-                e.preventDefault();
-                var testReportId = $(this).data('test-report-id');
-                // var reportType = $('#report_type').val(); // Assuming you have a dropdown with id='report_type'
-                var reportType = $(this).closest('tr').find('.test-reports-dropdown').val(); // Get the report type from the closest dropdown
-
-                // Construct the URL dynamically
-                var url = "{{ url('generate-pdf') }}/" + testReportId + "/" + reportType;
-
-                // Set the href attribute of the anchor tag to the constructed URL
-                $(this).attr('href', url);
-
-                // Optional: Open the link in a new tab/window
-                window.open(url, '_blank'); // This will open the URL in a new tab
-            });
-
-
-            // $('#allreadyassign').hide();
-            $('#optionalValues').hide();
-            $('#noManualValues').hide();
-            $('#basicValues').show();
-
-            $('#urioptionalValues').hide();
-            $('#urinoManualValues').hide();
-            $('#uribasicValues').show();
-
-            $('#test_profiles_container').hide();
-
-            $('#department').on('change', function(){
-                // console.log('Department');
-                if (this.value == '3') {
-                    $('#urin_test_type_container').show();
-                    $('#urin_test_type').prop('required', true);
-                }else{
-                    $('#urin_test_type_container').hide();
-                    $('#urin_test_type').prop('required', false);
-                    $('#urin_test_type').val('');
-                }
-            });
-
-            // $('#profile-tab').on('click', function () {
-            //     // Show Profile Test fields
-            //     $('#department').closest('.col-lg-6').hide();
-            //     $('#test_profiles_container').show();
-            //     $('#is_urine_type_container').show();
-            //     $('#cost_container').hide();
-            //     $('#specimen_type, #calculation_explanation, #test_profiles').attr('required', true);
-            //     $('#urin_test_type_container').hide(); // Hide urin_test_type field initially
-
-
-            //     // Handle checkbox 'Is urine type'
-            //     $('#is_urine_type').on('change', function () {
-            //         if ($(this).is(':checked')) {
-            //             $('#urin_test_type_container').show();
-            //             $('#urin_test_type').attr('required', true); // Make urine type required
-            //         } else {
-            //             $('#urin_test_type_container').hide();
-            //             $('#urin_test_type').removeAttr('required'); // Remove urine type required
-            //             $('#urin_test_type').val('');
-            //         }
-            //     });
-
-            //     // Set required attributes for Profile Test fields
-            //     $('#department, #cost').attr('required', false);
-            //     $('#department').val('');
-            //     $('#cost').val('');
-            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').removeAttr('required');
-            //     // $('#nomanualvalues_ref_range').removeAttr('required');
-            // });
-
-            // $('#individual-tab').on('click', function () {
-            //     // Show Individual Test fields
-            //     $('#department').closest('.col-lg-6').show();
-            //     $('#test_profiles_container').hide();
-            //     $('#is_urine_type_container').hide();
-            //     $('#cost_container').show();
-            //     $('#specimen_type, #calculation_explanation, #cost, #department').attr('required', true);
-            //     $('#urin_test_type_container').hide();
-            //     $('#urin_test_type').removeAttr('required'); // Remove required from urin test type
-
-            //     // Set required attributes for Individual Test fields
-            //     $('#test_profiles').attr('required', false);
-            //     $('#test_profiles').val('');
-            //     $('#is_urine_type').prop('checked', false);
-            //     // $('#male_low_value_ref_range, #male_high_value_ref_range, #female_low_value_ref_range, #female_high_value_ref_range').attr('required', true);
-            //     // $('#nomanualvalues_ref_range').attr('required', true);
-            // });
-
-            // Default selection to Profile Test on page load
-            // $('#profile-tab').trigger('click');
-
-            // Show/hide fields based on selected reference range
-            $('input[name="reference_range"]').on('change', function() {
-                if (this.value === 'basic_ref') {
-                    $('#basicValues').show();
-                    $('#optionalValues').hide();
-                    $('#noManualValues').hide();
-                    // Make fields required
-                    $('#basic_low_value_ref_range').prop('required', true);
-                    $('#basic_high_value_ref_range').prop('required', true);
-                    $('#male_low_value_ref_range').prop('required', false);
-                    $('#male_high_value_ref_range').prop('required', false);
-                    $('#female_low_value_ref_range').prop('required', false);
-                    $('#female_high_value_ref_range').prop('required', false);
-                } else if (this.value === 'optional_ref') {
-                    $('#basicValues').hide();
-                    $('#optionalValues').show();
-                    $('#noManualValues').hide();
-                    // Make fields required
-                    $('#basic_low_value_ref_range').prop('required', false);
-                    $('#basic_high_value_ref_range').prop('required', false);
-                    $('#male_low_value_ref_range').prop('required', true);
-                    $('#male_high_value_ref_range').prop('required', true);
-                    $('#female_low_value_ref_range').prop('required', true);
-                    $('#female_high_value_ref_range').prop('required', true);
-                }else if (this.value === 'no_manual_tag') {
-                    $('#basicValues').hide();
-                    $('#optionalValues').hide();
-                    $('#noManualValues').show();
-                    // Make fields required
-                    $('#basic_low_value_ref_range').prop('required', false);
-                    $('#basic_high_value_ref_range').prop('required', false);
-                    $('#male_low_value_ref_range').prop('required', false);
-                    $('#male_high_value_ref_range').prop('required', false);
-                    $('#female_low_value_ref_range').prop('required', false);
-                    $('#female_high_value_ref_range').prop('required', false);
-                }
-            });
-
-            $('input[name="urireference_range"]').on('change', function() {
-                if (this.value === 'uri_basic_ref') {
-                    $('#uribasicValues').show();
-                    $('#urioptionalValues').hide();
-                    $('#urinoManualValues').hide();
-                    // Make fields required
-                    $('#basic_low_value').prop('required', true);
-                    $('#basic_high_value').prop('required', true);
-                    $('#male_low_value').prop('required', false);
-                    $('#male_high_value').prop('required', false);
-                    $('#female_low_value').prop('required', false);
-                    $('#female_high_value').prop('required', false);
-                } else if (this.value === 'uri_optional_ref') {
-                    $('#uribasicValues').hide();
-                    $('#urioptionalValues').show();
-                    $('#urinoManualValues').hide();
-                    // Make fields required
-                    $('#basic_low_value').prop('required', false);
-                    $('#basic_high_value').prop('required', false);
-                    $('#male_low_value').prop('required', true);
-                    $('#male_high_value').prop('required', true);
-                    $('#female_low_value').prop('required', true);
-                    $('#female_high_value').prop('required', true);
-                }else if (this.value === 'uri_no_manual_tag') {
-                    $('#uribasicValues').hide();
-                    $('#urioptionalValues').hide();
-                    $('#urinoManualValues').show();
-                    // Make fields required
-                    $('#basic_low_value').prop('required', false);
-                    $('#basic_high_value').prop('required', false);
-                    $('#male_low_value').prop('required', false);
-                    $('#male_high_value').prop('required', false);
-                    $('#female_low_value').prop('required', false);
-                    $('#female_high_value').prop('required', false);
-                }
-            });
-            // When the document is ready, attach a click event to the "Edit" button
-            $('.edit-item-btn').on('click', function() {
-                // Get the ID from the data attribute
-
-                // var itemId = $(this).data('id');
-                // var url = '{{ url('/reports/test-reports') }}' + '/' + itemId;
-                // $('#leadtype_form').attr('action', url);
-                // $.ajax({
-                //         url: url, // Adjust the route as needed
-                //         type: 'GET',
-                //         success: function(response) {
-                //             // Assuming the response has a 'leadType' key
-                //             var doctor = response.doctor;
-                //             console.log("my practices ",doctor);
-
-                //             // Now you can use the leadType data to populate your modal fields
-                //             $('#id-field').val(doctor.id);
-                //             $('#name').val(doctor.name);
-                //             // $('#phone').val(doctor.phone);
-                //             $('#contact_number').val(doctor.contact_number);
-                //             $('#street_name').val(doctor.street_name);
-                //             $('#address_line_2').val(doctor.address_line_2);
-                //             $('#area').val(doctor.area);
-                //             $('#email').val(doctor.email);
-
-                //             // var surgeries = SetupPractice.surgeries.map(function(surgery) {
-                //             //         return surgery.id;
-                //             //     });
-
-                //             // $('#surgeries').val(surgeries).trigger('change');
-
-    </script> --}}
-
-    <div class="modal fade" id="showModalcalc" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Calculation Explanation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                    <div class="modal-body">
-                        <p class="calc-container"></p>
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="showModalRefferenceranges" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Set Normal Range</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                <form class="tablelist-form" id="refRanges_form" action="{{ url("/uriRefRanges") }}" method="Post" autocomplete="off">
-                    @csrf
-                    <input type="hidden" id="analyte" name="analyte">
-                    <div class="modal-body">
-                        <div class="col-lg-12">
-                            <label for="reference_range" class="form-label">Reference range</label>
-                            <div>
-
-                                <input type="radio" id="uri_basic_ref" name="urireference_range"
-                                     required  value="uri_basic_ref" checked/>
-                                    <label for="uri_basic_ref" class="form-label">Basic Reference range</label>
-                                <input type="radio" id="uri_optional_ref" class="ms-4" name="urireference_range"
-                                     required value="uri_optional_ref" />
-                                <label for="uri_optional_ref" class="form-label">Reference range with optional sex</label>
-                                <input type="radio" id="uri_no_manual_tag" class="ms-4" name="urireference_range"
-                                     required value="uri_no_manual_tag" />
-                                <label for="uri_no_manual_tag" class="form-label">No / Manual Tag</label>
-                            </div>
-                        </div>
-                        <div class="row" id="uribasicValues">
-                            {{-- <label for="" class="form-label">High value with optional sex</label> --}}
-                            {{-- <div> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="basic_low_value" class="form-label">Low Value</label>
-                                        <input type="text" id="basic_low_value" class="form-control" name="basic_low_value"
-                                            placeholder="Enter Low Value" required />
-                                    </div>
-                                </div>
-                                    {{-- <label for="male" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="basic_high_value" class="form-label">High Value</label>
-                                        <input type="text" id="basic_high_value" class="form-control" name="basic_high_value"
-                                            placeholder="Enter High Value" required />
-                                    </div>
-                                </div>
-                                {{-- <label for="female" class="form-label">Low value</label> --}}
-                            {{-- </div> --}}
-                        </div>
-                        <div class="row" id="urioptionalValues">
-                            <h5 for="" class="form-label text-black fw-bolder">Male </h5>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="male_low_value" class="form-label">Low Value</label>
-                                    <input type="text" id="male_low_value" class="form-control" name="male_low_value"
-                                        placeholder="Enter Low Value"  />
-                                </div>
-                            </div>
-                                {{-- <label for="male" class="form-label">High Value</label> --}}
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="male_high_value" class="form-label">High Value</label>
-                                    <input type="text" id="male_high_value" class="form-control" name="male_high_value"
-                                        placeholder="Enter High Value"  />
-                                </div>
-                            </div>
-                            <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="female_low_value" class="form-label">Low Value</label>
-                                    <input type="text" id="female_low_value" class="form-control" name="female_low_value"
-                                        placeholder="Enter Low Value"  />
-                                </div>
-                            </div>
-                                {{-- <label for="female" class="form-label">High Value</label> --}}
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="female_high_value" class="form-label">High Value</label>
-                                    <input type="text" id="female_high_value" class="form-control" name="female_high_value"
-                                        placeholder="Enter High Value"  />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" id="urinoManualValues">
-                            <textarea name="nomanualvalues" id="nomanualvalues" cols="30" rows="10"></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <div class="hstack gap-2 justify-content-end">
-                                <button type="button" class="btn btn-light"
-                                    data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-success" id="add-btn">Set Range</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dropdown Modal -->
-    <div class="modal fade" id="showModalDropdown" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Dropdown</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-end py-1">
-                        <input type="text" name="" id="dropdownName" hidden>
-                        <button type="button" id="addRowBtn" class="btn btn-secondary px-5">Add</button>
-                    </div>
-                    <form id="dropdownForm">
-                        @csrf
-                        <input type="hidden" name="dropdown_name" id="dropdown_name">
-                        <input type="hidden" name="deleted_ids" id="deleted_ids" value="">
-                        <table class="table table-responsive rounded">
-                            <thead>
-                                <tr>
-                                    <th class="rounded-start-3">Name</th>
-                                    <th>Values</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="valuesTable">
-                                <!-- Rows will be added dynamically -->
-                            </tbody>
-                        </table>
-                        <button type="submit" class="btn btn-primary float-end px-4">Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Test</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                <form class="tablelist-form" id="leadtype_form" action="{{ url("/test") }}" method="Post" autocomplete="off">
-                    @csrf
-                    <div class="text-center mb-4">
-                        {{-- <h4 class="fw-semibold fs-22">Plans & Pricing</h4>
-                        <p class="text-muted mb-4 fs-15">Simple pricing. No hidden fees. Advanced features for you business.</p> --}}
-                        <input type="hidden" id="sample_id" name="sample_id"
-                        value="{{ $sample->id }}">
-                        <div class="d-inline-flex">
-                            <ul class="nav nav-pills arrow-navtabs plan-nav rounded mb-3 p-1" id="pills-tab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link fw-semibold active" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab" aria-selected="true">Profile Test</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link fw-semibold" id="individual-tab" data-bs-toggle="pill" data-bs-target="#individual" type="button" role="tab" aria-selected="false">Individual Test</button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="id-field" />
-                        <div class="row g-3">
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="companyname-field"
-                                        class="form-label">Name of charge item</label>
-                                    <input type="text" id="name" name="name"
-                                        class="form-control"
-                                        placeholder="Enter Name" required />
-                                </div>
-                                {{-- @error('v_name')
-                                    <div class="text-danger">{{$message}}</div>
-                                @enderror --}}
-                            </div>
-                            <div class="col-lg-6" id="is_urine_type_container">
-                                <div>
-                                    <input type="checkbox" id="is_urine_type" name="is_urine_type">
-                                    <label for="is_urine_type" class="form-label">Is Urine Type</label>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="department" class="form-label">Department</label>
-                                    <select class="form-control" name="department" id="department">
-                                        <option value="">Select Department</option>
-                                        <option value="1">Biochemistry / Haematology</option>
-                                        <option value="2">Cytology / Gynecology</option>
-                                        <option value="3">Urinalysis / Microbiology</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-6" id="urin_test_type_container">
-                                <div>
-                                    <label for="urin_test_type" class="form-label">Select Type</label>
-                                    <select class="form-control" name="urin_test_type" id="urin_test_type">
-                                        <option value="">Select type</option>
-                                        <option value="1">Chemical Analysis</option>
-                                        <option value="2">Microscopy</option>
-                                        {{-- <option value="3">Urinalysis / Microbiology</option> --}}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-6" id="test_profiles_container">
-                                <div>
-                                    <label for="test_profiles" class="form-label">Profiles</label>
-                                    <select class="form-control" name="test_profiles" id="test_profiles">
-                                        <option value="">Select Profiles</option>
-                                        @foreach ($test_profiles as $item)
-                                            <option value="{{$item->id}}">{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div>
-                                    <label for="specimen_type" class="form-label">Specimen Type</label>
-                                    <input type="text" id="specimen_type" class="form-control" name="specimen_type"
-                                        placeholder="Enter Specimen Type" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6" id="cost_container">
-                                <div>
-                                    <label for="cost" class="form-label">Cost</label>
-                                    <input type="number" id="cost" name="cost" class="form-control"
-                                        placeholder="Enter Cost" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div>
-                                    <label for="Calculation-Explanation" class="form-label">Calculation Explanation</label>
-                                    <textarea name="calculation_explanation" id="calculation_explanation" class="form-control" cols="30" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <label for="reference_range" class="form-label">Reference range</label>
-                                <div>
-
-                                    <input type="radio" id="basic_ref" name="reference_range"
-                                         required  value="basic_ref" checked/>
-                                        <label for="basic_ref" class="form-label">Basic Reference range</label>
-                                    <input type="radio" id="optional_ref" class="ms-4" name="reference_range"
-                                         required value="optional_ref" />
-                                    <label for="optional_ref" class="form-label">Reference range with optional sex</label>
-                                    <input type="radio" id="no_manual_tag" class="ms-4" name="reference_range"
-                                         required value="no_manual_tag" />
-                                    <label for="no_manual_tag" class="form-label">No / Manual Tag</label>
-                                </div>
-                            </div>
-                            <div class="row" id="basicValues">
-                                {{-- <label for="" class="form-label">High value with optional sex</label> --}}
-                                {{-- <div> --}}
-                                    <div class="col-lg-6">
-                                        <div>
-                                            <label for="basic_low_value_ref_range" class="form-label">Low Value</label>
-                                            <input type="text" id="basic_low_value_ref_range" class="form-control" name="basic_low_value_ref_range"
-                                                placeholder="Enter Low Value" required />
-                                        </div>
-                                    </div>
-                                        {{-- <label for="male" class="form-label">High Value</label> --}}
-                                    <div class="col-lg-6">
-                                        <div>
-                                            <label for="basic_high_value_ref_range" class="form-label">High Value</label>
-                                            <input type="text" id="basic_high_value_ref_range" class="form-control" name="basic_high_value_ref_range"
-                                                placeholder="Enter High Value" required />
-                                        </div>
-                                    </div>
-                                    {{-- <label for="female" class="form-label">Low value</label> --}}
-                                {{-- </div> --}}
-                            </div>
-                            <div class="row" id="optionalValues">
-                                <h5 for="" class="form-label text-black fw-bolder">Male </h5>
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="male_low_value_ref_range" class="form-label">Low Value</label>
-                                        <input type="text" id="male_low_value_ref_range" class="form-control" name="male_low_value_ref_range"
-                                            placeholder="Enter Low Value"  />
-                                    </div>
-                                </div>
-                                    {{-- <label for="male" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="male_high_value_ref_range" class="form-label">High Value</label>
-                                        <input type="text" id="male_high_value_ref_range" class="form-control" name="male_high_value_ref_range"
-                                            placeholder="Enter High Value"  />
-                                    </div>
-                                </div>
-                                <h5 for="" class="form-label text-black fw-bolder mt-2">Female </h5>
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="female_low_value_ref_range" class="form-label">Low Value</label>
-                                        <input type="text" id="female_low_value_ref_range" class="form-control" name="female_low_value_ref_range"
-                                            placeholder="Enter Low Value"  />
-                                    </div>
-                                </div>
-                                    {{-- <label for="female" class="form-label">High Value</label> --}}
-                                <div class="col-lg-6">
-                                    <div>
-                                        <label for="female_high_value_ref_range" class="form-label">High Value</label>
-                                        <input type="text" id="female_high_value_ref_range" class="form-control" name="female_high_value_ref_range"
-                                            placeholder="Enter High Value"  />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row" id="noManualValues">
-                                <textarea name="nomanualvalues_ref_range" id="nomanualvalues_ref_range" cols="30" rows="10"></textarea>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-check form-check-dark mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active"
-                                        id="is_active" checked>
-                                    <label class="form-check-label" for="is_active">
-                                        Active
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light"
-                                data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Add Test</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!--delete Modal -->
-    <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1" aria-labelledby="deleteRecordLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="btn-close"></button>
-                </div>
-                <div class="modal-body p-5 text-center">
-                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
-                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
-                    </lord-icon>
-                    <div class="mt-4 text-center">
-                        <h4 class="fs-semibold">You are about to delete a test ?</h4>
-                        <p class="text-muted fs-14 mb-4 pt-1">Deleting your test will
-                            remove all of your information from our database.</p>
-                        <div class="hstack gap-2 justify-content-center remove">
-                            <button class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
-                                data-bs-dismiss="modal" id="deleteRecord-close"><i
-                                    class="ri-close-line me-1 align-middle"></i>
-                                Close</button>
-                            <input type="text" id="delete-record-id" hidden>
-                            <button class="btn btn-danger" id="delete-record">Yes,
-                                Delete It!!</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--UnCOMPLETE  Modal -->
-    <div class="modal fade zoomIn" id="UncompleteRecordModal" tabindex="-1" aria-labelledby="UncompleteRecordModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="btn-close"></button>
-                </div>
-                <div class="modal-body p-5 text-center">
-                    {{-- <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
-                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
-                    </lord-icon> --}}
-                    <lord-icon
-                        src="https://cdn.lordicon.com/guqkthkk.json"
-                        trigger="loop"
-                        colors="primary:#110a5c"
-                        style="width:90px;height:90px">
-                    </lord-icon>
-                    <div class="mt-4 text-center">
-                        <h4 class="fs-semibold text-black">Are you sure want to Incomplete this Report?</h4>
-                        {{-- <p class="text-muted fs-14 mb-4 pt-1">Deleting your test will
-                            remove all of your information from our database.</p> --}}
-                        <div class="hstack gap-2 justify-content-center remove">
-                            <button class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
-                                data-bs-dismiss="modal" id="deleteRecord-close"><i
-                                    class="ri-close-line me-1 align-middle"></i>
-                                Close</button>
-                            <input type="text" id="complete-record-id" hidden>
-                            <button class="btn btn-primary" id="Uncomplete-record">Yes,
-                                InComplete It !!</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--COMPLETE  Modal -->
-    <div class="modal fade zoomIn" id="completeRecordModal" tabindex="-1" aria-labelledby="completeRecordModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="btn-close"></button>
-                </div>
-                <div class="modal-body p-5 text-center">
-                    {{-- <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
-                        colors="primary:#405189,secondary:#f06548" style="width:90px;height:90px">
-                    </lord-icon> --}}
-                    <lord-icon
-                        src="https://cdn.lordicon.com/guqkthkk.json"
-                        trigger="loop"
-                        colors="primary:#110a5c"
-                        style="width:90px;height:90px">
-                    </lord-icon>
-                    <div class="mt-4 text-center">
-                        <h4 class="fs-semibold text-black">Are you sure want to complete this Report?</h4>
-                        {{-- <p class="text-muted fs-14 mb-4 pt-1">Deleting your test will
-                            remove all of your information from our database.</p> --}}
-                        <div class="hstack gap-2 justify-content-center remove">
-                            <button class="btn btn-link link-success fw-medium text-decoration-none shadow-none"
-                                data-bs-dismiss="modal" id="deleteRecord-close"><i
-                                    class="ri-close-line me-1 align-middle"></i>
-                                Close</button>
-                            <input type="text" id="complete-record-id" hidden>
-                            <button class="btn btn-primary" id="complete-record">Yes,
-                                Complete It!!</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- sign modal  --}}
-    <!-- Modal -->
-    <div class="modal fade" id="signModal" tabindex="-1" aria-labelledby="signModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="signModalLabel">Sign</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @foreach ($tests as $test)
-                        @php
-                            $testReport = $testReports
-                                ->where('test_id', $test->id)
-                                ->where('sample_id', $sample->id)
-                                ->first();
-                            // dd($testReport);
-                            $cytologyGynecologyResults = $testReport
-                                ? $testReport->cytologyGynecologyResults->first()
-                                : [];
-                            // dd($biochemHaemoResults);
-
-                            $testIds = $tests->pluck('id')->implode(',');
-                            // dd($testIds);
-
-                        @endphp
-                    @endforeach
-                    <div id="sign-form">
-                        <p class="text-dark fw-semibold fs-6">Please indicate that you agree with all that is in this
-                            report by signing:</p>
-                        <form class="tablelist-form" id="leadtype_form" action="{{ route('test-reports.signReport') }}"
-                            method="POST" autocomplete="off">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="text" class="form-control" id="email" name="email">
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password">
-                            </div>
-                            <input type="hidden" id="test_report_id" name="test_report_id"
-                                value="{{ $testIds }}">
-                            <input type="hidden" id="report_sample_id" name="report_sample_id"
-                                value="{{ $sample->id }}">
-                            <div id="success-message" class="text-success" style="display: none;"></div>
-                            <div id="error-message" class="text-danger" style="display: none;"></div>
-                        </form>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="sign-button">Sign</button>
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- end sign modal  --}}
-
-
-    <div class="modal fade" id="showModalSensitivity" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="exampleModalLabel">Add profile</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="close-modal"></button>
-                </div>
-                <form class="tablelist-form" id="sensitivity_form_submit" action="{{ url('/profile') }}" method="Post"
-                    autocomplete="off">
-
-                    @csrf
-
-
-
-                    <div class="modal-body">
-                        <input type="hidden" id="id-field" />
-
-                        <div class="row g-3">
-
-                            <!-- Row 1 -->
-
-                            <div class="col-lg-12">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div>
-                                            <label for="name" class="form-label">Name</label>
-                                            <input type="text" id="name" name="name"
-                                                class="form-control" required />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-2">
-                                <div class="col-md-4">
-                                    <label for="unit" class="form-label">Units</label>
-                                    <select class="form-select" id="unit" name="unit" required>
-                                        <option value="Zone (mm)">Zone (mm)</option>
-                                        <option value="MIC (ug/mL)">MIC (ug/mL)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-
-
-                            <!-- Row 2 -->
-
-                            <div class="col-lg-12">
-
-                                <div class="row">
-
-                                    <div class="col-lg-12 mt-2">
-
-                                        <div id="attribute-container">
-
-                                            <div class="row input-group">
-
-                                                <div class="col-md-12"><label for="antibiotic"
-                                                        class="form-label">Antibiotic</label></div>
-
-                                            </div>
-
-                                            <div id="attribute-item">
-
-                                                <div class="row input-group">
-
-                                                    <div class="col-md-12">
-
-                                                        <input type="text" class="form-control antibiotic-value"
-                                                            id="antibiotic" style=""
-                                                            name="antibiotic[]" required />
-
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-lg-12 mt-2">
-                                        <a id="add-item" class="btn btn-soft-primary fw-medium text-white"><i
-                                                class="ri-add-fill me-1 align-bottom "></i> Add Item</a>
-                                    </div>
-
-                                </div>
-
-
-
-                            </div>
-
-                        </div>
-
-                        <!--end row-->
-
-                    </div>
-
-                    <div class="modal-footer">
-
-                        <div class="hstack gap-2 justify-content-end">
-
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-
-                            <button type="submit" class="btn btn-success" id="add-btn">Add </button>
-
-                            {{-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> --}}
-
-                        </div>
-
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- report notes modal  --}}
-    {{-- <div class="modal right fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-scrollable">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-primary-subtle p-3">
-                    <h5 class="modal-title" id="notesModalLabel">All Notes</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="notes-container">
-                        <!-- Notes will be loaded here via AJAX -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-    <script>
-        $(document).ready(function() {
-            // cytology notes request handle for ajax
-            $('.add-note').on('click', function() {
-                var targetTextarea = $($(this).data('target'));
-                $('#notesModal').modal('show');
-
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('fetch-notes-cytology') }}',
-                    success: function(notes) {
-                        var notesContainer = $('#notes-container');
-                        notesContainer.empty();
-
-                        if (notes.length > 0) {
-                            notes.forEach(function(note) {
-                                // Create the note item with comment initially hidden
-                                var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
-                                var noteComment = $('<div class="note-comment" style="display:none;cursor: pointer;">' + note.comment + '</div>');
-
-                                // Append note item and comment to the container
-                                notesContainer.append(noteItem);
-                                notesContainer.append(noteComment);
-
-                                // Toggle the comment on note item click
-                                noteItem.on('click', function() {
-                                    noteComment.toggle();
-                                });
-
-                                // Append the comment to the textarea on comment click
-                                noteComment.on('click', function() {
-                                    var selectedComment = $(this).text();
-                                    var currentText = targetTextarea.val();
-                                    targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedComment);
-                                    $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a comment
-                                });
-                                 // Filter notes based on search input
-                                $('#note-search').on('input', function() {
-                                    var searchTerm = $(this).val().toLowerCase();
-                                    $('.note-item').each(function() {
-                                        var noteText = $(this).text().toLowerCase();
-                                        if (noteText.includes(searchTerm)) {
-                                            $(this).show();
-                                        } else {
-                                            $(this).hide();
-                                        }
-                                    });
-                                });
-                            });
-                        } else {
-                            notesContainer.append('<p>No notes available.</p>');
-                        }
-                    },
-                    error: function() {
-                        var notesContainer = $('#notes-container');
-                        notesContainer.empty();
-                        notesContainer.append('<p>Error fetching notes.</p>');
-                    }
-                });
-            });
-
-            //urinalysis notes request handle for ajax
-            $('.add-urine-note').on('click', function() {
-                var targetTextarea = $($(this).data('target'));
-                $('#notesModal').modal('show');
-
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ route('fetch-notes-urinalysis') }}',
-                    success: function(notes) {
-                        var notesContainer = $('#notes-container');
-                        notesContainer.empty();
-
-                        if (notes.length > 0) {
-                            notes.forEach(function(note) {
-                                // Create the note item with comment initially hidden
-                                var noteItem = $('<div class="note-item">' + note.note_code + '</div>');
-                                var noteComment = $('<div class="note-comment" style="display:none; cursor: pointer;">' + note.comment + '</div>');
-
-                                // Append note item and comment to the container
-                                notesContainer.append(noteItem);
-                                notesContainer.append(noteComment);
-
-                                // Toggle the comment on note item click
-                                noteItem.on('click', function() {
-                                    noteComment.toggle();
-                                });
-
-                                // Append the comment to the textarea on comment click
-                                noteComment.on('click', function() {
-                                    var selectedComment = $(this).text();
-                                    var currentText = targetTextarea.val();
-                                    targetTextarea.val(currentText + (currentText ? '\n' : '') + selectedComment);
-                                    $('#notesModal').modal('hide'); // Optional: Hide modal after selecting a comment
-                                });
-                                 // Filter notes based on search input
-                                $('#note-search').on('input', function() {
-                                    var searchTerm = $(this).val().toLowerCase();
-                                    $('.note-item').each(function() {
-                                        var noteText = $(this).text().toLowerCase();
-                                        if (noteText.includes(searchTerm)) {
-                                            $(this).show();
-                                        } else {
-                                            $(this).hide();
-                                        }
-                                    });
-                                });
-                            });
-                        } else {
-                            notesContainer.append('<p>No notes available.</p>');
-                        }
-                    },
-                    error: function() {
-                        var notesContainer = $('#notes-container');
-                        notesContainer.empty();
-                        notesContainer.append('<p>Error fetching notes.</p>');
-                    }
-                });
-            });
-        });
-
-    </script>
-
-@endsection
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>

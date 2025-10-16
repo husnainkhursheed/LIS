@@ -107,9 +107,9 @@ class TestReportController extends Controller
                 $allSubProfiles = getSubProfilesRecursive($profile);
                 foreach ($allSubProfiles as $subProfile) {
                     $profileTests = $profileTests->merge($subProfile->tests()->get());
-                    if ($subProfile->departments) {
-                        $profileDepartments = $profileDepartments->merge($subProfile->departments->pluck('department'));
-                    }
+                    // if ($subProfile->departments) {
+                    //     $profileDepartments = $profileDepartments->merge($subProfile->departments->pluck('department'));
+                    // }
                 }
             }
 
@@ -387,6 +387,7 @@ class TestReportController extends Controller
         }
 
         // dd($categorizedTests);
+        // dd($categoriesedTests);
 
         $test_profiles = TestProfile::all();
 
