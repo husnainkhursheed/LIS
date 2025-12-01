@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Setup;
 use App\Models\Test;
 use App\Models\TestProfile;
 use Illuminate\Http\Request;
+use App\Models\ProfileFormula;
 use App\Models\ProfileDepartment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
@@ -23,8 +24,7 @@ class TestProfileController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function($query) use ($searchTerm) {
-                $query->where('code', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('name', 'like', '%' . $searchTerm . '%')
+                $query->where('name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('cost', 'like', '%' . $searchTerm . '%');
 
             });
@@ -36,11 +36,12 @@ class TestProfileController extends Controller
             $query->orderBy($request->input('sort_by'), $sortOrder);
         }
         $tests = Test::where('is_active', true)->get();
+        $specimens = \App\Models\SpecimenType::all();
         $profiles = \App\Models\TestProfile::all();
         // dd($tests);
 
         $notes = $query->paginate(10);
-        return view('setup.testProfiles',compact('notes','tests','profiles'));
+        return view('setup.testProfiles',compact('notes','tests','profiles', 'specimens'));
     }
 
     public function store(Request $request)
@@ -56,6 +57,7 @@ class TestProfileController extends Controller
         // $testprofile->code  = $request->input('code');
         $testprofile->name  = $request->input('name');
         $testprofile->cost  = $request->input('cost');
+        $testprofile->specimentype_id  = $request->input('specimen_type') ?? null;
         // $testprofile->save();
         if($testprofile->save()) {
             foreach($request->department as $department) {
@@ -84,6 +86,19 @@ class TestProfileController extends Controller
         if ($request->has('tests')) {
             $testprofile->tests()->attach($request->input('tests'));
         }
+
+        if ($request->has('formulas') && !empty($request->formulas)) {
+            $formulas = json_decode($request->formulas, true);
+
+            foreach ($formulas as $formulaData) {
+                ProfileFormula::create([
+                    'profile_id' => $testprofile->id,
+                    'calculated_test_id' => $formulaData['calculated_test_id'],
+                    'formula' => $formulaData['formula'],
+                    'calculation_order' => $formulaData['calculation_order'] ?? 1,
+                ]);
+            }
+        }
         // dd($testprofile->tests);
 
         Session::flash('message', 'Created successfully!');
@@ -98,11 +113,20 @@ class TestProfileController extends Controller
         $profiletests = $note->tests;
         // dd($profiletests);
 
+        $formulas = $note->profileFormulas->map(function($formula) {
+            return [
+                'calculated_test_id' => $formula->calculated_test_id,
+                'formula' => $formula->formula,
+                'calculation_order' => $formula->calculation_order,
+            ];
+        });
+
 
         return response()->json([
             'note' => array_merge($note->toArray(), [
                 'sub_profiles' => $note->subProfiles->pluck('id')->toArray()
             ]),
+            'formulas' => $formulas,
             'profiledepartment' => $profiledepartment,
             'profiletests' => $profiletests,
         ]);
@@ -121,6 +145,39 @@ class TestProfileController extends Controller
             ->values();
 
         return response()->json(['test_ids' => $testIds]);
+    }
+
+    /**
+     * Fetch tests that belong to the given specimen type(s).
+     * Accepts specimen_type (single id) or specimen_type[] array in POST.
+     */
+    public function fetchTestsBySpecimen(Request $request)
+    {
+        $specimenIds = $request->input('specimen_type');
+
+        // If no specimen selected, return all active tests
+        if (empty($specimenIds)) {
+            $tests = \App\Models\Test::where('is_active', true)
+                ->get(['id', 'name']);
+
+            return response()->json(['tests' => $tests]);
+        }
+
+        // if (is_null($specimenIds)) {
+        //     return response()->json(['tests' => []]);
+        // }
+
+        // Normalize to array
+        if (!is_array($specimenIds)) {
+            $specimenIds = [$specimenIds];
+        }
+
+        // Query tests that have specimen_type in the provided ids and are active
+        $tests = \App\Models\Test::whereIn('specimen_type', $specimenIds)
+            ->where('is_active', true)
+            ->get(['id', 'name']);
+
+        return response()->json(['tests' => $tests]);
     }
 
     public function update(Request $request, $id)
@@ -154,6 +211,21 @@ class TestProfileController extends Controller
         $testprofile->tests()->detach();
         if ($request->has('tests')) {
             $testprofile->tests()->attach($request->input('tests'));
+        }
+
+        ProfileFormula::where('profile_id', $id)->delete();
+
+        if ($request->has('formulas') && !empty($request->formulas)) {
+            $formulas = json_decode($request->formulas, true);
+
+            foreach ($formulas as $formulaData) {
+                ProfileFormula::create([
+                    'profile_id' => $id,
+                    'calculated_test_id' => $formulaData['calculated_test_id'],
+                    'formula' => $formulaData['formula'],
+                    'calculation_order' => $formulaData['calculation_order'] ?? 1,
+                ]);
+            }
         }
         // dd($testprofile->tests);
         Session::flash('message', 'Updated successfully!');

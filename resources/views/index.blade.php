@@ -121,7 +121,9 @@ use \Carbon\Carbon;
 
                     @for ($page = 1; $page <= $samples->lastPage(); $page++)
                         <li class="page-item {{ $samples->currentPage() == $page ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $samples->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                            <a class="page-link" href="{{ $samples->url($page) }}">
+                                {{ str_pad($page, 2, '0', STR_PAD_LEFT) }}
+                            </a>
                         </li>
                     @endfor
 

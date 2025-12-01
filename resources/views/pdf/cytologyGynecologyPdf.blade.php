@@ -311,6 +311,32 @@
     </table>
     {{-- @endif --}}
     @endforeach
+    <table style="margin-top: 40px ">
+        <thead>
+            {{-- <tr class="bg-blue" colspan="4">
+                <th width="50%" colspan="4">RECOMMENDATION:</th>
+            </tr> --}}
+        </thead>
+        <tbody>
+            {{-- <tr>
+                <td colspan="4">{!! nl2br(e($cytologyGynecologyResults->recommend ?? '')) !!}</td>
+            </tr> --}}
+
+            <tr>
+                <td>
+                    <strong>Validated by: </strong>
+                    {{ $validated_by }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <strong>This material has been reviewed and the report completed and electronically signed by: </strong>
+                    {{ $signed_by }}
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
 
     <script type="text/php">
         $pdf->page_script('

@@ -21,8 +21,8 @@
 @endif
         <style>
             #reportStickyNav {
-            top: 86px;
-            background-color: #22416b;
+                top: 86px;
+                background-color: #22416b;
             }
 
             .border-nav {
@@ -188,10 +188,24 @@
                             @endif --}}
                         @endif
                         @if (!$allTestsCompleted)
-                            <li class="nav-item border-nav rounded flex-grow-1" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                data-bs-placement="top" title="Complete">
-                                <a class="nav-link sub-link complete-report-btn" data-id="{{ $sample->id }}" data-bs-toggle="modal"
-                                    href="#completeRecordModal">Complete</a>
+                            @php
+                                $createdDate = \Carbon\Carbon::parse($sample->created_at);
+                                $daysSinceCreated = $createdDate->diffInDays(now());
+                            @endphp
+
+                            <li class="nav-item border-nav rounded flex-grow-1"
+                                data-bs-toggle="tooltip"
+                                data-bs-trigger="hover"
+                                data-bs-placement="top"
+                                title="Complete">
+
+                                <a class="nav-link sub-link complete-report-btn
+                                    {{ $daysSinceCreated > 3 ? 'bg-danger text-white' : '' }}"
+                                    data-id="{{ $sample->id }}"
+                                    data-bs-toggle="modal"
+                                    href="#completeRecordModal">
+                                    Complete
+                                </a>
                             </li>
                         @else
                             @if (auth()->user()->hasRole('admin'))
@@ -206,10 +220,10 @@
                             <a class="nav-link sub-link" aria-current="page" id="pdfbtn"
                                 href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
                         </li>
-                        <li class="nav-item border-nav rounded flex-grow-1">
+                        {{-- <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link" aria-current="page" id=""
                                 href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}">Audit Trail</a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </div>
@@ -425,6 +439,7 @@
                                 </tr>
 
                                 @foreach($mainProfile['subprofiles'] as $subprofile)
+                                    <tr><td class="text-dark">Specimen Type: {{ $subprofile['specimen_type'] ?? '' }}</td></tr>
                                     <tr><td class="text-dark">{{ $subprofile['name'] }}</td></tr>
                                     <thead>
                                         <tr>
@@ -437,7 +452,9 @@
                                             <th class="rounded-end-3">Calc</th>
                                         </tr>
                                     </thead>
+                                    {{-- {{dd($subprofile['tests'])}} --}}
                                     @foreach($subprofile['tests'] as $index => $test)
+
                                         @php
                                             $testReport = $testReports
                                                 ->where('test_id', $test->id)
@@ -524,100 +541,111 @@
                                     @endforeach
                                 @endforeach
                                 @if(!empty($mainProfile['tests']))
-                                    <thead>
-                                        <tr>
-                                            <th class="rounded-start-3 ">Description</th>
-                                            <th>Test Results </th>
-                                            <th>Flag </th>
-                                            <th class="col-md-4">Reference Range </th>
-                                            <th>Test Notes </th>
-                                            <th></th>
-                                            <th class="rounded-end-3">Calc</th>
-                                        </tr>
-                                    </thead>
+                                    @php
+                                        $groupedTests = collect($mainProfile['tests'])->groupBy(function ($test) {
+                                            return $test->specimenType->name ?? 'Not Specified';
+                                        });
+                                    @endphp
 
-                                    @foreach($mainProfile['tests'] as $index => $test)
-                                        @php
-                                            $testReport = $testReports
-                                                ->where('test_id', $test->id)
-                                                ->where('sample_id', $sample->id)
-                                                ->first();
-                                            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                                        @endphp
+
+                                    @foreach($groupedTests as $specimenType => $tests)
                                         <tr>
-                                            <td>
-                                                <input type="text" data-test-id="{{ $test->id }}"
-                                                    name="tests[{{ $test->id }}][id]" class="form-control"
-                                                    value="{{ $test->id }}" hidden disabled />
-                                                <input type="text" data-test-id="{{ $test->id }}"
-                                                    name="tests[{{ $test->id }}][description]" class="form-control"
-                                                    value="{{ $test->name }}" disabled />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id="{{ $test->id }}"
-                                                    name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
-                                                    value="{{ $biochemHaemoResults->test_results ?? '' }}"
-                                                    data-basic-low="{{ $test->basic_low_value_ref_range }}"
-                                                    data-basic-high="{{ $test->basic_high_value_ref_range }}"
-                                                    data-male-low="{{ $test->male_low_value_ref_range }}"
-                                                    data-male-high="{{ $test->male_high_value_ref_range }}"
-                                                    data-female-low="{{ $test->female_low_value_ref_range }}"
-                                                    data-female-high="{{ $test->female_high_value_ref_range }}"
-                                                    data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
-                                            </td>
-                                            <td>
-                                                <input type="text"  data-test-id="{{ $test->id }}"
-                                                    name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
-                                                    value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
-                                                @php
-                                                    $background = '';
-                                                    if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
-                                                        $background = 'bg-success';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
-                                                        $background = 'bg-danger';
-                                                    } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
-                                                        $background = 'bg-warning';
-                                                    }
-                                                @endphp
-                                                <span class="badge badge-pill flag-badge {{ $background }} d-none"
-                                                    data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
-                                            </td>
-                                            <td>
-                                                <p class="reference-range">
-                                                    @if ($test->reference_range == 'basic_ref')
-                                                        {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
-                                                    @elseif ($test->reference_range == 'optional_ref')
-                                                        Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
-                                                        <br>
-                                                        Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
-                                                    @elseif ($test->reference_range == 'no_manual_tag')
-                                                        {{ $test->nomanualvalues_ref_range }}
-                                                    @endif
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
-                                            </td>
-                                            <td>
-                                                @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                                        data-bs-placement="top" title="Delete">
-                                                        <a class="remove-item-btn" data-id="{{ $test->id }}"
-                                                            data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
-                                                            href="#deleteRecordModal">
-                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                        </a>
-                                                    </li>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($test->calculation_explanation)
-                                                    <a href="" class="getcalc" data-bs-toggle="modal"
-                                                    data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
-                                                                    class="badge bg-info text-white">show</span> </a>
-                                                @endif
-                                            </td>
+                                            <td colspan="7" class="text-primary fw-semibold ps-2">Specimen Type: {{ $specimenType }}</td>
                                         </tr>
+                                         <thead>
+                                            <tr>
+                                                <th class="rounded-start-3 ">Description</th>
+                                                <th>Test Results </th>
+                                                <th>Flag </th>
+                                                <th class="col-md-4">Reference Range </th>
+                                                <th>Test Notes </th>
+                                                <th></th>
+                                                <th class="rounded-end-3">Calc</th>
+                                            </tr>
+                                        </thead>
+                                        @foreach($tests as $index => $test)
+                                            @php
+                                                $testReport = $testReports
+                                                    ->where('test_id', $test->id)
+                                                    ->where('sample_id', $sample->id)
+                                                    ->first();
+                                                $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                                            @endphp
+                                            <tr>
+                                                <td>
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][id]" class="form-control"
+                                                        value="{{ $test->id }}" hidden disabled />
+                                                    <input type="text" data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][description]" class="form-control"
+                                                        value="{{ $test->name }}" disabled />
+                                                </td>
+                                                <td>
+                                                    <input type="text"  data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][test_results]" class="form-control test-result"
+                                                        value="{{ $biochemHaemoResults->test_results ?? '' }}"
+                                                        data-basic-low="{{ $test->basic_low_value_ref_range }}"
+                                                        data-basic-high="{{ $test->basic_high_value_ref_range }}"
+                                                        data-male-low="{{ $test->male_low_value_ref_range }}"
+                                                        data-male-high="{{ $test->male_high_value_ref_range }}"
+                                                        data-female-low="{{ $test->female_low_value_ref_range }}"
+                                                        data-female-high="{{ $test->female_high_value_ref_range }}"
+                                                        data-nomanual-set="{{ $test->nomanualvalues_ref_range }}" />
+                                                </td>
+                                                <td>
+                                                    <input type="text"  data-test-id="{{ $test->id }}"
+                                                        name="tests[{{ $test->id }}][flag]" class="form-control flag-input"
+                                                        value="{{ $biochemHaemoResults->flag ?? '' }}" style="width: 80px;"/>
+                                                    @php
+                                                        $background = '';
+                                                        if (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Normal') {
+                                                            $background = 'bg-success';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'High') {
+                                                            $background = 'bg-danger';
+                                                        } elseif (!empty($biochemHaemoResults) && $biochemHaemoResults->flag == 'Low') {
+                                                            $background = 'bg-warning';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge badge-pill flag-badge {{ $background }} d-none"
+                                                        data-key="t-hot">{{ $biochemHaemoResults->flag ?? '' }}</span>
+                                                </td>
+                                                <td>
+                                                    <p class="reference-range">
+                                                        @if ($test->reference_range == 'basic_ref')
+                                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'optional_ref')
+                                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                            <br>
+                                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                        @elseif ($test->reference_range == 'no_manual_tag')
+                                                            {{ $test->nomanualvalues_ref_range }}
+                                                        @endif
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <textarea data-test-id="{{ $test->id }}" name="tests[{{ $test->id }}][test_notes]" class="form-control">{{ $biochemHaemoResults->test_notes ?? '' }}</textarea>
+                                                </td>
+                                                <td>
+                                                    @if ($index > 0 && !$allTestsCompleted && $profileId == 'no-profile')
+                                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                            data-bs-placement="top" title="Delete">
+                                                            <a class="remove-item-btn" data-id="{{ $test->id }}"
+                                                                data-sampleid="{{ $sample->id }}" data-bs-toggle="modal"
+                                                                href="#deleteRecordModal">
+                                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                            </a>
+                                                        </li>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($test->calculation_explanation)
+                                                        <a href="" class="getcalc" data-bs-toggle="modal"
+                                                        data-id="{{ $test->id }}" data-bs-target="#showModalcalc"> <span
+                                                                        class="badge bg-info text-white">show</span> </a>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endforeach
                                 @endif
 
@@ -958,6 +986,24 @@
                 @php
                     $procedureResults = $sample ? $sample->procedureResults : [];
                     $department3Status = $sample->departmentStatus('3');
+
+                    // Check if "urine c/s" (Urine Culture and Sensitivity) is present in tests
+                    $hasUrineCS = false;
+                    if (isset($tests)) {
+                        $hasUrineCS = $tests->contains(function ($test) {
+                            return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
+                        });
+                    } elseif (isset($categorizedTests)) {
+                        $allTests = collect();
+                        foreach ($categorizedTests as $profileData) {
+                            if (!empty($profileData['tests'])) {
+                                $allTests = $allTests->merge($profileData['tests']);
+                            }
+                        }
+                        $hasUrineCS = $allTests->contains(function ($test) {
+                            return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
+                        });
+                    }
                 @endphp
                 {{-- @endforeach --}}
 
@@ -980,21 +1026,23 @@
                     <ul class="nav nav-pills nav-justified mb-3" role="tablist">
 
                         <li class="nav-item1" role="presentation">
-                            <a class="nav-link waves-effect waves-light active" data-bs-toggle="tab" href="#pill-justified-home-1" role="tab" aria-selected="false" tabindex="-1">
+                            <a class="nav-link waves-effect waves-light {{ $hasUrineCS ? 'active' : 'disabled text-muted' }}" data-bs-toggle="tab" href="#pill-justified-home-1" role="tab" aria-selected="false" tabindex="{{ $hasUrineCS ? '0' : '-1' }}"
+                            style="{{ $hasUrineCS ? '' : 'pointer-events: none; opacity: 0.5;' }}">
 
                                 Chemical Analysis
                             </a>
                         </li>
                         <li class="nav-item1" role="presentation">
 
-                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-profile-1" role="tab" aria-selected="true">
+                            <a class="nav-link waves-effect waves-light {{ $hasUrineCS ? '' : 'disabled text-muted' }}" data-bs-toggle="tab" href="#pill-justified-profile-1" role="tab" aria-selected="true" tabindex="{{ $hasUrineCS ? '0' : '-1' }}"
+                            style="{{ $hasUrineCS ? '' : 'pointer-events: none; opacity: 0.5;' }}">
 
                                 Microscopy
                             </a>
                         </li>
                         <li class="nav-item1" role="presentation">
 
-                            <a class="nav-link waves-effect waves-light" data-bs-toggle="tab" href="#pill-justified-messages-1" role="tab" aria-selected="false" tabindex="-1">
+                            <a class="nav-link waves-effect waves-light {{ $hasUrineCS ? '' : 'active' }}" data-bs-toggle="tab" href="#pill-justified-messages-1" role="tab" aria-selected="false" tabindex="-1">
 
                                 Specimen
                             </a>
@@ -1002,7 +1050,7 @@
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content text-muted">
-                        <div class="tab-pane active show" id="pill-justified-home-1" role="tabpanel">
+                        <div class="tab-pane {{ $hasUrineCS ? 'active show' : '' }}" id="pill-justified-home-1" role="tabpanel">
                             <table id="tests-table" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
@@ -1212,7 +1260,7 @@
 
 
                         </div>
-                        <div class="tab-pane" id="pill-justified-profile-1" role="tabpanel">
+                        <div class="tab-pane {{ $hasUrineCS ? '' : '' }}" id="pill-justified-profile-1" role="tabpanel">
                             <table id="tests-table" class="table table-striped display table-responsive rounded">
                                 <thead>
                                     <tr>
@@ -1420,82 +1468,21 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="tab-pane" id="pill-justified-messages-1" role="tabpanel">
+                        <div class="tab-pane {{ $hasUrineCS ? '' : 'show active' }}" id="pill-justified-messages-1" role="tabpanel">
                             <div class="d-flex">
-                                {{-- <div class="flex-shrink-0">
-                                    <i class="ri-checkbox-circle-fill text-success"></i>
-                                </div> --}}
                                 <div class="flex-grow-1 ms-2">
                                     <div class="row">
                                         <h3 class="text-black">Type of Specimen :</h3>
                                         <div>
-                                            {{-- <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="procedure" class="form-label">Procedure </label>
-                                                    <select class="js-example-basic-multiple" name="procedure"
-                                                        id="procedure" >
-                                                        <option value="wet_prep"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'wet_prep' ? 'selected' : '' }}>
-                                                            Wet Prep</option>
-                                                        <option value="gram_stain"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'gram_stain' ? 'selected' : '' }}>
-                                                            Gram Stain</option>
-                                                        <option value="culture"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'culture' ? 'selected' : '' }}>
-                                                            Culture</option>
-                                                        <option value="stool"
-                                                            {{ !empty($urinalysisMicrobiologyResults) && $urinalysisMicrobiologyResults->procedure === 'stool' ? 'selected' : '' }}>
-                                                            Stool</option>
-                                                    </select>
-
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="specimen_note" class="form-label">Note</label>
-                                                    <textarea type="text" id="specimen_note" name="specimen_note" rows="5" class="form-control"
-                                                        value="">{{ $urinalysisMicrobiologyResults->specimen_note ?? '' }}</textarea>
-                                                </div>
-                                            </div> --}}
-                                            {{-- {{dd($urinalysisMicrobiologyResults->procedureResults())}} --}}
-                                            {{-- @foreach ($urinalysisMicrobiologyResults->procedureResults as $procedures) --}}
-                                                {{-- <div id="procedures-container">
-                                                    <div class="procedure-group">
-                                                        <div class="form-group">
-                                                            <label for="procedure" class="form-label">Procedure</label>
-                                                            <select class="js-example-basic-multiple procedure" name="procedure[]" id="procedure" >
-                                                                <option value="wet_prep">Wet Prep</option>
-                                                                <option value="gram_stain">Gram Stain</option>
-                                                                <option value="culture">Culture</option>
-                                                                <option value="stool">Stool</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="specimen_note" class="form-label">Note</label>
-                                                            <textarea type="text" id="specimen_note" name="specimen_note[]" rows="5" class="form-control"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <button type="button" id="add-procedure" class="btn btn-primary">Add Procedure</button> --}}
-                                            {{-- @endforeasch --}}
-
-                                            {{-- <button type="button" id="add-procedure" class="btn btn-primary">Add Procedure</button> --}}
                                             <div id="procedures-container">
                                                 <button type="button" class="btn btn-primary add-btn float-end mb-1"  id="add-procedure" ><i class="ri-add-line align-bottom me-1 "></i> Add
                                                     Procedure</button>
-                                                    {{-- {{dd($procedureResults)}} --}}
                                                 @foreach ($procedureResults as $index => $procedure)
 
                                                     <div class="procedure-group">
                                                         <div class="form-group">
                                                             <label for="procedure" class="form-label">Procedure</label>
                                                             <input type="text" class="form-control procedure" name="procedure" id="" value="{{ $procedure->procedure }}" >
-                                                            {{-- <select class="js-example-basic-multiple procedure" name="procedure[]">
-                                                                <option value="wet_prep" {{ $procedure->procedure == 'wet_prep' ? 'selected' : '' }}>Wet Prep</option>
-                                                                <option value="gram_stain" {{ $procedure->procedure == 'gram_stain' ? 'selected' : '' }}>Gram Stain</option>
-                                                                <option value="culture" {{ $procedure->procedure == 'culture' ? 'selected' : '' }}>Culture</option>
-                                                                <option value="stool" {{ $procedure->procedure == 'stool' ? 'selected' : '' }}>Stool</option>
-                                                            </select> --}}
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="specimen_note" class="form-label">Note</label>
@@ -1508,12 +1495,6 @@
 
                                                 @endforeach
                                             </div>
-
-
-
-
-                                            {{-- <button type="submit" class="btn btn-success">Submit</button> --}}
-
                                         </div>
 
 
@@ -1560,7 +1541,7 @@
                                                 $sensitivityResult = $sample->sensitivityResults->first();
                                                 $sensitivityData = $sensitivityResult ? json_decode($sensitivityResult->sensitivity) : [];
                                             @endphp
-                                            {{-- {{dd($sensitivityData)}} --}}
+                                            {{-- {{dd($sensitivityResult)}} --}}
 
                                             @if (!empty($sensitivityData))
                                                 @foreach ($sensitivityData as $profileIndex => $profile)
@@ -2168,7 +2149,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @foreach ($tests as $test)
+                    {{-- @foreach ($tests as $test)
                         @php
                             $testReport = $testReports
                                 ->where('test_id', $test->id)
@@ -2184,7 +2165,7 @@
                             // dd($testIds);
 
                         @endphp
-                    @endforeach
+                    @endforeach --}}
                     <div id="sign-form">
                         <p class="text-dark fw-semibold fs-6">Please indicate that you agree with all that is in this
                             report by signing:</p>
@@ -2200,8 +2181,8 @@
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="password" name="password">
                             </div>
-                            <input type="hidden" id="test_report_id" name="test_report_id"
-                                value="{{ $testIds }}">
+                            {{-- <input type="hidden" id="test_report_id" name="test_report_id"
+                                value="{{ $testIds }}"> --}}
                             <input type="hidden" id="report_sample_id" name="report_sample_id"
                                 value="{{ $sample->id }}">
                             <div id="success-message" class="text-success" style="display: none;"></div>
@@ -2497,7 +2478,11 @@
     <script src="{{ URL::asset('build/js/pages/datatables.init.js') }}"></script>
 
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
+    <script src="{{ URL::asset('build/js/calculateFormula.js') }}"></script>
+
     <script>
+        const calculationFormulas = @json($calculationFormulas ?? []);
+
         document.addEventListener('DOMContentLoaded', function() {
             const testResultInputs = document.querySelectorAll('.test-result');
             testResultInputs.forEach(input => {
@@ -3140,7 +3125,7 @@
 
                 var procedures = [];
                 var specimenNotes = [];
-                console.log(procedures);
+                // console.log(procedures);
                 // Gather data from the form based on report type
                 if (reporttypeis == 1) {
                     $('input[data-test-id], textarea[data-test-id]').each(function() {
@@ -3190,9 +3175,9 @@
                         // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
                         var items = [];
 
-                        $(this).next('table').find('tbody tr').each(function() {
+                        $(this).find('table').find('tbody tr').each(function() {
                             // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];
-                            var antibiotic = $(this).find('td:first').text();
+                            var antibiotic = $(this).find('td:first').text().trim();
                             var mic = $(this).find('input[type="text"]').val();
                             var sensitivity = $(this).find('input[type="radio"]:checked')
                                 .val();
@@ -3229,7 +3214,7 @@
 
                         testsData[testId][fieldName] = $(this).val();
                     });
-                    console.log(testsData);
+                    // console.log(testsData);
                     data = {
                         sampleid: $('#sampleid').val(),
                         // testReport: $('#testReport').val(),
@@ -3243,38 +3228,6 @@
                         sensitivity: JSON.stringify(reportData),
                         review: $('#review').val(),
                     };
-
-                    // console.log(reportData);
-                    // data = {
-                    //     sampleid: $('#sampleid').val(),
-                    //     testIds: $('#urinalysis_test_id').val(),
-                    //     reporttype: reporttypeis,
-                    //     s_gravity: $('#s_gravity_result').val(),
-                    //     ph: $('#ph_result').val(),
-                    //     bilirubin: $('#bilirubin_result').val(),
-                    //     blood: $('#blood_result').val(),
-                    //     leucocytes: $('#leucocytes_result').val(),
-                    //     glucose: $('#glucose_result').val(),
-                    //     nitrite: $('#nitrite_result').val(),
-                    //     ketones: $('#ketones_result').val(),
-                    //     urobilinogen: $('#urobilinogen_result').val(),
-                    //     proteins: $('#proteins_result').val(),
-                    //     colour: $('#colour').val(),
-                    //     appearance: $('#appearance').val(),
-                    //     epith_cells: $('#epith_cells_result').val(),
-                    //     bacteria: $('#bacteria_result').val(),
-                    //     white_cells: $('#white_cells_result').val(),
-                    //     yeast: $('#yeast_result').val(),
-                    //     red_cells: $('#red_cells_result').val(),
-                    //     trichomonas: $('#trichomonas_result').val(),
-                    //     casts: $('#casts_result').val(),
-                    //     crystals: $('#crystals_result').val(),
-                    //     specimen: $('#specimen').val(),
-                    //     procedure: procedures,
-                    //     specimen_note: specimenNotes,
-                    //     sensitivity_profiles: $('#profiles').val(),
-                    //     sensitivity: JSON.stringify(reportData)
-                    // };
                 }
 
                 $.ajax({
@@ -3881,37 +3834,37 @@
             }
         });
 
-        $(document).on('click', '#saveReportButton', function() {
-            // $('#saveReportButton').click(function() {
-            var reportData = [];
-            $('#reportContainer .sensitivity-group').each(function() {
+        // $(document).on('click', '#saveReportButton', function() {
+        //     // $('#saveReportButton').click(function() {
+        //     var reportData = [];
+        //     $('#reportContainer .sensitivity-group').each(function() {
 
-                var microorganism = $(this).find('input[type="text"]').val();
-                console.log(microorganism);
-                // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
-                var items = [];
+        //         var microorganism = $(this).find('input[type="text"]').val();
+        //         console.log(microorganism);
+        //         // var profileId = $(this).find('input[type="text"]').attr('name').match(/\d+/)[0];
+        //         var items = [];
 
-                $(this).next('table').find('tbody tr').each(function() {
-                    // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];3
-                    var antibiotic = $(this).find('td:first').text();
-                    var mic = $(this).find('input[type="text"]').val();
-                    var sensitivity = $(this).find('input[type="radio"]:checked').val();
+        //         $(this).next('table').find('tbody tr').each(function() {
+        //             // var itemId = $(this).find('input[type="text"]').attr('name').match(/\d+$/)[0];3
+        //             var antibiotic = $(this).find('td:first').text();
+        //             var mic = $(this).find('input[type="text"]').val();
+        //             var sensitivity = $(this).find('input[type="radio"]:checked').val();
 
-                    items.push({
-                        antibiotic: antibiotic,
-                        mic: mic,
-                        sensitivity: sensitivity
-                    });
-                });
+        //             items.push({
+        //                 antibiotic: antibiotic,
+        //                 mic: mic,
+        //                 sensitivity: sensitivity
+        //             });
+        //         });
 
-                reportData.push({
-                    // profile_id: profileId,
-                    microorganism: microorganism,
-                    items: items
-                });
-            });
+        //         reportData.push({
+        //             // profile_id: profileId,
+        //             microorganism: microorganism,
+        //             items: items
+        //         });
+        //     });
 
-            console.log(reportData);
+        //     console.log(reportData);
 
             // $.ajax({
             //     url: $('#saveReportForm').attr('action'),
@@ -3924,7 +3877,7 @@
             //         alert('Report saved successfully');
             //     }
             // });
-        });
+        // });
 
         // Remove sensitivity group on button click
         $(document).on('click', '.remove-sensitivity-group', function() {

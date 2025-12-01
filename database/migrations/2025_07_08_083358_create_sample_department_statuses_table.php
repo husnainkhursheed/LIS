@@ -26,6 +26,7 @@ return new class extends Migration
             $table->boolean('is_completed')->default(false);
             $table->foreignId('completed_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamp('completed_at')->nullable();
+            $table->boolean('is_revised')->default(false);
             $table->timestamps();
         });
     }

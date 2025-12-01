@@ -75,6 +75,28 @@
             display: inline-block;
             width: 35%;
         }
+
+         .request-section {
+            /* margin: 2px 0; */
+            padding: 4px 8px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3d90ca;
+        }
+
+
+        .request-section strong {
+            color: #3d90ca;
+            /* font-size: 12px; */
+        }
+        .specimen-type {
+            background-color: #e8f5e8;
+            padding: 3px 8px;
+            margin: 3px 0;
+            border-left: 3px solid #28a745;
+            font-style: italic;
+            color: #155724;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -167,7 +189,9 @@
 
                 @endphp
 
-                <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
+                <span class="request-section">
+                    <strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong>
+                </span>
             </th>
         </tr>
         <tr>
@@ -195,12 +219,13 @@
     <tbody>
          @foreach($categorizedTests as $profileId => $mainProfile)
             <tr id="{{ $profileId }}">
-                <td colspan="4"><strong>{{ $mainProfile['name'] }}</strong></td>
+                <td  colspan="4"><strong>{{ $mainProfile['name'] }}</strong></td>
             </tr>
 
             @foreach($mainProfile['subprofiles'] as $subprofile)
-                <tr><td colspan="4"><strong>{{ $subprofile['name'] }}</strong></td></tr>
-                <tr colspan="4" class="bg-blue">
+                <tr class="specimen-type"><td colspan="4">Specimen Type: {{ $subprofile['specimen_type'] ?? '' }}</td></tr>
+                <tr style="background-color: #e3f2fd; color: #1976d2; font-weight: bold; padding: 8px; text-align: left; border: 1px solid #ddd;"><td colspan="4"><strong>{{ $subprofile['name'] }}</strong></td></tr>
+                <tr colspan="4" style="background-color: #3d90ca; color: white; padding: 4px; text-align: left;font-weight: bold;font-size: 11px;" class="bg-blue">
                     <td>NAME OF TEST</td>
                     <td>RESULTS</td>
                     <td>FLAG</td>
@@ -260,71 +285,87 @@
                     </tr>
 
                 @endforeach
-                {{-- <tr>
+                <tr>
                     <td colspan="4">
                         <hr style="border: 0.5px solid #caced1; margin: 10px 0;">
                     </td>
-                </tr> --}}
+                </tr>
             @endforeach
             @if(!empty($mainProfile['tests']))
-                <tr colspan="4" class="bg-blue">
-                    <td>NAME OF TEST</td>
-                    <td>RESULTS</td>
-                    <td>FLAG</td>
-                    <td>REFERENCE RANGE</td>
-                </tr>
+                @php
+                    $groupedTests = collect($mainProfile['tests'])->groupBy(function ($test) {
+                        return $test->specimenType->name ?? 'Not Specified';
+                    });
+                @endphp
+                @foreach($groupedTests as $specimenType => $tests)
+                    <tr class="specimen-type">
+                        <td colspan="4" >Specimen Type: {{ $specimenType }}</td>
+                    </tr>
+                    <tr colspan="4" style="background-color: #3d90ca; color: white; padding: 4px; text-align: left;font-weight: bold;font-size: 11px;" class="bg-blue">
+                        <td>NAME OF TEST</td>
+                        <td>RESULTS</td>
+                        <td>FLAG</td>
+                        <td>REFERENCE RANGE</td>
+                    </tr>
+                    @foreach($tests as $index => $test)
+                        @php
+                            $testReport = $testReports
+                                ->where('test_id', $test->id)
+                                ->where('sample_id', $sample->id)
+                                ->first();
+                            $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
+                            $description = $biochemHaemoResults->description ?? $test->name;
+                            $testResults = $biochemHaemoResults->test_results ?? '';
+                            $testNote = $biochemHaemoResults->test_notes ?? '';
+                            $methodology = $test->methodology ?? '';
+                            $flag = $biochemHaemoResults->flag ?? '';
+                            $background = '';
 
-                @foreach($mainProfile['tests'] as $index => $test)
-                    @php
-                        $testReport = $testReports
-                            ->where('test_id', $test->id)
-                            ->where('sample_id', $sample->id)
-                            ->first();
-                        $biochemHaemoResults = $testReport ? $testReport->biochemHaemoResults->first() : [];
-                        $description = $biochemHaemoResults->description ?? $test->name;
-                        $testResults = $biochemHaemoResults->test_results ?? '';
-                        $testNote = $biochemHaemoResults->test_notes ?? '';
-                        $methodology = $test->methodology ?? '';
-                        $flag = $biochemHaemoResults->flag ?? '';
-                        $background = '';
+                            if ($flag == 'Normal') {
+                                $background = 'color:#40bb82; background-color: #d4edda; padding: 2px 6px; border-radius: 10px; font-size: 0.8em;';
+                            } elseif ($flag == 'High') {
+                                $background = 'color:red; background-color: #f8d7da; padding: 2px 6px; border-radius: 10px; font-size: 0.8em;';
+                            } elseif ($flag == 'Low') {
+                                $background = 'color:red; background-color: #f8d7da; padding: 2px 6px; border-radius: 10px; font-size: 0.8em;';
+                            }
 
-                        if ($flag == 'Normal') {
-                            $background = 'color:#40bb82';
-                        } elseif ($flag == 'High') {
-                            $background = 'color:red';
-                        } elseif ($flag == 'Low') {
-                            $background = 'color:red';
-                        }
+                            $referenceRange = '';
 
-                        $referenceRange = '';
-
-                        if ($test->reference_range == 'basic_ref') {
-                            $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '') . ' ' . ($test->basic_unit_value_ref_range ?? '');
-                        } elseif ($test->reference_range == 'optional_ref') {
-                            $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . ' '. ($test->male_unit_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? ''). ' '. ($test->female_unit_value_ref_range ?? '');
-                        } elseif ($test->reference_range == 'no_manual_tag') {
-                            $referenceRange = ($test->nomanualvalues_ref_range ?? '');
-                        }
-                    @endphp
+                            if ($test->reference_range == 'basic_ref') {
+                                $referenceRange = ($test->basic_low_value_ref_range ?? '') . '-' . ($test->basic_high_value_ref_range ?? '') . ' ' . ($test->basic_unit_value_ref_range ?? '');
+                            } elseif ($test->reference_range == 'optional_ref') {
+                                $referenceRange = 'Male: ' . ($test->male_low_value_ref_range ?? '') . '-' . ($test->male_high_value_ref_range ?? '') . ' '. ($test->male_unit_value_ref_range ?? '') . '<br>Female: ' . ($test->female_low_value_ref_range ?? '') . '-' . ($test->female_high_value_ref_range ?? ''). ' '. ($test->female_unit_value_ref_range ?? '');
+                            } elseif ($test->reference_range == 'no_manual_tag') {
+                                $referenceRange = ($test->nomanualvalues_ref_range ?? '');
+                            }
+                        @endphp
 
 
+                        <tr>
+                            <td>
+                                <small>{{ $description }}</small>
+                                @if ($testNote)
+                                    <br><small>({{ $testNote }})</small>
+                                @endif
+                            </td>
+                            <td><small>{{ $testResults }}</small></td>
+                            <td>
+                                @if($flag)
+                                    <span style="{{ $background }}">{{ $flag }}</span>
+                                @endif
+                            </td>
+                            <td >
+                                <small>{!! $referenceRange !!}</small>
+                                @if ($methodology)
+                                    <br><small>({{ $methodology }})</small>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
                     <tr>
-                        <td>{{ $description }}
-                            @if ($testNote)
-                                <br><small>({{ $testNote }})</small>
-                            @endif
+                        <td colspan="4">
+                            <hr style="border: 0.5px solid #caced1; margin: 10px 0;">
                         </td>
-
-                        <td >{{ $testResults }}</td>
-                        <td>
-                            <span class="badge badge-pill flag-badge" style="{{ $background }}" data-key="t-hot">{{ $flag }}</span>
-                        </td>
-                        <td style="text-align: left">{!! $referenceRange !!}
-                            @if ($methodology)
-                                <br><small>({{ $methodology }})</small>
-                            @endif
-                        </td>
-
                     </tr>
                 @endforeach
             @endif

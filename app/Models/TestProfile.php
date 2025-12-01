@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Test;
 use App\Models\Sample;
+use App\Models\ProfileFormula;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -11,7 +12,7 @@ class TestProfile extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'cost'];
+    protected $fillable = ['name', 'cost' , 'specimentype_id'];
 
     public function subProfiles()
     {
@@ -38,5 +39,15 @@ class TestProfile extends Model
     public function departments()
     {
         return $this->hasMany(ProfileDepartment::class, 'test_profile_id');
+    }
+
+    public function specimen_type()
+    {
+        return $this->belongsTo(SpecimenType::class, 'specimentype_id');
+    }
+
+    public function profileFormulas()
+    {
+        return $this->hasMany(ProfileFormula::class, 'profile_id');
     }
 }

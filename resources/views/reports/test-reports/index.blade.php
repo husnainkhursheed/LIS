@@ -44,7 +44,7 @@ use \Carbon\Carbon;
                         <label for="test_number">Test Number</label>
                         <input type="text" name="test_number" id="test_number"  value="{{ $testNumber ?? '' }}" class="form-control">
                     </div> --}}
-                    <div class="col-3">
+                    <div class="col-2">
                         <label for="access_number">Access Number</label>
                         <input type="text" name="access_number" id="access_number"  value="{{ $accessNumber ?? '' }}"  class="form-control">
                     </div>
@@ -57,13 +57,13 @@ use \Carbon\Carbon;
                         <input type="date" name="dob" id="dob" value="{{ request('dob') }}" class="form-control">
                     </div>
 
-                    <div class="col-2">
+                    <div class="col-1">
 
                         <button type="submit" class="btn search-btn">Search</button>
 
                     </div>
-                    <div class="col-2">
-                        <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
+                    <div class="col-2" style="display:flex; justify-content:end">
+                        <select class="form-select sort-dropdown"  aria-label="Default select example" name="sort_by" onchange="this.form.submit()">
                             <option selected disabled>Sort By</option>
                             {{-- <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option> --}}
                             <option value="access_number" {{ request('sort_by') == 'access_number' ? 'selected' : '' }}>Access Number</option>
@@ -71,6 +71,16 @@ use \Carbon\Carbon;
                             <option value="patient_name" {{ request('sort_by') == 'patient_name' ? 'selected' : '' }}>Patient Name</option>
                         </select>
                     </div>
+                    <div class="col-2">
+                        <select class="form-select sort-dropdown" style="" aria-label="Default select example" name="status" onchange="this.form.submit()">
+                            <option selected disabled>Status</option>
+                            {{-- <option value="test_number" {{ request('sort_by') == 'test_number' ? 'selected' : '' }}>Test Number</option> --}}
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="complete" {{ request('status') == 'complete' ? 'selected' : '' }}>Complete</option>
+                            <option value="incomplete" {{ request('status') == 'incomplete' ? 'selected' : '' }}>Incomplete </option>
+                        </select>
+                    </div>
+
 
                 </div>
 
@@ -93,6 +103,7 @@ use \Carbon\Carbon;
                                         <th>Date Received</th>
                                         <th>Select ReportType</th>
                                         <th>Is Completed</th>
+                                        <th>Is Revised</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -136,20 +147,57 @@ use \Carbon\Carbon;
                                                 <div>
                                                     @switch($index)
                                                         @case('1')
-                                                            Biochemistry / Haematology
+                                                            <small>Biochemistry / Haematology</small>
                                                             @break
                                                         @case('2')
-                                                            Cytology / Gynecology
+                                                            <small>Cytology / Gynecology</small>
                                                             @break
                                                         @case('3')
-                                                            Urinalysis / Microbiology
+                                                            <small>Urinalysis / Microbiology</small>
                                                             @break
                                                         @default
-                                                            Unknown Department
+                                                            <small>Unknown Department</small>
                                                     @endswitch:
-                                                    {!! $departmentStatus['is_completed']
+                                                    {{-- {!! $departmentStatus['is_completed']
                                                         ? '<span class="badge bg-success-subtle text-success mb-0 me-1">COMPLETED</span>'
-                                                        : '<span class="badge bg-warning-subtle text-warning mb-0 me-1">PENDING</span>' !!}
+                                                        : '<span class="badge bg-warning-subtle text-warning mb-0 me-1">PENDING</span>' !!} --}}
+                                                    @php
+                                                        $createdDate = \Carbon\Carbon::parse($testReport->created_at);
+                                                        $daysSinceCreated = $createdDate->diffInDays(\Carbon\Carbon::now());
+                                                    @endphp
+
+                                                    {!! $departmentStatus['is_completed']
+                                                        ? '<small><span class="badge bg-success-subtle text-success mb-0 me-1" data-bs-toggle="tooltip" title="This report is completed">COMPLETED</span></small>'
+                                                        : ($daysSinceCreated > 3
+                                                            ? '<small><span class="badge bg-danger-subtle text-danger mb-0 me-1" data-bs-toggle="tooltip" title="Turnaround time exceeded — more than 3 days old">PENDING </span></small>'
+                                                            : '<small><span class="badge bg-warning-subtle text-warning mb-0 me-1" data-bs-toggle="tooltip" title="Pending but within turnaround time">PENDING</span></small>') !!}
+                                                </div>
+                                            @endforeach</td>
+                                            <td>@foreach ($testReport->unique_departments_status as $index => $departmentStatus)
+                                                {{-- {{dd($testReport->unique_departments_status)}} --}}
+                                                <div>
+                                                    @switch($index)
+                                                        @case('1')
+                                                            <small>Biochemistry / Haematology</small>
+                                                            @break
+                                                        @case('2')
+                                                            <small>Cytology / Gynecology</small>
+                                                            @break
+                                                        @case('3')
+                                                            <small>Urinalysis / Microbiology</small>
+                                                            @break
+                                                        @default
+                                                            <small>Unknown Department</small>
+                                                    @endswitch:
+                                                    @php
+                                                        $departmentStatus = $testReport->departmentStatus($index);
+                                                    @endphp
+
+                                                    @if ($departmentStatus && $departmentStatus->is_revised)
+                                                        <small><span class="badge bg-success-subtle text-danger mb-0 me-1" data-bs-toggle="tooltip" title="This report is revised">Revised</span></small>
+                                                    @else
+                                                        <small><span class="badge bg-secondary-subtle text-muted mb-0 me-1" data-bs-toggle="tooltip" title="This report is not revised">Not Revised</span></small>
+                                                    @endif
                                                 </div>
                                             @endforeach</td>
                                             <td>
@@ -190,7 +238,7 @@ use \Carbon\Carbon;
                             <ul class="pagination justify-content-center">
                                 @if ($testReports->previousPageUrl())
                                     <li class="page-item previousPageUrl">
-                                        <a class="page-link" href="{{ $testReports->previousPageUrl() }}" aria-label="Previous">
+                                        <a class="page-link" href="{{ $testReports->previousPageUrl() . '&' . http_build_query(request()->except('page')) }}" aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                             <span class="sr-only">Previous</span>
                                         </a>
@@ -204,13 +252,15 @@ use \Carbon\Carbon;
                                 @for ($page = 1; $page <= $testReports->lastPage(); $page++)
                                     <li class="page-item {{ $testReports->currentPage() == $page ? 'active' : '' }}">
                                         <a class="page-link"
-                                            href="{{ $testReports->url($page) }}">{{ str_pad($page, 2, '0', STR_PAD_LEFT) }}</a>
+                                        href="{{ $testReports->url($page) . '&' . http_build_query(request()->except('page')) }}">
+                                        {{ str_pad($page, 2, '0', STR_PAD_LEFT) }}
+                                        </a>
                                     </li>
                                 @endfor
 
                                 @if ($testReports->nextPageUrl())
                                     <li class="page-item nextPageUrl">
-                                        <a class="page-link" href="{{ $testReports->nextPageUrl() }}" aria-label="Next">
+                                        <a class="page-link" href="{{ $testReports->nextPageUrl() . '&' . http_build_query(request()->except('page')) }}" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                             <span class="sr-only">Next</span>
                                         </a>

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('samples', function (Blueprint $table) {
             $table->id();
-            $table->string('test_number', 6)->unique();
+            // $table->string('test_number', 6)->unique();
             $table->string('access_number')->unique();
             $table->date('collected_date');
             $table->date('received_date');

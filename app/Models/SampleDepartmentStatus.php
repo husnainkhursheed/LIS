@@ -21,6 +21,7 @@ class SampleDepartmentStatus extends Model
         'is_completed',
         'completed_by',
         'completed_at',
+        'is_revised',
     ];
 
     public function sample()

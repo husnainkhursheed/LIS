@@ -20,7 +20,7 @@ class PDFController extends Controller
         return $qr;
     }
 
-    public function generatePDF(Request $request, $sample_id, $reporttype) 
+    public function generatePDF(Request $request, $sample_id, $reporttype)
     {
         try {
             // Fetch sample and related tests
@@ -144,32 +144,8 @@ class PDFController extends Controller
             $categorizedTests = [];
             $sampleProfiles = $sample->testProfiles->pluck('id')->toArray(); // Get profile IDs assigned to the sample
 
-            // if ($reporttype == '1' || $reporttype == '3') {
-            //     foreach ($tests as $test) {
-            //         // Check if there are any test profiles assigned to the test
-            //         if ($test->testProfiles->isNotEmpty()) {
-            //             // Loop through the test profiles and filter them based on the sample's profiles
-            //             foreach ($test->testProfiles as $profile) {
-            //                 if (in_array($profile->id, $sampleProfiles)) {
-            //                     $profileId = $profile->id;
-            //                     $profileName = $profile->name;
-            //                     $categorizedTests[$profileId]['name'] = $profileName;
-            //                     $categorizedTests[$profileId]['tests'][] = $test;
-            //                 }
-            //             }
-            //         } else {
-            //             // Handle the case where there is no profile assigned to the test
-            //             $profileId = 'no-profile';
-            //             $profileName = 'Individual Tests';
-            //             $categorizedTests[$profileId]['name'] = $profileName;
-            //             $categorizedTests[$profileId]['tests'][] = $test;
-            //         }
-            //     }
-            // }
-
             if ($reporttype == '1' || $reporttype == '3') {
                 // Get all sample profiles with subprofiles
-                // $sampleProfiles = $sample->testProfiles()->with('subProfiles.tests')->get();
                 // dd($sampleProfiles);
                 foreach ($profiles as $mainProfile) {
                     $mainProfileId = $mainProfile->id;
@@ -201,6 +177,7 @@ class PDFController extends Controller
                             $subProfileName = $subProfile->name;
                             $categorizedTests[$mainProfileId]['subprofiles'][$subProfileId] = [
                                 'name' => $subProfileName,
+                                'specimen_type' => $subProfile->specimen_type?->name ?? null,
                                 'tests' => [],
                             ];
 
@@ -224,6 +201,8 @@ class PDFController extends Controller
                 }
             }
 
+            // dd($categorizedTests);
+
 
 
             // Calculate pagination
@@ -232,14 +211,8 @@ class PDFController extends Controller
             $currentPage = $request->input('page', 1);
 
             $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
-            // $signed_by = $sample::with('signedBy','validateBy')->get();
-            // foreach ($signed_by as $sample) {
-            //     // Access the signed user's name
-            //     $signedUserName = $sample->signedBy->first_name ?? 'No Signer';
-            //     $validateUserName = $sample->validateBy->first_name ?? 'No Validator';
-            //     // dd($signedUserName);
-            // }
-                        // Data for PDF view
+
+            // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
                 'date' => date('m/d/Y'),

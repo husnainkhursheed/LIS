@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Sample;
+use App\Models\SpecimenType;
 use App\Models\TestProfiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,5 +32,10 @@ class Test extends Model
     public function testProfiles()
     {
         return $this->belongsToMany(TestProfile::class, 'profile_tests');
+    }
+
+    public function specimenType()
+    {
+        return $this->belongsTo(SpecimenType::class, 'specimen_type');
     }
 }

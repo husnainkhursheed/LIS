@@ -180,7 +180,7 @@
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested"  multiple="multiple">
                                 @foreach ($tests as $test)
                                     <option value="{{ $test->id }}"  @foreach ($sample->tests as $stest){{ $stest->id == $test->id ? 'selected' : ''}}@endforeach data-cost="{{ $test->cost }}">
-                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
+                                        {{ $test->name .' '. $test->specimenType?->name .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
                         </div>

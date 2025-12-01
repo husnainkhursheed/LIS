@@ -19,9 +19,9 @@ class PermissionSeeder extends Seeder
     {
 
         $admin = User::create([
-            'first_name' => 'admin',
-            'surname' => 'admin',
-            'email' => 'admin@admin.com',
+            'first_name' => 'Management',
+            'surname' => 'Management',
+            'email' => 'management@mail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('12345678'),
             'avatar' => '',

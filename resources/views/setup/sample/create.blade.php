@@ -87,11 +87,18 @@
                     </div> --}}
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="access_number" class="form-label">Access Number</label>
-                            <input type="text" id="access_number" name="access_number"  value="{{$access_number}}" hi class="form-control"
-                               hidden required />
-                            <input type="text" id="" name="" value="{{$access_number}}" class="form-control"
-                            disabled  />
+                            <label for="access_number" class="form-label">Choose location for Access Number</label>
+                            {{-- <input type="text" id="access_number" name="access_number"  value="{{$access_number}}" hi class="form-control"
+                               hidden required /> --}}
+                            {{-- <input type="text" id="" name="" value="{{$access_number}}" class="form-control"
+                            disabled  /> --}}
+                            <select class="form-control" name="access_number_location" id="access_number_location" required>
+                                <option value="">Choose Location</option>
+                                <option value="barataria">Barataria</option>
+                                <option value="nova">Nova</option>
+                                <option value="push">Push</option>
+                            </select>
+
                         </div>
                     </div>
                 </div>
@@ -199,14 +206,14 @@
                             <input type="text" class="form-control" name="total_cost_profile" id="total_cost_profile" >
                         </div>
                     </div>
-                    <div class="x">
+                    <div class="col-md-10">
                         <div class="form-group">
                             <label for="test_requested" class="form-label">Individual Tests</label>
                             <select class="js-example-basic-multiple" name="test_requested[]" id="test_requested" multiple="multiple">
                                 {{-- {{dd($tests->where('department'!= null))}} --}}
                                 @foreach ($tests as $test)
                                     <option value="{{ $test->id }}" data-cost="{{ $test->cost }}" {{ (collect(old('test_requested'))->contains($test->id)) ? 'selected' : '' }}>
-                                        {{ $test->name .' '. $test->specimen_type .' '. $test->cost }}</option>
+                                        {{ $test->name .' '. $test->specimenType?->name .' '. $test->cost }}</option>
                                 @endforeach
                             </select>
                         </div>

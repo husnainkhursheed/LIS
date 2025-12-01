@@ -10,6 +10,7 @@ use App\Models\TestReport;
 use App\Models\TestProfile;
 use Illuminate\Http\Request;
 use App\Models\CustomDropdown;
+use App\Models\ProfileFormula;
 use App\Models\ProcedureResults;
 use App\Models\SensitivityResults;
 use App\Models\BiochemHaemoResults;
@@ -21,6 +22,7 @@ use App\Models\SampleDepartmentStatus;
 use App\Models\CytologyGynecologyResults;
 use App\Models\UrinalysisReferenceRanges;
 use App\Models\UrinalysisMicrobiologyResults;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TestReportController extends Controller
 {
@@ -35,6 +37,7 @@ class TestReportController extends Controller
         $accessNumber = $request->input('access_number');
         $patientName = $request->input('patient_name');
         $query = Sample::query();
+        $status = $request->input('status');
         $currentUser = Auth::user();
 
         // if ($request->filled('test_number')) {
@@ -80,9 +83,9 @@ class TestReportController extends Controller
             }
         }
 
-        $testReports = $query->paginate(10);
+        $testReports = $query->get();
 
-        $testReports->getCollection()->transform(function ($sample) {
+        $processedtestReports = $testReports->map(function ($sample) {
             // Fetch individual tests with direct department association
             $individualTests = $sample->tests()->get();
 
@@ -167,9 +170,37 @@ class TestReportController extends Controller
             $sample->unique_departments = $allDepartments;
             $sample->unique_departments_status = $departmentsStatus;
 
+            // Determine overall completion status
+            $sample->is_complete = $departmentsStatus->every(fn($status) => $status['is_completed'] === true);
+
+
             return $sample;
         });
 
+        // Now filter by status (complete/incomplete/all)
+        if ($status && $status !== 'all') {
+            $processedtestReports = $processedtestReports->filter(function ($sample) use ($status) {
+                return $status === 'complete'
+                    ? $sample->is_complete
+                    : !$sample->is_complete;
+            })->values();
+        }
+
+        // Manual pagination
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $processedtestReports->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $testReports = new LengthAwarePaginator(
+            $currentPageItems,
+            $processedtestReports->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
 
         return view('reports/test-reports.index', compact('testReports', 'accessNumber', 'patientName'));
     }
@@ -239,89 +270,53 @@ class TestReportController extends Controller
         $allTestsCompleted = true; // Flag to check if all tests are completed
         $completedat = null;
 
+        $testReports = TestReport::where('sample_id', $sample->id)
+        ->whereIn('test_id', $tests->pluck('id'))
+        ->get();
 
+        switch ($reporttype) {
+            case 1: // Biochemistry/Haematology Results
+                // $testReports->push($departmentTestsReports);
+                $completedat = BiochemHaemoResults::whereIn('test_report_id', $testReports->pluck('id'))
+                    ->where('is_completed', true)
+                    ->first();
+                    $completedat = $completedat ? $completedat->completed_at : null;
 
-        // foreach ($tests as $test) {
-        //     // Fetch the related TestReport with its results based on the report type
-        //     $testReport = TestReport::with([
-        //         'biochemHaemoResults',
-        //         'cytologyGynecologyResults',
-        //         'urinalysisMicrobiologyResults'
-        //     ])
-        //     ->where('sample_id', $sample->id)
-        //     ->where('test_id', $test->id)
-        //     ->first();
-            // dd($testReport);
-            // if(empty($testReport)){
-            //     continue;
-            // }
-            // if (!empty($testReport) && empty($testReport->urinalysisMicrobiologyResults->first())) {
-            //     continue;
-            // }
+                $allTestsCompleted = BiochemHaemoResults::whereIn('test_report_id', $testReports->pluck('id'))
+                    ->where('is_completed', true)
+                    ->count() == $tests->count();
+                break;
 
-            $testReports = TestReport::where('sample_id', $sample->id)
-            ->whereIn('test_id', $tests->pluck('id'))
-            ->get();
+            case 2: // Cytology/Gynecology Results
+                // $testReports->push($departmentTestsReports);
+                $completedat = CytologyGynecologyResults::whereIn('test_report_id', $testReports->pluck('id'))
+                ->where('is_completed', true)
+                ->first();
+                $completedat = $completedat ? $completedat->completed_at : null;
 
-            // if ($testReport) {
-                 // Store the TestReport for further use if needed
+                $allTestsCompleted = CytologyGynecologyResults::whereIn('test_report_id', $testReports->pluck('id'))
+                    ->where('is_completed', true)
+                    ->count() == $tests->count();
+                break;
 
-                // Determine the completed status based on the report type
-                switch ($reporttype) {
-                    case 1: // Biochemistry/Haematology Results
-                        // $testReports->push($departmentTestsReports);
-                        $completedat = BiochemHaemoResults::whereIn('test_report_id', $testReports->pluck('id'))
-                            ->where('is_completed', true)
-                            ->first();
-                            $completedat = $completedat ? $completedat->completed_at : null;
+            case 3: // Urinalysis/Microbiology Results
+                $testscount = $tests->filter(function ($test) {
+                    return $test->urin_test_type !== null;
+                });
+                $completedat = UrinalysisMicrobiologyResults::whereIn('test_report_id', $testReports->pluck('id'))
+                ->where('is_completed', true)
+                ->first();
+                $completedat = $completedat ? $completedat->completed_at : null;
+                $allTestsCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $testReports->pluck('id'))
+                    ->where('is_completed', true)
+                    ->count() == $testscount->count();
+                break;
 
-                        $allTestsCompleted = BiochemHaemoResults::whereIn('test_report_id', $testReports->pluck('id'))
-                            ->where('is_completed', true)
-                            ->count() == $tests->count();
-                        break;
-
-                    case 2: // Cytology/Gynecology Results
-                        // $testReports->push($departmentTestsReports);
-                        $completedat = CytologyGynecologyResults::whereIn('test_report_id', $testReports->pluck('id'))
-                        ->where('is_completed', true)
-                        ->first();
-                        $completedat = $completedat ? $completedat->completed_at : null;
-
-                        $allTestsCompleted = CytologyGynecologyResults::whereIn('test_report_id', $testReports->pluck('id'))
-                            ->where('is_completed', true)
-                            ->count() == $tests->count();
-                        break;
-
-                    case 3: // Urinalysis/Microbiology Results
-                        // dd($testReport->urinalysisMicrobiologyResults->first());
-                        // $testReports->push($departmentTestsReports);
-                        $testscount = $tests->filter(function ($test) {
-                            return $test->urin_test_type !== null;
-                        });
-                        $completedat = UrinalysisMicrobiologyResults::whereIn('test_report_id', $testReports->pluck('id'))
-                        ->where('is_completed', true)
-                        ->first();
-                        // dd(UrinalysisMicrobiologyResults::whereIn('test_report_id', $testReports->pluck('id'))
-                        // ->where('is_completed', true)
-                        // ->count());
-                        // dd($testscount);
-                        $completedat = $completedat ? $completedat->completed_at : null;
-                        $allTestsCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $testReports->pluck('id'))
-                            ->where('is_completed', true)
-                            ->count() == $testscount->count();
-                        break;
-
-                    default:
-                        // $testReports->push($departmentTestsReports);
-                        // Handle other report types if necessary
-                        $allTestsCompleted = false; // Set flag to false if the report type is not recognized
-                        break;
-                }
-
-            // } else {
-            //     $allTestsCompleted = false; // Set flag to false if no TestReport is found
-            // }
-        // }
+            default:
+                // Handle other report types if necessary
+                $allTestsCompleted = false; // Set flag to false if the report type is not recognized
+                break;
+        }
 
 
         // dd($testReports);
@@ -331,8 +326,6 @@ class TestReportController extends Controller
 
         if ($reporttype == '1' || $reporttype == '3') {
             // Get all sample profiles with subprofiles
-            // $sampleProfiles = $sample->testProfiles()->with('subProfiles.tests')->get();
-            // dd($sampleProfiles);
             foreach ($profiles as $mainProfile) {
                 $mainProfileId = $mainProfile->id;
                 $mainProfileName = $mainProfile->name;
@@ -363,6 +356,7 @@ class TestReportController extends Controller
                         $subProfileName = $subProfile->name;
                         $categorizedTests[$mainProfileId]['subprofiles'][$subProfileId] = [
                             'name' => $subProfileName,
+                            'specimen_type' => $subProfile->specimen_type?->name ?? null,
                             'tests' => [],
                         ];
 
@@ -387,9 +381,27 @@ class TestReportController extends Controller
         }
 
         // dd($categorizedTests);
-        // dd($categoriesedTests);
 
         $test_profiles = TestProfile::all();
+
+        $calculationFormulas = [];
+
+        foreach ($test_profiles as $profile) {
+            $formulas = ProfileFormula::where('profile_id', $profile->id)
+                ->with('calculatedTest')
+                ->orderBy('calculation_order')
+                ->get();
+
+            foreach ($formulas as $formula) {
+                $calculationFormulas[] = [
+                    'profile_id' => $formula->profile_id,
+                    'calculated_test_id' => $formula->calculated_test_id,
+                    'calculated_test_name' => $formula->calculatedTest->name,
+                    'formula' => $formula->formula,
+                    'calculation_order' => $formula->calculation_order,
+                ];
+            }
+        }
 
         $contraceptivedropdown = CustomDropdown::where('dropdown_name', 'Contraceptive')->get();
 
@@ -397,7 +409,7 @@ class TestReportController extends Controller
 
         $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
 
-        return view('reports/test-reports.edit', compact('test_profiles','categorizedTests','completedat','allTestsCompleted','sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
+        return view('reports/test-reports.edit', compact('calculationFormulas','test_profiles','categorizedTests','completedat','allTestsCompleted','sample','reporttype','tests','testReports','contraceptivedropdown','senstivityprofiles','referenceRanges'));
     }
 
     public function getsensitivityitems(Request $request)
@@ -1007,6 +1019,17 @@ class TestReportController extends Controller
         $user = Auth::user();
         $sample = Sample::find($request->sample_id);
         $reporttypeis = $request->reporttypeis;
+
+        SampleDepartmentStatus::updateOrCreate(
+            [
+                'sample_id' => $sample->id,
+                'department' => $reporttypeis,
+            ],
+            [
+                'is_revised' => true,
+            ]
+        );
+
 
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 

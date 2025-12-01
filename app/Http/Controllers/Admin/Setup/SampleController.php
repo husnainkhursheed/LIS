@@ -62,48 +62,70 @@ class SampleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
-
         $request->validate([
-            // 'test_number' => 'required',
-            'access_number' => 'required|unique:samples,access_number,except,id',
+            'access_number_location' => 'required|in:barataria,nova,push',
             'collected_date' => 'required',
             'received_date' => 'required',
-            // 'received_time' => 'required',
             'patient_id' => 'required',
             'institution_id' => 'required',
             'doctor_id' => 'required',
             'bill_to' => 'required',
-            // 'test_requested' => 'required',
-            // 'test_profiles' => 'required',
-       ]);
-        //    dd($request->all());
+        ]);
 
+        // Prefix map by location
+        $prefixMap = [
+            'barataria' => 'B',
+            'nova' => 'N',
+            'push' => 'P',
+        ];
 
-       $sample = new Sample();
-       // $sample->test_number =$request->test_number;
-       $sample->access_number = $request->access_number;
-       $sample->collected_date = $request->collected_date;
-       $sample->received_date = $request->received_date;
-       $sample->received_time = now()->format('H:i:s'); // Store the current system time
-       $sample->patient_id = $request->patient_id;
-       $sample->doctor_id = $request->doctor_id;
-       $sample->institution_id = $request->institution_id;
-       $sample->bill_to = $request->bill_to;
-       $sample->profiles_total_cost = $request->total_cost_profile;
-       $sample->indvidualtests_total_cost = $request->total_cost;
-       $sample->grand_total_cost = $request->grand_total;
-    //    $sample->notes = $request->notes;
-       $sample->save();
-       // Attach the tests to the sample
-       $sample->tests()->attach($request->test_requested);
-       $sample->testProfiles()->attach($request->test_profiles);
+        $prefix = $prefixMap[$request->access_number_location];
+        $yearSuffix = now()->format('y'); // e.g. '25'
 
-        Session::flash('message', 'Created successfully!');
+        // Get the last accession number for this location and year
+        $lastSample = Sample::where('access_number', 'like', "{$prefix}{$yearSuffix}-%")
+            ->orderBy('access_number', 'desc')
+            ->first();
+
+        if ($lastSample) {
+            // Extract the numeric sequence (after the dash)
+            $lastNumber = (int) substr($lastSample->access_number, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        // Generate accession number like B25-0001
+        $accessNumber = "{$prefix}{$yearSuffix}-{$nextNumber}";
+
+        // --- Save the Sample ---
+        $sample = new Sample();
+        $sample->access_number = $accessNumber;
+        $sample->collected_date = $request->collected_date;
+        $sample->received_date = $request->received_date;
+        $sample->received_time = now()->format('H:i:s');
+        $sample->patient_id = $request->patient_id;
+        $sample->doctor_id = $request->doctor_id;
+        $sample->institution_id = $request->institution_id;
+        $sample->bill_to = $request->bill_to;
+        $sample->profiles_total_cost = $request->total_cost_profile;
+        $sample->indvidualtests_total_cost = $request->total_cost;
+        $sample->grand_total_cost = $request->grand_total;
+        $sample->save();
+
+        // Attach related tests
+        $sample->tests()->attach($request->test_requested);
+        $sample->testProfiles()->attach($request->test_profiles);
+
+        Session::flash('message', "Sample created successfully! Access Number: {$accessNumber}");
         Session::flash('alert-class', 'alert-success');
+
         return redirect()->back();
     }
+
+
 
     /**
      * Display the specified resource.

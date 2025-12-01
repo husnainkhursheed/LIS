@@ -109,6 +109,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/note/{id}', [NoteController::class, 'destroy'])->name('note.destroy');
 
     Route::post('/TestProfile/fetch-tests-from-profiles', [TestProfileController::class, 'fetchTestsFromProfiles']);
+    // Fetch tests for selected specimen(s) via AJAX
+    Route::post('/TestProfile/fetch-tests-by-specimen', [TestProfileController::class, 'fetchTestsBySpecimen'])->name('TestProfile.fetchTestsBySpecimen');
     // test profile crud  working
     Route::get('/TestProfile', [TestProfileController::class, 'index'])->name('TestProfile.index');
     Route::post('/TestProfile', [TestProfileController::class, 'store'])->name('TestProfile.store');

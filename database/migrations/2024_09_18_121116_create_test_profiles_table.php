@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->decimal('cost', 8, 2); // Entered cost for the profile
+            $table->foreignId('specimentype_id')->nullable()->constrained('specimen_types')->onDelete('set null');
             $table->timestamps();
         });
     }

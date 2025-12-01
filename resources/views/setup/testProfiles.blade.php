@@ -48,13 +48,13 @@
                                         <select class="form-select sort-dropdown" aria-label="Default select example"
                                             name="sort_by" onchange="this.form.submit()">
                                             <option selected disabled>Sort By</option>
-                                            <option value="code"
-                                                {{ request('sort_by') == 'code' ? 'selected' : '' }}>Code</option>
+                                            {{-- <option value="code"
+                                                {{ request('sort_by') == 'code' ? 'selected' : '' }}>Code</option> --}}
                                             <option value="name"
                                                 {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name
                                             </option>
-                                            <option value="specimen_type"
-                                                {{ request('sort_by') == 'specimen_type' ? 'selected' : '' }}>Specimen Type
+                                            <option value="cost"
+                                                {{ request('sort_by') == 'cost' ? 'selected' : '' }}>Cost
                                             </option>
                                         </select>
                                     </form>
@@ -168,7 +168,7 @@
                                         placeholder="Enter Cost" required />
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="col-lg-12">
                                 <label for="test_requested" class="form-label">Departments</label>
                                 <select class="js-example-basic-multiple" name="department[]" id="department" multiple="multiple">
                                     {{-- <option value="">Select Department</option> --}}
@@ -178,37 +178,33 @@
                                 </select>
                             </div>
 
+                            <div class="col-lg-12">
+                                <label for="specimen_type" class="form-label">Specimens Type</label><small class="text-warning"> (note: Specimens apply only to profiles that do not have subprofiles)</small>
+                                <select class="js-example-basic-multiple" name="specimen_type" id="specimen_type">
+                                    <option value="">Choose Specimen</option>
+                                    @foreach ($specimens as $specimen)
+                                        <option value="{{ $specimen->id }}">{{ $specimen->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
 
-                            <div class="form-group">
-                                <div class="form-group">
-                                    <label for="sub_profiles" class="form-label">Include Sub-Profiles</label>
-                                    <select class="js-example-basic-multiple" name="sub_profiles[]" id="sub_profiles" onchange="checkTestProfiles()" multiple="multiple">
+
+
+                            <div class="col-lg-12">
+                                    <label for="sub_profiles" class="form-label">Include Sub-Profiles</label><small class="text-warning"> (note: Profiles that contain subprofiles do not have formulas )</small>
+                                    <select class="js-example-basic-multiple" name="sub_profiles[]" id="sub_profiles" multiple="multiple">
                                         @foreach($profiles as $profile)
                                             {{-- Prevent selecting self as sub-profile --}}
                                             <option value="{{ $profile->id }}">{{ $profile->name }}</option>
                                         @endforeach
                                     </select>
-                                </div>
-                                {{-- <label id="toggle-load-profiles" style="cursor:pointer; user-select:none;">
-                                    Load Tests from Profiles
-                                    <span id="arrow-icon" style="transition: transform 0.2s;"><i class="ri-arrow-down-s-line"></i></span>
-                                </label>
-                                <div id="load-profiles-group" style="display:none; margin-top:10px;">
-                                    <select class="form-select js-example-basic-multiple" id="load_profiles" multiple="multiple">
-                                        @foreach($profiles as $profile)
-                                            <option value="{{ $profile->id }}">{{ $profile->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button" class="btn btn-info mt-2" id="fetch-profile-tests">Load Selected Profiles' Tests</button>
-                                </div> --}}
                             </div>
 
-                            <div class="form-group">
+                            <div class="col-lg-12">
                                 <label for="tests" class="form-label">Tests</label>
                                 <select class="js-example-basic-multiple" name="tests[]" id="tests" multiple="multiple">
                                     {{-- <option value="">Select Department</option> --}}
-                                    {{-- {{dd($tests)}} --}}
                                     @foreach ($tests as $test)
                                         <option value="{{$test->id}}"> {{$test->name}}</option>
                                     @endforeach
@@ -221,6 +217,22 @@
 
                                 <span class="badge bg-primary-subtle text-white "></span>
                             </div>
+                            <div class="col-lg-12">
+                                <hr class="my-4">
+                                <h5 class="mb-3">Calculation Formulas</h5>
+                                <p class="text-muted small">Define automatic calculations for tests in this profile</p>
+
+                                <div id="formulas-container">
+                                    <!-- Dynamic formula rows will be added here -->
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-formula-btn">
+                                    <i class="ri-add-line"></i> Add Formula
+                                </button>
+
+                                <!-- Hidden input to store formulas as JSON -->
+                                <input type="hidden" name="formulas" id="formulas-data" />
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -232,13 +244,110 @@
                     </div>
                 </form>
             </div>
+        </div>4
+    </div>
+
+    <!-- Formula Row Template (hidden) -->
+    <template id="formula-row-template">
+        <div class="formula-row card mb-3 p-3 border">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Calculated Test</label>
+                    <select class="form-select calculated-test-select" required>
+                        <option value="">Select Test</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Formula</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control formula-input"
+                            placeholder="e.g., TRIGLYCERIDES/5" required />
+                        <button type="button" class="btn btn-outline-info formula-helper-btn"
+                                title="Formula Helper">
+                            <i class="ri-question-line"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Use test names in UPPERCASE. Operators: +, -, *, /, ()</small>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Order</label>
+                    <input type="number" class="form-control calculation-order"
+                        min="1" value="1" required />
+                </div>
+
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger btn-sm remove-formula-btn">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formula Preview -->
+            <div class="mt-2">
+                <small class="text-info formula-preview"></small>
+            </div>
+        </div>
+    </template>
+
+    <!-- Formula Helper Modal -->
+    <div class="modal fade" id="formulaHelperModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Formula Builder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Tests to Include</label>
+                        <div id="available-tests-list" class="list-group mb-3">
+                            <!-- Will be populated with available tests -->
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Formula Preview</label>
+                        <input type="text" class="form-control" id="formula-builder-preview" readonly />
+                    </div>
+
+                    <div class="btn-group mb-3" role="group">
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op="+">+</button>
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op="-">-</button>
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op="*">×</button>
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op="/">/</button>
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op="(">(</button>
+                        <button type="button" class="btn btn-outline-secondary operator-btn" data-op=")">)</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Constant Value</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="constant-value" step="0.001" />
+                            <button type="button" class="btn btn-primary" id="add-constant-btn">Add to Formula</button>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Examples:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><code>TRIGLYCERIDES/5</code> - Simple division</li>
+                            <li><code>(CHOLESTEROL-HDL)-VLDL</code> - Multiple operations</li>
+                            <li><code>CHOLESTEROL/HDL</code> - Ratio</li>
+                            <li><code>(MICROALBUMIN/CREATININE)*1000</code> - With constant</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="apply-formula-btn">Apply Formula</button>
+                </div>
+            </div>
         </div>
     </div>
 
-
-<!--end modal-->
-
-<!-- Modal -->
+    <!-- Modal -->
     <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1"
         aria-labelledby="deleteRecordLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -363,6 +472,86 @@
                 closeOnSelect: false
             });
 
+            // Function to enable/disable sub_profiles based on specimen selection
+            function updateSubProfilesDisabledState() {
+                // Get current value(s) of specimen_type. Works for single or multiple selects.
+                let val = $('#specimen_type').val();
+
+                // Normalize to an array for easier checks
+                if (val === null) val = [];
+                if (!Array.isArray(val)) val = [val];
+
+                // If there's any non-empty selection, disable sub_profiles
+                const hasSpecimenSelected = val.some(function(v) { return v !== null && v !== '' && v !== undefined; });
+
+                if (hasSpecimenSelected) {
+                    // disable underlying select and refresh select2
+                    $('#sub_profiles').prop('disabled', true);
+                    $('#sub_profiles').val(null).trigger('change');
+                    // visually update select2 by triggering change (select2 respects underlying disabled prop)
+                    // $('#sub_profiles').trigger('change.select2');
+                } else {
+                    $('#sub_profiles').prop('disabled', false);
+                    // $('#sub_profiles').trigger('change.select2');
+                }
+            }
+
+            // Watch specimen_type changes, update sub_profiles state and fetch tests for selected specimen(s)
+            $('#specimen_type').on('change', function() {
+                // When specimen is changed, clear selected sub_profiles (if any) and update state
+                // Optionally we could keep selections, but requirement says disable Include Sub-Profiles when specimen selected
+                updateSubProfilesDisabledState();
+
+                // Fetch related tests via AJAX
+                let selectedSpecimens = $(this).val();
+
+                // Normalize to array or null
+                // if (!selectedSpecimens || selectedSpecimens.length === 0) {
+                //     // If no specimen selected, reset tests list to original options
+                //     $('#tests option').each(function() { $(this).prop('disabled', false); });
+                //     $('#tests').val('').trigger('change');
+                //     selectedTestsOrder = [];
+                //     // updateOrderedTestsDisplay();
+                //     return;
+                // }
+
+                $.ajax({
+                    url: '{{ route("TestProfile.fetchTestsBySpecimen") }}',
+                    type: 'POST',
+                    data: {
+                        specimen_type: selectedSpecimens,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (!response.tests) return;
+
+                        let $select = $('#tests');
+
+                        // Remove current options and rebuild from returned tests
+                        // But to preserve other tests not related to specimen, we'll clear selection and replace options with returned set
+                        $select.empty();
+
+                        response.tests.forEach(function(test) {
+                            $select.append(new Option(test.name, test.id));
+                        });
+
+                        // Refresh select2
+                        $select.trigger('change');
+
+                        // Clear ordered tests since new set loaded
+                        selectedTestsOrder = [];
+                        $('#ordered_tests').val('');
+                        // updateOrderedTestsDisplay();
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching tests by specimen', xhr);
+                    }
+                });
+            });
+
+            // Ensure the state is correct on initial load
+            updateSubProfilesDisabledState();
+
             // $('#mySelect').on('select2:select', function (e) {
             //     var selectedId = e.params.data.id;
             //     var $option = $(this).find('option[value="' + selectedId + '"]');
@@ -410,6 +599,38 @@
                 updateOrderedTestsDisplay();
             });
 
+            function updateFormulasStateBasedOnSubProfiles() {
+                const selected = $('#sub_profiles').val();
+                const hasValue = Array.isArray(selected) ? selected.length > 0 : !!selected;
+
+                if (hasValue) {
+                    // Clear formulas data and UI
+                    $('#formulas-container').empty();
+                    $('#formulas-data').val('');
+                    formulas = [];
+
+                    // Disable the add button and any leftover formula controls
+                    $('#add-formula-btn').prop('disabled', true).addClass('disabled');
+                    $('#formulas-container').find('input, select, button').prop('disabled', true);
+
+                    // Optional: show a small notice (uncomment if desired)
+                    // if ($('#formulas-disabled-note').length === 0) {
+                    //     $('<div id="formulas-disabled-note" class="text-muted small mt-2">Formulas disabled when Include Sub-Profiles is selected.</div>').insertBefore('#formulas-container');
+                    // }
+                } else {
+                    // Re-enable add button; actual formula rows will be added by user
+                    $('#add-formula-btn').prop('disabled', false).removeClass('disabled');
+                    $('#formulas-container').find('input, select, button').prop('disabled', false);
+                    $('#formulas-disabled-note').remove();
+                }
+            }
+
+            $('#sub_profiles').on('change', function() {
+                // also call your existing check function if needed
+                checkTestProfiles();
+                updateFormulasStateBasedOnSubProfiles();
+            });
+
             function updateOrderedTestsDisplay() {
                 // Update hidden input with ordered values
                 $('#ordered_tests').val(selectedTestsOrder.join(','));
@@ -445,192 +666,532 @@
 
 
 
-        $('#fetch-profile-tests').on('click', function() {
-            var profileIds = $('#load_profiles').val();
-            if (!profileIds || profileIds.length === 0) return;
+            $('#fetch-profile-tests').on('click', function() {
+                var profileIds = $('#load_profiles').val();
+                if (!profileIds || profileIds.length === 0) return;
 
-            $.ajax({
-                url: '/TestProfile/fetch-tests-from-profiles',
-                type: 'POST',
-                data: {
-                    profile_ids: profileIds,
-                    _token: $('input[name="_token"]').val()
-                },
-                success: function(response) {
-                    let $select = $('#tests');
-                    response.test_ids.forEach(function(id) {
-                        let $option = $select.find('option[value="' + id + '"]');
-                        $option.detach();
-                        $select.append($option);
-                    });
-
-                    // Set Select2 selected values in order
-                    $select.val(response.test_ids).trigger('change');
-                    // $('#tests').val(response.test_ids).trigger('change');
-                    $('#ordered_tests').val(response.test_ids.join(','));
-                    selectedTestsOrder = getOrderedTestsArray();
-                    updateOrderedTestsDisplay();
-                },
-                error: function(xhr) {
-                    alert('Could not load tests for the selected profiles.');
-                }
-            });
-        });
-
-        $('#toggle-load-profiles').on('click', function() {
-            $('#load-profiles-group').slideToggle(150);
-            $('#arrow-icon').toggleClass('rotated');
-        });
-
-        // Optional: rotate arrow when open
-        $('<style>.rotated { transform: rotate(180deg); }</style>').appendTo('head');
-
-        // When the document is ready, attach a click event to the "Edit" button
-        $('.edit-item-btn').on('click', function() {
-            // Get the ID from the data attribute
-
-            var itemId = $(this).data('id');
-            var url = '{{ url("/TestProfile") }}' + '/' + itemId + '/edit';
-
-            $.ajax({
-                    url: url, // Adjust the route as needed
-                    type: 'GET',
+                $.ajax({
+                    url: '/TestProfile/fetch-tests-from-profiles',
+                    type: 'POST',
+                    data: {
+                        profile_ids: profileIds,
+                        _token: $('input[name="_token"]').val()
+                    },
                     success: function(response) {
-                        // Assuming the response has a 'leadType' key
-                        var note = response.note;
-                        // console.log("my practices ",doctor);
-
-                        // Now you can use the leadType data to populate your modal fields
-                        $('#id-field').val(note.id);
-                        $('#code').val(note.code);
-                        $('#name').val(note.name);
-                        $('#cost').val(note.cost);
-
-                        var profiledepartment = response.profiledepartment.map(function(surgery) {
-                            return surgery.department;
-                        });
-                        $('#department').val(profiledepartment).trigger('change');
-
-                        if (response.note && response.note.sub_profiles) {
-                            // $('#sub_profiles').val(response.note.sub_profiles.map(String)).trigger('change');
-                            let $sub_profiles_select = $('#sub_profiles');
-                            response.note.sub_profiles.forEach(function(id) {
-                                let $option = $sub_profiles_select.find('option[value="' + id + '"]');
-                                $option.detach();
-                                $sub_profiles_select.append($option);
-                            });
-
-                            // Set Select2 selected values in order
-                            $sub_profiles_select.val(response.note.sub_profiles).trigger('change');
-                        }
-
-                        var profiletests = response.profiletests; // Array of {id, name} in correct order
-                        let testIds = profiletests.map(function(test) { return test.id.toString(); });
-
-                        // Move options in DOM to match saved order
                         let $select = $('#tests');
-                        testIds.forEach(function(id) {
+                        response.test_ids.forEach(function(id) {
                             let $option = $select.find('option[value="' + id + '"]');
                             $option.detach();
                             $select.append($option);
                         });
 
                         // Set Select2 selected values in order
-                        $select.val(testIds).trigger('change');
-
-                        // Set the order array and update badges/hidden input
-                        selectedTestsOrder = testIds;
+                        $select.val(response.test_ids).trigger('change');
+                        // $('#tests').val(response.test_ids).trigger('change');
+                        $('#ordered_tests').val(response.test_ids.join(','));
+                        selectedTestsOrder = getOrderedTestsArray();
                         updateOrderedTestsDisplay();
-
-                        $('#ordered_tests').val(testIds.join(','));
-
-                        // Update modal title, button, etc...
-                        $('#exampleModalLabel').html("Edit Profile");
-                        $('#showModal .modal-footer').css('display', 'block');
-                        $('#add-btn').html("Update");
-                        $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + note.id);
                     },
-                    error: function(xhr, status, error) {
-                        console.error(xhr, status, error);
-                        // Handle errors if needed
+                    error: function(xhr) {
+                        alert('Could not load tests for the selected profiles.');
                     }
                 });
+            });
 
+            $('#toggle-load-profiles').on('click', function() {
+                $('#load-profiles-group').slideToggle(150);
+                $('#arrow-icon').toggleClass('rotated');
+            });
+
+            // Optional: rotate arrow when open
+            $('<style>.rotated { transform: rotate(180deg); }</style>').appendTo('head');
+
+            // When the document is ready, attach a click event to the "Edit" button
+            $('.edit-item-btn').on('click', function() {
+                // Get the ID from the data attribute
+
+                var itemId = $(this).data('id');
+                var url = '{{ url("/TestProfile") }}' + '/' + itemId + '/edit';
+
+                $.ajax({
+                        url: url, // Adjust the route as needed
+                        type: 'GET',
+                        success: function(response) {
+                            // Assuming the response has a 'leadType' key
+                            var note = response.note;
+                            // console.log("my practices ",doctor);
+
+                            // Now you can use the leadType data to populate your modal fields
+                            $('#id-field').val(note.id);
+                            $('#code').val(note.code);
+                            $('#name').val(note.name);
+                            $('#cost').val(note.cost);
+
+
+
+                            // Ensure sub_profiles enabled/disabled state matches any specimen selection (edit response may have populated specimen_type)
+                            updateSubProfilesDisabledState();
+
+
+                            var profiledepartment = response.profiledepartment.map(function(surgery) {
+                                return surgery.department;
+                            });
+                            $('#department').val(profiledepartment).trigger('change');
+
+                            if (response.note && response.note.sub_profiles) {
+                                // $('#sub_profiles').val(response.note.sub_profiles.map(String)).trigger('change');
+                                let $sub_profiles_select = $('#sub_profiles');
+                                response.note.sub_profiles.forEach(function(id) {
+                                    let $option = $sub_profiles_select.find('option[value="' + id + '"]');
+                                    $option.detach();
+                                    $sub_profiles_select.append($option);
+                                });
+
+                                // Set Select2 selected values in order
+                                $sub_profiles_select.val(response.note.sub_profiles).trigger('change');
+                            }
+
+                            if (response.note && response.note.specimentype_id) {
+                                $('#specimen_type').val(response.note.specimentype_id).trigger('change');
+                            }
+
+
+                            var profiletests = response.profiletests; // Array of {id, name} in correct order
+                            let testIds = profiletests.map(function(test) { return test.id.toString(); });
+
+                            // Move options in DOM to match saved order
+                            let $select = $('#tests');
+                            testIds.forEach(function(id) {
+                                let $option = $select.find('option[value="' + id + '"]');
+                                $option.detach();
+                                $select.append($option);
+                            });
+                            setTimeout(() => {
+                                // Set Select2 selected values in order
+                                $select.val(testIds).trigger('change');
+                                // Load formulas
+                                if (response.formulas) {
+                                    loadFormulas(response.formulas);
+                                }
+                            }, 4000); // delay of 10 sec
+
+                            // Set the order array and update badges/hidden input
+                            selectedTestsOrder = testIds;
+                            updateOrderedTestsDisplay();
+
+                            $('#ordered_tests').val(testIds.join(','));
+
+                            // Update modal title, button, etc...
+                            $('#exampleModalLabel').html("Edit Profile");
+                            $('#showModal .modal-footer').css('display', 'block');
+                            $('#add-btn').html("Update");
+                            $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + note.id);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr, status, error);
+                            // Handle errors if needed
+                        }
+                    });
+
+            });
+
+            function resetModal() {
+                // Reset modal titleq
+                $('#exampleModalLabel').html("Add Profile");
+
+                // Display the modal footer
+                $('#showModal .modal-footer').css('display', 'block');
+
+                // Change the button text
+                $('#add-btn').html("Add");
+                $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}');
+                // if ( $('#patch').length) {
+                //     $('#patch').remove();
+                // }
+                $('#code').val('');
+                $('#name').val('');
+                $('#cost ').val('');
+                $('#tests ').val('');
+                // $('#surgeries').val("");
+                $('#surgeries').val("").trigger('change');
+                $('#tests').val("").trigger('change');
+                $('#department').val("").trigger('change');
+                $('#tests').val('').trigger('change');
+                $('#sub_profiles').val('').trigger('change');
+                $('#specimen_type').val('').trigger('change');
+                $('#ordered-tests').empty();
+                $('#ordered_tests').val('');
+                $('#sub_profiles option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+                $('#tests option').each(function() {
+                    $(this).prop('disabled', false);
+                });
+                $('#formulas-container').empty();
+                $('#formulas-data').val('');
+                formulas = [];
+
+            }
+
+            // Event listener for modal close event
+            $('#showModal').on('hidden.bs.modal', function () {
+                resetModal();
+            });
+
+            $('.remove-item-btn').on('click', function() {
+                var itemId = $(this).data('id');
+                $('#delete-record').attr('data-id', itemId);
+            });
+
+            $('#delete-record').on('click', function() {
+                var itemId = $(this).data('id');
+                var url = '/TestProfile/' + itemId;
+
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        // Handle success, e.g., remove the deleted item from the UI
+                        console.log(response);
+                        $('#deleteRecordModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        console.error(xhr, status, error);
+                    }
+                });
+            });
+
+
+            // Function to reset modal when clicking the "Close" button
+            $('#close-modal').on('click', function() {
+                resetModal();
+            });
         });
 
-        function resetModal() {
-            // Reset modal titleq
-            $('#exampleModalLabel').html("Add Profile");
+        // Formula Management System
+        let formulas = [];
+        let currentFormulaRow = null;
+        let availableTests = [];
 
-            // Display the modal footer
-            $('#showModal .modal-footer').css('display', 'block');
-
-            // Change the button text
-            $('#add-btn').html("Add");
-            $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}');
-            // if ( $('#patch').length) {
-            //     $('#patch').remove();
-            // }
-            $('#code').val('');
-            $('#name').val('');
-            $('#cost ').val('');
-            $('#tests ').val('');
-            // $('#surgeries').val("");
-            $('#surgeries').val("").trigger('change');
-            $('#tests').val("").trigger('change');
-            $('#department').val("").trigger('change');
-            $('#tests').val('').trigger('change');
-            $('#sub_profiles').val('').trigger('change');
-            $('#ordered-tests').empty();
-            $('#ordered_tests').val('');
-            $('#sub_profiles option').each(function() {
-                $(this).prop('disabled', false);
-            });
-            $('#tests option').each(function() {
-                $(this).prop('disabled', false);
+        // Update available tests when tests selection changes
+        $('#tests').on('change', function() {
+            availableTests = [];
+            $('#tests option:selected').each(function() {
+                availableTests.push({
+                    id: $(this).val(),
+                    name: $(this).text()
+                });
             });
 
+            updateCalculatedTestOptions();
+            updateFormulaHelperTests();
+        });
+
+        // Add new formula row
+        $('#add-formula-btn').on('click', function() {
+            if (availableTests.length === 0) {
+                alert('Please select tests first before adding formulas');
+                return;
+            }
+            addFormulaRow();
+        });
+
+        function addFormulaRow(data = null) {
+            const template = document.getElementById('formula-row-template');
+            const clone = template.content.cloneNode(true);
+            const container = document.getElementById('formulas-container');
+
+            // Add to container
+            container.appendChild(clone);
+
+            const row = container.lastElementChild;
+
+            // Populate calculated test dropdown
+            const select = row.querySelector('.calculated-test-select');
+            availableTests.forEach(test => {
+                const option = new Option(test.name, test.id);
+                select.add(option);
+            });
+
+            // If editing, populate data
+            if (data) {
+                const targetValue = String(data.calculated_test_id);
+
+                // 🕐 Make sure options exist first
+                setTimeout(() => {
+                    // Find the select again to be safe
+                    const select = row.querySelector('.calculated-test-select');
+
+                    // Try direct match first
+                    select.value = targetValue;
+
+                    // Fallback: manually find and select the option
+                    if (select.value !== targetValue) {
+                        const match = Array.from(select.options).find(opt => String(opt.value) === targetValue);
+                        if (match) match.selected = true;
+                    }
+
+                    // Update other fields
+                    const formulaInput = row.querySelector('.formula-input');
+                    if (formulaInput) formulaInput.value = data.formula || '';
+
+                    const orderInput = row.querySelector('.calculation-order');
+                    if (orderInput) orderInput.value = data.calculation_order || 1;
+
+                    // ✅ Trigger preview update
+                    updateFormulaPreview(row);
+                }, 50); // small delay ensures options are rendered
+            }
+
+            // Attach event listeners
+            attachFormulaRowListeners(row);
         }
 
-        // Event listener for modal close event
-        $('#showModal').on('hidden.bs.modal', function () {
-            resetModal();
-        });
+        function attachFormulaRowListeners(row) {
+            // Remove formula
+            row.querySelector('.remove-formula-btn').addEventListener('click', function() {
+                row.remove();
+                updateFormulasData();
+            });
 
-        $('.remove-item-btn').on('click', function() {
-            var itemId = $(this).data('id');
-            $('#delete-record').attr('data-id', itemId);
-        });
+            // Formula helper
+            row.querySelector('.formula-helper-btn').addEventListener('click', function() {
+                currentFormulaRow = row;
+                const currentFormula = row.querySelector('.formula-input').value;
+                $('#formula-builder-preview').val(currentFormula);
+                $('#formulaHelperModal').modal('show');
+            });
 
-        $('#delete-record').on('click', function() {
-            var itemId = $(this).data('id');
-            var url = '/TestProfile/' + itemId;
+            // Update preview on input
+            row.querySelector('.formula-input').addEventListener('input', function() {
+                updateFormulaPreview(row);
+                updateFormulasData();
+            });
 
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    // Handle success, e.g., remove the deleted item from the UI
-                    console.log(response);
-                    $('#deleteRecordModal').modal('hide');
-                    location.reload();
-                },
-                error: function(xhr, status, error) {
-                    // Handle error
-                    console.error(xhr, status, error);
+            row.querySelector('.calculated-test-select').addEventListener('change', function() {
+                updateFormulaPreview(row);
+                updateFormulasData();
+            });
+
+            row.querySelector('.calculation-order').addEventListener('change', function() {
+                updateFormulasData();
+            });
+        }
+
+        function updateFormulaPreview(row) {
+            const select = row.querySelector('.calculated-test-select');
+            const testId = select.value;
+            const formula = row.querySelector('.formula-input').value;
+            const preview = row.querySelector('.formula-preview');
+
+            if (testId && formula) {
+                const testName = select.options[select.selectedIndex]?.text || '';
+                preview.innerHTML = `<strong>${testName}</strong> = ${formula}`;
+
+                // Validate formula
+                if (validateFormula(formula)) {
+                    preview.classList.remove('text-danger');
+                    preview.classList.add('text-info');
+                } else {
+                    preview.classList.remove('text-info');
+                    preview.classList.add('text-danger');
+                    preview.innerHTML += ' <i class="ri-error-warning-line"></i> Invalid formula';
+                }
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        function validateFormulaWithDetails(formula) {
+            // Basic validation
+            if (!formula || formula.trim() === '') {
+                return { valid: false, error: 'Formula is empty' };
+            }
+
+            // Allow letters, numbers, spaces, operators, parentheses, and special characters
+            const validPattern = /^[A-Za-z0-9\s\+\-\*\/\(\)\.\#\%\@\&\$\!\~\[\]\_\-\:\,]+$/;
+            if (!validPattern.test(formula)) {
+                return { valid: false, error: 'Contains invalid characters' };
+            }
+
+            // Check balanced parentheses
+            let openCount = (formula.match(/\(/g) || []).length;
+            let closeCount = (formula.match(/\)/g) || []).length;
+            if (openCount !== closeCount) {
+                return { valid: false, error: 'Unbalanced parentheses' };
+            }
+
+            // Extract referenced test names from formula
+            const referencedTests = [];
+            availableTests.forEach(test => {
+                const upperTestName = test.name.toUpperCase().trim();
+                if (formula.toUpperCase().includes(upperTestName)) {
+                    referencedTests.push(test.name);
                 }
             });
+
+            return { valid: true, referencedTests };
+        }
+
+        function validateFormula(formula) {
+            // Basic validation: check for test names and operators
+            if (!formula || formula.trim() === '') return false;
+
+            // Allow letters, numbers, spaces, operators, parentheses, and special characters (*,#,%,etc)
+            const validPattern = /^[A-Za-z0-9\s\+\-\*\/\(\)\.\#\%\@\&\$\!\~\[\]\_\-\:\,]+$/;
+            if (!validPattern.test(formula)) return false;
+
+            // Check balanced parentheses
+            let openCount = (formula.match(/\(/g) || []).length;
+            let closeCount = (formula.match(/\)/g) || []).length;
+            if (openCount !== closeCount) return false;
+
+            return true;
+        }
+
+        function updateCalculatedTestOptions() {
+            // Update all calculated test dropdowns
+            $('.calculated-test-select').each(function() {
+                const currentValue = $(this).val();
+                $(this).empty().append('<option value="">Select Test</option>');
+
+                availableTests.forEach(test => {
+                    const option = new Option(test.name, test.id);
+                    $(this).append(option);
+                });
+
+                // Restore previous selection if still valid
+                if (currentValue) {
+                    $(this).val(currentValue);
+                }
+            });
+        }
+
+        function updateFormulasData() {
+            formulas = [];
+
+            $('.formula-row').each(function() {
+                const testId = $(this).find('.calculated-test-select').val();
+                const formula = $(this).find('.formula-input').val();
+                const order = $(this).find('.calculation-order').val();
+
+                if (testId && formula) {
+                    formulas.push({
+                        calculated_test_id: testId,
+                        formula: formula,
+                        calculation_order: parseInt(order) || 1
+                    });
+                }
+            });
+
+            // Update hidden input
+            $('#formulas-data').val(JSON.stringify(formulas));
+        }
+
+        // Formula Helper Modal Functions
+        function updateFormulaHelperTests() {
+            const container = $('#available-tests-list');
+            container.empty();
+
+            availableTests.forEach(test => {
+                // Display original test name with special characters
+                const displayName = test.name;
+                const upperName = test.name.toUpperCase().trim();
+
+                const item = $(`
+                    <button type="button" class="list-group-item list-group-item-action test-name-btn"
+                            data-test-name="${upperName}">
+                        <span class="badge bg-primary me-2">${test.id}</span>
+                        ${displayName}
+                        ${displayName.includes('*') || displayName.includes('#') || displayName.includes('%') ?
+                            '<span class="badge bg-warning ms-2">Special chars</span>' : ''}
+                    </button>
+                `);
+                container.append(item);
+            });
+
+            // Attach click handlers
+            $('.test-name-btn').on('click', function() {
+                const testName = $(this).data('test-name');
+                const current = $('#formula-builder-preview').val();
+
+                // Add space before test name if needed (after operator or opening parenthesis)
+                const lastChar = current.slice(-1);
+                const needsSpace = current.length > 0 && !['+', '-', '*', '/', '(', ' '].includes(lastChar);
+                const prefix = needsSpace ? ' ' : '';
+
+                $('#formula-builder-preview').val(current + prefix + testName);
+            });
+        }
+
+        // Operator buttons
+        $('.operator-btn').on('click', function() {
+            const operator = $(this).data('op');
+            const current = $('#formula-builder-preview').val();
+            $('#formula-builder-preview').val(current + operator);
         });
 
-
-        // Function to reset modal when clicking the "Close" button
-        $('#close-modal').on('click', function() {
-            resetModal();
+        // Add constant
+        $('#add-constant-btn').on('click', function() {
+            const constant = $('#constant-value').val();
+            if (constant) {
+                const current = $('#formula-builder-preview').val();
+                $('#formula-builder-preview').val(current + constant);
+                $('#constant-value').val('');
+            }
         });
-    });
+
+        // Apply formula from helper
+        $('#apply-formula-btn').on('click', function() {
+            if (currentFormulaRow) {
+                const formula = $('#formula-builder-preview').val();
+                $(currentFormulaRow).find('.formula-input').val(formula);
+                updateFormulaPreview(currentFormulaRow);
+                updateFormulasData();
+            }
+            $('#formulaHelperModal').modal('hide');
+        });
+
+        // Load formulas when editing
+        function loadFormulas(formulasData) {
+            $('#formulas-container').empty();
+
+            if (formulasData && formulasData.length > 0) {
+                formulasData.forEach(formula => {
+                    addFormulaRow(formula);
+                });
+            }
+        }
+
+        // Form submission - ensure formulas are included
+        $('#leadtype_form').on('submit', function() {
+            updateFormulasData();
+
+            // Validate all formulas
+            let isValid = true;
+            $('.formula-input').each(function() {
+                const formula = $(this).val();
+                if (formula && !validateFormula(formula)) {
+                    isValid = false;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fix invalid formulas before submitting');
+                return false;
+            }
+
+            return true;
+        });
+
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
