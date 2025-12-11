@@ -82,8 +82,19 @@ function calculateFormula(formula, testResults) {
     }
 }
 
-// Perform calculations based on formulas
-function performCalculations() {
+    // Add at top-level (after any existing globals)
+    let isCalculating = false;
+    let pendingRerun = false;
+function performCalculations()
+{
+    // Prevent re-entrant runs; if a run is active, request a rerun and return
+    if (isCalculating) {
+        pendingRerun = true;
+        return;
+    }
+    isCalculating = true;
+    pendingRerun = false;
+
     const testResults = getAllTestResults();
 
     console.log('=== Starting Calculations ===');
@@ -91,6 +102,7 @@ function performCalculations() {
 
     if (Object.keys(testResults).length === 0) {
         console.log('No test results available yet');
+        isCalculating = false;
         return;
     }
 
@@ -118,18 +130,25 @@ function performCalculations() {
             if (targetInput) {
                 // Check if it's not manually disabled
                 if (!targetInput.hasAttribute('data-manual-entry')) {
-                    // Set the calculated value
-                    targetInput.value = calculatedValue;
+                    // Only set value and dispatch if it actually changed (prevents loops)
+                    const oldVal = parseFloat(targetInput.value);
+                    const needUpdate = isNaN(oldVal) || Math.abs(oldVal - calculatedValue) > 0.000001;
 
-                    console.log(`✓ Set ${calculated_test_name} = ${calculatedValue}`);
+                    if (needUpdate) {
+                        targetInput.value = calculatedValue;
+                        console.log(`✓ Set ${calculated_test_name} = ${calculatedValue}`);
 
-                    // Update test results for dependent calculations
-                    const normalizedName = calculated_test_name.toUpperCase().trim();
-                    testResults[normalizedName] = calculatedValue;
-                    testResults[`TEST_${calculated_test_id}`] = calculatedValue;
+                        // Update test results for dependent calculations
+                        const normalizedName = calculated_test_name.toUpperCase().trim();
+                        testResults[normalizedName] = calculatedValue;
+                        testResults[`TEST_${calculated_test_id}`] = calculatedValue;
 
-                    // Trigger input event to update flags if you have flag calculation logic
-                    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        // Dispatch a non-bubbling custom event instead of raw 'input' if you prefer,
+                        // but dispatching only when value changed avoids loops.
+                        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    } else {
+                        console.log(`= ${calculated_test_name} unchanged (${calculatedValue}), skipping update`);
+                    }
                 } else {
                     console.log(`⊗ Skipped ${calculated_test_name} - marked for manual entry`);
                 }
@@ -140,6 +159,14 @@ function performCalculations() {
             console.warn(`✗ Could not calculate ${calculated_test_name} - missing required test values`);
         }
     });
+
+    isCalculating = false;
+
+    // If changes happened while calculating, run again once
+    if (pendingRerun) {
+        pendingRerun = false;
+        performCalculations();
+    }
 
     console.log('=== Calculations Complete ===\n');
 }
@@ -182,19 +209,44 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
         if (input) {
-            // Style calculated fields
-            // input.classList.add('calculated-field');
-            // input.style.backgroundColor = '#e8f4fd';
-            // input.style.fontWeight = '600';
-            // input.setAttribute('readonly', 'readonly');
-            // input.setAttribute('title', `Auto-calculated: ${formulaData.formula}`);
+            // Flag as calculated so other logic can detect it
+            input.dataset.calculated = 'true';
+            input.setAttribute('title', `Auto-calculated: ${formulaData.formula}`);
 
-            // Add a small icon/badge to indicate it's calculated
+            // Add a small icon/badge to indicate it's calculated and allow toggling manual entry
             const badge = document.createElement('span');
             badge.className = 'badge bg-info ms-1';
             badge.style.fontSize = '0.65em';
+            badge.style.cursor = 'pointer';
             badge.textContent = 'AUTO';
             badge.title = formulaData.formula;
+
+            // Toggle manual/auto on badge click
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isManual = input.getAttribute('data-manual-entry') === 'true';
+                if (isManual) {
+                    // Turn auto back on and recalc
+                    input.removeAttribute('data-manual-entry');
+                    badge.textContent = 'AUTO';
+                    badge.className = 'badge bg-info ms-1';
+                    performCalculations();
+                } else {
+                    // Lock as manual so calculations won't overwrite
+                    input.setAttribute('data-manual-entry', 'true');
+                    badge.textContent = 'MANUAL';
+                    badge.className = 'badge bg-warning ms-1';
+                }
+            });
+
+            // If user types into a calculated field, mark it manual (so it won't be overwritten)
+            input.addEventListener('input', () => {
+                if (input.dataset.calculated === 'true' && !input.hasAttribute('data-manual-entry')) {
+                    input.setAttribute('data-manual-entry', 'true');
+                    badge.textContent = 'MANUAL';
+                    badge.className = 'badge bg-warning ms-1';
+                }
+            });
 
             // Insert badge after the input
             if (input.nextSibling) {

@@ -293,4 +293,203 @@ class HomeController extends Controller
             }
         }
     }
+
+    public function completedSamples(Request $request)
+    {
+        $query = Sample::with('patient');
+
+        // Handle search
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($query) use ($searchTerm) {
+                $query->where('access_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('received_date', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('patient', function($patientQuery) use ($searchTerm) {
+                        $patientQuery->where('first_name', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('surname', 'like', '%' . $searchTerm . '%');
+                    });
+            });
+        }
+
+        // Handle entries shown filter
+        if ($request->has('entries_shown')) {
+            $entriesShown = $request->input('entries_shown');
+            $now = now();
+
+            if ($entriesShown == 'last_20_days') {
+                $query->where('received_date', '>=', $now->subDays(20));
+            } elseif ($entriesShown == 'last_3_years') {
+                $query->where('received_date', '>=', $now->subYears(3));
+            }
+        }
+
+        // Handle sorting
+        if ($request->has('sort_by')) {
+            $sortBy = $request->input('sort_by');
+            $sortOrder = $request->input('sort_order') ?? 'asc';
+
+            if (in_array($sortBy, ['first_name', 'surname'])) {
+                $query->join('patients', 'samples.patient_id', '=', 'patients.id')
+                    ->orderBy('patients.' . $sortBy, $sortOrder);
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+        }
+
+        // Get all samples (we'll filter before paginating)
+        $allSamples = $query->get();
+
+        // Filter and process samples
+        $processedSamples = $allSamples->map(function ($sample) {
+            // Fetch individual tests with direct department association
+            $individualTests = $sample->tests()->get();
+            $individualTestDepartments = $individualTests->pluck('department')->unique();
+
+            // Initialize collection for profile-related tests
+            $profileTests = collect();
+            $profileDepartments = collect();
+
+            // Fetch profile tests and their departments
+            foreach ($sample->testProfiles as $profile) {
+                $profileTests = $profileTests->merge($profile->tests()->get());
+
+                if ($profile->departments) {
+                    $profileDepartments = $profileDepartments->merge(
+                        $profile->departments->pluck('department')
+                    );
+                }
+
+                // Handle subprofiles recursively
+                $allSubProfiles = getSubProfilesRecursive($profile);
+                foreach ($allSubProfiles as $subProfile) {
+                    $profileTests = $profileTests->merge($subProfile->tests()->get());
+                    if ($subProfile->departments) {
+                        $profileDepartments = $profileDepartments->merge(
+                            $subProfile->departments->pluck('department')
+                        );
+                    }
+                }
+            }
+
+            // Merge individual and profile-related departments
+            $allDepartments = $individualTestDepartments->merge($profileDepartments)->unique();
+
+            // Merge individual and profile tests
+            $tests = $individualTests->merge($profileTests);
+
+            // Track the latest completion time across all departments
+            $latestCompletedAt = null;
+
+            // Group tests by department and check if all tests in each department are completed
+            $departmentsStatus = $allDepartments->mapWithKeys(function ($department) use ($tests, $sample, &$latestCompletedAt) {
+                // Filter tests for the current department
+                $departmentTests = $tests->filter(function ($test) use ($department) {
+                    return $test->department === $department ||
+                        $test->testProfiles->contains(function ($testProfile) use ($department) {
+                            return $testProfile->departments->contains('department', $department);
+                        });
+                });
+
+                $departmentTestsReports = TestReport::where('sample_id', $sample->id)
+                    ->whereIn('test_id', $departmentTests->pluck('id'))
+                    ->get();
+
+                $isCompleted = false;
+                $completedat = null;
+
+                switch ($department) {
+                    case '2':
+                        $completedResult = CytologyGynecologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->latest('completed_at')
+                            ->first();
+
+                        $completedat = $completedResult ? $completedResult->completed_at : null;
+
+                        $isCompleted = CytologyGynecologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+
+                        break;
+
+                    case '1':
+                        $completedResult = BiochemHaemoResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->latest('completed_at')
+                            ->first();
+
+                        $completedat = $completedResult ? $completedResult->completed_at : null;
+
+                        $isCompleted = BiochemHaemoResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $departmentTests->count();
+                        break;
+
+                    case '3':
+                        $completedResult = UrinalysisMicrobiologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->latest('completed_at')
+                            ->first();
+
+                        $completedat = $completedResult ? $completedResult->completed_at : null;
+
+                        $testscount = $departmentTests->filter(function ($test) {
+                            return $test->urin_test_type !== null;
+                        });
+                        $isCompleted = UrinalysisMicrobiologyResults::whereIn('test_report_id', $departmentTestsReports->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count() == $testscount->count();
+                        break;
+                }
+
+                // Track the latest completion time
+                if ($completedat && (!$latestCompletedAt || $completedat > $latestCompletedAt)) {
+                    $latestCompletedAt = $completedat;
+                }
+
+                return [
+                    $department => [
+                        'is_completed' => $isCompleted,
+                        'completed_at' => $completedat,
+                    ],
+                ];
+            });
+
+            // Check if all departments are completed
+            $allDepartmentsCompleted = $departmentsStatus->every(function ($status) {
+                return $status['is_completed'];
+            });
+
+            // Add attributes to the sample object
+            $sample->all_departments_completed = $allDepartmentsCompleted;
+            $sample->completed_at = $latestCompletedAt; // Add this line
+            $sample->unique_departments = $allDepartments;
+            $sample->unique_departments_status = $departmentsStatus;
+
+            return $sample;
+        });
+
+        // Filter out completed samples BEFORE pagination
+        $incompleteSamples = $processedSamples->filter(function ($sample) {
+            return $sample->all_departments_completed;
+        });
+
+        // Manual pagination
+        $perPage = 15;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $incompleteSamples->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $samples = new LengthAwarePaginator(
+            $currentPageItems,
+            $incompleteSamples->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('completedsamples', compact('samples'));
+    }
 }

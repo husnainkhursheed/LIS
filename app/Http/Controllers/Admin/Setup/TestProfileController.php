@@ -52,6 +52,7 @@ class TestProfileController extends Controller
             'cost' => 'required',
             'department' => 'required',
        ]);
+        //    dd($request->input('tests'));
 
         $testprofile = new TestProfile();
         // $testprofile->code  = $request->input('code');
@@ -68,8 +69,9 @@ class TestProfileController extends Controller
             }
 
             // Attach sub-profiles
-            if ($request->has('sub_profiles')) {
-                $testprofile->subProfiles()->sync($request->input('sub_profiles'));
+            $testprofile->subProfiles()->detach();
+            foreach ($request->sub_profiles as $subprofile) {
+                $testprofile->subProfiles()->attach($subprofile);
             }
         }
 
@@ -84,8 +86,11 @@ class TestProfileController extends Controller
         // $orderedTests = explode(',', $request->input('ordered_tests'));
         // dd($orderedTests);
         if ($request->has('tests')) {
-            $testprofile->tests()->attach($request->input('tests'));
+            foreach ($request->tests as $testId) {
+                $testprofile->tests()->attach($testId); // maintains your order
+            }
         }
+
 
         if ($request->has('formulas') && !empty($request->formulas)) {
             $formulas = json_decode($request->formulas, true);
@@ -110,7 +115,7 @@ class TestProfileController extends Controller
     {
         $note = TestProfile::find($id);
         $profiledepartment = ProfileDepartment::where('test_profile_id', $note->id)->get();
-        $profiletests = $note->tests;
+        $profiletests = $note->tests()->get();
         // dd($profiletests);
 
         $formulas = $note->profileFormulas->map(function($formula) {
@@ -124,7 +129,7 @@ class TestProfileController extends Controller
 
         return response()->json([
             'note' => array_merge($note->toArray(), [
-                'sub_profiles' => $note->subProfiles->pluck('id')->toArray()
+                'sub_profiles' => $note->subProfiles()->pluck('test_profiles.id')->toArray(),
             ]),
             'formulas' => $formulas,
             'profiledepartment' => $profiledepartment,
@@ -194,6 +199,8 @@ class TestProfileController extends Controller
         // $testprofile->code  = $request->input('code');
         $testprofile->name  = $request->input('name');
         $testprofile->cost  = $request->input('cost');
+        $testprofile->specimentype_id  = $request->input('specimen_type') ?? null;
+
         // $note->update();
         // dd($request->department);
         if($testprofile->update()) {
@@ -204,13 +211,19 @@ class TestProfileController extends Controller
                     'department' => $department,
                 ]);
             }
+            $testprofile->subProfiles()->detach();
+            foreach ($request->sub_profiles as $subprofile) {
+                $testprofile->subProfiles()->attach($subprofile);
+            }
+            // $testprofile->subProfiles()->sync($request->input('sub_profiles', []));
 
-            $testprofile->subProfiles()->sync($request->input('sub_profiles', []));
         }
 
         $testprofile->tests()->detach();
         if ($request->has('tests')) {
-            $testprofile->tests()->attach($request->input('tests'));
+            foreach ($request->tests as $testId) {
+                $testprofile->tests()->attach($testId); // maintains your order
+            }
         }
 
         ProfileFormula::where('profile_id', $id)->delete();

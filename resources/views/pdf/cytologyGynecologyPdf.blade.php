@@ -214,12 +214,12 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="4"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}
-                </td>
-            </tr>
-            <tr>
                 <td colspan="4"> <span> <strong> CERVIX EXAMINATION: </strong></span>
                     {{$cytologyGynecologyResults->cervix_examination ?? ''}}</td>
+            </tr>
+            <tr>
+                <td colspan="4"> <span> <strong> HISTORY: </strong></span> {{$cytologyGynecologyResults->history ?? ''}}
+                </td>
             </tr>
             @endforeach
         </tbody>
@@ -253,6 +253,7 @@
     </table>
     {{-- @endif --}}
     @endforeach
+    <br>
 
     {{-- loop for $cytologyGynecologyResults->diagnostic_interpretation / DIAGNOSTIC INTERPRETATION --}}
 
@@ -282,6 +283,7 @@
     </table>
     {{-- @endif --}}
     @endforeach
+    <br>
 
     {{-- loop for $cytologyGynecologyResults->recommend / RECOMMENDATION --}}
 
@@ -300,7 +302,7 @@
     <table>
         <thead>
             <tr class="bg-blue" colspan="4">
-                <th width="50%" colspan="4">RECOMMENDATION:</th>
+                <th width="50%" colspan="4">RECOMMENDATION *2019 ASCCP Updated Consensus Guidelines www.asccp.org:</th>
             </tr>
         </thead>
         <tbody>
@@ -346,9 +348,14 @@
                 $width = $pdf->get_width();
 
                 // Centered PATHOLOGIST
-                $pathologistText = "PATHOLOGIST: MELANIE JOHNCILLA, MD";
+                $pathologistText = "PATHOLOGIST: MELANIE JOHNCILLA MD, FCAP";
                 $pathologistWidth = $fontMetrics->get_text_width($pathologistText, $font, $size);
-                $pdf->text(($width - $pathologistWidth) / 2, 786, $pathologistText, $font, $size);
+                $pdf->text(($width - $pathologistWidth) / 2, 776, $pathologistText, $font, $size);
+
+                // Document reference below PATHOLOGIST
+                $docRef = "(DOC-PPA-#13-V1)";
+                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
+                $pdf->text(($width - $docRefWidth) / 2, 787, $docRef, $font, $size);
 
                 // Line
                 $pdf->line(40, 798, $width - 40, 798, [61/255, 144/255, 202/255], 0.5);

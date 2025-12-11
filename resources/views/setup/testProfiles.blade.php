@@ -399,6 +399,10 @@
 
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
+        // Formula Management System
+        let formulas = [];
+        let currentFormulaRow = null;
+        let availableTests = [];
         function checkTestProfiles() {
             $('#tests').val('').trigger('change');
             // Get selected profile IDs
@@ -498,22 +502,9 @@
 
             // Watch specimen_type changes, update sub_profiles state and fetch tests for selected specimen(s)
             $('#specimen_type').on('change', function() {
-                // When specimen is changed, clear selected sub_profiles (if any) and update state
-                // Optionally we could keep selections, but requirement says disable Include Sub-Profiles when specimen selected
                 updateSubProfilesDisabledState();
 
-                // Fetch related tests via AJAX
                 let selectedSpecimens = $(this).val();
-
-                // Normalize to array or null
-                // if (!selectedSpecimens || selectedSpecimens.length === 0) {
-                //     // If no specimen selected, reset tests list to original options
-                //     $('#tests option').each(function() { $(this).prop('disabled', false); });
-                //     $('#tests').val('').trigger('change');
-                //     selectedTestsOrder = [];
-                //     // updateOrderedTestsDisplay();
-                //     return;
-                // }
 
                 $.ajax({
                     url: '{{ route("TestProfile.fetchTestsBySpecimen") }}',
@@ -526,22 +517,34 @@
                         if (!response.tests) return;
 
                         let $select = $('#tests');
-
-                        // Remove current options and rebuild from returned tests
-                        // But to preserve other tests not related to specimen, we'll clear selection and replace options with returned set
                         $select.empty();
 
                         response.tests.forEach(function(test) {
                             $select.append(new Option(test.name, test.id));
                         });
 
-                        // Refresh select2
-                        $select.trigger('change');
+                        // Update available tests
+                        availableTests = response.tests.map(t => ({ id: t.id, name: t.name }));
 
-                        // Clear ordered tests since new set loaded
+                        // Reinitialize Select2
+                        $select.select2({ width: '100%' });
+
+                        // Clear previous order
                         selectedTestsOrder = [];
                         $('#ordered_tests').val('');
-                        // updateOrderedTestsDisplay();
+
+                        // ----------- 🔥 KEY FIX -----------
+                        // Delay all dependent operations until Select2 finishes
+                        setTimeout(() => {
+                            if (typeof window.specimenTestsCallback === 'function') {
+                                window.specimenTestsCallback();
+                                window.specimenTestsCallback = null;
+                            }
+
+                            // Also update formula helper list
+                            updateFormulaHelperTests();
+
+                        }, 150);
                     },
                     error: function(xhr) {
                         console.error('Error fetching tests by specimen', xhr);
@@ -708,92 +711,159 @@
 
             // When the document is ready, attach a click event to the "Edit" button
             $('.edit-item-btn').on('click', function() {
-                // Get the ID from the data attribute
-
                 var itemId = $(this).data('id');
                 var url = '{{ url("/TestProfile") }}' + '/' + itemId + '/edit';
 
                 $.ajax({
-                        url: url, // Adjust the route as needed
-                        type: 'GET',
-                        success: function(response) {
-                            // Assuming the response has a 'leadType' key
-                            var note = response.note;
-                            // console.log("my practices ",doctor);
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        var note = response.note;
+                        console.log('Fetched profile data:', note);
+                        // Populate basic fields
+                        $('#id-field').val(note.id);
+                        $('#code').val(note.code);
+                        $('#name').val(note.name);
+                        $('#cost').val(note.cost);
 
-                            // Now you can use the leadType data to populate your modal fields
-                            $('#id-field').val(note.id);
-                            $('#code').val(note.code);
-                            $('#name').val(note.name);
-                            $('#cost').val(note.cost);
+                        updateSubProfilesDisabledState();
 
+                        // Departments
+                        var profiledepartment = response.profiledepartment.map(d => d.department);
+                        $('#department').val(profiledepartment).trigger('change');
 
+                        // Sub-profiles
+                        if (note.sub_profiles && note.sub_profiles.length > 0) {
+                                console.log('Setting sub-profiles to', note.sub_profiles);
 
-                            // Ensure sub_profiles enabled/disabled state matches any specimen selection (edit response may have populated specimen_type)
-                            updateSubProfilesDisabledState();
-
-
-                            var profiledepartment = response.profiledepartment.map(function(surgery) {
-                                return surgery.department;
-                            });
-                            $('#department').val(profiledepartment).trigger('change');
-
-                            if (response.note && response.note.sub_profiles) {
-                                // $('#sub_profiles').val(response.note.sub_profiles.map(String)).trigger('change');
                                 let $sub_profiles_select = $('#sub_profiles');
-                                response.note.sub_profiles.forEach(function(id) {
-                                    let $option = $sub_profiles_select.find('option[value="' + id + '"]');
-                                    $option.detach();
-                                    $sub_profiles_select.append($option);
+                                let subProfileIds = note.sub_profiles.map(String);
+
+                                // 🔥 Reorder DOM options according to saved order
+                                let orderedOptions = [];
+                                let remainingOptions = [];
+
+                                // Build a map of existing options
+                                let optionMap = {};
+                                $sub_profiles_select.find('option').each(function () {
+                                    optionMap[String(this.value)] = this;
                                 });
 
-                                // Set Select2 selected values in order
-                                $sub_profiles_select.val(response.note.sub_profiles).trigger('change');
-                            }
+                                // First: options in saved order
+                                subProfileIds.forEach(id => {
+                                    if (optionMap[id]) {
+                                        orderedOptions.push(optionMap[id]);
+                                        delete optionMap[id];
+                                    }
+                                });
 
-                            if (response.note && response.note.specimentype_id) {
-                                $('#specimen_type').val(response.note.specimentype_id).trigger('change');
-                            }
-
-
-                            var profiletests = response.profiletests; // Array of {id, name} in correct order
-                            let testIds = profiletests.map(function(test) { return test.id.toString(); });
-
-                            // Move options in DOM to match saved order
-                            let $select = $('#tests');
-                            testIds.forEach(function(id) {
-                                let $option = $select.find('option[value="' + id + '"]');
-                                $option.detach();
-                                $select.append($option);
-                            });
-                            setTimeout(() => {
-                                // Set Select2 selected values in order
-                                $select.val(testIds).trigger('change');
-                                // Load formulas
-                                if (response.formulas) {
-                                    loadFormulas(response.formulas);
+                                // Remaining: push in original order
+                                for (let id in optionMap) {
+                                    remainingOptions.push(optionMap[id]);
                                 }
-                            }, 4000); // delay of 10 sec
 
-                            // Set the order array and update badges/hidden input
-                            selectedTestsOrder = testIds;
-                            updateOrderedTestsDisplay();
+                                // Rebuild <select>
+                                $sub_profiles_select.empty();
+                                orderedOptions.forEach(opt => $sub_profiles_select.append(opt));
+                                remainingOptions.forEach(opt => $sub_profiles_select.append(opt));
 
-                            $('#ordered_tests').val(testIds.join(','));
+                                // Set selected values in saved order
+                                $sub_profiles_select.val(subProfileIds).trigger('change');
 
-                            // Update modal title, button, etc...
-                            $('#exampleModalLabel').html("Edit Profile");
-                            $('#showModal .modal-footer').css('display', 'block');
-                            $('#add-btn').html("Update");
-                            $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + note.id);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr, status, error);
-                            // Handle errors if needed
+                            }else{
+                            console.log('Setting specimen type to', note.specimentype_id);
+                            // Set specimen type **first**
+                            if (note.specimentype_id) {
+                                window.specimenTestsCallback = function() {
+                                    reorderAndSelectTests(response.profiletests, response.formulas);
+                                };
+                                console.log('Setting specimen type to', note.specimentype_id);
+                                $('#specimen_type').val(note.specimentype_id).trigger('change');
+                            } else {
+                                // No specimen-type, just reorder and load formulas
+                                availableTests = $('#tests option').map(function() {
+                                    return { id: this.value, name: this.text };
+                                }).get();
+
+                                reorderAndSelectTests(response.profiletests, response.formulas);
+                            }
                         }
-                    });
 
+                        // Update modal title, button, form action
+                        $('#exampleModalLabel').html("Edit Profile");
+                        $('#showModal .modal-footer').css('display', 'block');
+                        $('#add-btn').html("Update");
+                        $('#leadtype_form').attr('action', '{{ url("/TestProfile") }}/' + note.id);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr, status, error);
+                    }
+                });
             });
+
+            function reorderAndSelectTests(profiletests, formulas) {
+                let $select = $('#tests');
+                let savedOrderIds = (profiletests || []).map(t => String(t.id));
+
+                // Destroy Select2 before rebuilding
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+
+                // Build map
+                let allOptions = {};
+                $select.find('option').each(function() {
+                    allOptions[String(this.value)] = this.text;
+                });
+
+                // Reorder: selected first
+                let selectedOptions = [];
+                let unselectedOptions = [];
+
+                savedOrderIds.forEach(id => {
+                    if (allOptions[id]) {
+                        selectedOptions.push({ id, text: allOptions[id] });
+                        delete allOptions[id];
+                    }
+                });
+
+                for (let id in allOptions) {
+                    unselectedOptions.push({ id, text: allOptions[id] });
+                }
+
+                // Sort unselected alphabetically
+                unselectedOptions.sort((a, b) => a.text.localeCompare(b.text));
+
+                // Rebuild <select>
+                $select.empty();
+                selectedOptions.forEach(o => $select.append(new Option(o.text, o.id, true, true)));
+                unselectedOptions.forEach(o => $select.append(new Option(o.text, o.id)));
+
+                $select.select2({ width: '100%' });
+
+                // Save order
+                selectedTestsOrder = savedOrderIds.slice();
+                $('#ordered_tests').val(savedOrderIds.join(','));
+                updateOrderedTestsDisplay();
+
+                // 🔥 **Update availableTests to ONLY selected tests**
+                availableTests = selectedOptions.map(o => ({
+                    id: o.id,
+                    name: o.text
+                }));
+
+                // 🔥 **Update the formula dropdowns & helper list**
+                updateCalculatedTestOptions();
+                updateFormulaHelperTests();
+
+                // Load formulas
+                if (formulas) loadFormulas(formulas);
+            }
+
+
+
+
+
 
             function resetModal() {
                 // Reset modal titleq
@@ -873,10 +943,7 @@
             });
         });
 
-        // Formula Management System
-        let formulas = [];
-        let currentFormulaRow = null;
-        let availableTests = [];
+
 
         // Update available tests when tests selection changes
         $('#tests').on('change', function() {
@@ -906,51 +973,28 @@
             const clone = template.content.cloneNode(true);
             const container = document.getElementById('formulas-container');
 
-            // Add to container
             container.appendChild(clone);
-
             const row = container.lastElementChild;
 
-            // Populate calculated test dropdown
+            // Populate dropdown
             const select = row.querySelector('.calculated-test-select');
             availableTests.forEach(test => {
-                const option = new Option(test.name, test.id);
-                select.add(option);
+                select.add(new Option(test.name, test.id));
             });
 
-            // If editing, populate data
+            // Editing existing row
             if (data) {
-                const targetValue = String(data.calculated_test_id);
+                select.value = String(data.calculated_test_id);
 
-                // 🕐 Make sure options exist first
-                setTimeout(() => {
-                    // Find the select again to be safe
-                    const select = row.querySelector('.calculated-test-select');
+                row.querySelector('.formula-input').value = data.formula || '';
+                row.querySelector('.calculation-order').value = data.calculation_order || 1;
 
-                    // Try direct match first
-                    select.value = targetValue;
-
-                    // Fallback: manually find and select the option
-                    if (select.value !== targetValue) {
-                        const match = Array.from(select.options).find(opt => String(opt.value) === targetValue);
-                        if (match) match.selected = true;
-                    }
-
-                    // Update other fields
-                    const formulaInput = row.querySelector('.formula-input');
-                    if (formulaInput) formulaInput.value = data.formula || '';
-
-                    const orderInput = row.querySelector('.calculation-order');
-                    if (orderInput) orderInput.value = data.calculation_order || 1;
-
-                    // ✅ Trigger preview update
-                    updateFormulaPreview(row);
-                }, 50); // small delay ensures options are rendered
+                updateFormulaPreview(row);
             }
 
-            // Attach event listeners
             attachFormulaRowListeners(row);
         }
+
 
         function attachFormulaRowListeners(row) {
             // Remove formula
@@ -1098,29 +1142,29 @@
             const container = $('#available-tests-list');
             container.empty();
 
+            // 🔥 Use only selected tests (availableTests)
             availableTests.forEach(test => {
-                // Display original test name with special characters
                 const displayName = test.name;
                 const upperName = test.name.toUpperCase().trim();
 
                 const item = $(`
-                    <button type="button" class="list-group-item list-group-item-action test-name-btn"
-                            data-test-name="${upperName}">
+                    <button type="button"
+                        class="list-group-item list-group-item-action test-name-btn"
+                        data-test-name="${upperName}">
                         <span class="badge bg-primary me-2">${test.id}</span>
                         ${displayName}
-                        ${displayName.includes('*') || displayName.includes('#') || displayName.includes('%') ?
-                            '<span class="badge bg-warning ms-2">Special chars</span>' : ''}
+                        ${(displayName.match(/[*#%]/)) ? '<span class="badge bg-warning ms-2">Special chars</span>' : ''}
                     </button>
                 `);
+
                 container.append(item);
             });
 
-            // Attach click handlers
-            $('.test-name-btn').on('click', function() {
+            // Attach click handler (remove old first)
+            container.off('click', '.test-name-btn').on('click', '.test-name-btn', function () {
                 const testName = $(this).data('test-name');
                 const current = $('#formula-builder-preview').val();
 
-                // Add space before test name if needed (after operator or opening parenthesis)
                 const lastChar = current.slice(-1);
                 const needsSpace = current.length > 0 && !['+', '-', '*', '/', '(', ' '].includes(lastChar);
                 const prefix = needsSpace ? ' ' : '';
@@ -1128,6 +1172,8 @@
                 $('#formula-builder-preview').val(current + prefix + testName);
             });
         }
+
+
 
         // Operator buttons
         $('.operator-btn').on('click', function() {

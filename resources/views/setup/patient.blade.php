@@ -617,7 +617,7 @@
                 }
 
                 // Proceed with form submission
-                //  form.submit();
+                 form.submit();
             } catch (error) {
                 console.error('Error during final duplicate check:', error);
                 form.submit();

@@ -40,6 +40,15 @@
                         <span class="pt-1">Dashboards</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ route('completedSamples') }}">
+                        <span class="">
+                            <img src="{{ URL::asset('build/icons/dashboard.png') }}" alt="" height="18">
+                        </span>
+                        {{-- <i class="ri-dashboard-2-line"></i> --}}
+                        <span class="pt-1">Completed Samples</span>
+                    </a>
+                </li>
                 @canany('Sample create')
                     <li class="nav-item">
                         <a class="nav-link menu-link d-flex gap-3 align-middle" href="{{ url('/sample/create') }}">

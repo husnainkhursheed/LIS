@@ -986,21 +986,12 @@
                 @php
                     $procedureResults = $sample ? $sample->procedureResults : [];
                     $department3Status = $sample->departmentStatus('3');
+                    // dd($sampleprofiles);
 
                     // Check if "urine c/s" (Urine Culture and Sensitivity) is present in tests
                     $hasUrineCS = false;
-                    if (isset($tests)) {
-                        $hasUrineCS = $tests->contains(function ($test) {
-                            return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
-                        });
-                    } elseif (isset($categorizedTests)) {
-                        $allTests = collect();
-                        foreach ($categorizedTests as $profileData) {
-                            if (!empty($profileData['tests'])) {
-                                $allTests = $allTests->merge($profileData['tests']);
-                            }
-                        }
-                        $hasUrineCS = $allTests->contains(function ($test) {
+                    if ($sample->testProfiles()->count() > 0) {
+                        $hasUrineCS = $sample->testProfiles()->get()->contains(function ($test) {
                             return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
                         });
                     }

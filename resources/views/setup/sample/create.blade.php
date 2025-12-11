@@ -600,7 +600,6 @@
         // });
 
         function checkTestProfiles() {
-            $('#test_requested').val('').trigger('change');
             // Get selected profile IDs
             let selectedProfiles = $('#test_profiles').val();
             if (selectedProfiles === null || selectedProfiles.length === 0) {
@@ -612,38 +611,45 @@
                 $('#test_requested option').each(function() {
                     $(this).prop('disabled', false);
                 });
+                return;
             }
 
             // Send AJAX request to the server
             $.ajax({
-                url: '{{ route("checkTestsInProfiles") }}', // Your route here
+                url: '{{ route("checkTestsInProfiles") }}',
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
                     profiles: selectedProfiles
                 },
                 success: function(response) {
-                    // Assuming the response contains the IDs of test profiles to hide
                     if (response.profilesToHide) {
+                        // Get currently selected test values
+                        let currentlySelectedTests = $('#test_requested').val() || [];
+
                         $('#test_profiles option').each(function() {
-                            // Disable the profiles that are in the profilesToHide array
                             if (response.profilesToHide.includes(parseInt($(this).val()))) {
-                                $(this).prop('disabled', true);  // Disable the option
+                                $(this).prop('disabled', true);
                             } else {
-                                $(this).prop('disabled', false); // Enable the option
+                                $(this).prop('disabled', false);
                             }
                         });
-                        // Refresh the Select2 options
                         $('#test_profiles').select2();
+
                         $('#test_requested option').each(function() {
-                            // Disable the profiles that are in the profilesToHide array
                             if (response.testIdsInSelectedProfiles.includes(parseInt($(this).val()))) {
-                                $(this).prop('disabled', true);  // Disable the option
+                                $(this).prop('disabled', true);
                             } else {
-                                $(this).prop('disabled', false); // Enable the option
+                                $(this).prop('disabled', false);
                             }
                         });
-                        // Refresh the Select2 options
+
+                        // Remove disabled tests from selection
+                        let filteredTests = currentlySelectedTests.filter(testId => {
+                            return !response.testIdsInSelectedProfiles.includes(parseInt(testId));
+                        });
+
+                        $('#test_requested').val(filteredTests).trigger('change');
                         $('#test_requested').select2();
                     }
                 },
@@ -778,7 +784,12 @@
                         data: $(this).serialize(),
                         success: function(response) {
                             if (response.success) {
-                                var newOption = new Option(response.patient.first_name, response.patient.id, true, true);
+                                var newOption = new Option(
+                                    `${response.patient.first_name} ${response.patient.surname} ${response.patient.dob}`,
+                                    response.patient.id,
+                                    true,
+                                    true
+                                );
                                 $('#patient_id').append(newOption).trigger('change');
                                 $('#showModalPatient').modal('hide');
                                 $('#patient_form')[0].reset();

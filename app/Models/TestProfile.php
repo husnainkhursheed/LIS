@@ -16,7 +16,7 @@ class TestProfile extends Model
 
     public function subProfiles()
     {
-        return $this->belongsToMany(TestProfile::class, 'profile_profiles', 'parent_profile_id', 'child_profile_id');
+        return $this->belongsToMany(TestProfile::class, 'profile_profiles', 'parent_profile_id', 'child_profile_id')->orderBy('profile_profiles.id');;
     }
 
     public function parentProfiles()
@@ -27,7 +27,7 @@ class TestProfile extends Model
     // Many-to-Many relationship with Tests
     public function tests()
     {
-        return $this->belongsToMany(Test::class, 'profile_tests');
+        return $this->belongsToMany(Test::class, 'profile_tests')->orderBy('profile_tests.id');
     }
 
     // Many-to-Many relationship with Samples

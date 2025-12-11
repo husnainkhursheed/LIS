@@ -464,11 +464,15 @@
                 $directorText = "Lab Director: Dr. Christina Pierre";
                 $width = $pdf->get_width();
                 $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
-                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
+                $docRef = "(DOC-PPA-#13-V1)";
+                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
                 $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
+                // Add document reference below accreditation text
+                $pdf->text(($width - $docRefWidth) / 2, 796, $docRef, $font, $size);
                 $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
                 $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
                 // Director text below the line and page count
+                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
                 $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
             }
         ');

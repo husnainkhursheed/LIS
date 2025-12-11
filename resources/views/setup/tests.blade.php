@@ -8,6 +8,15 @@
         type="text/css" />
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <style>
+
+        .modal {
+            z-index: 1055 !important;
+        }
+        .modal.show {
+            z-index: 2000 !important; /* front modal */
+        }
+    </style>
 @endsection
 @section('content')
     {{-- @component('components.breadcrumb')
@@ -292,12 +301,12 @@
                             </div> --}}
                             <div class="col-lg-6">
                                 <div>
-                                    <label for="specimen_type" class="form-label">Specimen Type<a href=""
-                                data-bs-toggle="modal" data-bs-target="#showModalSpecimenType"
-                                > <span class="badge bg-info text-white"> Add New</span> </a></label>
+                                    <label for="specimen_type" class="form-label">Specimen Type<a href="javascript:void(0)" id="openSpecimenModal">
+                                        <span class="badge bg-info text-white"> Add New</span>
+                                    </a></label>
                                     {{-- <input type="text" id="specimen_type" class="form-control" name="specimen_type"
                                         placeholder="Enter Specimen Type" required /> --}}
-                                    <select class="js-example-basic-multiple form-control" name="specimen_type" id="specimen_type">
+                                    <select class="form-control" name="specimen_type" id="specimen_type">
                                         @foreach ($specimen_types as $specimen_type)
 
                                             <option value="{{ $specimen_type->id }}">
@@ -537,6 +546,18 @@
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
     <script>
         $(document).ready(function() {
+
+            document.getElementById("openSpecimenModal").addEventListener("click", function (e) {
+                e.preventDefault();
+
+                // Prevent Bootstrap from closing previous modal
+                let specimenModal = new bootstrap.Modal(document.getElementById('showModalSpecimenType'), {
+                    backdrop: false,     // important!!
+                    keyboard: false
+                });
+
+                specimenModal.show();
+            });
             // Hide optionalValues by default
             $('#urin_test_type_container').hide();
             $('#optionalValues').hide();
@@ -744,7 +765,7 @@
                             $('#male_unit_value_ref_range').prop('required', true);
                             $('#female_low_value_ref_range').prop('required', true);
                             $('#female_high_value_ref_range').prop('required', true);
-                            $('#female_unit_value_ref_range').prop('required', false);
+                            $('#female_unit_value_ref_range').prop('required', true);
                             $('#basic_low_value_ref_range').val(test.basic_low_value_ref_range);
                             $('#basic_high_value_ref_range').val(test.basic_high_value_ref_range);
                             $('#basic_unit_value_ref_range').val(test.basic_unit_value_ref_range);
@@ -763,7 +784,7 @@
                             $('#noManualValues').show();
                             $('#basic_low_value_ref_range').prop('required', false);
                             $('#basic_high_value_ref_range').prop('required', false);
-                            $('#basic_unit_value_ref_range').prop('required', true);
+                            $('#basic_unit_value_ref_range').prop('required', false);
                             $('#male_low_value_ref_range').prop('required', false);
                             $('#male_high_value_ref_range').prop('required', false);
                             $('#male_unit_value_ref_range').prop('required', false);

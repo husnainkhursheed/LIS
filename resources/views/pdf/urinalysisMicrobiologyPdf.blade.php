@@ -270,18 +270,8 @@
     <tbody>
         @php
             $hasUrineCS = false;
-            if (isset($tests)) {
-                $hasUrineCS = $tests->contains(function ($test) {
-                    return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
-                });
-            } elseif (isset($categorizedTests)) {
-                $allTests = collect();
-                foreach ($categorizedTests as $profileData) {
-                    if (!empty($profileData['tests'])) {
-                        $allTests = $allTests->merge($profileData['tests']);
-                    }
-                }
-                $hasUrineCS = $allTests->contains(function ($test) {
+            if ($sample->testProfiles()->count() > 0) {
+                $hasUrineCS = $sample->testProfiles()->get()->contains(function ($test) {
                     return stripos($test->name, 'urine c/s') !== false || stripos($test->name, 'culture and sensitivity') !== false;
                 });
             }
@@ -299,8 +289,8 @@
                         </tr>
                         <tr class="bg-blue">
                             <th width="50%">Test</th>
-                            <th width="15%">Results</th>
-                            <th width="10%">Flag</th>
+                            <th width="25%">Results</th>
+                            {{-- <th width="10%">Flag</th> --}}
                             <th width="25%">Normal Range</th>
                         </tr>
                         @foreach ($categorizedTests as $profileId => $profileData)
@@ -368,11 +358,11 @@
                                     <tr>
                                         <td><small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }}</small></td>
                                         <td><small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }}</small></td>
-                                        <td>
+                                        {{-- <td>
                                             @if($flag)
                                                 <span class="{{ $flagClass }}"><small>{{ $flag }}</small></span>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                         <td><small>{!! $referenceRange !!}</small></td>
                                     </tr>
                                 @endforeach
@@ -387,8 +377,8 @@
                         </tr>
                         <tr class="bg-blue">
                             <th width="50%">Test</th>
-                            <th width="15%">Results</th>
-                            <th width="10%">Flag</th>
+                            <th width="25%">Results</th>
+                            {{-- <th width="10%">Flag</th> --}}
                             <th width="25%">Normal Range</th>
                         </tr>
                         @foreach ($categorizedTests as $profileId => $profileData)
@@ -456,11 +446,11 @@
                                     <tr>
                                         <td style="vertical-align: top;"><small>{{ $urinalysisMicrobiologyResults->description ?? $test->name }}</small></td>
                                         <td style="vertical-align: top;"><small>{{ $urinalysisMicrobiologyResults->test_results ?? '' }}</small></td>
-                                        <td style="vertical-align: top;">
+                                        {{-- <td style="vertical-align: top;">
                                             @if($flag)
                                                 <span class="{{ $flagClass }}"><small>{{ $flag }}</small></span>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                         <td style="vertical-align: top;"><small>{!! $referenceRange !!}</small></td>
                                     </tr>
                                 @endforeach
@@ -554,12 +544,14 @@
                 <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
             </td>
         </tr>
-        <tr>
-            <td colspan="4" class="heading">REVIEW AND RECOMMENDATIONS</td>
-        </tr>
-        <tr>
-            <td colspan="4" class="review-section">{!! nl2br(e($sensitivityResult->review ?? '')) !!}</td>
-        </tr>
+        @if (isset($sensitivityResult->review))
+            <tr>
+                <td colspan="4" class="heading">REVIEW AND RECOMMENDATIONS</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="review-section">{!! nl2br(e($sensitivityResult->review ?? '')) !!}</td>
+            </tr>
+        @endif
         <br><br><br>
         <tr>
             <td colspan="4">
@@ -587,8 +579,12 @@
                 $directorText = "Lab Director: Dr. Christina Pierre";
                 $width = $pdf->get_width();
                 $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                $docRef = "(DOC-PPA-#13-V1)";
+                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
                 $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
                 $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
+                // Add document reference below accreditation text
+                $pdf->text(($width - $docRefWidth) / 2, 796, $docRef, $font, $size);
                 $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
                 $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
                 // Director text below the line and page count
