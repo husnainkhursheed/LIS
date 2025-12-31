@@ -32,7 +32,7 @@
             Add Sample
         @endslot
     @endcomponent --}}
-    @include('layouts.notification')
+    @include('layouts.not   ification')
     {{-- <div class="row">
         @if (Session::has('message'))
             <div class="alert {{ Session::get('alert-class', 'alert-info') }}" id="alert-message">
@@ -251,7 +251,7 @@
 
     {{-- end  --}}
 
-    <!--patient-modal-->
+    <!--patient-modal-->P
     <div class="modal fade" id="showModalPatient" tabindex="-1" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">

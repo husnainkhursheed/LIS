@@ -59,7 +59,8 @@ class TestController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:tests,name',
+            // 'name' => 'required|unique:tests,name',
+            'name' => 'required',
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
@@ -151,7 +152,8 @@ class TestController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|unique:tests,name,' . $id, // Exclude current record's ID
+            // 'name' => 'required|unique:tests,name,' . $id, // Exclude current record's ID
+            'name' => 'required',
             // 'department' => 'required',
             'specimen_type' => 'required',
             // 'cost' => 'required',
@@ -174,6 +176,7 @@ class TestController extends Controller
         if($reference_range == 'basic_ref'){
             $test->basic_low_value_ref_range  = $request->input('basic_low_value_ref_range');
             $test->basic_high_value_ref_range  = $request->input('basic_high_value_ref_range');
+            $test->basic_unit_value_ref_range  = $request->input('basic_unit_value_ref_range');
             $test->male_low_value_ref_range  = null;
             $test->male_high_value_ref_range  = null;
             $test->female_low_value_ref_range  = null;
@@ -182,8 +185,10 @@ class TestController extends Controller
         }else if($reference_range == 'optional_ref'){
             $test->male_low_value_ref_range  = $request->input('male_low_value_ref_range');
             $test->male_high_value_ref_range  = $request->input('male_high_value_ref_range');
+            $test->male_unit_value_ref_range  = $request->input('male_unit_value_ref_range');
             $test->female_low_value_ref_range  = $request->input('female_low_value_ref_range');
             $test->female_high_value_ref_range  = $request->input('female_high_value_ref_range');
+            $test->female_unit_value_ref_range  = $request->input('female_unit_value_ref_range');
             $test->basic_low_value_ref_range  = null;
             $test->basic_high_value_ref_range  = null;
             $test->nomanualvalues_ref_range = null;

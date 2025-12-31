@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\AuditTrail;
 use App\Models\TestReport;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +28,11 @@ class BiochemHaemoResults extends Model
         'signed_by',
         'signed_at',
     ];
+
+    public function auditTrails()
+    {
+        return $this->hasMany(AuditTrail::class);
+    }
 
     public function testReport()
     {

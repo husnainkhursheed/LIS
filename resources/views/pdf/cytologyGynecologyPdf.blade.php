@@ -7,7 +7,7 @@
 
     <style>
         @page {
-            margin: 10mm 10mm 30mm 10mm;
+            margin: 2mm 10mm 30mm 10mm;
         }
 
         body {
@@ -116,15 +116,17 @@
                     <table>
                         <tr>
                             <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
-                            <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
                         </tr>
                         @php
                             $dob = \Carbon\Carbon::parse($sample->patient->dob);
                             $age = $dob->age;
                         @endphp
                         <tr>
-                            <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
-                            <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                            <td style="font-weight: normal;">
+                                <strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}&nbsp;&nbsp;&nbsp;&nbsp;
+                                <strong>Age:</strong> {{ $age }} yrs &nbsp;
+                                <strong>Sex:</strong> {{ $sample->patient->sex === 'male' ? 'M' : 'F' }}
+                            </td>
                         </tr>
                         <tr>
                             <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
@@ -168,7 +170,7 @@
             </tr>
             <tr>
                 <td colspan="4">
-                    <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                    <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
                 </td>
             </tr>
             <tr>
@@ -185,6 +187,11 @@
                 @endphp
                 <span style="white-space: nowrap;"><strong>Request: {{ $sampleprofiles  . ', ' . $individualtests  }}</strong></span>
                 </th>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
+                </td>
             </tr>
             <tr class="bg-blue">
                 <th width="50%" colspan="4">CLINICAL INFORMATION</th>
@@ -324,54 +331,65 @@
                 <td colspan="4">{!! nl2br(e($cytologyGynecologyResults->recommend ?? '')) !!}</td>
             </tr> --}}
 
-            <tr>
+            {{-- <tr>
                 <td>
                     <strong>Validated by: </strong>
                     {{ $validated_by }}
                 </td>
-            </tr>
+            </tr> --}}
             <tr>
                 <td colspan="4">
                     <strong>This material has been reviewed and the report completed and electronically signed by: </strong>
-                    {{ $signed_by }}
+                    {{ $validated_by }}
                 </td>
             </tr>
 
         </tbody>
     </table>
 
-    <script type="text/php">
-        $pdf->page_script('
+<script type="text/php">
+    $pdf->page_script('
         if ($PAGE_COUNT > 0) {
-                $font = $fontMetrics->get_font("Cambria, serif", "normal");
-                $size = 9;
-                $width = $pdf->get_width();
+            $font = $fontMetrics->get_font("Cambria, serif", "normal");
+            $size = 9;
+            $width = $pdf->get_width();
 
-                // Centered PATHOLOGIST
-                $pathologistText = "PATHOLOGIST: MELANIE JOHNCILLA MD, FCAP";
-                $pathologistWidth = $fontMetrics->get_text_width($pathologistText, $font, $size);
-                $pdf->text(($width - $pathologistWidth) / 2, 776, $pathologistText, $font, $size);
+            // -------------------
+            // HEADER (unchanged)
+            // -------------------
 
-                // Document reference below PATHOLOGIST
-                $docRef = "(DOC-PPA-#13-V1)";
-                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
-                $pdf->text(($width - $docRefWidth) / 2, 787, $docRef, $font, $size);
+            // Centered PATHOLOGIST
+            $pathologistText = "PATHOLOGIST: MELANIE JOHNCILLA MD, FCAP";
+            $pathologistWidth = $fontMetrics->get_text_width($pathologistText, $font, $size);
+            $pdf->text(($width - $pathologistWidth) / 2, 750, $pathologistText, $font, $size);
 
-                // Line
-                $pdf->line(40, 798, $width - 40, 798, [61/255, 144/255, 202/255], 0.5);
+            // Centered DOC-PPA reference below PATHOLOGIST
+            $docRef = "(DOC-PPA-#13-V1)";
+            $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
 
-                // Centered Page number (below PATHOLOGIST)
-                $pageText = "Page $PAGE_NUM of $PAGE_COUNT";
-                $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
-                $pdf->text(($width - $pageWidth) / 2, 805, $pageText, $font, $size);
+            // Line below DOC-PPA
+            $pdf->line(40, 765, $width - 40, 765, [61/255, 144/255, 202/255], 0.5);
 
-                // Centered Lab Director (below page number)
-                $directorText = "Lab Director: Dr. Christina Pierre";
-                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
-                $pdf->text(($width - $directorWidth) / 2, 820, $directorText, $font, $size);
-            }
-        ');
-    </script>
+            // -------------------
+            // FOOTER (UPDATED)
+            // -------------------
+
+            // LEFT: Lab Director
+            $directorText = "Lab Director: Dr. Christina Pierre";
+            $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
+            $pdf->text(40, 770, $directorText, $font, $size);
+
+            // CENTER: Page number
+            $pageText = "Page $PAGE_NUM of $PAGE_COUNT";
+            $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
+            $pdf->text(($width - $pageWidth) / 2, 770, $pageText, $font, $size);
+
+            // RIGHT: DOC-PPA number
+            $pdf->text($width - $docRefWidth - 40, 770, $docRef, $font, $size);
+        }
+    ');
+</script>
+
 </body>
 
 </html>

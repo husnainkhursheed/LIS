@@ -5,7 +5,7 @@
     <script>
         setTimeout(function() {
             document.getElementById('alert-message').style.display = 'none';
-        }, 5000);
+        }, 10000);
     </script>
 @endif
 
@@ -31,7 +31,7 @@
     <script>
         setTimeout(function() {
             document.getElementById('error-message').style.display = 'none';
-        }, 5000); 
+        }, 5000);
     </script>
 @endif
 

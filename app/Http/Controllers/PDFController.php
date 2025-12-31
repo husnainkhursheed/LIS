@@ -211,7 +211,16 @@ class PDFController extends Controller
             $currentPage = $request->input('page', 1);
 
             $referenceRanges = UrinalysisReferenceRanges::all()->keyBy('analyte');
+            $signedUser = User::find($signed_by);
+            $validatedUser = User::find($completedBy);
 
+            $signedName = $signedUser
+                ? trim(($signedUser->first_name ?? '') . ' ' . ($signedUser->surname ?? $signedUser->last_name ?? ''))
+                : null;
+
+            $validatedName = $validatedUser
+                ? trim(($validatedUser->first_name ?? '') . ' ' . ($validatedUser->surname ?? $validatedUser->last_name ?? ''))
+                : null;
             // Data for PDF view
             $data = [
                 'title' => 'Border Life - LIS',
@@ -224,8 +233,8 @@ class PDFController extends Controller
                 'totalPages' => $totalPages,
                 'currentPage' => $currentPage,
                 'reporttype' => $reporttype,
-                'signed_by' => optional(User::find($signed_by))->first_name, // Replace with actual data
-                'validated_by' => optional(User::find($completedBy))->first_name, // Replace with actual data
+                'signed_by' => $signedName, // Replace with actual data
+                'validated_by' => $validatedName, // Replace with actual data
             ];
 
             // Load the view based on $type
@@ -247,7 +256,7 @@ class PDFController extends Controller
             $pdf->setOption('isHtml5ParserEnabled', true);
             $pdf->setOption('isPhpEnabled', true);
             // (Optional) Set paper size and orientation
-            $pdf->setPaper('A4', 'portrait');
+            $pdf->setPaper('Letter', 'portrait');
 
             // Stream the generated PDF file to the browser
             return $pdf->stream('Report.pdf');

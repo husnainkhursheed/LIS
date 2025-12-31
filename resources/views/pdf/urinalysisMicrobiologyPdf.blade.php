@@ -5,7 +5,7 @@
     <title>Border Life - LIS</title>
     <style>
         @page {
-            margin: 10mm 10mm 30mm 10mm;
+            margin: 2mm 10mm 30mm 10mm;
             box-sizing: border-box;
         }
         body {
@@ -131,7 +131,7 @@
         .sensitivity-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0;
+            /* margin: 10px 0; */
         }
         .sensitivity-table th, .sensitivity-table td {
             border: 1px solid #3d90ca;
@@ -151,7 +151,7 @@
         .procedure-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0;
+            /* margin: 10px 0; */
         }
         .procedure-table th, .procedure-table td {
             border: 1px solid #3d90ca;
@@ -195,15 +195,17 @@
                 <table>
                     <tr>
                         <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
-                        <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
                     </tr>
                     @php
                         $dob = \Carbon\Carbon::parse($sample->patient->dob);
                         $age = $dob->age;
                     @endphp
                     <tr>
-                        <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
-                        <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                        <td style="font-weight: normal;">
+                            <strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}&nbsp;&nbsp;&nbsp;&nbsp;
+                            <strong>Age:</strong> {{ $age }} yrs &nbsp;
+                            <strong>Sex:</strong> {{ $sample->patient->sex === 'male' ? 'M' : 'F' }}
+                        </td>
                     </tr>
                     <tr>
                         <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
@@ -232,7 +234,7 @@
         </tr>
         <tr>
             <td colspan="4">
-                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
             </td>
         </tr>
         <tr>
@@ -263,7 +265,7 @@
         </tr>
         <tr>
             <td colspan="4">
-                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
             </td>
         </tr>
     </thead>
@@ -295,9 +297,9 @@
                         </tr>
                         @foreach ($categorizedTests as $profileId => $profileData)
                             @if(!empty($profileData['tests']))
-                                <tr>
+                                {{-- <tr>
                                     <td colspan="4"><strong>* {{ $profileData['name'] }}</strong></td>
-                                </tr>
+                                </tr> --}}
                                 @php
                                     $microscopyTests = collect();
                                     $chemicalAnalysisTests = collect();
@@ -383,9 +385,9 @@
                         </tr>
                         @foreach ($categorizedTests as $profileId => $profileData)
                             @if(!empty($profileData['tests']))
-                                <tr>
+                                {{-- <tr>
                                     <td colspan="4"><strong>* {{ $profileData['name'] }}</strong></td>
-                                </tr>
+                                </tr> --}}
                                 @php
                                     $microscopyTests = collect();
                                     $chemicalAnalysisTests = collect();
@@ -478,7 +480,7 @@
                 <td colspan="4" class="heading">MICROBIOLOGY</td>
             </tr>
             <tr>
-                <td colspan="4">
+                <td colspan="4" style="vertical-align: top; padding: 0;">
                     <table class="procedure-table">
                         <tr class="bg-blue">
                             <th width="30%">PROCEDURE</th>
@@ -510,7 +512,7 @@
                 <td colspan="4" class="heading">SENSITIVITY</td>
             </tr>
             <tr>
-                <td colspan="4">
+                <td colspan="4" style="vertical-align: top; padding: 0;">
                     <table class="sensitivity-table">
                         @foreach ($data as $i)
                             <tr class="bg-blue">
@@ -562,36 +564,94 @@
         <tr>
             <td colspan="4">
                 <strong>This material has been reviewed and the report completed and electronically signed by: </strong>
-                {{ $signed_by }}
+                Dr. Rajeev P. Nagassar (MBBS, DM)
             </td>
         </tr>
     </tbody>
 </table>
 
 <script type="text/php">
-    if ( isset($pdf) ) {
+    if (isset($pdf)) {
         $pdf->page_script('
             if ($PAGE_COUNT > 0) {
+
                 $font = $fontMetrics->get_font("Cambria, serif", "normal");
                 $size = 9;
-                // Centered text calculation
+
+                // Page dimensions
+                $width  = $pdf->get_width();
+                $height = $pdf->get_height();
+
+                // Bottom margin from page bottom
+                $bottomMargin = 35;
+
+                // Vertical positions (relative to page height)
+                $footerY        = $height - $bottomMargin;
+                $separatorLineY = $footerY - 10;
+                $accreditTextY  = $separatorLineY - 15;
+
+                // Texts
                 $accreditText = "THIS LABORATORY IS ACCREDITED FOR THE TESTS AND PROFILES MARKED *.";
-                $directorText = "Lab Director: Dr. Christina Pierre";
-                $width = $pdf->get_width();
-                $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
                 $docRef = "(DOC-PPA-#13-V1)";
-                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
+                $directorText = "Lab Director: Dr. Christina Pierre";
+
+                // Widths
+                $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                $docRefWidth   = $fontMetrics->get_text_width($docRef, $font, $size);
                 $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
-                $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
-                // Add document reference below accreditation text
-                $pdf->text(($width - $docRefWidth) / 2, 796, $docRef, $font, $size);
-                $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
-                $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
-                // Director text below the line and page count
-                $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
+
+                // Accreditation text (centered)
+                $pdf->text(
+                    ($width - $accreditWidth) / 2,
+                    $accreditTextY,
+                    $accreditText,
+                    $font,
+                    $size
+                );
+
+                // Horizontal separator line
+                $pdf->line(
+                    40,
+                    $separatorLineY,
+                    $width - 40,
+                    $separatorLineY,
+                    [0, 112/255, 192/255],
+                    0.5
+                );
+
+                // LEFT: Lab Director
+                $pdf->text(
+                    40,
+                    $footerY,
+                    $directorText,
+                    $font,
+                    $size
+                );
+
+                // CENTER: Page number
+                $pageText = "Page $PAGE_NUM of $PAGE_COUNT";
+                $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
+                $pdf->text(
+                    ($width - $pageWidth) / 2,
+                    $footerY,
+                    $pageText,
+                    $font,
+                    $size
+                );
+
+                // RIGHT: DOC reference
+                $pdf->text(
+                    $width - $docRefWidth - 40,
+                    $footerY,
+                    $docRef,
+                    $font,
+                    $size
+                );
             }
         ');
     }
 </script>
+
+
 </body>
 </html>

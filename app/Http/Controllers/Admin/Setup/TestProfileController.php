@@ -70,8 +70,10 @@ class TestProfileController extends Controller
 
             // Attach sub-profiles
             $testprofile->subProfiles()->detach();
-            foreach ($request->sub_profiles as $subprofile) {
-                $testprofile->subProfiles()->attach($subprofile);
+            if ($request->has('subProfiles')) {
+                foreach ($request->sub_profiles as $subprofile) {
+                    $testprofile->subProfiles()->attach($subprofile);
+                }
             }
         }
 
@@ -212,8 +214,10 @@ class TestProfileController extends Controller
                 ]);
             }
             $testprofile->subProfiles()->detach();
-            foreach ($request->sub_profiles as $subprofile) {
-                $testprofile->subProfiles()->attach($subprofile);
+            if ($request->has('subProfiles')) {
+                foreach ($request->sub_profiles as $subprofile) {
+                    $testprofile->subProfiles()->attach($subprofile);
+                }
             }
             // $testprofile->subProfiles()->sync($request->input('sub_profiles', []));
 

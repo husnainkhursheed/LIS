@@ -220,10 +220,10 @@
                             <a class="nav-link sub-link" aria-current="page" id="pdfbtn"
                                 href="{{ url('generate-pdf/'.$sample->id.'/'.$reporttype) }}" target="_blank">Generate Pdf Report</a>
                         </li>
-                        {{-- <li class="nav-item border-nav rounded flex-grow-1">
+                        <li class="nav-item border-nav rounded flex-grow-1">
                             <a class="nav-link sub-link" aria-current="page" id=""
                                 href="{{ url('reports/audit-trails/'.$sample->id.'/'.$reporttype) }}">Audit Trail</a>
-                        </li> --}}
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -244,7 +244,7 @@
                                     <div class="form-group">
                                         <label for="access_number" class="form-label">Report Signed By</label>
                                         <input type="text" class="form-control" id="report_signed"
-                                            value="{{ 'Report signed by ' . $hematologyStatus->signedBy->first_name . ' on ' . $hematologyStatus->signed_at }}"
+                                            value="{{ 'Report signed by ' . $hematologyStatus->signedBy->first_name.' '. $hematologyStatus->signedBy->surname . ' on ' . $hematologyStatus->signed_at }}"
                                             disabled />
                                     </div>
                                 </div>
@@ -261,7 +261,7 @@
                                     <div class="form-group">
                                         <label for="access_number" class="form-label">Report Signed By</label>
                                         <input type="text" class="form-control" id="report_signed"
-                                            value="{{ 'Report signed by ' . $cytologyStatus->signedBy->first_name . ' on ' . $cytologyStatus->signed_at }}"
+                                            value="{{ 'Report signed by ' . $cytologyStatus->signedBy->first_name .' '. $cytologyStatus->signedBy->surname  .' on ' . $cytologyStatus->signed_at }}"
                                             disabled />
                                     </div>
                                 </div>
@@ -505,11 +505,11 @@
                                         <td>
                                             <p class="reference-range">
                                                 @if ($test->reference_range == 'basic_ref')
-                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range .' '.$test->basic_unit_value_ref_range}}
                                                 @elseif ($test->reference_range == 'optional_ref')
-                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range .' '.$test->male_unit_value_ref_range}}
                                                     <br>
-                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range .' '.$test->female_unit_value_ref_range}}
                                                 @elseif ($test->reference_range == 'no_manual_tag')
                                                     {{ $test->nomanualvalues_ref_range }}
                                                 @endif
@@ -612,11 +612,11 @@
                                                 <td>
                                                     <p class="reference-range">
                                                         @if ($test->reference_range == 'basic_ref')
-                                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                            {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range.' '.$test->basic_unit_value_ref_range }}
                                                         @elseif ($test->reference_range == 'optional_ref')
-                                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                            Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range .' '.$test->male_unit_value_ref_range }}
                                                             <br>
-                                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                            Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range .' '.$test->female_unit_value_ref_range }}
                                                         @elseif ($test->reference_range == 'no_manual_tag')
                                                             {{ $test->nomanualvalues_ref_range }}
                                                         @endif
@@ -1124,11 +1124,11 @@
                                                         <td colspan="1">
                                                             <p class="reference-range">
                                                                 @if ($test->reference_range == 'basic_ref')
-                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range .' '.$test->basic_unit_value_ref_range }}
                                                                 @elseif ($test->reference_range == 'optional_ref')
-                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range .' '.$test->male_unit_value_ref_range }}
                                                                     <br>
-                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range.' '.$test->female_unit_value_ref_range }}
                                                                 @elseif ($test->reference_range == 'no_manual_tag')
                                                                     {{ $test->nomanualvalues_ref_range }}
                                                                 @endif
@@ -1334,11 +1334,11 @@
                                                         <td>
                                                             <p class="reference-range">
                                                                 @if ($test->reference_range == 'basic_ref')
-                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range }}
+                                                                    {{ $test->basic_low_value_ref_range . '-' . $test->basic_high_value_ref_range .' '.$test->basic_unit_value_ref_range }}
                                                                 @elseif ($test->reference_range == 'optional_ref')
-                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range }}
+                                                                    Male: {{ $test->male_low_value_ref_range . '-' . $test->male_high_value_ref_range .' '.$test->male_unit_value_ref_range }}
                                                                     <br>
-                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range }}
+                                                                    Female: {{ $test->female_low_value_ref_range . '-' . $test->female_high_value_ref_range .' '.$test->female_unit_value_ref_range }}
                                                                 @elseif ($test->reference_range == 'no_manual_tag')
                                                                     {{ $test->nomanualvalues_ref_range }}
                                                                 @endif

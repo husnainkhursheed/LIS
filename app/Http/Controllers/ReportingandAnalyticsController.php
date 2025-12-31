@@ -343,29 +343,50 @@ class ReportingandAnalyticsController extends Controller
         // dd($reporttype);
         $reporttype = $reporttype;
         $sample = Sample::findOrFail($id);
-        // dd($sample);
-        // $sample->tests;
 
-        $individualTests = $sample->tests()->get();
+        $individualTests = $sample->tests()->where('department', $reporttype)->get();
 
-        // Initialize collection for profile-related tests
+        // Get all test profiles associated with the sample, regardless of department
+        $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
+
         $profileTests = collect();
 
-        // Fetch profile tests and their departments
-        foreach ($sample->testProfiles as $profile) {
-            $profileTests = $profileTests->merge($profile->tests()->get());
-        }
+        foreach ($profiles as $profile) {
+            // If profile has subprofiles, ignore department check
+            $hasSubProfiles = $profile->subProfiles && $profile->subProfiles->isNotEmpty();
 
+            if ($hasSubProfiles ) {
+
+                // Add profile's tests
+                 $profileTests = $profileTests->merge($profile->tests);
+                //  dd($profileTests);
+
+                // Add all subprofile tests recursively
+                $allSubProfiles = getSubProfilesRecursive($profile);
+                foreach ($allSubProfiles as $subProfile) {
+                     if ($subProfile->departments->contains('department', $reporttype)) {
+                         $profileTests = $profileTests->merge($subProfile->tests);
+                        //  dd($profileTests);
+                    }
+                }
+            }else{
+                // If no subprofiles, check if the profile's departments match the report type
+                if ($profile->departments->contains('department', $reporttype)) {
+                    // Add profile's tests directly
+                    $profileTests = $profileTests->merge($profile->tests);
+                }
+            }
+        }
         // Merge individual and profile tests
         $tests = $individualTests->merge($profileTests);
 
-        $departmentTests = $tests->filter(function ($test) use ($reporttype) {
-            // Ensure the test and its profile's departments are properly checked
-            return $test->department === $reporttype ||
-                $test->testProfiles->contains(function ($testProfile) use ($reporttype) {
-                    return $testProfile->departments->contains('department', $reporttype);
-                });
-        });
+        // $departmentTests = $tests->filter(function ($test) use ($reporttype) {
+        //     // Ensure the test and its profile's departments are properly checked
+        //     return $test->department === $reporttype ||
+        //         $test->testProfiles->contains(function ($testProfile) use ($reporttype) {
+        //             return $testProfile->departments->contains('department', $reporttype);
+        //         });
+        // });
 
         // dd($departmentTests);
 
@@ -374,7 +395,7 @@ class ReportingandAnalyticsController extends Controller
         // dd($tests);
 
         $testReports = collect();
-        foreach ($departmentTests as $test) {
+        foreach ($tests as $test) {
             $testReport = TestReport::where('sample_id', $sample->id)
                 ->where('test_id', $test->id)
                 ->first();
@@ -399,17 +420,20 @@ class ReportingandAnalyticsController extends Controller
         }
         // dd($entriesIds);
         $auditTrailEntries = AuditTrail::whereIn('test_report_id', $entriesIds)->get();
-        // dd($records);
+        // dd($auditTrailEntries);
         // Filter and keep only unique entries based on changed_at timestamp
-        $records = $auditTrailEntries->unique('test_report_id');
+         $records = $records->unique(function ($item) {
+                return $item->test_report_id . '_' . $item->changed_at;
+            })->values();
         // dd($records);
-        return view('reports/test-reports.auditTraits', compact('records','sample'));
+        return view('reports/test-reports.auditTraits', compact('records','sample' , 'reporttype'));
     }
 
     public function trailchanges(Request $request , $id){
-        // dd($request->changedat);
-        $changes_made = AuditTrail::where('test_report_id', $id)->where('changed_at',$request->changedat)->get();
-        // dd($changes_made);
+        $changes_made = AuditTrail::where('test_report_id', $id)
+        ->where('changed_at', $request->changedat)
+        ->where('field_name', '!=', 'updated_at') // Correct syntax
+        ->get();
 
         return response()->json([
             'changes_made' => $changes_made,

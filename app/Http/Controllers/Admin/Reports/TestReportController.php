@@ -492,7 +492,7 @@ class TestReportController extends Controller
                     }
                 }
                 // dd($changes);
-                $this->addAuditTrail($result->id, $user, $changes);
+                $this->addAuditTrail($testReport->id, $user, $changes);
 
             }
             // dd($changes);
@@ -516,6 +516,7 @@ class TestReportController extends Controller
                     ['test_report_id' => $testReport->id],
                 );
                 $originalValues = $result->getOriginal();
+                // dd($originalValues);
 
                 $result->history = $data['history'] ?? null;
                 $result->last_period = $data['last_period'] ?? null;
@@ -529,6 +530,7 @@ class TestReportController extends Controller
                 $result->save();
 
                 $changes = [];
+                // dd($result->getChanges());
                 foreach ($result->getChanges() as $field => $newValue) {
                     if (array_key_exists($field, $originalValues)) {
                         $changes[$field] = [
@@ -538,7 +540,7 @@ class TestReportController extends Controller
                     }
                 }
                 // dd($changes);
-                $this->addAuditTrail($testReport, $user, $changes);
+                $this->addAuditTrail($testReport->id, $user, $changes);
             }
         }
 
@@ -556,6 +558,7 @@ class TestReportController extends Controller
                 $result =  UrinalysisMicrobiologyResults::updateOrCreate(
                     ['test_report_id' => $testReport->id]
                 );
+
 
                 $originalValues = $result->getOriginal();
                 // Condition to check
@@ -594,113 +597,199 @@ class TestReportController extends Controller
                     }
                 }
 
-                $this->addAuditTrail($result->id, $user, $changes);
+                $this->addAuditTrail($testReport->id, $user, $changes);
 
             }
-            if (isset($data['procedure']) && isset($data['specimen_note'])) {
-                // Delete all previous ProcedureResults for this sample
+            if (isset($data['procedure'], $data['specimen_note'])) {
+                // OLD procedures - store as keyed array for comparison
+                $oldProcedures = ProcedureResults::where('sample_id', $data['sampleid'])
+                    ->get()
+                    ->mapWithKeys(fn ($row) => [
+                        $row->id => [
+                            'procedure' => $row->procedure,
+                            'specimen_note' => $row->specimen_note,
+                        ]
+                    ])
+                    ->toArray();
+
+                // Delete & recreate
                 ProcedureResults::where('sample_id', $data['sampleid'])->delete();
 
-                $procedures = $data['procedure'];
-                $specimen_notes = $data['specimen_note'];
-
-                foreach ($procedures as $index => $procedure) {
+                $newProcedureIds = [];
+                foreach ($data['procedure'] as $index => $procedure) {
                     if (!empty($procedure)) {
-                        $procedureNote = $specimen_notes[$index] ?? null;
-                        ProcedureResults::create([
+                        $created = ProcedureResults::create([
                             'sample_id' => $data['sampleid'],
                             'procedure' => $procedure,
-                            'specimen_note' => $procedureNote
+                            'specimen_note' => $data['specimen_note'][$index] ?? null,
                         ]);
+                        $newProcedureIds[$index] = $created->id;
                     }
                 }
+
+                // NEW procedures
+                $newProcedures = ProcedureResults::where('sample_id', $data['sampleid'])
+                    ->get()
+                    ->mapWithKeys(fn ($row) => [
+                        $row->id => [
+                            'procedure' => $row->procedure,
+                            'specimen_note' => $row->specimen_note,
+                        ]
+                    ])
+                    ->toArray();
+
+                // Track only changed/added/removed procedures
+                $changedProcedures = [];
+
+                // Find changed and removed procedures
+                foreach ($oldProcedures as $oldId => $oldData) {
+                    $found = false;
+                    foreach ($newProcedures as $newId => $newData) {
+                        if ($oldData === $newData) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        $changedProcedures['removed_or_modified'][] = $oldData;
+                    }
+                }
+
+                // Find added or modified procedures
+                foreach ($newProcedures as $newId => $newData) {
+                    $found = false;
+                    foreach ($oldProcedures as $oldId => $oldData) {
+                        if ($oldData === $newData) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        $changedProcedures['added_or_modified'][] = $newData;
+                    }
+                }
+
+                // Only log if there are actual changes
+                if (!empty($changedProcedures)) {
+                    $this->addAuditTrail(
+                        $result->id,
+                        $user,
+                        [
+                            'procedures' => [
+                                'from' => $changedProcedures['removed_or_modified'] ?? [],
+                                'to'   => $changedProcedures['added_or_modified'] ?? [],
+                            ]
+                        ],
+                        'procedures_updated'
+                    );
+                }
             }
-            if (isset($data['sensitivity']) && isset($data['sensitivity_profiles'])) {
-                // Delete all previous ProcedureResults for this sample
+            // if (isset($data['procedure']) && isset($data['specimen_note'])) {
+            //     // Delete all previous ProcedureResults for this sample
+            //     ProcedureResults::where('sample_id', $data['sampleid'])->delete();
+
+            //     $procedures = $data['procedure'];
+            //     $specimen_notes = $data['specimen_note'];
+
+            //     foreach ($procedures as $index => $procedure) {
+            //         if (!empty($procedure)) {
+            //             $procedureNote = $specimen_notes[$index] ?? null;
+            //             ProcedureResults::create([
+            //                 'sample_id' => $data['sampleid'],
+            //                 'procedure' => $procedure,
+            //                 'specimen_note' => $procedureNote
+            //             ]);
+            //         }
+            //     }
+            // }
+                // ============================
+                // SENSITIVITY AUDIT (SNAPSHOT)
+                // ============================
+
+            if (isset($data['sensitivity'], $data['sensitivity_profiles'])) {
+                // OLD sensitivity
+                $oldSensitivity = SensitivityResults::where('sample_id', $data['sampleid'])->first();
+
+                // Decode JSON fields for comparison
+                $oldSensitivityData = $oldSensitivity ? [
+                    'sensitivity' => is_string($oldSensitivity->sensitivity)
+                        ? json_decode($oldSensitivity->sensitivity, true)
+                        : $oldSensitivity->sensitivity,
+                    'sensitivity_profiles' => is_string($oldSensitivity->sensitivity_profiles)
+                        ? json_decode($oldSensitivity->sensitivity_profiles, true)
+                        : $oldSensitivity->sensitivity_profiles,
+                    'review' => $oldSensitivity->review,
+                ] : null;
+
+                // Prepare new data (ensure it's array format for comparison)
+                $newSensitivityData = [
+                    'sensitivity' => is_array($data['sensitivity'])
+                        ? $data['sensitivity']
+                        : json_decode($data['sensitivity'], true),
+                    'sensitivity_profiles' => is_array($data['sensitivity_profiles'])
+                        ? $data['sensitivity_profiles']
+                        : json_decode($data['sensitivity_profiles'], true),
+                    'review' => $data['review'],
+                ];
+
+                // Track only actual field changes
+                $changes = [];
+
+                if ($oldSensitivityData === null || $oldSensitivityData['sensitivity'] !== $newSensitivityData['sensitivity']) {
+                    $changes['sensitivity'] = [
+                        'from' => $oldSensitivityData['sensitivity'] ?? null,
+                        'to' => $newSensitivityData['sensitivity'],
+                    ];
+                }
+
+                if ($oldSensitivityData === null || $oldSensitivityData['sensitivity_profiles'] !== $newSensitivityData['sensitivity_profiles']) {
+                    $changes['sensitivity_profiles'] = [
+                        'from' => $oldSensitivityData['sensitivity_profiles'] ?? null,
+                        'to' => $newSensitivityData['sensitivity_profiles'],
+                    ];
+                }
+
+                if ($oldSensitivityData === null || ($oldSensitivityData['review'] ?? null) !== ($newSensitivityData['review'] ?? null)) {
+                    $changes['review'] = [
+                        'from' => $oldSensitivityData['review'] ?? null,
+                        'to' => $newSensitivityData['review'] ?? null,
+                    ];
+                }
+
+                // Replace the record (store as JSON in database)
                 SensitivityResults::where('sample_id', $data['sampleid'])->delete();
 
                 SensitivityResults::create([
                     'sample_id' => $data['sampleid'],
-                    'sensitivity' => is_array($data['sensitivity']) ? json_encode($data['sensitivity']) : $data['sensitivity'],
-                    'sensitivity_profiles' => is_array($data['sensitivity_profiles']) ? json_encode($data['sensitivity_profiles']) : $data['sensitivity_profiles'],
-                    'review' =>  $data['review'],
+                    'sensitivity' => is_array($data['sensitivity'])
+                        ? json_encode($data['sensitivity'])
+                        : $data['sensitivity'],
+                    'sensitivity_profiles' => is_array($data['sensitivity_profiles'])
+                        ? json_encode($data['sensitivity_profiles'])
+                        : $data['sensitivity_profiles'],
+                    'review' => $data['review'],
                 ]);
+
+                // Only log if there are actual changes - store as array, not JSON string
+                if (!empty($changes)) {
+                    $this->addAuditTrail(
+                        $testReport->id,
+                        $user,
+                        $changes,
+                        'sensitivity_updated'
+                    );
+                }
             }
-            // $test_ids = explode(',', $data['testIds']);
-            // foreach ($test_ids as $testId ) {
-            //     // Find or create the test report
-            //     $testReport = TestReport::firstOrCreate(
-            //         [
-            //             'sample_id' => $data['sampleid'],
-            //             'test_id' => $testId
-            //         ]
-            //     );
-            //     // Save the data into BiochemHaemoResults table
-            //     $urinalysisMicrobiologyResult = UrinalysisMicrobiologyResults::updateOrCreate(
-            //         ['test_report_id' => $testReport->id], // Condition to check
-            //         [
-            //             'history' => $data['history'] ?? null,
-            //             's_gravity'=> $data['s_gravity'] ?? null,
-            //             'ph'=> $data['ph'] ?? null,
-            //             'bilirubin'=> $data['bilirubin'] ?? null,
-            //             'blood'=> $data['blood'] ?? null,
-            //             'leucocytes'=> $data['leucocytes'] ?? null,
-            //             'glucose'=> $data['glucose'] ?? null,
-            //             'nitrite'=> $data['nitrite'] ?? null,
-            //             'ketones'=> $data['ketones'] ?? null,
-            //             'urobilinogen'=> $data['urobilinogen'] ?? null,
-            //             'proteins'=> $data['proteins'] ?? null,
-            //             'colour'=> $data['colour'] ?? null,
-            //             'appearance'=> $data['appearance'] ?? null,
-            //             'epith_cells'=> $data['epith_cells'] ?? null,
-            //             'bacteria'=> $data['bacteria'] ?? null,
-            //             'white_cells'=> $data['white_cells'] ?? null,
-            //             'yeast'=> $data['yeast'] ?? null,
-            //             'red_cells'=> $data['red_cells'] ?? null,
-            //             'trichomonas'=> $data['trichomonas'] ?? null,
-            //             'casts'=> $data['casts'] ?? null,
-            //             'crystals'=> $data['crystals'] ?? null,
-            //             'sensitivity'=> $data['sensitivity'] ?? null,
-            //             'sensitivity_profiles'=> $data['sensitivity_profiles'] ?? null,
-            //         ]
-            //     );
+            // if (isset($data['sensitivity']) && isset($data['sensitivity_profiles'])) {
+            //     // Delete all previous ProcedureResults for this sample
+            //     SensitivityResults::where('sample_id', $data['sampleid'])->delete();
 
-            //     // Now save the procedure results
-            //     if (isset($data['procedure']) && isset($data['specimen_note'])) {
-            //         $existingProcedureResults = ProcedureResults::where('urinalysis_microbiology_result_id', $urinalysisMicrobiologyResult->id)->get();
-            //         $existingProcedureIds = $existingProcedureResults->pluck('id')->toArray();
-
-            //         $procedures = $data['procedure'];
-            //         // dd($procedures);
-            //         $specimen_notes = $data['specimen_note'];
-            //         // dd($specimen_notes);
-            //         $newProcedureIds = [];
-
-            //         foreach ($procedures as $index => $procedure) {
-            //             if (!empty($procedure)) {
-            //                 $procedureNote = $specimen_notes[$index] ?? null;
-            //                 // dd($urinalysisMicrobiologyResult->id);
-            //                 $procedureResult = ProcedureResults::updateOrCreate(
-            //                     [
-            //                         'urinalysis_microbiology_result_id' => $urinalysisMicrobiologyResult->id,
-            //                         'procedure' => $procedure,
-            //                     ],
-            //                     [
-
-            //                         'specimen_note' => $procedureNote
-            //                     ]
-            //                 );
-
-            //                 $newProcedureIds[] = $procedureResult->id;
-            //             }
-            //         }
-
-            //         // Determine which procedures to delete
-            //         $procedureIdsToDelete = array_diff($existingProcedureIds, $newProcedureIds);
-
-            //         // Delete procedures that are not present in the request
-            //         ProcedureResults::whereIn('id', $procedureIdsToDelete)->delete();
-            //     }
+            //     SensitivityResults::create([
+            //         'sample_id' => $data['sampleid'],
+            //         'sensitivity' => is_array($data['sensitivity']) ? json_encode($data['sensitivity']) : $data['sensitivity'],
+            //         'sensitivity_profiles' => is_array($data['sensitivity_profiles']) ? json_encode($data['sensitivity_profiles']) : $data['sensitivity_profiles'],
+            //         'review' =>  $data['review'],
+            //     ]);
             // }
         }
 
@@ -721,15 +810,19 @@ class TestReportController extends Controller
      */
     protected function addAuditTrail($testReport, $user, array $changes)
     {
-        // dd($testReport);
         foreach ($changes as $field => $values) {
             AuditTrail::create([
                 'test_report_id' => $testReport,
                 'user_id' => $user->id,
                 'changed_at' => now(),
                 'field_name' => $field,
-                'from_value' => $values['from'],
-                'to_value' => $values['to'],
+                // Store arrays as JSON, but keep simple values as-is
+                'from_value' => is_array($values['from'])
+                    ? json_encode($values['from'], JSON_UNESCAPED_UNICODE)
+                    : $values['from'],
+                'to_value' => is_array($values['to'])
+                    ? json_encode($values['to'], JSON_UNESCAPED_UNICODE)
+                    : $values['to'],
             ]);
         }
     }
@@ -790,21 +883,41 @@ class TestReportController extends Controller
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 
         // Get the profiles associated with the sample
-        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
-            $query->where('department', $reporttypeis);
-        })->with('tests')->get();
+        $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
 
         // Collect all the tests from the profiles that match the department
         $profileTests = collect();
+
         foreach ($profiles as $profile) {
-            // Add tests from each profile that match the department
-            $profileTests = $profileTests->merge(
-                $profile->tests()->get()
-            );
+            // If profile has subprofiles, ignore department check
+            $hasSubProfiles = $profile->subProfiles && $profile->subProfiles->isNotEmpty();
+
+            if ($hasSubProfiles ) {
+
+                // Add profile's tests
+                 $profileTests = $profileTests->merge($profile->tests);
+                //  dd($profileTests);
+
+                // Add all subprofile tests recursively
+                $allSubProfiles = getSubProfilesRecursive($profile);
+                foreach ($allSubProfiles as $subProfile) {
+                     if ($subProfile->departments->contains('department', $reporttypeis)) {
+                         $profileTests = $profileTests->merge($subProfile->tests);
+                        //  dd($profileTests);
+                    }
+                }
+            }else{
+                // If no subprofiles, check if the profile's departments match the report type
+                if ($profile->departments->contains('department', $reporttypeis)) {
+                    // Add profile's tests directly
+                    $profileTests = $profileTests->merge($profile->tests);
+                }
+            }
         }
 
         // Combine individual tests and profile tests
         $tests = $individualTests->merge($profileTests);
+
         foreach ($tests as $testId ) {
             // Find or create the test report
 
@@ -894,15 +1007,14 @@ class TestReportController extends Controller
     public function completetest(Request $request){
         $user = Auth::user();
         $sample = Sample::find($request->sample_id);
+        $sample->created_at = now();
+        $sample->save();
         $reporttypeis = $request->reporttypeis;
-
-        // $tests = $sample->tests()->where('department', $reporttypeis)->get();
 
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 
         // Get the profiles associated with the sample
         $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
-        // dd($profiles);
 
         $profileTests = collect();
 
@@ -935,14 +1047,8 @@ class TestReportController extends Controller
 
         // Combine individual tests and all profile/subprofile tests
         $tests = $individualTests->merge($profileTests);
-        // dd($tests);
-
-        // $test_ids = $sample->tests()->where('department', $reporttypeis)->pluck('tests.id');
-        // $testReport =  TestReport::where('sample_id', $sample->id)->whereIn('test_id', $test_ids)->get();
-        // dd($testReport);
 
 
-            // dd($tests);
         foreach ($tests as $testId ) {
             // Find or create the test report
 
@@ -952,16 +1058,7 @@ class TestReportController extends Controller
                 session()->flash('alert', 'Some changes done on your report. Please save the Report first');
                 continue;
             }
-            //     [
-            //         'sample_id' => $sample->id,
-            //         'test_id' => $testId->id
-            //     ],
-            //     [
-            //         'is_completed' => true,
-            //         'completed_by' => $user->id,
-            //         'completed_at' => now(),
-            //     ]
-            // );
+
             // Update the status in the appropriate results table based on reporttypeis
             switch ($reporttypeis) {
                 case 1: // Biochemistry/Haematology Results
@@ -1018,6 +1115,8 @@ class TestReportController extends Controller
     public function uncompletetest(Request $request){
         $user = Auth::user();
         $sample = Sample::find($request->sample_id);
+        $sample->created_at = now();
+        $sample->save();
         $reporttypeis = $request->reporttypeis;
 
         SampleDepartmentStatus::updateOrCreate(
@@ -1027,31 +1126,48 @@ class TestReportController extends Controller
             ],
             [
                 'is_revised' => true,
+                'is_signed' => false,
+                'signed_by' => null,
+                'signed_at' => null,
             ]
         );
 
-
         $individualTests = $sample->tests()->where('department', $reporttypeis)->get();
 
-        // Get the profiles associated with the sample
-        $profiles = $sample->testProfiles()->whereHas('departments', function($query) use ($reporttypeis) {
-            $query->where('department', $reporttypeis);
-        })->with('tests')->get();
+        $profiles = $sample->testProfiles()->with('tests', 'subProfiles.tests', 'departments')->get();
 
-        // dd($profiles);
-
-        // Collect all the tests from the profiles that match the department
         $profileTests = collect();
+
         foreach ($profiles as $profile) {
-            // Add tests from each profile that match the department
-            $profileTests = $profileTests->merge(
-                $profile->tests()->get()
-            );
+            // If profile has subprofiles, ignore department check
+            $hasSubProfiles = $profile->subProfiles && $profile->subProfiles->isNotEmpty();
+
+            if ($hasSubProfiles ) {
+
+                // Add profile's tests
+                 $profileTests = $profileTests->merge($profile->tests);
+                //  dd($profileTests);
+
+                // Add all subprofile tests recursively
+                $allSubProfiles = getSubProfilesRecursive($profile);
+                foreach ($allSubProfiles as $subProfile) {
+                     if ($subProfile->departments->contains('department', $reporttypeis)) {
+                         $profileTests = $profileTests->merge($subProfile->tests);
+                        //  dd($profileTests);
+                    }
+                }
+            }else{
+                // If no subprofiles, check if the profile's departments match the report type
+                if ($profile->departments->contains('department', $reporttypeis)) {
+                    // Add profile's tests directly
+                    $profileTests = $profileTests->merge($profile->tests);
+                }
+            }
         }
 
         // Combine individual tests and profile tests
         $tests = $individualTests->merge($profileTests);
-            // dd($test_ids);
+
         foreach ($tests as $testId ) {
             // Find or create the test report
             $testReport = TestReport::where('sample_id',$sample->id)->where('test_id',$testId->id)->first();
@@ -1059,19 +1175,6 @@ class TestReportController extends Controller
                 continue;
             }
 
-            //     [
-            //         'sample_id' => $sample->id,
-            //         'test_id' => $testId->id
-            //     ],
-            //     [
-            //         'is_completed' => false,
-            //         'completed_by' => null,
-            //         'completed_at' => null,
-            //         'is_signed' => false,
-            //         'signed_by' => null,
-            //         'signed_at' => null,
-            //     ]
-            // );
             switch ($reporttypeis) {
                 case 1: // Biochemistry/Haematology Results
                     BiochemHaemoResults::where('test_report_id', $testReport->id)
@@ -1114,15 +1217,6 @@ class TestReportController extends Controller
                     break;
             }
         }
-
-        // Update the test-reports table with the user ID in the signed_by column
-        // $testReport->is_completed = false;
-        // $testReport->completed_by = null;
-        // $testReport->completed_at = null;
-        // $testReport->is_signed = false;
-        // $testReport->signed_by = null;
-        // $testReport->signed_at = null;
-        // $testReport->save();
 
         return response()->json([
             'success' => 'Report Completed successfully.',

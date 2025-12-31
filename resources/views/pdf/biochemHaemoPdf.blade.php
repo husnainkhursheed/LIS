@@ -5,7 +5,7 @@
     <title>Border Life - LIS</title>
     <style>
         @page {
-            margin: 10mm 10mm 30mm 10mm;
+            margin: 2mm 10mm 30mm 10mm;
         }
         body {
             font-family: 'Cambria', sans-serif;
@@ -121,21 +121,23 @@
                 <table>
                     <tr>
                         <td style="font-weight: normal"><strong>Name:</strong> {{ $sample->patient->first_name ?? '' }} {{ $sample->patient->surname ?? '' }}</td>
-                        <td style="font-weight: normal"><strong>Sex:</strong> {{ $sample->patient->sex ?? '' }}</td>
                     </tr>
                     @php
                         $dob = \Carbon\Carbon::parse($sample->patient->dob);
                         $age = $dob->age;
                     @endphp
                     <tr>
-                        <td style="font-weight: normal"><strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}</td>
-                        <td style="font-weight: normal"><strong>Age:</strong> {{ $age }} yrs</td>
+                        <td style="font-weight: normal;">
+                            <strong>DOB:</strong> {{ \Carbon\Carbon::parse($sample->patient->dob)->format('d-M-Y') }}&nbsp;&nbsp;&nbsp;&nbsp;
+                            <strong>Age:</strong> {{ $age }} yrs &nbsp;
+                            <strong>Sex:</strong> {{ $sample->patient->sex === 'male' ? 'M' : 'F' }}
+                        </td>
                     </tr>
                     <tr>
                         <td style="font-weight: normal"><strong>Ordering Dr:</strong> {{ $sample->doctor->name }}</td>
                     </tr>
                     <tr>
-                        <td style="font-weight: normal"><strong>Institution:</strong> {{ $sample->institution->name }}</td>
+                        <td style="font-weight: normal; width:100%;"><strong>Institution:</strong> {{ $sample->institution->name }}</td>
                     </tr>
                 </table>
                 {{-- <span style="font-weight: normal"><strong>Name:</strong>
@@ -173,7 +175,7 @@
         </tr>
         <tr>
             <td colspan="4">
-                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
             </td>
         </tr>
         <tr>
@@ -204,7 +206,7 @@
         </tr>
         <tr>
             <td colspan="4">
-                <hr style="border: 1px solid #3d90ca; margin: 10px 0;">
+                <hr style="border: 1px solid #3d90ca; margin: 5px 0;">
             </td>
         </tr>
 
@@ -447,36 +449,93 @@
         <tr>
             <td colspan="4">
                 <strong>This material has been reviewed and the report completed and electronically signed by: </strong>
-                {{ $signed_by }}
+                A. Richardson, ASCPi Laboratory Manager
             </td>
         </tr>
     </tbody>
 </table>
 
 <script type="text/php">
-    if ( isset($pdf) ) {
+    if (isset($pdf)) {
         $pdf->page_script('
             if ($PAGE_COUNT > 0) {
+
                 $font = $fontMetrics->get_font("Cambria, serif", "normal");
                 $size = 9;
-                // Centered text calculation
+
+                // Page dimensions
+                $width  = $pdf->get_width();
+                $height = $pdf->get_height();
+
+                // Bottom margin from page bottom
+                $bottomMargin = 35;
+
+                // Vertical positions (relative to page height)
+                $footerTextY     = $height - $bottomMargin;
+                $separatorLineY  = $footerTextY - 10;
+                $accreditTextY   = $separatorLineY - 15;
+
+                // Text content
                 $accreditText = "THIS LABORATORY IS ACCREDITED FOR THE TESTS AND PROFILES MARKED *.";
-                $directorText = "Lab Director: Dr. Christina Pierre";
-                $width = $pdf->get_width();
-                $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
                 $docRef = "(DOC-PPA-#13-V1)";
-                $docRefWidth = $fontMetrics->get_text_width($docRef, $font, $size);
-                $pdf->text(($width - $accreditWidth) / 2, 786, $accreditText, $font, $size);
-                // Add document reference below accreditation text
-                $pdf->text(($width - $docRefWidth) / 2, 796, $docRef, $font, $size);
-                $pdf->line(40, 810, $width - 40, 810, [0, 112/255, 192/255], 0.5);
-                $pdf->text(270, 815, "Page $PAGE_NUM of $PAGE_COUNT", $font, $size);
-                // Director text below the line and page count
-                $directorWidth = $fontMetrics->get_text_width($directorText, $font, $size);
-                $pdf->text(($width - $directorWidth) / 2, 828, $directorText, $font, $size);
+                $directorText = "Lab Director: Dr. Christina Pierre";
+
+                // Width calculations
+                $accreditWidth = $fontMetrics->get_text_width($accreditText, $font, $size);
+                $docRefWidth   = $fontMetrics->get_text_width($docRef, $font, $size);
+
+                // Accreditation text (centered)
+                $pdf->text(
+                    ($width - $accreditWidth) / 2,
+                    $accreditTextY,
+                    $accreditText,
+                    $font,
+                    $size
+                );
+
+                // Separator line
+                $pdf->line(
+                    40,
+                    $separatorLineY,
+                    $width - 40,
+                    $separatorLineY,
+                    [0, 112/255, 192/255],
+                    0.5
+                );
+
+                // CENTER: Page number
+                $pageText = "Page $PAGE_NUM of $PAGE_COUNT";
+                $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
+                $pdf->text(
+                    ($width - $pageWidth) / 2,
+                    $footerTextY,
+                    $pageText,
+                    $font,
+                    $size
+                );
+
+                // LEFT: Lab Director
+                $pdf->text(
+                    40,
+                    $footerTextY,
+                    $directorText,
+                    $font,
+                    $size
+                );
+
+                // RIGHT: Document reference
+                $pdf->text(
+                    $width - $docRefWidth - 40,
+                    $footerTextY,
+                    $docRef,
+                    $font,
+                    $size
+                );
             }
         ');
     }
 </script>
+
+
 </body>
 </html>

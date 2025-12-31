@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\UserManagement;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\RoleOrPermission;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
@@ -55,10 +56,13 @@ class UsersController extends Controller
     {
         // dd($request->file('userimage'));
         $request->validate([
-            'first_name'=>'required',
-            'surname'=>'required',
-            'email' => 'required|email|unique:users',
-            // 'userimage' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'first_name' => 'required',
+            'surname' => 'required',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->whereNull('deleted_at'),
+            ],
         ]);
 
         // $user_password = Hash::make($request->password);

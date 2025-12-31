@@ -48,11 +48,21 @@ use \Carbon\Carbon;
                                     </tr>
                                 </thead>
                                 <tbody>
+                                @if(isset($records))
                                     @foreach ($records as $record)
                                     <tr>
                                         {{-- {{dd($record->id)}} --}}
-                                        <td>{{$sample->test_number}}</td>
-                                        <td>{{$record->user->first_name}}</td>
+                                        @if ($reporttype == 1)
+                                            <td>{{ $record->biochemResult?->testReport?->test?->name }}</td>
+
+                                        @elseif ($reporttype == 2)
+                                            <td>{{ $record->cytologyResult?->testReport?->test?->name }}</td>
+
+                                        @elseif ($reporttype == 3)
+                                            <td>{{ $record->urinalysisResult?->testReport?->test?->name }}</td>
+                                        @endif
+                                        {{-- <td>{{$record->testReport->test->name}}</td> --}}
+                                        <td>{{$record->user->first_name ." ". $record->user->surname}}</td>
                                         <td>{{$record->changed_at}}</td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
@@ -65,6 +75,7 @@ use \Carbon\Carbon;
                                         </td>
                                     </tr>
                                     @endforeach
+                                @endif
                                 </tbody>
                             </table>
                             {{-- @endif --}}
@@ -234,94 +245,310 @@ use \Carbon\Carbon;
             }
         });
         jQuery(document).ready(function($) {
-            $('#SaveReport').on('click', function(event) {
-                event.preventDefault();
-                var itemId = $(this).data('id');
-                var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
-                 // Prevent the default link behavior
-                var reporttypeis = $('#report_type').val();
-                data = {
-                    report_type: reporttypeis,
-                };
-
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    success: function(response) {
-                        // Handle the success response
-                        console.log('Success:', response);
-                        // if (response.success) {
-                        //     Toastify({
-                        //         text: response.message,
-                        //         gravity: 'top',
-                        //         position: 'center',
-                        //         duration: 5000,
-                        //         close: true,
-                        //         backgroundColor: '#40bb82',
-                        //     }).showToast();
-                        // } else {
-                        //     var errors = response.message;
-                        //     var errorMessage = errors.join('\n');
-                        //     Toastify({
-                        //         text: errors,
-                        //         duration: 5000,
-                        //         gravity: 'top',
-                        //         position: 'left',
-                        //         backgroundColor: '#ff4444',
-                        //     }).showToast();
-                        // }
-
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', xhr, status, error);
-                    }
-                });
-            });
-        // When the document is ready, attach a click event to the "Edit" button
-        $('.edit-item-btn').on('click', function() {
-            // Get the ID from the data attribute
-
+        $('#SaveReport').on('click', function(event) {
+            event.preventDefault();
             var itemId = $(this).data('id');
-            var changedat = $(this).data('changedat');
-            // console.log(itemId);
-            var url = '{{ url('reports/changes') }}' + '/' + itemId ;
+            var url = '{{ url("/reports/test-reports") }}' + '/' + itemId ;
+                // Prevent the default link behavior
+            var reporttypeis = $('#report_type').val();
+            data = {
+                report_type: reporttypeis,
+            };
 
 
             $.ajax({
                 url: url,
-                type: 'GET',
-                data :  { changedat: changedat },
+                type: 'POST',
+                data: data,
                 success: function(response) {
-                    // Clear existing table rows
-                    $('#changestable tbody').empty();
-                    // console.log(response.changes_made);
+                    // Handle the success response
+                    console.log('Success:', response);
+                    // if (response.success) {
+                    //     Toastify({
+                    //         text: response.message,
+                    //         gravity: 'top',
+                    //         position: 'center',
+                    //         duration: 5000,
+                    //         close: true,
+                    //         backgroundColor: '#40bb82',
+                    //     }).showToast();
+                    // } else {
+                    //     var errors = response.message;
+                    //     var errorMessage = errors.join('\n');
+                    //     Toastify({
+                    //         text: errors,
+                    //         duration: 5000,
+                    //         gravity: 'top',
+                    //         position: 'left',
+                    //         backgroundColor: '#ff4444',
+                    //     }).showToast();
+                    // }
 
-                    // Iterate over each change in the response and populate the table
-                    response.changes_made.forEach(function(change) {
-
-                        var field_name = change.field_name || '';
-                        var from_value = change.from_value || '';
-                        var to_value = change.to_value || '';
-
-                        // Construct table row HTML
-                        var row = '<tr>' +
-                                '<td>' + field_name + '</td>' +
-                                '<td>' + from_value + '</td>' +
-                                '<td>' + to_value + '</td>' +
-                                '</tr>';
-
-                        // Append row to the table body
-                        $('#changestable tbody').append(row);
-                    });
                 },
                 error: function(xhr, status, error) {
-                    console.error(xhr, status, error);
-
+                    console.error('Error:', xhr, status, error);
                 }
             });
         });
+        // When the document is ready, attach a click event to the "Edit" button
+        $('.edit-item-btn').on('click', function () {
+
+            var itemId    = $(this).data('id');
+            var changedat = $(this).data('changedat');
+
+            var url = '{{ url('reports/changes') }}/' + itemId;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: { changedat: changedat },
+
+                success: function (response) {
+
+                    $('#changestable tbody').empty();
+
+                    response.changes_made.forEach(function (change) {
+
+                        var field_name = change.field_name ?? '';
+
+                        var from_value = formatAuditValue(change.from_value, field_name);
+                        var to_value   = formatAuditValue(change.to_value, field_name);
+
+                        var row = `
+                            <tr>
+                                <td class="fw-bold">${formatFieldName(field_name)}</td>
+                                <td>${from_value}</td>
+                                <td>${to_value}</td>
+                            </tr>
+                        `;
+
+                        $('#changestable tbody').append(row);
+                    });
+                },
+
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        /**
+         * Format field names to be more readable
+         */
+        function formatFieldName(fieldName) {
+            const fieldLabels = {
+                'sensitivity': 'Sensitivity',
+                'sensitivity_profiles': 'Sensitivity Profiles',
+                'review': 'Review',
+                'procedures': 'Procedures'
+            };
+
+            return fieldLabels[fieldName] || fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        /**
+         * Format audit value
+         * - Detect JSON
+         * - Format procedures, arrays, objects
+         * - Handle special cases for sensitivity and procedures
+         * - Fallback to plain text
+         */
+        function formatAuditValue(value, fieldName) {
+
+            if (!value || value === 'null' || value === '[]' || value === '{}') {
+                return '<em class="text-muted">—</em>';
+            }
+
+            // Try JSON decode
+            try {
+                let parsed = JSON.parse(value);
+
+                // ==========================
+                // PROCEDURES (Array format)
+                // ==========================
+                if (fieldName === 'procedures' && Array.isArray(parsed)) {
+                    if (parsed.length === 0) {
+                        return '<em class="text-muted">No procedures</em>';
+                    }
+
+                    let html = '<ul class="list-unstyled mb-0">';
+
+                    parsed.forEach((item, index) => {
+                        html += '<li class="mb-2 p-2 border rounded bg-light">';
+                        html += `<div class="mb-1"><span class="badge bg-secondary">#${index + 1}</span></div>`;
+
+                        if (item.procedure) {
+                            html += `<div><strong>Procedure:</strong> ${escapeHtml(item.procedure)}</div>`;
+                        }
+
+                        if (item.specimen_note) {
+                            html += `<div><strong>Note:</strong> ${escapeHtml(item.specimen_note)}</div>`;
+                        }
+
+                        html += '</li>';
+                    });
+
+                    html += '</ul>';
+                    return html;
+                }
+
+                // ==========================
+                // SENSITIVITY / SENSITIVITY PROFILES
+                // ==========================
+                if (fieldName === 'sensitivity' || fieldName === 'sensitivity_profiles') {
+
+                    // If it's an array, process each item
+                    if (Array.isArray(parsed)) {
+                        if (parsed.length === 0) {
+                            return '<em class="text-muted">None</em>';
+                        }
+
+                        let html = '<div class="mb-0">';
+
+                        parsed.forEach((item, index) => {
+                            // Each item should be an object with microorganism and items
+                            if (typeof item === 'object' && item !== null) {
+
+                                if (index > 0) {
+                                    html += '<hr class="my-2">';
+                                }
+
+                                html += '<div class="p-2 border rounded bg-light mb-2">';
+
+                                // Display microorganism
+                                if (item.microorganism) {
+                                    html += `<div class="mb-2"><strong class="text-primary">Microorganism:</strong> ${escapeHtml(item.microorganism)}</div>`;
+                                }
+
+                                // Display items (antibiotics)
+                                if (item.items && Array.isArray(item.items)) {
+                                    html += '<div><strong>Antibiotics:</strong></div>';
+                                    html += '<table class="table table-sm table-bordered mt-1 mb-0">';
+                                    html += '<thead class="table-light"><tr><th>Antibiotic</th><th>MIC</th><th>Sensitivity</th></tr></thead>';
+                                    html += '<tbody>';
+
+                                    item.items.forEach(antibiotic => {
+                                        if (typeof antibiotic === 'object') {
+                                            let sensitivityClass = '';
+                                            let sensitivity = antibiotic.sensitivity || '';
+
+                                            if (sensitivity.toLowerCase() === 'sensitive') {
+                                                sensitivityClass = 'text-success';
+                                            } else if (sensitivity.toLowerCase() === 'resistant') {
+                                                sensitivityClass = 'text-danger';
+                                            } else if (sensitivity.toLowerCase() === 'intermediate') {
+                                                sensitivityClass = 'text-warning';
+                                            }
+
+                                            html += '<tr>';
+                                            html += `<td>${escapeHtml(antibiotic.antibiotic || '')}</td>`;
+                                            html += `<td>${escapeHtml(antibiotic.mic || '')}</td>`;
+                                            html += `<td class="${sensitivityClass} fw-bold">${escapeHtml(sensitivity)}</td>`;
+                                            html += '</tr>';
+                                        }
+                                    });
+
+                                    html += '</tbody></table>';
+                                }
+
+                                html += '</div>';
+                            }
+                        });
+
+                        html += '</div>';
+                        return html;
+                    }
+                }
+
+                // ==========================
+                // GENERIC ARRAY
+                // ==========================
+                if (Array.isArray(parsed)) {
+                    if (parsed.length === 0) {
+                        return '<em class="text-muted">Empty</em>';
+                    }
+
+                    let html = '<ul class="list-unstyled mb-0">';
+
+                    parsed.forEach((item, index) => {
+                        if (typeof item === 'object') {
+                            html += '<li class="mb-2 p-2 border rounded bg-light">';
+
+                            Object.entries(item).forEach(([key, val]) => {
+                                html += `<div><strong>${escapeHtml(key.replace(/_/g, ' '))}:</strong> ${escapeHtml(val ?? '')}</div>`;
+                            });
+
+                            html += '</li>';
+                        } else {
+                            html += `<li class="p-1">${escapeHtml(item)}</li>`;
+                        }
+                    });
+
+                    html += '</ul>';
+                    return html;
+                }
+
+                // ==========================
+                // GENERIC OBJECT
+                // ==========================
+                if (typeof parsed === 'object' && parsed !== null) {
+                    let html = '<div class="p-2 border rounded bg-light">';
+
+                    Object.entries(parsed).forEach(([key, val]) => {
+                        let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                        if (Array.isArray(val)) {
+                            html += `<div class="mb-2"><strong>${escapeHtml(formattedKey)}:</strong></div>`;
+                            html += '<ul class="ms-3">';
+                            val.forEach(v => {
+                                if (typeof v === 'object') {
+                                    html += '<li>';
+                                    Object.entries(v).forEach(([k, value]) => {
+                                        html += `<span class="me-2"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(value ?? '')}</span>`;
+                                    });
+                                    html += '</li>';
+                                } else {
+                                    html += `<li>${escapeHtml(v ?? '')}</li>`;
+                                }
+                            });
+                            html += '</ul>';
+                        } else if (typeof val === 'object' && val !== null) {
+                            html += `<div class="mb-2"><strong>${escapeHtml(formattedKey)}:</strong></div>`;
+                            html += '<div class="ms-3">';
+                            Object.entries(val).forEach(([k, v]) => {
+                                html += `<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v ?? '')}</div>`;
+                            });
+                            html += '</div>';
+                        } else {
+                            html += `<div><strong>${escapeHtml(formattedKey)}:</strong> ${escapeHtml(val ?? '')}</div>`;
+                        }
+                    });
+
+                    html += '</div>';
+                    return html;
+                }
+
+                // ==========================
+                // PRIMITIVE (string, number, boolean)
+                // ==========================
+                return escapeHtml(String(parsed));
+
+            } catch (e) {
+                // Not JSON → plain text
+                console.error('JSON parse error:', e, 'Value:', value);
+                return escapeHtml(value);
+            }
+        }
+
+        /**
+         * Escape HTML (safety)
+         */
+        function escapeHtml(text) {
+            if (text === null || text === undefined) {
+                return '';
+            }
+            return $('<div>').text(String(text)).html();
+        }
 
 
 
